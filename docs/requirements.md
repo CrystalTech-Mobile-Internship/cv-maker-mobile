@@ -15,10 +15,25 @@
 | **Phân loại ứng dụng** | Productivity / Career Tool / Document Creator |
 | **Công nghệ cốt lõi** | **Flutter 3.x (Dart 3.x)** hỗ trợ cả Android và iOS |
 | **Cơ sở dữ liệu đám mây** | **Supabase Cloud** (PostgreSQL 15+, Row-Level Security, Storage Buckets, Auth) |
-| **Lưu trữ cục bộ** | **Hive / SQLite** (Mô hình Offline-First, tự động lưu nháp Auto-Save) |
+| **Lưu trữ cục bộ** | **Drift + SQLite** (mô hình Offline-First, tự động lưu nháp Auto-Save) |
 | **Động cơ tài liệu** | **Flutter PDF Engine (`pdf` & `printing`)** — Kết xuất PDF Vector chuẩn A4, ngắt trang thông minh |
-| **Trí tuệ nhân tạo (AI)**| **Google Gemini API** (Google Generative AI SDK) hỗ trợ viết tóm tắt và nâng cấp kinh nghiệm |
+| **Trí tuệ nhân tạo (AI)**| **Google Gemini API** dự kiến cho giai đoạn sau MVP cốt lõi; không chặn nghiệm thu luồng chính |
 | **Quản lý trạng thái** | **Riverpod** (StateNotifier / AsyncNotifier) |
+
+---
+
+### 1.1. Phạm vi MVP đã được nhóm xác nhận ngày 06/10/2026
+
+- Ứng dụng hỗ trợ cả Guest Mode, đăng ký, đăng nhập và quên mật khẩu.
+- MVP có đúng hai template: Harvard ATS và Modern Minimalist.
+- Xuất PDF A4 và chia sẻ bằng System Share Sheet là chức năng bắt buộc.
+- Dữ liệu được lưu local bằng Drift + SQLite trước; đồng bộ Supabase triển khai sau khi luồng local ổn định.
+- Gemini AI được hoãn đến sau khi các chức năng cốt lõi đạt tiêu chí nghiệm thu.
+- Không nhập CV từ PDF hoặc Word trong MVP.
+- Giao diện MVP dùng tiếng Việt.
+- Android là nền tảng kiểm thử chính. Mã nguồn vẫn phải tương thích iOS, nhưng chưa bắt buộc tạo bản build iOS khi nhóm không có macOS.
+
+Chi tiết ranh giới phạm vi được lưu tại `docs/mvp-scope.md`.
 
 ---
 
@@ -31,7 +46,7 @@ Sinh viên mới tốt nghiệp, fresher và người đi làm thường gặp k
 
 **Smart CV Maker Mobile** giải quyết triệt để các vấn đề trên thông qua quy trình chuẩn:
 ```
-Nhập liệu Form động (Offline) ➔ Trợ lý AI nâng cấp câu từ ➔ Tự động gắn vào Template chuẩn ATS ➔ Live Preview ➔ Xuất PDF Vector A4 sắc nét ➔ Chia sẻ/In ấn tức thì
+Nhập liệu Form động (Offline) ➔ Tự động gắn vào Template chuẩn ATS ➔ Live Preview ➔ Xuất PDF Vector A4 sắc nét ➔ Chia sẻ tức thì
 ```
 
 ---
@@ -46,8 +61,8 @@ Nhập liệu Form động (Offline) ➔ Trợ lý AI nâng cấp câu từ ➔ 
 ### 3.2. Mục tiêu người dùng (User Goals)
 * **UG-01:** Tôi muốn tạo mới và quản lý nhiều bản CV khác nhau trực tiếp trên điện thoại.
 * **UG-02:** Tôi muốn ứng dụng tự động lưu dữ liệu ngay cả khi mất mạng hoặc lỡ tay tắt app.
-* **UG-03:** Tôi muốn được AI gợi ý cách diễn đạt kinh nghiệm làm việc chuyên nghiệp (Action Verbs + Metrics + Impact).
-* **UG-04:** Tôi muốn tự do chuyển đổi giữa các mẫu thiết kế (Harvard, Modern, Minimalist) mà không bị mất dữ liệu đã nhập.
+* **UG-03 (sau MVP):** Tôi muốn được AI gợi ý cách diễn đạt kinh nghiệm làm việc chuyên nghiệp (Action Verbs + Metrics + Impact).
+* **UG-04:** Tôi muốn chuyển đổi giữa hai mẫu Harvard ATS và Modern Minimalist mà không bị mất dữ liệu đã nhập.
 * **UG-05:** Tôi muốn xem trước tài liệu như bản in thật trên khổ A4 trước khi quyết định xuất file.
 * **UG-06:** Tôi muốn xuất file PDF vector sắc nét không lỗi font tiếng Việt và chia sẻ trực tiếp qua Zalo/Email.
 
@@ -70,8 +85,8 @@ Nhập liệu Form động (Offline) ➔ Trợ lý AI nâng cấp câu từ ➔ 
 * **F10 - Thuật toán Ngắt trang thông minh (Smart Pagination):** Tự động tính toán chiều cao khối nội dung để phân tách nhiều trang A4, chống cắt đôi dòng chữ hoặc để tiêu đề lẻ loi cuối trang.
 * **F11 - Mẫu Template 01 (Harvard Academic):** Bố cục 1 cột truyền thống, tối ưu máy quét ATS, đường kẻ phân cách sắc sảo.
 * **F12 - Mẫu Template 02 (Modern Minimalist):** Bố cục 2 cột bất đối xứng (Sidebar thông tin/kỹ năng + Nội dung kinh nghiệm).
-* **F13 - Mẫu Template 03 (Minimalist Clean):** Phong cách Châu Âu thanh lịch, thoáng đãng, nhấn mạnh kiểu chữ.
-* **F14 - Mẫu Template 04 (Creative Tech Lead):** Thiết kế cho ngành Công nghệ/Sáng tạo có thanh Timeline quá trình công tác.
+* **F13 - Mẫu Template 03 (Minimalist Clean — sau MVP):** Phong cách Châu Âu thanh lịch, thoáng đãng, nhấn mạnh kiểu chữ.
+* **F14 - Mẫu Template 04 (Creative Tech Lead — sau MVP):** Thiết kế cho ngành Công nghệ/Sáng tạo có thanh Timeline quá trình công tác.
 * **F15 - Live Preview tương tác:** Trình xem trước PDF tương tác thời gian thực (phóng to, thu nhỏ, xoay trang).
 * **F16 - Bộ điều khiển giao diện (Styling Controls):** Đổi màu chủ đạo (Color Palette), tùy biến kích cỡ chữ (Font size) và khoảng cách dòng.
 
@@ -79,10 +94,10 @@ Nhập liệu Form động (Offline) ➔ Trợ lý AI nâng cấp câu từ ➔ 
 * **F17 - Cơ sở dữ liệu quan hệ PostgreSQL:** Lược đồ CSDL chuẩn hóa trên Supabase Cloud quản lý người dùng, CV và sections.
 * **F18 - Bảo mật Row-Level Security (RLS):** Phân quyền nghiêm ngặt ở tầng CSDL, cô lập dữ liệu người dùng tuyệt đối (`auth.uid() = user_id`).
 * **F19 - Supabase Storage Buckets:** Lưu trữ ảnh đại diện người dùng và tệp PDF xuất bản an toàn.
-* **F20 - Đồng bộ hóa Đám mây (Cloud Sync):** Tự động đồng bộ 2 chiều giữa bộ nhớ máy (Hive) và Supabase khi có kết nối Internet.
-* **F21 - AI Polish Summary:** Dùng Google Gemini viết lại đoạn tóm tắt nghề nghiệp hấp dẫn dựa trên thông tin ứng viên.
-* **F22 - AI Bullet Point Enhancer:** Nâng cấp câu mô tả kinh nghiệm theo công thức quốc tế: *Action Verb + Metric + Impact*.
-* **F23 - AI ATS Scoring & Keyword Matcher:** So khớp từ khóa trong CV với mô tả công việc (Job Description) để chấm điểm phù hợp.
+* **F20 - Đồng bộ hóa Đám mây (Cloud Sync):** Tự động đồng bộ 2 chiều giữa cơ sở dữ liệu Drift/SQLite trên máy và Supabase khi có kết nối Internet.
+* **F21 - AI Polish Summary (sau MVP):** Dùng Google Gemini viết lại đoạn tóm tắt nghề nghiệp hấp dẫn dựa trên thông tin ứng viên.
+* **F22 - AI Bullet Point Enhancer (sau MVP):** Nâng cấp câu mô tả kinh nghiệm theo công thức quốc tế: *Action Verb + Metric + Impact*.
+* **F23 - AI ATS Scoring & Keyword Matcher (sau MVP):** So khớp từ khóa trong CV với mô tả công việc (Job Description) để chấm điểm phù hợp.
 * **F24 - Tập dữ liệu mẫu (Seed Data):** Cung cấp sẵn 3 bản CV mẫu chất lượng cao cho người dùng tham khảo.
 * **F25 - Tích hợp Hệ thống (Share & Print) & CI/CD:** Chia sẻ file PDF trực tiếp qua Zalo/Email, in không dây và kiểm thử tự động trên GitHub Actions.
 
