@@ -1,0 +1,97 @@
+{
+  "id": "30000000-0000-4000-8000-000000000001",
+  "userId": null,
+  "title": "CV Senior Flutter Engineer",
+  "templateId": "minimalist_clean",
+  "primaryColor": "#334155",
+  "fontSizeScale": 0.95,
+  "personalInfo": {
+    "fullName": "Phạm Thu Hà",
+    "targetRole": "Senior Flutter Engineer",
+    "email": "thuha.engineer@example.com",
+    "phone": "0900000003",
+    "address": "Thành phố Hồ Chí Minh, Việt Nam",
+    "linkedInUrl": "https://www.linkedin.com/in/thuha-example",
+    "githubUrl": "https://github.com/thuha-example",
+    "avatarPath": null
+  },
+  "summary": "Kỹ sư Flutter có hơn 5 năm kinh nghiệm phát triển ứng dụng đa nền tảng, dẫn dắt nhóm mobile và tối ưu kiến trúc cho sản phẩm có hàng trăm nghìn người dùng.",
+  "educations": [
+    {
+      "id": "31000000-0000-4000-8000-000000000001",
+      "institution": "Trường Đại học Khoa học Tự nhiên",
+      "degree": "Cử nhân",
+      "fieldOfStudy": "Công nghệ thông tin",
+      "startDate": "2015-09-01T00:00:00.000Z",
+      "endDate": "2019-06-30T00:00:00.000Z",
+      "isCurrent": false,
+      "gpa": "3.6/4.0",
+      "achievements": []
+    }
+  ],
+  "experiences": [
+    {
+      "id": "32000000-0000-4000-8000-000000000001",
+      "jobTitle": "Senior Flutter Engineer",
+      "company": "Công ty Sản phẩm Số Mẫu",
+      "location": "Thành phố Hồ Chí Minh, Việt Nam",
+      "startDate": "2023-03-01T00:00:00.000Z",
+      "endDate": null,
+      "isCurrent": true,
+      "bulletPoints": [
+        "Thiết kế kiến trúc module giúp giảm 35% thời gian phát triển tính năng mới.",
+        "Dẫn dắt nhóm 6 kỹ sư và thiết lập quy trình review, test và phát hành ứng dụng."
+      ]
+    },
+    {
+      "id": "32000000-0000-4000-8000-000000000002",
+      "jobTitle": "Flutter Developer",
+      "company": "Công ty Giải pháp Di động Mẫu",
+      "location": "Thành phố Hồ Chí Minh, Việt Nam",
+      "startDate": "2019-08-01T00:00:00.000Z",
+      "endDate": "2023-02-28T00:00:00.000Z",
+      "isCurrent": false,
+      "bulletPoints": [
+        "Phát triển và bảo trì bốn ứng dụng Flutter trên Android và iOS.",
+        "Tối ưu thời gian khởi động ứng dụng từ 3.2 giây xuống còn 1.8 giây."
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "33000000-0000-4000-8000-000000000001",
+      "name": "Flutter",
+      "category": "hard",
+      "proficiency": 95
+    },
+    {
+      "id": "33000000-0000-4000-8000-000000000002",
+      "name": "Clean Architecture",
+      "category": "hard",
+      "proficiency": 90
+    },
+    {
+      "id": "33000000-0000-4000-8000-000000000003",
+      "name": "Lãnh đạo nhóm",
+      "category": "soft",
+      "proficiency": 85
+    }
+  ],
+  "projects": [
+    {
+      "id": "34000000-0000-4000-8000-000000000001",
+      "name": "Nền tảng thương mại điện tử đa nền tảng",
+      "role": "Mobile Tech Lead",
+      "description": "Dẫn dắt phát triển ứng dụng mua sắm Flutter và xây dựng quy trình phát hành tự động.",
+      "technologies": ["Flutter", "Dart", "Riverpod", "Firebase", "CI/CD"],
+      "demoUrl": "https://example.com/mobile-commerce-demo",
+      "sourceUrl": null,
+      "startDate": "2024-01-01T00:00:00.000Z",
+      "endDate": null
+    }
+  ],
+  "isSynced": false,
+  "createdAt": "2026-10-06T01:10:00.000Z",
+  "updatedAt": "2026-10-06T01:10:00.000Z"
+}
+

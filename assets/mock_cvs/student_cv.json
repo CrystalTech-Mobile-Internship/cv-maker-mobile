@@ -1,0 +1,66 @@
+{
+  "id": "10000000-0000-4000-8000-000000000001",
+  "userId": null,
+  "title": "CV Thực tập sinh Flutter",
+  "templateId": "harvard_ats",
+  "primaryColor": "#1E293B",
+  "fontSizeScale": 1.0,
+  "personalInfo": {
+    "fullName": "Trần Minh Anh",
+    "targetRole": "Flutter Developer Intern",
+    "email": "minhanh.student@example.com",
+    "phone": "0900000001",
+    "address": "Hà Nội, Việt Nam",
+    "linkedInUrl": "https://www.linkedin.com/in/minhanh-example",
+    "githubUrl": "https://github.com/minhanh-example",
+    "avatarPath": null
+  },
+  "summary": "Sinh viên Kỹ thuật phần mềm yêu thích phát triển ứng dụng di động, có nền tảng Flutter, Dart và tư duy xây dựng sản phẩm theo hướng người dùng.",
+  "educations": [
+    {
+      "id": "11000000-0000-4000-8000-000000000001",
+      "institution": "Trường Đại học Công nghệ",
+      "degree": "Cử nhân",
+      "fieldOfStudy": "Kỹ thuật phần mềm",
+      "startDate": "2023-09-01T00:00:00.000Z",
+      "endDate": null,
+      "isCurrent": true,
+      "gpa": "3.45/4.0",
+      "achievements": [
+        "Học bổng khuyến khích học tập học kỳ 2 năm 2025"
+      ]
+    }
+  ],
+  "experiences": [],
+  "skills": [
+    {
+      "id": "12000000-0000-4000-8000-000000000001",
+      "name": "Flutter",
+      "category": "hard",
+      "proficiency": 70
+    },
+    {
+      "id": "12000000-0000-4000-8000-000000000002",
+      "name": "Làm việc nhóm",
+      "category": "soft",
+      "proficiency": 75
+    }
+  ],
+  "projects": [
+    {
+      "id": "13000000-0000-4000-8000-000000000001",
+      "name": "Ứng dụng quản lý chi tiêu sinh viên",
+      "role": "Flutter Developer",
+      "description": "Xây dựng ứng dụng ghi nhận giao dịch và thống kê chi tiêu theo tháng.",
+      "technologies": ["Flutter", "Dart", "SQLite"],
+      "demoUrl": null,
+      "sourceUrl": "https://github.com/minhanh-example/student-expense-app",
+      "startDate": "2026-02-01T00:00:00.000Z",
+      "endDate": "2026-05-30T00:00:00.000Z"
+    }
+  ],
+  "isSynced": false,
+  "createdAt": "2026-10-06T01:00:00.000Z",
+  "updatedAt": "2026-10-06T01:00:00.000Z"
+}
+
