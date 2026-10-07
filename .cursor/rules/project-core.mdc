@@ -1,0 +1,20 @@
+---
+description: Core product, safety, and delivery rules for Smart CV Maker
+alwaysApply: true
+---
+
+# Project Core
+
+- Treat `docs/requirements.md` and `docs/mvp-flow.md` as product sources of truth.
+- Inspect current code and Git status before editing.
+- Preserve unrelated and uncommitted user changes.
+- Build offline-first: save locally before cloud sync.
+- Preserve Guest Mode unless the task explicitly changes its contract.
+- Address CV operations using `cvId`; do not extend hard-coded sample data.
+- Never commit `.env`, credentials, production data, or service-role keys.
+- Never claim placeholder or mocked behavior is complete.
+- Add tests proportional to behavior and risk.
+- Run formatting, analysis, and relevant tests before handoff.
+- Do not commit, push, delete data, or rewrite history without explicit approval.
+- Report changed files, checks, limitations, and a suggested commit message.
+

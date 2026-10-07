@@ -21,20 +21,14 @@ class AuthService {
     required String email,
     required String password,
   }) {
-    return _client.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+    return _client.auth.signInWithPassword(email: email, password: password);
   }
 
   Future<AuthResponse> signUp({
     required String email,
     required String password,
   }) {
-    return _client.auth.signUp(
-      email: email,
-      password: password,
-    );
+    return _client.auth.signUp(email: email, password: password);
   }
 
   Future<void> signOut() => _client.auth.signOut();
@@ -45,8 +39,9 @@ class AuthService {
       // Web must return to the origin that is actually serving Flutter.
       // Android uses the registered custom deep link instead.
       redirectTo: kIsWeb ? Uri.base.origin : googleRedirectUri,
-      authScreenLaunchMode:
-          kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+      authScreenLaunchMode: kIsWeb
+          ? LaunchMode.platformDefault
+          : LaunchMode.externalApplication,
     );
   }
 }

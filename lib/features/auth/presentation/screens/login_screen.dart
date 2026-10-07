@@ -27,16 +27,16 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _authSubscription = SupabaseService.client?.auth.onAuthStateChange.listen(
-      (state) {
-        if (!mounted ||
-            state.event != AuthChangeEvent.signedIn ||
-            state.session == null) {
-          return;
-        }
-        context.go('/home');
-      },
-    );
+    _authSubscription = SupabaseService.client?.auth.onAuthStateChange.listen((
+      state,
+    ) {
+      if (!mounted ||
+          state.event != AuthChangeEvent.signedIn ||
+          state.session == null) {
+        return;
+      }
+      context.go('/home');
+    });
     if (_authService.currentSession != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) context.go('/home');
@@ -131,7 +131,9 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showMessage('Không thể kết nối Supabase. Hãy kiểm tra mạng và cấu hình .env.');
+      _showMessage(
+        'Không thể kết nối Supabase. Hãy kiểm tra mạng và cấu hình .env.',
+      );
     }
   }
 
@@ -194,9 +196,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   AppConstants.appName,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -214,7 +216,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          _isRegisterMode ? 'Tạo tài khoản' : 'Đăng nhập tài khoản',
+                          _isRegisterMode
+                              ? 'Tạo tài khoản'
+                              : 'Đăng nhập tài khoản',
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 18),
@@ -247,9 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : Text(_isRegisterMode
-                                    ? 'Đăng ký'
-                                    : 'Đăng nhập'),
+                              : Text(_isRegisterMode ? 'Đăng ký' : 'Đăng nhập'),
                         ),
                         const SizedBox(height: 10),
                         OutlinedButton.icon(
@@ -260,17 +262,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextButton(
                           onPressed: _isLoading
                               ? null
-                              : () => setState(() => _isRegisterMode = !_isRegisterMode),
-                          child: Text(_isRegisterMode
-                              ? 'Đã có tài khoản? Đăng nhập'
-                              : 'Chưa có tài khoản? Đăng ký'),
+                              : () => setState(
+                                  () => _isRegisterMode = !_isRegisterMode,
+                                ),
+                          child: Text(
+                            _isRegisterMode
+                                ? 'Đã có tài khoản? Đăng nhập'
+                                : 'Chưa có tài khoản? Đăng ký',
+                          ),
                         ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
                             const Expanded(child: Divider()),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               child: Text(
                                 'HOẶC',
                                 style: Theme.of(context).textTheme.bodySmall,
@@ -282,7 +290,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
                           onPressed: _handleGuestLogin,
-                          icon: const Icon(Icons.offline_bolt_outlined, color: AppTheme.accentTeal),
+                          icon: const Icon(
+                            Icons.offline_bolt_outlined,
+                            color: AppTheme.accentTeal,
+                          ),
                           label: const Text('Trải nghiệm Offline (Khách)'),
                         ),
                       ],

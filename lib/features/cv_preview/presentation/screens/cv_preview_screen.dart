@@ -25,7 +25,9 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
                 Icon(Icons.check_circle, color: Colors.white, size: 20),
                 SizedBox(width: 10),
                 Expanded(
-                  child: Text('Đã kết xuất file PDF chuẩn vector A4 thành công!'),
+                  child: Text(
+                    'Đã kết xuất file PDF chuẩn vector A4 thành công!',
+                  ),
                 ),
               ],
             ),
@@ -46,15 +48,24 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _selectedTemplate,
-              icon: const Icon(Icons.arrow_drop_down, color: AppTheme.primarySlate),
+              icon: const Icon(
+                Icons.arrow_drop_down,
+                color: AppTheme.primarySlate,
+              ),
               items: const [
                 DropdownMenuItem(
                   value: 'harvard_ats',
-                  child: Text('Mẫu Harvard ATS', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'Mẫu Harvard ATS',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 DropdownMenuItem(
                   value: 'modern_minimalist',
-                  child: Text('Mẫu Modern Minimalist', style: TextStyle(fontSize: 13)),
+                  child: Text(
+                    'Mẫu Modern Minimalist',
+                    style: TextStyle(fontSize: 13),
+                  ),
                 ),
               ],
               onChanged: (val) {
@@ -74,7 +85,10 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
               Container(
                 constraints: const BoxConstraints(maxWidth: 500),
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 32,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -114,10 +128,7 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
                     const Text(
                       'Hà Nội, Việt Nam • 0901 234 567 • tuananh@example.com • github.com/TuanAnh',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF64748B),
-                      ),
+                      style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                     ),
                     const SizedBox(height: 12),
                     const Divider(color: Colors.black, thickness: 1.2),
@@ -130,7 +141,11 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
                       'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, '
                       'State Management (Riverpod) và tích hợp Backend-as-a-Service (Supabase). '
                       'Đam mê tối ưu hóa trải nghiệm người dùng và xây dựng hệ thống bền vững.',
-                      style: TextStyle(fontSize: 11.5, height: 1.45, color: Colors.black87),
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        height: 1.45,
+                        color: Colors.black87,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -142,11 +157,17 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
                       children: [
                         Text(
                           'ĐẠI HỌC CÔNG NGHỆ',
-                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           '2022 - 2026',
-                          style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
                       ],
                     ),
@@ -164,22 +185,38 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
                       children: [
                         Text(
                           'DỰ ÁN SMART CV MAKER MOBILE',
-                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           '10/2026 - Hiện tại',
-                          style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontStyle: FontStyle.italic,
+                          ),
                         ),
                       ],
                     ),
                     const Text(
                       'Fullstack Mobile Engineer',
-                      style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: Color(0xFF334155)),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                        color: Color(0xFF334155),
+                      ),
                     ),
                     const SizedBox(height: 4),
-                    _buildBulletPoint('Thiết kế kiến trúc Clean Architecture nhiều tầng tách biệt presentation, domain và data.'),
-                    _buildBulletPoint('Tối ưu hóa công cụ render PDF A4 vector độ nét cao, ngăn chặn tràn trang thông minh.'),
-                    _buildBulletPoint('Tích hợp mô hình AI phân tích từ khóa và tính điểm tương thích hệ thống ATS.'),
+                    _buildBulletPoint(
+                      'Thiết kế kiến trúc Clean Architecture nhiều tầng tách biệt presentation, domain và data.',
+                    ),
+                    _buildBulletPoint(
+                      'Tối ưu hóa công cụ render PDF A4 vector độ nét cao, ngăn chặn tràn trang thông minh.',
+                    ),
+                    _buildBulletPoint(
+                      'Tích hợp mô hình AI phân tích từ khóa và tính điểm tương thích hệ thống ATS.',
+                    ),
                     const SizedBox(height: 16),
 
                     // Section 4: Skills
@@ -189,7 +226,11 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
                       '• Ngôn ngữ & Framework: Flutter, Dart, TypeScript, Kotlin\n'
                       '• Backend & Database: Supabase, PostgreSQL, Row-Level Security, REST API\n'
                       '• AI & Tools: Google Gemini AI, Git Flow, Figma, Vector PDF Engine',
-                      style: TextStyle(fontSize: 11, height: 1.45, color: Colors.black87),
+                      style: TextStyle(
+                        fontSize: 11,
+                        height: 1.45,
+                        color: Colors.black87,
+                      ),
                     ),
                   ],
                 ),
@@ -218,10 +259,15 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : const Icon(Icons.download_rounded),
-            label: Text(_isExporting ? 'Đang xuất PDF...' : 'Tải xuống File PDF (A4)'),
+            label: Text(
+              _isExporting ? 'Đang xuất PDF...' : 'Tải xuống File PDF (A4)',
+            ),
           ),
         ),
       ),
@@ -252,11 +298,18 @@ class _CvPreviewScreenState extends State<CvPreviewScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('• ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+          const Text(
+            '• ',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+          ),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 11, height: 1.35, color: Colors.black87),
+              style: const TextStyle(
+                fontSize: 11,
+                height: 1.35,
+                color: Colors.black87,
+              ),
             ),
           ),
         ],

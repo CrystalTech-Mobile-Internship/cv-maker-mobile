@@ -19,8 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   String? _errorMessage;
 
-  bool get _isSignedIn =>
-      SupabaseService.client?.auth.currentSession != null;
+  bool get _isSignedIn => SupabaseService.client?.auth.currentSession != null;
 
   CvRemoteDataSource get _remoteDataSource => CvRemoteDataSource();
 
@@ -78,7 +77,9 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Xoá CV?'),
-        content: Text('Bạn có chắc muốn xoá "${cv.title}" khỏi Supabase không?'),
+        content: Text(
+          'Bạn có chắc muốn xoá "${cv.title}" khỏi Supabase không?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -97,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (confirmed != true) return;
 
     try {
-      await _remoteDataSource.deleteRemoteCv(cv.id!);
+      await _remoteDataSource.deleteRemoteCv(cv.id);
       if (!mounted) return;
       _showMessage('Đã xoá CV khỏi Supabase.');
       await _loadCvs();
@@ -134,7 +135,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           IconButton(
             tooltip: _isSignedIn ? 'Đăng xuất' : 'Đăng nhập',
-            icon: Icon(_isSignedIn ? Icons.logout_rounded : Icons.login_rounded),
+            icon: Icon(
+              _isSignedIn ? Icons.logout_rounded : Icons.login_rounded,
+            ),
             onPressed: _isSignedIn ? _signOut : () => context.go('/login'),
           ),
         ],
@@ -289,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Cập nhật: ${_formatDate(cv.updatedAt ?? cv.createdAt)}',
+                      'Cập nhật: ${_formatDate(cv.updatedAt)}',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey.shade600,
@@ -300,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               IconButton(
                 tooltip: 'Xoá CV',
-                onPressed: cv.id == null ? null : () => _deleteCv(cv),
+                onPressed: () => _deleteCv(cv),
                 icon: Icon(
                   Icons.delete_outline,
                   color: Theme.of(context).colorScheme.error,
@@ -318,7 +321,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return _messageCard(
       icon: Icons.description_outlined,
       title: 'Chưa có CV trên cloud',
-      message: 'Tạo CV đầu tiên. Khi bấm Lưu, dữ liệu sẽ được ghi vào Supabase.',
+      message:
+          'Tạo CV đầu tiên. Khi bấm Lưu, dữ liệu sẽ được ghi vào Supabase.',
       action: 'Tạo CV mới',
       onPressed: () => _openEditor(),
     );

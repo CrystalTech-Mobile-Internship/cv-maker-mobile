@@ -1,137 +1,168 @@
 import 'education_model.dart';
 import 'experience_model.dart';
+import 'personal_info_model.dart';
 import 'project_model.dart';
 import 'skill_model.dart';
 
-class PersonalInfoModel {
-  const PersonalInfoModel({
-    this.fullName = '',
-    this.role = '',
-    this.email = '',
-    this.phone = '',
-    this.location = '',
-    this.website = '',
-  });
+const _unsetCvValue = Object();
 
-  final String fullName;
-  final String role;
-  final String email;
-  final String phone;
-  final String location;
-  final String website;
-
-  factory PersonalInfoModel.fromMap(Map<String, dynamic>? map) {
-    final data = map ?? const <String, dynamic>{};
-    return PersonalInfoModel(
-      fullName: data['full_name'] as String? ?? '',
-      role: data['role'] as String? ?? '',
-      email: data['email'] as String? ?? '',
-      phone: data['phone'] as String? ?? '',
-      location: data['location'] as String? ?? '',
-      website: data['website'] as String? ?? '',
-    );
-  }
-
-  Map<String, dynamic> toMap() => {
-    'full_name': fullName,
-    'role': role,
-    'email': email,
-    'phone': phone,
-    'location': location,
-    'website': website,
-  };
-}
-
+/// Aggregate root containing all editable and sync-related CV data.
 class CvModel {
-  const CvModel({
-    this.id,
-    this.userId,
+  CvModel({
+    required this.id,
     required this.title,
-    this.templateId,
-    this.primaryColor = '#1E293B',
-    this.fontSizeScale = 1.0,
-    this.summary = '',
-    this.personalInfo = const PersonalInfoModel(),
-    this.educations = const [],
-    this.experiences = const [],
-    this.skills = const [],
-    this.projects = const [],
-    this.createdAt,
-    this.updatedAt,
-  });
+    required this.templateId,
+    required this.primaryColor,
+    required this.fontSizeScale,
+    required this.personalInfo,
+    required this.summary,
+    required this.isSynced,
+    required this.createdAt,
+    required this.updatedAt,
+    this.userId,
+    List<EducationModel> educations = const [],
+    List<ExperienceModel> experiences = const [],
+    List<SkillModel> skills = const [],
+    List<ProjectModel> projects = const [],
+  }) : educations = List.unmodifiable(educations),
+       experiences = List.unmodifiable(experiences),
+       skills = List.unmodifiable(skills),
+       projects = List.unmodifiable(projects);
 
-  final String? id;
+  final String id;
   final String? userId;
   final String title;
-  final String? templateId;
+  final String templateId;
   final String primaryColor;
   final double fontSizeScale;
-  final String summary;
   final PersonalInfoModel personalInfo;
+  final String summary;
   final List<EducationModel> educations;
   final List<ExperienceModel> experiences;
   final List<SkillModel> skills;
   final List<ProjectModel> projects;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final bool isSynced;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  factory CvModel.fromMap(Map<String, dynamic> map) {
+  factory CvModel.empty({required String id, String? userId, DateTime? now}) {
+    final timestamp = (now ?? DateTime.now()).toUtc();
+
     return CvModel(
-      id: map['id'] as String?,
-      userId: map['user_id'] as String?,
-      title: map['title'] as String? ?? 'CV chưa đặt tên',
-      templateId: map['template_id'] as String?,
-      primaryColor: map['primary_color'] as String? ?? '#1E293B',
-      fontSizeScale: _asDouble(map['font_size_scale']) ?? 1.0,
-      summary: map['summary'] as String? ?? '',
-      personalInfo: PersonalInfoModel.fromMap(_asMap(map['personal_info'])),
-      createdAt: _asDateTime(map['created_at']),
-      updatedAt: _asDateTime(map['updated_at']),
+      id: id,
+      userId: userId,
+      title: 'CV chưa đặt tên',
+      templateId: 'harvard_ats',
+      primaryColor: '#1E293B',
+      fontSizeScale: 1,
+      personalInfo: const PersonalInfoModel(),
+      summary: '',
+      isSynced: false,
+      createdAt: timestamp,
+      updatedAt: timestamp,
     );
   }
 
-  Map<String, dynamic> toMap({String? ownerId}) => {
-    if (id != null) 'id': id,
-    'user_id': ownerId ?? userId,
-    'title': title,
-    'template_id': templateId,
-    'primary_color': primaryColor,
-    'font_size_scale': fontSizeScale,
-    'summary': summary,
-    'personal_info': personalInfo.toMap(),
-  };
+  factory CvModel.fromJson(Map<String, dynamic> json) {
+    final updatedAt = DateTime.parse(json['updatedAt'] as String).toUtc();
 
-  CvModel copyWith({String? id, String? userId}) => CvModel(
-    id: id ?? this.id,
-    userId: userId ?? this.userId,
-    title: title,
-    templateId: templateId,
-    primaryColor: primaryColor,
-    fontSizeScale: fontSizeScale,
-    summary: summary,
-    personalInfo: personalInfo,
-    educations: educations,
-    experiences: experiences,
-    skills: skills,
-    projects: projects,
-    createdAt: createdAt,
-    updatedAt: updatedAt,
-  );
+    return CvModel(
+      id: json['id'] as String,
+      userId: json['userId'] as String?,
+      title: json['title'] as String? ?? 'CV chưa đặt tên',
+      templateId: json['templateId'] as String? ?? 'harvard_ats',
+      primaryColor: json['primaryColor'] as String? ?? '#1E293B',
+      fontSizeScale: (json['fontSizeScale'] as num? ?? 1).toDouble(),
+      personalInfo: PersonalInfoModel.fromJson(
+        Map<String, dynamic>.from(
+          json['personalInfo'] as Map<dynamic, dynamic>? ?? const {},
+        ),
+      ),
+      summary: json['summary'] as String? ?? '',
+      educations: _readModelList(json['educations'], EducationModel.fromJson),
+      experiences: _readModelList(
+        json['experiences'],
+        ExperienceModel.fromJson,
+      ),
+      skills: _readModelList(json['skills'], SkillModel.fromJson),
+      projects: _readModelList(json['projects'], ProjectModel.fromJson),
+      isSynced: json['isSynced'] as bool? ?? false,
+      createdAt: json['createdAt'] == null
+          ? updatedAt
+          : DateTime.parse(json['createdAt'] as String).toUtc(),
+      updatedAt: updatedAt,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'title': title,
+      'templateId': templateId,
+      'primaryColor': primaryColor,
+      'fontSizeScale': fontSizeScale,
+      'personalInfo': personalInfo.toJson(),
+      'summary': summary,
+      'educations': educations.map((item) => item.toJson()).toList(),
+      'experiences': experiences.map((item) => item.toJson()).toList(),
+      'skills': skills.map((item) => item.toJson()).toList(),
+      'projects': projects.map((item) => item.toJson()).toList(),
+      'isSynced': isSynced,
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'updatedAt': updatedAt.toUtc().toIso8601String(),
+    };
+  }
+
+  CvModel copyWith({
+    String? id,
+    Object? userId = _unsetCvValue,
+    String? title,
+    String? templateId,
+    String? primaryColor,
+    double? fontSizeScale,
+    PersonalInfoModel? personalInfo,
+    String? summary,
+    List<EducationModel>? educations,
+    List<ExperienceModel>? experiences,
+    List<SkillModel>? skills,
+    List<ProjectModel>? projects,
+    bool? isSynced,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return CvModel(
+      id: id ?? this.id,
+      userId: identical(userId, _unsetCvValue)
+          ? this.userId
+          : userId as String?,
+      title: title ?? this.title,
+      templateId: templateId ?? this.templateId,
+      primaryColor: primaryColor ?? this.primaryColor,
+      fontSizeScale: fontSizeScale ?? this.fontSizeScale,
+      personalInfo: personalInfo ?? this.personalInfo,
+      summary: summary ?? this.summary,
+      educations: educations ?? this.educations,
+      experiences: experiences ?? this.experiences,
+      skills: skills ?? this.skills,
+      projects: projects ?? this.projects,
+      isSynced: isSynced ?? this.isSynced,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 }
 
-Map<String, dynamic>? _asMap(dynamic value) {
-  if (value is Map<String, dynamic>) return value;
-  if (value is Map) return Map<String, dynamic>.from(value);
-  return null;
-}
+List<T> _readModelList<T>(
+  Object? value,
+  T Function(Map<String, dynamic>) fromJson,
+) {
+  final items = value as List<dynamic>? ?? const [];
 
-double? _asDouble(dynamic value) {
-  if (value is num) return value.toDouble();
-  return double.tryParse('$value');
-}
-
-DateTime? _asDateTime(dynamic value) {
-  if (value is DateTime) return value;
-  if (value is String) return DateTime.tryParse(value);
-  return null;
+  return items
+      .map(
+        (item) =>
+            fromJson(Map<String, dynamic>.from(item as Map<dynamic, dynamic>)),
+      )
+      .toList();
 }

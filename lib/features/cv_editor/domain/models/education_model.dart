@@ -1,56 +1,84 @@
-class EducationModel {
-  const EducationModel({
-    this.id,
-    required this.institution,
-    this.degree = '',
-    this.fieldOfStudy = '',
-    this.startDate,
-    this.endDate,
-    this.gpa,
-    this.achievements = const [],
-  });
+const _unsetEducationValue = Object();
 
-  final String? id;
+/// One education entry in a CV.
+class EducationModel {
+  EducationModel({
+    required this.id,
+    required this.institution,
+    required this.degree,
+    required this.fieldOfStudy,
+    required this.startDate,
+    this.endDate,
+    this.isCurrent = false,
+    this.gpa,
+    List<String> achievements = const [],
+  }) : achievements = List.unmodifiable(achievements);
+
+  final String id;
   final String institution;
   final String degree;
   final String fieldOfStudy;
-  final DateTime? startDate;
+  final DateTime startDate;
   final DateTime? endDate;
-  final double? gpa;
+  final bool isCurrent;
+  final String? gpa;
   final List<String> achievements;
 
-  factory EducationModel.fromMap(Map<String, dynamic> map) => EducationModel(
-    id: map['id'] as String?,
-    institution: map['institution'] as String? ?? '',
-    degree: map['degree'] as String? ?? '',
-    fieldOfStudy: map['field_of_study'] as String? ?? '',
-    startDate: _parseDate(map['start_date']),
-    endDate: _parseDate(map['end_date']),
-    gpa: _parseDouble(map['gpa']),
-    achievements: _parseStrings(map['achievements']),
-  );
+  factory EducationModel.fromJson(Map<String, dynamic> json) {
+    return EducationModel(
+      id: json['id'] as String,
+      institution: json['institution'] as String? ?? '',
+      degree: json['degree'] as String? ?? '',
+      fieldOfStudy: json['fieldOfStudy'] as String? ?? '',
+      startDate: DateTime.parse(json['startDate'] as String).toUtc(),
+      endDate: json['endDate'] == null
+          ? null
+          : DateTime.parse(json['endDate'] as String).toUtc(),
+      isCurrent: json['isCurrent'] as bool? ?? false,
+      gpa: json['gpa'] as String?,
+      achievements: List<String>.from(
+        json['achievements'] as List<dynamic>? ?? const [],
+      ),
+    );
+  }
 
-  Map<String, dynamic> toMap() => {
-    if (id != null) 'id': id,
-    'institution': institution,
-    'degree': degree,
-    'field_of_study': fieldOfStudy,
-    'start_date': startDate?.toIso8601String(),
-    'end_date': endDate?.toIso8601String(),
-    'gpa': gpa,
-    'achievements': achievements,
-  };
-}
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'institution': institution,
+      'degree': degree,
+      'fieldOfStudy': fieldOfStudy,
+      'startDate': startDate.toUtc().toIso8601String(),
+      'endDate': endDate?.toUtc().toIso8601String(),
+      'isCurrent': isCurrent,
+      'gpa': gpa,
+      'achievements': achievements,
+    };
+  }
 
-DateTime? _parseDate(dynamic value) =>
-    value is String ? DateTime.tryParse(value) : null;
-
-double? _parseDouble(dynamic value) {
-  if (value is num) return value.toDouble();
-  return double.tryParse('$value');
-}
-
-List<String> _parseStrings(dynamic value) {
-  if (value is! List) return const [];
-  return value.whereType<String>().toList(growable: false);
+  EducationModel copyWith({
+    String? id,
+    String? institution,
+    String? degree,
+    String? fieldOfStudy,
+    DateTime? startDate,
+    Object? endDate = _unsetEducationValue,
+    bool? isCurrent,
+    Object? gpa = _unsetEducationValue,
+    List<String>? achievements,
+  }) {
+    return EducationModel(
+      id: id ?? this.id,
+      institution: institution ?? this.institution,
+      degree: degree ?? this.degree,
+      fieldOfStudy: fieldOfStudy ?? this.fieldOfStudy,
+      startDate: startDate ?? this.startDate,
+      endDate: identical(endDate, _unsetEducationValue)
+          ? this.endDate
+          : endDate as DateTime?,
+      isCurrent: isCurrent ?? this.isCurrent,
+      gpa: identical(gpa, _unsetEducationValue) ? this.gpa : gpa as String?,
+      achievements: achievements ?? this.achievements,
+    );
+  }
 }

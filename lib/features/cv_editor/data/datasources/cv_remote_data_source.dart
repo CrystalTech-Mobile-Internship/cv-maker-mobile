@@ -1,11 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/network/supabase_client.dart';
+import '../mappers/cv_supabase_mapper.dart';
 import '../../domain/models/cv_model.dart';
-import '../../domain/models/education_model.dart';
-import '../../domain/models/experience_model.dart';
-import '../../domain/models/project_model.dart';
-import '../../domain/models/skill_model.dart';
 
 class CvRemoteDataSourceException implements Exception {
   const CvRemoteDataSourceException(this.message, {this.cause});
@@ -65,7 +62,7 @@ class CvRemoteDataSource {
     try {
       final row = await _client
           .from('cvs')
-          .upsert(cv.toMap(ownerId: userId))
+          .upsert(CvSupabaseMapper.toCvRow(cv, userId: userId))
           .select()
           .single();
       final savedCvId = row['id'] as String;
@@ -75,7 +72,12 @@ class CvRemoteDataSource {
       await _client.from('cv_sections').delete().eq('cv_id', savedCvId);
       await _upsertSections(savedCvId, cv);
 
-      return cv.copyWith(id: savedCvId, userId: userId);
+      return cv.copyWith(
+        id: savedCvId,
+        userId: userId,
+        isSynced: true,
+        updatedAt: DateTime.now().toUtc(),
+      );
     } on PostgrestException catch (error) {
       throw CvRemoteDataSourceException(
         'Không thể lưu CV vào database: ${error.message}',
@@ -124,95 +126,11 @@ class CvRemoteDataSource {
   }
 
   CvModel _mapCvRow(Map<String, dynamic> row) {
-    final sections =
-        (row['cv_sections'] as List?)
-            ?.whereType<Map>()
-            .map((section) => Map<String, dynamic>.from(section))
-            .toList() ??
-        const <Map<String, dynamic>>[];
-    final base = CvModel.fromMap(row);
-
-    final grouped = <String, List<Map<String, dynamic>>>{};
-    for (final section in sections) {
-      final type = section['section_type'] as String?;
-      if (type == null) continue;
-      final items =
-          (section['cv_items'] as List?)
-              ?.whereType<Map>()
-              .map((item) => Map<String, dynamic>.from(item['payload'] as Map))
-              .toList() ??
-          const <Map<String, dynamic>>[];
-      grouped[type] = items;
-    }
-
-    return CvModel(
-      id: base.id,
-      userId: base.userId,
-      title: base.title,
-      templateId: base.templateId,
-      primaryColor: base.primaryColor,
-      fontSizeScale: base.fontSizeScale,
-      summary: base.summary,
-      personalInfo: base.personalInfo,
-      educations:
-          grouped['education']
-              ?.map(EducationModel.fromMap)
-              .toList(growable: false) ??
-          const [],
-      experiences:
-          grouped['experience']
-              ?.map(ExperienceModel.fromMap)
-              .toList(growable: false) ??
-          const [],
-      skills:
-          grouped['skills']?.map(SkillModel.fromMap).toList(growable: false) ??
-          const [],
-      projects:
-          grouped['projects']
-              ?.map(ProjectModel.fromMap)
-              .toList(growable: false) ??
-          const [],
-      createdAt: base.createdAt,
-      updatedAt: base.updatedAt,
-    );
+    return CvSupabaseMapper.fromCvRow(row);
   }
 
   Future<void> _upsertSections(String cvId, CvModel cv) async {
-    final sections =
-        <({String type, String title, List<Map<String, dynamic>> items})>[
-          (
-            type: 'education',
-            title: 'Học vấn',
-            items: cv.educations
-                .whereType<EducationModel>()
-                .map((item) => item.toMap())
-                .toList(),
-          ),
-          (
-            type: 'experience',
-            title: 'Kinh nghiệm',
-            items: cv.experiences
-                .whereType<ExperienceModel>()
-                .map((item) => item.toMap())
-                .toList(),
-          ),
-          (
-            type: 'skills',
-            title: 'Kỹ năng',
-            items: cv.skills
-                .whereType<SkillModel>()
-                .map((item) => item.toMap())
-                .toList(),
-          ),
-          (
-            type: 'projects',
-            title: 'Dự án',
-            items: cv.projects
-                .whereType<ProjectModel>()
-                .map((item) => item.toMap())
-                .toList(),
-          ),
-        ];
+    final sections = CvSupabaseMapper.toSections(cv);
 
     for (var index = 0; index < sections.length; index++) {
       final definition = sections[index];
