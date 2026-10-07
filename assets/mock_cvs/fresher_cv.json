@@ -1,0 +1,84 @@
+{
+  "id": "20000000-0000-4000-8000-000000000001",
+  "userId": null,
+  "title": "CV Fresher Mobile Developer",
+  "templateId": "modern_minimalist",
+  "primaryColor": "#0F766E",
+  "fontSizeScale": 1.0,
+  "personalInfo": {
+    "fullName": "Lê Hoàng Nam",
+    "targetRole": "Fresher Mobile Developer",
+    "email": "hoangnam.fresher@example.com",
+    "phone": "0900000002",
+    "address": "Đà Nẵng, Việt Nam",
+    "linkedInUrl": "https://www.linkedin.com/in/hoangnam-example",
+    "githubUrl": "https://github.com/hoangnam-example",
+    "avatarPath": null
+  },
+  "summary": "Lập trình viên mobile mới tốt nghiệp có kinh nghiệm thực hành Flutter, REST API và Git Flow qua các dự án cá nhân và kỳ thực tập doanh nghiệp.",
+  "educations": [
+    {
+      "id": "21000000-0000-4000-8000-000000000001",
+      "institution": "Trường Đại học Bách khoa",
+      "degree": "Kỹ sư",
+      "fieldOfStudy": "Công nghệ thông tin",
+      "startDate": "2021-09-01T00:00:00.000Z",
+      "endDate": "2026-06-30T00:00:00.000Z",
+      "isCurrent": false,
+      "gpa": "3.35/4.0",
+      "achievements": ["Đồ án tốt nghiệp đạt 9.0/10"]
+    }
+  ],
+  "experiences": [
+    {
+      "id": "22000000-0000-4000-8000-000000000001",
+      "jobTitle": "Mobile Developer Intern",
+      "company": "Công ty Công nghệ Mẫu",
+      "location": "Đà Nẵng, Việt Nam",
+      "startDate": "2026-01-05T00:00:00.000Z",
+      "endDate": "2026-04-30T00:00:00.000Z",
+      "isCurrent": false,
+      "bulletPoints": [
+        "Phát triển ba màn hình Flutter theo thiết kế Figma và tích hợp REST API.",
+        "Viết widget test cho các trạng thái loading, empty và error."
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "23000000-0000-4000-8000-000000000001",
+      "name": "Flutter",
+      "category": "hard",
+      "proficiency": 80
+    },
+    {
+      "id": "23000000-0000-4000-8000-000000000002",
+      "name": "REST API",
+      "category": "hard",
+      "proficiency": 70
+    },
+    {
+      "id": "23000000-0000-4000-8000-000000000003",
+      "name": "Giao tiếp",
+      "category": "soft",
+      "proficiency": 75
+    }
+  ],
+  "projects": [
+    {
+      "id": "24000000-0000-4000-8000-000000000001",
+      "name": "Smart CV Maker Mobile",
+      "role": "Fullstack Mobile Developer",
+      "description": "Ứng dụng tạo CV offline-first, xem trước template và đồng bộ dữ liệu người dùng.",
+      "technologies": ["Flutter", "Riverpod", "Supabase", "PostgreSQL"],
+      "demoUrl": null,
+      "sourceUrl": "https://github.com/hoangnam-example/smart-cv-maker",
+      "startDate": "2026-08-01T00:00:00.000Z",
+      "endDate": null
+    }
+  ],
+  "isSynced": false,
+  "createdAt": "2026-10-06T01:05:00.000Z",
+  "updatedAt": "2026-10-06T01:05:00.000Z"
+}
+
