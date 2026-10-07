@@ -8,6 +8,8 @@ class SupabaseService {
   static bool get isInitialized => _initialized;
 
   static Future<void> initialize() async {
+    if (_initialized) return;
+
     if (!EnvConstants.isSupabaseConfigured) {
       debugPrint(
         '⚠️ [SupabaseService] SUPABASE_URL hoặc SUPABASE_ANON_KEY chưa được cấu hình thực tế.\n'
@@ -33,5 +35,18 @@ class SupabaseService {
   static SupabaseClient? get client {
     if (!_initialized) return null;
     return Supabase.instance.client;
+  }
+
+  /// Throws a clear configuration error instead of returning a nullable client
+  /// deep inside a data source.
+  static SupabaseClient get requiredClient {
+    final value = client;
+    if (value == null) {
+      throw StateError(
+        'Supabase chưa được cấu hình. Kiểm tra SUPABASE_URL và '
+        'SUPABASE_ANON_KEY trong file .env.',
+      );
+    }
+    return value;
   }
 }
