@@ -11,16 +11,14 @@ Future<void> main() async {
   try {
     await dotenv.load(fileName: '.env');
   } catch (e) {
-    debugPrint('ℹ️ [Main] Không tìm thấy file .env hoặc đang dùng cấu hình mặc định: $e');
+    debugPrint(
+      'ℹ️ [Main] Không tìm thấy file .env hoặc đang dùng cấu hình mặc định: $e',
+    );
   }
 
   // Initialize Supabase if keys are provided
   await SupabaseService.initialize();
 
   // Run app inside Riverpod ProviderScope
-  runApp(
-    const ProviderScope(
-      child: CvMakerApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: CvMakerApp()));
 }
