@@ -9,17 +9,21 @@ class CvEditorScreen extends StatefulWidget {
   State<CvEditorScreen> createState() => _CvEditorScreenState();
 }
 
-class _CvEditorScreenState extends State<CvEditorScreen> with SingleTickerProviderStateMixin {
+class _CvEditorScreenState extends State<CvEditorScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   // Personal Info Controllers
   final _fullNameController = TextEditingController(text: 'Nguyễn Tuấn Anh');
-  final _roleController = TextEditingController(text: 'Flutter Software Engineer');
+  final _roleController = TextEditingController(
+    text: 'Flutter Software Engineer',
+  );
   final _emailController = TextEditingController(text: 'tuananh@example.com');
   final _phoneController = TextEditingController(text: '0901 234 567');
   final _locationController = TextEditingController(text: 'Hà Nội, Việt Nam');
   final _summaryController = TextEditingController(
-    text: 'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, '
+    text:
+        'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, '
         'Riverpod và Supabase. Có kinh nghiệm tối ưu hóa hiệu năng ứng dụng di động.',
   );
 
@@ -113,7 +117,8 @@ class _CvEditorScreenState extends State<CvEditorScreen> with SingleTickerProvid
           _buildPlaceholderTab(
             icon: Icons.psychology_rounded,
             title: 'Kỹ năng chuyên môn',
-            subtitle: 'Phân loại kỹ năng kỹ thuật, ngôn ngữ lập trình, ngoại ngữ.',
+            subtitle:
+                'Phân loại kỹ năng kỹ thuật, ngôn ngữ lập trình, ngoại ngữ.',
           ),
         ],
       ),
@@ -221,16 +226,23 @@ class _CvEditorScreenState extends State<CvEditorScreen> with SingleTickerProvid
             children: [
               Text(
                 'Tóm tắt bản thân (Summary)',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               TextButton.icon(
                 onPressed: _handleAiOptimizeSummary,
-                icon: const Icon(Icons.auto_awesome, color: AppTheme.accentTeal, size: 16),
+                icon: const Icon(
+                  Icons.auto_awesome,
+                  color: AppTheme.accentTeal,
+                  size: 16,
+                ),
                 label: const Text(
                   'Tối ưu AI',
-                  style: TextStyle(color: AppTheme.accentTeal, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: AppTheme.accentTeal,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -240,7 +252,8 @@ class _CvEditorScreenState extends State<CvEditorScreen> with SingleTickerProvid
             controller: _summaryController,
             maxLines: 4,
             decoration: const InputDecoration(
-              hintText: 'Viết ngắn gọn từ 3-5 câu giới thiệu năng lực cốt lõi...',
+              hintText:
+                  'Viết ngắn gọn từ 3-5 câu giới thiệu năng lực cốt lõi...',
               alignLabelWithHint: true,
             ),
           ),
@@ -269,10 +282,7 @@ class _CvEditorScreenState extends State<CvEditorScreen> with SingleTickerProvid
               child: Icon(icon, size: 48, color: AppTheme.primarySlate),
             ),
             const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
               subtitle,

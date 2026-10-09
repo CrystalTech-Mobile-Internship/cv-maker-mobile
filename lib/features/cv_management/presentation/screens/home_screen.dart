@@ -85,10 +85,7 @@ class HomeScreen extends StatelessWidget {
                   'Danh sách hồ sơ của bạn',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                Text(
-                  '1 hồ sơ',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text('1 hồ sơ', style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
             const SizedBox(height: 12),
@@ -110,7 +107,9 @@ class HomeScreen extends StatelessWidget {
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: AppTheme.primarySlate.withValues(alpha: 0.08),
+                              color: AppTheme.primarySlate.withValues(
+                                alpha: 0.08,
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(
@@ -143,15 +142,24 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppTheme.successGreen.withValues(alpha: 0.15),
+                              color: AppTheme.successGreen.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.bolt, color: AppTheme.successGreen, size: 14),
+                                Icon(
+                                  Icons.bolt,
+                                  color: AppTheme.successGreen,
+                                  size: 14,
+                                ),
                                 SizedBox(width: 2),
                                 Text(
                                   '88 ATS',
@@ -174,7 +182,10 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           TextButton.icon(
                             onPressed: () => context.push('/preview'),
-                            icon: const Icon(Icons.visibility_outlined, size: 18),
+                            icon: const Icon(
+                              Icons.visibility_outlined,
+                              size: 18,
+                            ),
                             label: const Text('Xem & Xuất PDF'),
                           ),
                           const SizedBox(width: 8),
@@ -183,7 +194,10 @@ class HomeScreen extends StatelessWidget {
                             icon: const Icon(Icons.edit_outlined, size: 18),
                             label: const Text('Chỉnh sửa'),
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
                             ),
                           ),
                         ],

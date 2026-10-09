@@ -91,9 +91,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   AppConstants.appName,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -151,7 +151,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             const Expanded(child: Divider()),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                               child: Text(
                                 'HOẶC',
                                 style: Theme.of(context).textTheme.bodySmall,
@@ -163,7 +165,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
                           onPressed: _handleGuestLogin,
-                          icon: const Icon(Icons.offline_bolt_outlined, color: AppTheme.accentTeal),
+                          icon: const Icon(
+                            Icons.offline_bolt_outlined,
+                            color: AppTheme.accentTeal,
+                          ),
                           label: const Text('Trải nghiệm Offline (Khách)'),
                         ),
                       ],
