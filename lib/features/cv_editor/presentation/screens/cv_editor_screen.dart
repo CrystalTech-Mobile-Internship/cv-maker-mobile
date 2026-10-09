@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme.dart';
+import '../../../../core/network/supabase_client.dart';
+import '../../data/datasources/cv_remote_data_source.dart';
+import '../../domain/models/models.dart';
 
 class CvEditorScreen extends StatefulWidget {
-  const CvEditorScreen({super.key});
+  const CvEditorScreen({super.key, this.initialCv});
+
+  final CvModel? initialCv;
 
   @override
   State<CvEditorScreen> createState() => _CvEditorScreenState();
@@ -14,6 +19,7 @@ class _CvEditorScreenState extends State<CvEditorScreen>
   late TabController _tabController;
 
   // Personal Info Controllers
+  final _titleController = TextEditingController();
   final _fullNameController = TextEditingController(text: 'Nguyễn Tuấn Anh');
   final _roleController = TextEditingController(
     text: 'Flutter Software Engineer',
@@ -26,16 +32,32 @@ class _CvEditorScreenState extends State<CvEditorScreen>
         'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, '
         'Riverpod và Supabase. Có kinh nghiệm tối ưu hóa hiệu năng ứng dụng di động.',
   );
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+    _loadInitialCv();
+  }
+
+  void _loadInitialCv() {
+    final cv = widget.initialCv;
+    _titleController.text = cv?.title ?? 'CV của tôi';
+    if (cv == null) return;
+
+    _fullNameController.text = cv.personalInfo.fullName;
+    _roleController.text = cv.personalInfo.targetRole;
+    _emailController.text = cv.personalInfo.email;
+    _phoneController.text = cv.personalInfo.phone;
+    _locationController.text = cv.personalInfo.address;
+    _summaryController.text = cv.summary;
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _titleController.dispose();
     _fullNameController.dispose();
     _roleController.dispose();
     _emailController.dispose();
@@ -43,6 +65,85 @@ class _CvEditorScreenState extends State<CvEditorScreen>
     _locationController.dispose();
     _summaryController.dispose();
     super.dispose();
+  }
+
+  CvModel _buildCvModel() {
+    final existing = widget.initialCv;
+    final currentUserId = SupabaseService.client?.auth.currentUser?.id;
+    final title = _titleController.text.trim();
+    final now = DateTime.now().toUtc();
+
+    return CvModel(
+      id: existing?.id ?? 'local-${now.microsecondsSinceEpoch}',
+      userId: currentUserId ?? existing?.userId,
+      title: title.isEmpty ? 'CV chưa đặt tên' : title,
+      templateId: existing?.templateId ?? 'harvard_ats',
+      primaryColor: existing?.primaryColor ?? '#1E293B',
+      fontSizeScale: existing?.fontSizeScale ?? 1.0,
+      summary: _summaryController.text.trim(),
+      personalInfo: PersonalInfoModel(
+        fullName: _fullNameController.text.trim(),
+        targetRole: _roleController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        address: _locationController.text.trim(),
+        linkedInUrl: existing?.personalInfo.linkedInUrl,
+        githubUrl: existing?.personalInfo.githubUrl,
+        avatarPath: existing?.personalInfo.avatarPath,
+      ),
+      // Preserve sections until their dynamic form tabs are connected.
+      educations: existing?.educations ?? const [],
+      experiences: existing?.experiences ?? const [],
+      skills: existing?.skills ?? const [],
+      projects: existing?.projects ?? const [],
+      isSynced: false,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+    );
+  }
+
+  Future<void> _handleSave() async {
+    if (SupabaseService.client?.auth.currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Hãy đăng nhập Supabase trước khi lưu CV lên cloud.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSaving = true);
+    try {
+      final savedCv = await CvRemoteDataSource().upsertCv(_buildCvModel());
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đã lưu CV lên Supabase Singapore.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      context.pop(savedCv);
+    } on CvRemoteDataSourceException catch (error) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không thể lưu CV. Hãy kiểm tra mạng và thử lại.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _handleAiOptimizeSummary() {
@@ -69,7 +170,7 @@ class _CvEditorScreenState extends State<CvEditorScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trình chỉnh sửa CV'),
+        title: Text(widget.initialCv == null ? 'Tạo CV mới' : 'Chỉnh sửa CV'),
         actions: [
           IconButton(
             tooltip: 'Xem trước PDF',
@@ -139,14 +240,20 @@ class _CvEditorScreenState extends State<CvEditorScreen>
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => context.pop(),
-                  child: const Text('Quay lại'),
+                  onPressed: _isSaving ? null : _handleSave,
+                  child: _isSaving
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Lưu lên cloud'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => context.push('/preview'),
+                  onPressed: _isSaving ? null : () => context.push('/preview'),
                   icon: const Icon(Icons.arrow_forward_rounded, size: 18),
                   label: const Text('Xem trước CV'),
                 ),
@@ -164,6 +271,14 @@ class _CvEditorScreenState extends State<CvEditorScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          TextField(
+            controller: _titleController,
+            decoration: const InputDecoration(
+              labelText: 'Tên CV',
+              prefixIcon: Icon(Icons.title_outlined),
+            ),
+          ),
+          const SizedBox(height: 14),
           Text(
             'Thông tin cơ bản',
             style: Theme.of(context).textTheme.titleLarge,
