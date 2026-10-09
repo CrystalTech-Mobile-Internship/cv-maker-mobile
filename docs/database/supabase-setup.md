@@ -2,7 +2,7 @@
 
 ## 1. Trạng thái hiện tại
 
-Repository đã có migration và test RLS dạng SQL nhưng chưa áp dụng vào project cloud. Không cần URL hoặc key để review các file này.
+Repository đã có migration và test RLS dạng SQL. Máy phát triển đã có Project URL và anon/publishable key trong `.env`; file này bị loại khỏi Git. Chưa có bằng chứng kiểm thử trong repository để khẳng định migration và RLS đã chạy thành công trên project cloud.
 
 Không chạy migration trên project dùng chung hoặc production trước khi hai thành viên review schema và có phương án sao lưu.
 
@@ -44,8 +44,10 @@ Kết quả bắt buộc trước khi kết nối Flutter:
 ## 5. Trạng thái xác minh
 
 - Kiểm tra tĩnh SQL: đã review cấu trúc, grants, RLS và policy ownership.
-- Chạy migration: chưa thực hiện.
+- Cấu hình client local: đã có URL và anon/publishable key trong `.env`; `.env` không được Git theo dõi.
+- Chạy migration trên cloud: chưa được xác minh bằng log hoặc kết quả kiểm thử lưu trong repository.
 - Chạy `supabase test db`: chưa thực hiện vì máy chưa có Supabase local project/runtime được xác nhận.
-- Kết nối Flutter với cloud: chưa thực hiện vì chưa có URL/key.
+- Kết nối cơ bản tới Supabase Auth: đạt HTTP 200 khi gọi read-only `/auth/v1/settings` bằng URL và anon/publishable key trong `.env` ngày 09/10/2026.
+- Kết nối Flutter và thao tác database: chưa có integration test xác nhận; kết quả HTTP 200 ở trên không chứng minh migration hoặc RLS đã hoạt động.
 
 Không được ghi báo cáo rằng RLS đã hoạt động trên cloud cho đến khi test hai người dùng chạy thành công.

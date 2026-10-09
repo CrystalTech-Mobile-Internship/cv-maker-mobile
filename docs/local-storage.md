@@ -81,7 +81,7 @@ Chưa hoàn thành:
 
 - Dashboard và Editor chưa đọc/ghi qua repository.
 - Chưa có debounce để tự động lưu khi nhập liệu.
-- Chưa có Supabase schema, RLS hoặc sync engine.
+- Đã có migration Supabase và RLS ở mức source code; chưa xác minh trên cloud và chưa có sync engine.
 - Chưa có xử lý xung đột giữa nhiều thiết bị.
 
 ## 6. Bước tiếp theo
