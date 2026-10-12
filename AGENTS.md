@@ -22,14 +22,17 @@ If code and documentation disagree, report the mismatch before expanding the imp
 ## Project principles
 
 - Build an offline-first Flutter application; local persistence is the primary runtime source of truth.
-- Save locally before attempting cloud synchronization.
+- Follow Feature-First Clean Architecture strictly (`domain/`, `data/`, `presentation/`).
+- NEVER call Supabase, Remote Data Sources, or database clients directly from Presentation widgets or screens; all interactions must pass through Riverpod Providers/Repositories.
+- Keep local persistence (SQLite Drift) and cloud backend (Supabase) in separate datasources; coordinate them in repository implementations (save locally before attempting cloud synchronization).
+- Keep presentation widgets modular: Extract complex forms, tab bodies, and list items into `presentation/widgets/` rather than bundling everything into one monolithic screen file.
 - Use Riverpod for state management and GoRouter for navigation.
 - Pass CV identity explicitly; editor and preview flows must operate on a `cvId`.
-- Keep presentation, domain logic, and data access separable.
 - Treat Supabase RLS as mandatory for every user-owned table.
 - Never place secret, service-role, database, or private AI keys in the mobile application or Git.
 - Preserve user data on network, authentication, synchronization, and PDF failures.
 - Do not represent placeholders or mocked behavior as completed functionality.
+- Adhere to detailed architectural rules in `.agents/rules/05_flutter_clean_architecture_and_layers.md`.
 
 ## Agent workflow
 

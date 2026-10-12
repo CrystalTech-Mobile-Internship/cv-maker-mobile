@@ -16,14 +16,16 @@
 
 ## 2. Design tokens
 
-- Primary: `#4F46E5`.
+- Primary: `#1E293B` (Slate Navy chuẩn ATS trong `AppTheme`; tham chiếu wireframe Stitch: `#4F46E5`).
+- Secondary / Accent: `#0EA5E9` (Modern Teal / Cyan trong `AppTheme`).
 - Success: `#10B981`.
-- Warning/offline: `#F59E0B`.
-- Error: `#DC2626`.
-- Background: `#F8FAFC` hoặc sắc tím rất nhạt tương đương.
+- Warning / Offline: `#F59E0B`.
+- Error: `#F43F5E` (hoặc `#DC2626`).
+- Background: `#F8FAFC`.
+- Surface Card: `#FFFFFF`.
 - Main text: `#0F172A`.
 - Secondary text: `#64748B`.
-- Font: Inter hoặc font sans-serif hỗ trợ đầy đủ tiếng Việt.
+- Font: Inter hoặc font sans-serif hỗ trợ đầy đủ tiếng Việt (`GoogleFonts.interTextTheme`).
 - Spacing: bội số của 8 dp.
 - Input/button radius: 12 dp.
 - Card radius: 16 dp.
@@ -108,4 +110,27 @@ Tham chiếu: `wireframes/08-ui-states.png`.
 - Chưa nối Dashboard/Editor với database chỉ để làm giao diện giống ảnh.
 - Chưa xây Supabase Auth, sync engine hoặc PDF engine trong lát cắt tài liệu này.
 - Triển khai chức năng thật bắt đầu theo thứ tự trong `docs/mvp-flow.md` từ tuần 6.
+
+## 6. Quy cách Giao diện Web Adaptive (Web Split-Screen)
+
+- **Điểm ngắt thích ứng (Breakpoint):** Khi độ rộng màn hình `constraints.maxWidth >= 900px` (trên Chrome/Edge/Desktop/Tablet ngang), ứng dụng tự động kích hoạt bố cục Split-Screen.
+- **Bố cục 2 cột:**
+  - **Cột trái (40% - 45%):** Khung cuộn form nhập liệu Editor với cấu trúc Tab/Accordion mượt mà, hỗ trợ các thao tác sửa thông tin, thêm kinh nghiệm, học vấn, kỹ năng và nút gọi trợ lý AI.
+  - **Cột phải (55% - 60%):** Canvas Live Preview trang A4 thời gian thực. Bất kỳ thay đổi văn bản nào ở form bên trái sẽ được phản chiếu ngay lập tức lên tờ giấy A4 với tỷ lệ chuẩn.
+- **Thanh công cụ đỉnh trang (Top Header Bar):**
+  - Hiển thị logo Smart CV Maker, tiêu đề CV hiện tại, bộ chọn Palette màu sắc nhanh, nút chọn Template, nút `In CV trực tiếp`, nút `Xuất PDF` và huy hiệu nổi bật `Nâng cấp PRO 💎`.
+
+## 7. Quy cách Màn hình Nâng cấp Pro & Hộp thoại Thanh toán VietQR
+
+- **Paywall BottomSheet / Modal Dialog:**
+  - Tiêu đề: `Mở Khóa Toàn Bộ Sức Mạnh Của Smart CV Maker PRO 💎`.
+  - Danh sách tính năng so sánh (Free vs Pro) kèm icon tích xanh: Không giới hạn CV, xuất PDF không watermark, trọn bộ Template cao cấp, Trợ lý AI và ATS Matcher không giới hạn.
+  - Tùy chọn gói: `49.000đ / Tháng` hoặc `99.000đ Trọn đời (Tiết kiệm 60%)`.
+  - Nút bấm chính (CTA): `Thanh toán nhanh qua VietQR`.
+- **Hộp thoại Quét mã VietQR (VietQR Payment Dialog):**
+  - Hiển thị ảnh mã QR tạo động theo chuẩn NAPAS 247 (tích hợp qua PayOS hoặc SePay).
+  - Hiển thị thông tin chuyển khoản rõ ràng: Tên tài khoản, Số tài khoản, Ngân hàng, Số tiền chính xác và Nội dung chuyển khoản duy nhất (VD: `CVPRO_USER_8392`).
+  - Nút `Sao chép số tài khoản` và `Sao chép nội dung`.
+  - Thanh chỉ báo trạng thái: `Đang chờ thanh toán (Tự động kích hoạt sau khi quét)...` kèm animation radar/pulse nhẹ nhàng.
+  - Khi nhận được tín hiệu Webhook thành công: Hiển thị hiệu ứng pháo hoa/chúc mừng (Lottie hoặc Success Checkmark) và tự động đóng modal, nâng cấp huy hiệu tài khoản thành `PRO`.
 
