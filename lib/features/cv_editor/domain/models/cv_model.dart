@@ -12,6 +12,7 @@ class CvModel {
     required this.id,
     required this.title,
     required this.templateId,
+    this.language = 'vi',
     required this.primaryColor,
     required this.fontSizeScale,
     required this.personalInfo,
@@ -33,6 +34,7 @@ class CvModel {
   final String? userId;
   final String title;
   final String templateId;
+  final String language; // 'vi' or 'en'
   final String primaryColor;
   final double fontSizeScale;
   final PersonalInfoModel personalInfo;
@@ -45,7 +47,12 @@ class CvModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  factory CvModel.empty({required String id, String? userId, DateTime? now}) {
+  factory CvModel.empty({
+    required String id,
+    String? userId,
+    String language = 'vi',
+    DateTime? now,
+  }) {
     final timestamp = (now ?? DateTime.now()).toUtc();
 
     return CvModel(
@@ -53,6 +60,7 @@ class CvModel {
       userId: userId,
       title: 'CV chưa đặt tên',
       templateId: 'harvard_ats',
+      language: language,
       primaryColor: '#1E293B',
       fontSizeScale: 1,
       personalInfo: const PersonalInfoModel(),
@@ -71,6 +79,7 @@ class CvModel {
       userId: json['userId'] as String?,
       title: json['title'] as String? ?? 'CV chưa đặt tên',
       templateId: json['templateId'] as String? ?? 'harvard_ats',
+      language: json['language'] as String? ?? 'vi',
       primaryColor: json['primaryColor'] as String? ?? '#1E293B',
       fontSizeScale: (json['fontSizeScale'] as num? ?? 1).toDouble(),
       personalInfo: PersonalInfoModel.fromJson(
@@ -100,6 +109,7 @@ class CvModel {
       'userId': userId,
       'title': title,
       'templateId': templateId,
+      'language': language,
       'primaryColor': primaryColor,
       'fontSizeScale': fontSizeScale,
       'personalInfo': personalInfo.toJson(),
@@ -119,6 +129,7 @@ class CvModel {
     Object? userId = _unsetCvValue,
     String? title,
     String? templateId,
+    String? language,
     String? primaryColor,
     double? fontSizeScale,
     PersonalInfoModel? personalInfo,
@@ -138,6 +149,7 @@ class CvModel {
           : userId as String?,
       title: title ?? this.title,
       templateId: templateId ?? this.templateId,
+      language: language ?? this.language,
       primaryColor: primaryColor ?? this.primaryColor,
       fontSizeScale: fontSizeScale ?? this.fontSizeScale,
       personalInfo: personalInfo ?? this.personalInfo,
