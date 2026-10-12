@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_client.dart';
+
+final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
 /// Thin authentication layer used by the login screen.
 ///
@@ -16,6 +19,11 @@ class AuthService {
   User? get currentUser => SupabaseService.client?.auth.currentUser;
 
   Session? get currentSession => SupabaseService.client?.auth.currentSession;
+
+  Stream<AuthState>? get onAuthStateChange =>
+      SupabaseService.client?.auth.onAuthStateChange;
+
+  bool get isConfigured => SupabaseService.isInitialized;
 
   Future<AuthResponse> signIn({
     required String email,

@@ -29,7 +29,9 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/preview',
       name: 'preview',
-      builder: (context, state) => const CvPreviewScreen(),
+      builder: (context, state) => CvPreviewScreen(
+        cv: state.extra is CvModel ? state.extra as CvModel : null,
+      ),
     ),
   ],
 );

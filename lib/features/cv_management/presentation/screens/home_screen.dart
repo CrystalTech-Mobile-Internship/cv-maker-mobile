@@ -1,84 +1,305 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/network/supabase_client.dart';
-import '../../../cv_editor/data/datasources/cv_remote_data_source.dart';
-import '../../../cv_editor/domain/models/cv_model.dart';
+import '../../../../core/widgets/responsive_layout_builder.dart';
+import '../../../auth/data/auth_service.dart';
+import '../../../cv_editor/data/repositories/cv_repository_provider.dart';
+import '../../../cv_editor/domain/models/models.dart';
 
-class HomeScreen extends StatefulWidget {
+/// Reactive provider that streams all locally stored CVs from Drift SQLite.
+final cvListStreamProvider = StreamProvider.autoDispose<List<CvModel>>((ref) {
+  final repository = ref.watch(cvRepositoryProvider);
+  return repository.watchAll();
+});
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<CvModel> _cvs = const [];
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  bool get _isSignedIn => SupabaseService.client?.auth.currentSession != null;
-
-  CvRemoteDataSource get _remoteDataSource => CvRemoteDataSource();
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCvs();
-  }
-
-  Future<void> _loadCvs() async {
-    if (!_isSignedIn) {
-      if (!mounted) return;
-      setState(() {
-        _cvs = const [];
-        _isLoading = false;
-        _errorMessage = null;
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final cvs = await _remoteDataSource.fetchUserCvs();
-      if (!mounted) return;
-      setState(() {
-        _cvs = cvs;
-        _isLoading = false;
-      });
-    } on CvRemoteDataSourceException catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = error.message;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Không thể tải danh sách CV. Hãy thử lại.';
-      });
-    }
-  }
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool get _isSignedIn => ref.read(authServiceProvider).currentUser != null;
 
   Future<void> _openEditor([CvModel? cv]) async {
     await context.push('/editor', extra: cv);
-    if (mounted) await _loadCvs();
+  }
+
+  Future<void> _showCreateCvDialog() async {
+    final titleController = TextEditingController(text: 'CV của tôi');
+    String selectedTemplate = 'harvard_ats';
+    String selectedLanguage = 'vi'; // 'vi' or 'en'
+
+    final created = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.post_add_rounded, color: AppTheme.accentTeal),
+                  SizedBox(width: 8),
+                  Text('Tạo hồ sơ CV mới'),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Tên hồ sơ:',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: titleController,
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        hintText: 'VD: CV Flutter Software Engineer',
+                        prefixIcon: Icon(Icons.edit_note_rounded),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Mẫu CV (Template):',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(
+                          value: 'harvard_ats',
+                          label: Text('Harvard ATS'),
+                          icon: Icon(Icons.description_outlined),
+                        ),
+                        ButtonSegment(
+                          value: 'modern_minimalist',
+                          label: Text('Minimalist'),
+                          icon: Icon(Icons.view_quilt_outlined),
+                        ),
+                      ],
+                      selected: {selectedTemplate},
+                      onSelectionChanged: (set) {
+                        setDialogState(() => selectedTemplate = set.first);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Ngôn ngữ mặc định:',
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(
+                          value: 'vi',
+                          label: Text('🇻🇳 Tiếng Việt'),
+                        ),
+                        ButtonSegment(
+                          value: 'en',
+                          label: Text('🇬🇧 English'),
+                        ),
+                      ],
+                      selected: {selectedLanguage},
+                      onSelectionChanged: (set) {
+                        setDialogState(() => selectedLanguage = set.first);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: const Text('Huỷ'),
+                ),
+                FilledButton.icon(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  icon: const Icon(Icons.check_rounded),
+                  label: const Text('Tạo ngay'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (created != true) return;
+
+    final now = DateTime.now().toUtc();
+    final isEn = selectedLanguage == 'en';
+    final newCv = CvModel(
+      id: 'local-${now.microsecondsSinceEpoch}',
+      userId: ref.read(authServiceProvider).currentUser?.id,
+      title: titleController.text.trim().isEmpty
+          ? (isEn ? 'Software Engineer Resume' : 'CV của tôi')
+          : titleController.text.trim(),
+      templateId: selectedTemplate,
+      language: selectedLanguage,
+      primaryColor: '#1E293B',
+      fontSizeScale: 1.0,
+      summary: isEn
+          ? 'Motivated software engineer with experience in cross-platform mobile development, clean architecture, and modern state management.'
+          : 'Kỹ sư phần mềm nhiệt huyết chuyên sâu về ứng dụng đa nền tảng, kiến trúc sạch và tối ưu hiệu năng.',
+      personalInfo: PersonalInfoModel(
+        fullName: isEn ? 'Nguyen Tuan Anh' : 'Nguyễn Tuấn Anh',
+        targetRole: isEn ? 'Software Engineer' : 'Kỹ sư phần mềm Flutter',
+        email: 'tuananh@example.com',
+        phone: '0901 234 567',
+        address: isEn ? 'Hanoi, Vietnam' : 'Hà Nội, Việt Nam',
+      ),
+      educations: [
+        EducationModel(
+          id: 'edu-1',
+          institution: isEn
+              ? 'Hanoi University of Science and Technology'
+              : 'Đại học Bách Khoa Hà Nội',
+          degree: isEn ? 'Bachelor of Engineering' : 'Kỹ sư',
+          fieldOfStudy: isEn
+              ? 'Computer Science'
+              : 'Công nghệ Thông tin',
+          startDate: DateTime(2020, 9, 1).toUtc(),
+          endDate: DateTime(2024, 6, 30).toUtc(),
+          gpa: '3.6 / 4.0',
+        ),
+      ],
+      experiences: [
+        ExperienceModel(
+          id: 'exp-1',
+          jobTitle: isEn
+              ? 'Flutter Software Engineer'
+              : 'Kỹ sư phần mềm Flutter',
+          company: isEn
+              ? 'Tech Solutions Global'
+              : 'Công ty Cổ phần Công nghệ Tech',
+          location: isEn ? 'Hanoi, Vietnam' : 'Hà Nội',
+          startDate: DateTime(2023, 1, 1).toUtc(),
+          isCurrent: true,
+          bulletPoints: isEn
+              ? [
+                  'Architected production mobile app using Clean Architecture and Riverpod.',
+                  'Engineered offline-first SQLite synchronization with automated Supabase cloud replication.',
+                ]
+              : [
+                  'Phát triển ứng dụng di động đa nền tảng áp dụng kiến trúc Clean Architecture.',
+                  'Tối ưu hóa bộ nhớ và thiết kế luồng đồng bộ SQLite offline-first.',
+                ],
+        ),
+      ],
+      skills: const [
+        SkillModel(
+          id: 's-1',
+          name: 'Flutter & Dart',
+          category: SkillCategory.hard,
+          proficiency: 90,
+        ),
+        SkillModel(
+          id: 's-2',
+          name: 'Clean Architecture',
+          category: SkillCategory.hard,
+          proficiency: 85,
+        ),
+        SkillModel(
+          id: 's-3',
+          name: 'SQLite / Drift',
+          category: SkillCategory.hard,
+          proficiency: 80,
+        ),
+      ],
+      projects: const [],
+      isSynced: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    try {
+      final repository = ref.read(cvRepositoryProvider);
+      await repository.save(newCv);
+      if (!mounted) return;
+      _showMessage('Đã tạo CV mới thành công.');
+      await _openEditor(newCv);
+    } catch (_) {
+      if (mounted) _showMessage('Không thể tạo CV. Hãy thử lại.');
+    }
+  }
+
+  Future<void> _showRenameDialog(CvModel cv) async {
+    final controller = TextEditingController(text: cv.title);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Đổi tên CV'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Tên hồ sơ mới',
+            prefixIcon: Icon(Icons.drive_file_rename_outline_rounded),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Huỷ'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Lưu tên'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    final newTitle = controller.text.trim();
+    if (newTitle.isEmpty || newTitle == cv.title) return;
+
+    try {
+      final updatedCv = cv.copyWith(
+        title: newTitle,
+        updatedAt: DateTime.now().toUtc(),
+      );
+      await ref.read(cvRepositoryProvider).save(updatedCv);
+      if (mounted) _showMessage('Đã đổi tên CV thành công.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể đổi tên CV.');
+    }
+  }
+
+  Future<void> _duplicateCv(CvModel cv) async {
+    try {
+      final newId = 'local-${DateTime.now().microsecondsSinceEpoch}';
+      await ref.read(cvRepositoryProvider).duplicate(cv.id, newId: newId);
+      if (mounted) _showMessage('Đã nhân bản CV thành công.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể nhân bản CV.');
+    }
   }
 
   Future<void> _deleteCv(CvModel cv) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Xoá CV?'),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red),
+            SizedBox(width: 8),
+            Text('Xoá CV?'),
+          ],
+        ),
         content: Text(
-          'Bạn có chắc muốn xoá "${cv.title}" khỏi Supabase không?',
+          'Bạn có chắc muốn xoá hồ sơ "${cv.title}" không? '
+          'Hành động này không thể hoàn tác.',
         ),
         actions: [
           TextButton(
@@ -98,18 +319,16 @@ class _HomeScreenState extends State<HomeScreen> {
     if (confirmed != true) return;
 
     try {
-      await _remoteDataSource.deleteRemoteCv(cv.id);
-      if (!mounted) return;
-      _showMessage('Đã xoá CV khỏi Supabase.');
-      await _loadCvs();
-    } on CvRemoteDataSourceException catch (error) {
-      if (mounted) _showMessage(error.message);
+      await ref.read(cvRepositoryProvider).deleteById(cv.id);
+      if (mounted) _showMessage('Đã xoá CV thành công.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể xoá CV.');
     }
   }
 
   Future<void> _signOut() async {
     try {
-      await SupabaseService.client?.auth.signOut();
+      await ref.read(authServiceProvider).signOut();
     } finally {
       if (mounted) context.go('/login');
     }
@@ -123,16 +342,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cvsAsync = ref.watch(cvListStreamProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppConstants.appName),
         actions: [
-          if (_isSignedIn)
-            IconButton(
-              tooltip: 'Làm mới',
-              onPressed: _isLoading ? null : _loadCvs,
-              icon: const Icon(Icons.refresh_rounded),
-            ),
           IconButton(
             tooltip: _isSignedIn ? 'Đăng xuất' : 'Đăng nhập',
             icon: Icon(
@@ -143,207 +358,48 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Welcome & AI Status Banner
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primarySlate, Color(0xFF334155)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.accentTeal.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.auto_awesome_rounded,
-                      color: AppTheme.accentCyan,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Trợ lý CV Chuẩn ATS',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Tối ưu hóa từ khóa tuyển dụng & định dạng xuất A4 chuẩn quốc tế.',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Section Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Danh sách hồ sơ của bạn',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Text('1 hồ sơ', style: Theme.of(context).textTheme.bodyMedium),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Sample CV Item Card
-            Card(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () => context.push('/editor'),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: AppTheme.primarySlate.withValues(
-                                alpha: 0.08,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.article_outlined,
-                              color: AppTheme.primarySlate,
-                              size: 26,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Flutter Software Engineer',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Cập nhật: Hôm nay • Mẫu Harvard ATS',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.successGreen.withValues(
-                                alpha: 0.15,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.bolt,
-                                  color: AppTheme.successGreen,
-                                  size: 14,
-                                ),
-                                SizedBox(width: 2),
-                                Text(
-                                  '88 ATS',
-                                  style: TextStyle(
-                                    color: AppTheme.successGreen,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(height: 1),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () => context.push('/preview'),
-                            icon: const Icon(
-                              Icons.visibility_outlined,
-                              size: 18,
-                            ),
-                            label: const Text('Xem & Xuất PDF'),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton.icon(
-                            onPressed: () => context.push('/editor'),
-                            icon: const Icon(Icons.edit_outlined, size: 18),
-                            label: const Text('Chỉnh sửa'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+        child: ResponsiveLayoutBuilder(
+          mobile: (context, constraints) => _buildMobileLayout(cvsAsync),
+          desktop: (context, constraints) => _buildDesktopLayout(cvsAsync),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _openEditor(),
+        onPressed: _showCreateCvDialog,
         icon: const Icon(Icons.add_rounded),
         label: const Text('Tạo CV mới'),
       ),
     );
   }
 
+  Widget _buildMobileLayout(AsyncValue<List<CvModel>> cvsAsync) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _buildHeader(),
+        const SizedBox(height: 24),
+        _buildCvsSection(cvsAsync, isDesktop: false),
+        const SizedBox(height: 80), // Padding for FloatingActionButton
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout(AsyncValue<List<CvModel>> cvsAsync) {
+    return WebConstrainedWidth(
+      maxWidth: 1200,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 32),
+          _buildCvsSection(cvsAsync, isDesktop: true),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [AppTheme.primarySlate, Color(0xFF334155)],
@@ -355,7 +411,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: AppTheme.accentTeal.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
@@ -363,29 +419,29 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Icon(
               Icons.auto_awesome_rounded,
               color: AppTheme.accentCyan,
-              size: 28,
+              size: 32,
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Trợ lý CV Chuẩn ATS',
+                  'Trợ lý CV Chuẩn ATS (Local-First)',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   _isSignedIn
-                      ? 'CV của bạn đang được đồng bộ trên Supabase Singapore.'
-                      : 'Đăng nhập để lưu và đồng bộ CV trên cloud.',
+                      ? 'Dữ liệu được lưu an toàn trên máy và tự động đồng bộ Cloud.'
+                      : 'Chế độ Ngoại tuyến (Guest Mode): Dữ liệu lưu vĩnh viễn trên máy của bạn.',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 13,
                   ),
                 ),
@@ -397,96 +453,277 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCvsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildCvsSection(
+    AsyncValue<List<CvModel>> cvsAsync, {
+    required bool isDesktop,
+  }) {
+    return cvsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(48),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => _buildErrorState(error.toString()),
+      data: (cvs) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Danh sách hồ sơ của bạn',
-              style: Theme.of(context).textTheme.titleLarge,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Danh sách hồ sơ của bạn',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primarySlate.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${cvs.length} hồ sơ',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Text(
-              '${_cvs.length} hồ sơ',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            const SizedBox(height: 16),
+            if (cvs.isEmpty)
+              _buildEmptyState()
+            else if (isDesktop)
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 380,
+                  mainAxisExtent: 170,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                itemCount: cvs.length,
+                itemBuilder: (context, index) => _buildCvCard(cvs[index]),
+              )
+            else
+              ...cvs.map(_buildCvCard),
           ],
-        ),
-        const SizedBox(height: 12),
-        if (_isLoading)
-          const Padding(
-            padding: EdgeInsets.all(36),
-            child: Center(child: CircularProgressIndicator()),
-          )
-        else if (_errorMessage != null)
-          _buildErrorState()
-        else if (!_isSignedIn)
-          _buildSignedOutState()
-        else if (_cvs.isEmpty)
-          _buildEmptyState()
-        else
-          ..._cvs.map(_buildCvCard),
-      ],
+        );
+      },
     );
   }
 
   Widget _buildCvCard(CvModel cv) {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => _openEditor(cv),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppTheme.primarySlate.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.article_outlined,
-                  color: AppTheme.primarySlate,
-                  size: 26,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppTheme.accentTeal.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.description_rounded,
+                      color: AppTheme.accentTeal,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          cv.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          cv.personalInfo.targetRole.isEmpty
+                              ? 'Chưa đặt vị trí ứng tuyển'
+                              : cv.personalInfo.targetRole,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  PopupMenuButton<String>(
+                    tooltip: 'Tùy chọn',
+                    icon: const Icon(Icons.more_vert_rounded),
+                    onSelected: (action) {
+                      switch (action) {
+                        case 'edit':
+                          _openEditor(cv);
+                          break;
+                        case 'preview':
+                          context.push('/preview', extra: cv);
+                          break;
+                        case 'rename':
+                          _showRenameDialog(cv);
+                          break;
+                        case 'duplicate':
+                          _duplicateCv(cv);
+                          break;
+                        case 'delete':
+                          _deleteCv(cv);
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined, size: 20),
+                            SizedBox(width: 10),
+                            Text('Chỉnh sửa'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'preview',
+                        child: Row(
+                          children: [
+                            Icon(Icons.picture_as_pdf_outlined, size: 20),
+                            SizedBox(width: 10),
+                            Text('Xem trước PDF'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'rename',
+                        child: Row(
+                          children: [
+                            Icon(Icons.drive_file_rename_outline_rounded,
+                                size: 20),
+                            SizedBox(width: 10),
+                            Text('Đổi tên'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'duplicate',
+                        child: Row(
+                          children: [
+                            Icon(Icons.copy_rounded, size: 20),
+                            SizedBox(width: 10),
+                            Text('Nhân bản'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.delete_outline_rounded,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Xoá hồ sơ',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      cv.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: cv.isSynced
+                          ? Colors.green.shade50
+                          : Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: cv.isSynced
+                            ? Colors.green.shade200
+                            : Colors.amber.shade300,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Cập nhật: ${_formatDate(cv.updatedAt)}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          cv.isSynced
+                              ? Icons.cloud_done_rounded
+                              : Icons.phone_android_rounded,
+                          size: 13,
+                          color: cv.isSynced
+                              ? Colors.green.shade700
+                              : Colors.amber.shade800,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          cv.isSynced ? 'Đã đồng bộ' : 'Lưu trên máy',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: cv.isSynced
+                              ? Colors.green.shade800
+                              : Colors.amber.shade900,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Cập nhật: ${_formatDate(cv.updatedAt)}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
               ),
-              IconButton(
-                tooltip: 'Xoá CV',
-                onPressed: () => _deleteCv(cv),
-                icon: Icon(
-                  Icons.delete_outline,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded),
             ],
           ),
         ),
@@ -496,32 +733,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildEmptyState() {
     return _messageCard(
-      icon: Icons.description_outlined,
-      title: 'Chưa có CV trên cloud',
+      icon: Icons.note_add_outlined,
+      title: 'Chưa có hồ sơ CV nào',
       message:
-          'Tạo CV đầu tiên. Khi bấm Lưu, dữ liệu sẽ được ghi vào Supabase.',
-      action: 'Tạo CV mới',
-      onPressed: () => _openEditor(),
+          'Bắt đầu tạo hồ sơ đầu tiên của bạn. '
+          'Hồ sơ sẽ được lưu an toàn trên máy và hỗ trợ xuất bản PDF chuẩn ATS.',
+      action: 'Tạo CV đầu tiên ngay',
+      onPressed: _showCreateCvDialog,
     );
   }
 
-  Widget _buildSignedOutState() {
+  Widget _buildErrorState(String message) {
     return _messageCard(
-      icon: Icons.cloud_off_outlined,
-      title: 'Bạn chưa đăng nhập',
-      message: 'Đăng nhập Supabase để tải và lưu CV của riêng bạn.',
-      action: 'Đăng nhập',
-      onPressed: () => context.go('/login'),
-    );
-  }
-
-  Widget _buildErrorState() {
-    return _messageCard(
-      icon: Icons.cloud_sync_outlined,
-      title: 'Không tải được dữ liệu',
-      message: _errorMessage!,
+      icon: Icons.error_outline_rounded,
+      title: 'Không thể tải danh sách hồ sơ',
+      message: message,
       action: 'Thử lại',
-      onPressed: _loadCvs,
+      onPressed: () => ref.invalidate(cvListStreamProvider),
     );
   }
 
@@ -533,19 +761,33 @@ class _HomeScreenState extends State<HomeScreen> {
     required VoidCallback onPressed,
   }) {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(28),
         child: Column(
           children: [
-            Icon(icon, size: 44, color: AppTheme.primarySlate),
+            Icon(icon, size: 52, color: AppTheme.accentTeal),
             const SizedBox(height: 12),
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
             const SizedBox(height: 8),
-            Text(message, textAlign: TextAlign.center),
-            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
+            const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: onPressed,
-              icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+              icon: const Icon(Icons.add_rounded, size: 18),
               label: Text(action),
             ),
           ],
@@ -555,9 +797,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _formatDate(DateTime? value) {
-    if (value == null) return 'chưa đồng bộ';
+    if (value == null) return 'chưa lưu';
     final local = value.toLocal();
     return '${local.day.toString().padLeft(2, '0')}/'
-        '${local.month.toString().padLeft(2, '0')}/${local.year}';
+        '${local.month.toString().padLeft(2, '0')}/${local.year} '
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 }

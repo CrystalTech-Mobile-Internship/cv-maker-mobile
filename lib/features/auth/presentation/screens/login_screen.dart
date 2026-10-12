@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/env_constants.dart';
-import '../../../../core/network/supabase_client.dart';
 import '../../../../app/theme.dart';
 import '../../data/auth_service.dart';
 
@@ -27,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _authSubscription = SupabaseService.client?.auth.onAuthStateChange.listen((
+    _authSubscription = _authService.onAuthStateChange?.listen((
       state,
     ) {
       if (!mounted ||
