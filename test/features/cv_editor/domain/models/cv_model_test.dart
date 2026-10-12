@@ -35,6 +35,7 @@ void main() {
 
       expect(decoded.id, cv.id);
       expect(decoded.userId, cv.userId);
+      expect(decoded.language, cv.language);
       expect(decoded.personalInfo.fullName, 'Nguyễn Văn Mẫu');
       expect(decoded.educations.single.institution, 'Đại học Mẫu');
       expect(decoded.experiences.single.bulletPoints, hasLength(2));
@@ -86,6 +87,7 @@ void main() {
       'assets/mock_cvs/student_cv.json',
       'assets/mock_cvs/fresher_cv.json',
       'assets/mock_cvs/experienced_cv.json',
+      'assets/mock_cvs/tuananh_fullstack_cv.json',
     ];
 
     for (final assetPath in assetPaths) {
