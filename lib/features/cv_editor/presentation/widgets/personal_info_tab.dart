@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
@@ -15,6 +17,10 @@ class PersonalInfoTab extends StatelessWidget {
     required this.summaryController,
     required this.onFieldChanged,
     required this.onAiOptimize,
+    required this.avatarPath,
+    required this.onPickAvatar,
+    required this.onRemoveAvatar,
+    required this.supportsProfilePhoto,
     this.language = 'vi',
   });
 
@@ -27,6 +33,10 @@ class PersonalInfoTab extends StatelessWidget {
   final TextEditingController summaryController;
   final ValueChanged<String>? onFieldChanged;
   final VoidCallback onAiOptimize;
+  final String? avatarPath;
+  final Future<void> Function() onPickAvatar;
+  final VoidCallback onRemoveAvatar;
+  final bool supportsProfilePhoto;
   final String language;
 
   bool get _isEn => language == 'en';
@@ -58,6 +68,14 @@ class PersonalInfoTab extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
+              ),
+              const SizedBox(height: 14),
+              _ProfilePhotoPicker(
+                language: language,
+                avatarPath: avatarPath,
+                supportsProfilePhoto: supportsProfilePhoto,
+                onPickAvatar: onPickAvatar,
+                onRemoveAvatar: onRemoveAvatar,
               ),
               const SizedBox(height: 14),
               TextField(
@@ -173,6 +191,105 @@ class PersonalInfoTab extends StatelessWidget {
               const SizedBox(height: 32),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+final class _ProfilePhotoPicker extends StatelessWidget {
+  const _ProfilePhotoPicker({
+    required this.language,
+    required this.avatarPath,
+    required this.supportsProfilePhoto,
+    required this.onPickAvatar,
+    required this.onRemoveAvatar,
+  });
+
+  final String language;
+  final String? avatarPath;
+  final bool supportsProfilePhoto;
+  final Future<void> Function() onPickAvatar;
+  final VoidCallback onRemoveAvatar;
+
+  @override
+  Widget build(BuildContext context) {
+    final isEn = language == 'en';
+    final file = avatarPath == null ? null : File(avatarPath!);
+    final hasImage = file?.existsSync() ?? false;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: supportsProfilePhoto
+            ? AppTheme.accentTeal.withValues(alpha: 0.06)
+            : Colors.grey.shade50,
+        border: Border.all(
+          color: supportsProfilePhoto
+              ? AppTheme.accentTeal.withValues(alpha: 0.35)
+              : Colors.grey.shade300,
+        ),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 36,
+              backgroundColor: Colors.grey.shade200,
+              foregroundImage: hasImage ? FileImage(file!) : null,
+              child: hasImage
+                  ? null
+                  : const Icon(Icons.person_rounded, size: 38),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isEn ? 'Profile photo (optional)' : 'Ảnh đại diện (tuỳ chọn)',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    supportsProfilePhoto
+                        ? (isEn
+                              ? 'Shown in Minimalist Clean and Creative Tech.'
+                              : 'Hiển thị trên Minimalist Clean và Creative Tech.')
+                        : (isEn
+                              ? 'Choose a photo template in Preview to display it.'
+                              : 'Chọn mẫu có ảnh ở màn hình Xem trước để hiển thị.'),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      FilledButton.tonalIcon(
+                        key: const Key('pick-profile-photo'),
+                        onPressed: onPickAvatar,
+                        icon: const Icon(Icons.add_photo_alternate_outlined),
+                        label: Text(
+                          hasImage
+                              ? (isEn ? 'Change photo' : 'Đổi ảnh')
+                              : (isEn ? 'Add photo' : 'Thêm ảnh'),
+                        ),
+                      ),
+                      if (hasImage)
+                        TextButton.icon(
+                          key: const Key('remove-profile-photo'),
+                          onPressed: onRemoveAvatar,
+                          icon: const Icon(Icons.delete_outline),
+                          label: Text(isEn ? 'Remove' : 'Xoá'),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

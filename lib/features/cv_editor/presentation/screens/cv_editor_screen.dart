@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../auth/data/auth_service.dart';
 import '../../data/repositories/cv_repository_provider.dart';
+import '../../data/services/profile_image_service_impl.dart';
 import '../../domain/models/models.dart';
 import '../widgets/education_tab.dart';
 import '../widgets/experience_tab.dart';
@@ -35,6 +37,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   final _phoneController = TextEditingController();
   final _locationController = TextEditingController();
   final _summaryController = TextEditingController();
+  String? _avatarPath;
 
   // Collections State
   List<EducationModel> _educations = [];
@@ -66,6 +69,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       _phoneController.text = cv.personalInfo.phone;
       _locationController.text = cv.personalInfo.address;
       _summaryController.text = cv.summary;
+      _avatarPath = cv.personalInfo.avatarPath;
       _educations = List.of(cv.educations);
       _experiences = List.of(cv.experiences);
       _skills = List.of(cv.skills);
@@ -263,6 +267,31 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     });
   }
 
+  Future<void> _pickProfilePhoto() async {
+    try {
+      final path = await ref.read(profileImageServiceProvider).pickAndStoreImage();
+      if (path == null || !mounted) return;
+      setState(() => _avatarPath = path);
+      _onFieldChanged();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isEn
+                ? 'Could not add this photo. Please choose another image.'
+                : 'Không thể thêm ảnh này. Vui lòng chọn ảnh khác.',
+          ),
+        ),
+      );
+    }
+  }
+
+  void _removeProfilePhoto() {
+    setState(() => _avatarPath = null);
+    _onFieldChanged();
+  }
+
   @override
   void dispose() {
     _debounceTimer?.cancel();
@@ -298,6 +327,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         email: _emailController.text.trim(),
         phone: _phoneController.text.trim(),
         address: _locationController.text.trim(),
+        avatarPath: _avatarPath,
       ),
       educations: _educations,
       experiences: _experiences,
@@ -895,6 +925,16 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   summaryController: _summaryController,
                   onFieldChanged: _onFieldChanged,
                   onAiOptimize: _handleAiOptimizeSummary,
+                  avatarPath: _avatarPath,
+                  onPickAvatar: _pickProfilePhoto,
+                  onRemoveAvatar: _removeProfilePhoto,
+                  supportsProfilePhoto: const {
+                    AppConstants.templateMinimalistClean,
+                    AppConstants.templateCreativeTech,
+                  }.contains(
+                    widget.initialCv?.templateId ??
+                        AppConstants.templateHarvardAts,
+                  ),
                 ),
 
                 // Tab 2: Education

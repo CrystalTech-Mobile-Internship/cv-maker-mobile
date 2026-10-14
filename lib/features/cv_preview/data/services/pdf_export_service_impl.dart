@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -11,6 +11,8 @@ import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../domain/services/pdf_export_service.dart';
 
 class PdfExportServiceImpl implements PdfExportService {
+  static Future<_PdfFontSet>? _fontSetFuture;
+
   @override
   Future<Uint8List> generateCvPdf({
     required CvModel cv,
@@ -19,6 +21,7 @@ class PdfExportServiceImpl implements PdfExportService {
   }) async {
     final isEn = language == 'en';
     final scale = (cv.fontSizeScale > 0) ? cv.fontSizeScale : 1.0;
+    final templateStyle = _TemplateStyle.fromId(templateId);
 
     final doc = pw.Document(
       title: cv.title.isNotEmpty ? cv.title : 'Curriculum Vitae',
@@ -27,26 +30,18 @@ class PdfExportServiceImpl implements PdfExportService {
           : 'CV Maker',
     );
 
-    // Load Unicode-compatible fonts to support Vietnamese diacritics
-    pw.Font fontRegular;
-    pw.Font fontBold;
-    pw.Font fontItalic;
-
-    try {
-      fontRegular = await PdfGoogleFonts.robotoRegular();
-      fontBold = await PdfGoogleFonts.robotoBold();
-      fontItalic = await PdfGoogleFonts.robotoItalic();
-    } catch (_) {
-      // Fallback for offline or test environments
-      fontRegular = pw.Font.helvetica();
-      fontBold = pw.Font.helveticaBold();
-      fontItalic = pw.Font.helveticaOblique();
-    }
+    // Bundled Unicode fonts keep Vietnamese rendering deterministic and fully
+    // offline. Falling back to Helvetica would silently drop diacritics.
+    final fonts = await _loadBundledFonts();
 
     final theme = pw.ThemeData.withFont(
-      base: fontRegular,
-      bold: fontBold,
-      italic: fontItalic,
+      base: fonts.regular,
+      bold: fonts.bold,
+      italic: fonts.regular,
+    );
+    final avatarImage = await _loadAvatarImage(
+      cv.personalInfo.avatarPath,
+      enabled: templateStyle.showPhoto,
     );
 
     // Personal Info Resolvers
@@ -73,57 +68,32 @@ class PdfExportServiceImpl implements PdfExportService {
     final summary = cv.summary.isNotEmpty
         ? cv.summary
         : (isEn
-            ? 'Results-driven Fullstack Software Engineer specializing in cross-platform mobile architectures with Flutter, Dart, Clean Architecture, and Riverpod. Proven track record in engineering offline-first SQLite databases, vector PDF document rendering engines, and scalable Supabase cloud integrations.'
-            : 'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, State Management (Riverpod) và tích hợp Backend-as-a-Service (Supabase). Đam mê tối ưu hóa trải nghiệm người dùng và xây dựng hệ thống bền vững.');
+              ? 'Results-driven Fullstack Software Engineer specializing in cross-platform mobile architectures with Flutter, Dart, Clean Architecture, and Riverpod. Proven track record in engineering offline-first SQLite databases, vector PDF document rendering engines, and scalable Supabase cloud integrations.'
+              : 'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, State Management (Riverpod) và tích hợp Backend-as-a-Service (Supabase). Đam mê tối ưu hóa trải nghiệm người dùng và xây dựng hệ thống bền vững.');
 
     doc.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 32),
+        margin: templateStyle.pageMargin,
         theme: theme,
         build: (pw.Context context) {
           return [
             // Header: Name, Target Role, Contact
-            pw.Center(
-              child: pw.Text(
-                fullName,
-                style: pw.TextStyle(
-                  fontSize: 18 * scale,
-                  fontWeight: pw.FontWeight.bold,
-                  letterSpacing: 1.1,
-                  color: PdfColors.black,
-                ),
-              ),
+            _buildPdfHeader(
+              fullName: fullName,
+              targetRole: targetRole,
+              contact: '$address • $phone • $email',
+              scale: scale,
+              style: templateStyle,
+              avatarImage: avatarImage,
             ),
-            pw.SizedBox(height: 3 * scale),
-            pw.Center(
-              child: pw.Text(
-                targetRole,
-                style: pw.TextStyle(
-                  fontSize: 11 * scale,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColor.fromHex('#475569'),
-                ),
-              ),
-            ),
-            pw.SizedBox(height: 5 * scale),
-            pw.Center(
-              child: pw.Text(
-                '$address • $phone • $email',
-                style: pw.TextStyle(
-                  fontSize: 9.5 * scale,
-                  color: PdfColor.fromHex('#64748B'),
-                ),
-              ),
-            ),
-            pw.SizedBox(height: 10 * scale),
-            pw.Divider(thickness: 1.2 * scale, color: PdfColors.black),
             pw.SizedBox(height: 8 * scale),
 
             // Section 1: Summary
             _buildPdfSectionHeader(
               isEn ? 'PROFESSIONAL SUMMARY' : 'TÓM TẮT MỤC TIÊU NGHỀ NGHIỆP',
               scale,
+              templateStyle,
             ),
             pw.SizedBox(height: 4 * scale),
             pw.Text(
@@ -137,7 +107,11 @@ class PdfExportServiceImpl implements PdfExportService {
             pw.SizedBox(height: 14 * scale),
 
             // Section 2: Education
-            _buildPdfSectionHeader(isEn ? 'EDUCATION' : 'HỌC VẤN', scale),
+            _buildPdfSectionHeader(
+              isEn ? 'EDUCATION' : 'HỌC VẤN',
+              scale,
+              templateStyle,
+            ),
             pw.SizedBox(height: 4 * scale),
             if (cv.educations.isNotEmpty) ...[
               ...cv.educations.map((edu) {
@@ -226,6 +200,7 @@ class PdfExportServiceImpl implements PdfExportService {
                   ? 'WORK EXPERIENCE & PROJECTS'
                   : 'KINH NGHIỆM LÀM VIỆC & DỰ ÁN',
               scale,
+              templateStyle,
             ),
             pw.SizedBox(height: 4 * scale),
             if (cv.experiences.isNotEmpty) ...[
@@ -235,8 +210,8 @@ class PdfExportServiceImpl implements PdfExportService {
                 final endStr = exp.isCurrent
                     ? (isEn ? 'Present' : 'Hiện tại')
                     : (exp.endDate != null
-                        ? '${exp.endDate!.month.toString().padLeft(2, '0')}/${exp.endDate!.year}'
-                        : '');
+                          ? '${exp.endDate!.month.toString().padLeft(2, '0')}/${exp.endDate!.year}'
+                          : '');
                 final period = '$startStr - $endStr';
 
                 return pw.Padding(
@@ -366,12 +341,13 @@ class PdfExportServiceImpl implements PdfExportService {
               _buildPdfSectionHeader(
                 isEn ? 'KEY PROJECTS' : 'DỰ ÁN NỔI BẬT',
                 scale,
+                templateStyle,
               ),
               pw.SizedBox(height: 4 * scale),
               ...cv.projects.map((proj) {
                 final dateStr = (proj.startDate != null)
                     ? '${proj.startDate!.month.toString().padLeft(2, '0')}/${proj.startDate!.year} - '
-                      '${proj.endDate != null ? "${proj.endDate!.month.toString().padLeft(2, '0')}/${proj.endDate!.year}" : (isEn ? "Present" : "Hiện tại")}'
+                          '${proj.endDate != null ? "${proj.endDate!.month.toString().padLeft(2, '0')}/${proj.endDate!.year}" : (isEn ? "Present" : "Hiện tại")}'
                     : '';
                 return pw.Padding(
                   padding: pw.EdgeInsets.only(bottom: 8 * scale),
@@ -443,6 +419,7 @@ class PdfExportServiceImpl implements PdfExportService {
             _buildPdfSectionHeader(
               isEn ? 'TECHNICAL & SOFT SKILLS' : 'KỸ NĂNG CHUYÊN MÔN & MỀM',
               scale,
+              templateStyle,
             ),
             pw.SizedBox(height: 4 * scale),
             if (cv.skills.isNotEmpty) ...[
@@ -451,11 +428,11 @@ class PdfExportServiceImpl implements PdfExportService {
               pw.Text(
                 isEn
                     ? '• Languages & Frameworks: Flutter, Dart, TypeScript, Kotlin, SQL\n'
-                        '• Backend & Cloud: Supabase, PostgreSQL, Row-Level Security, REST APIs\n'
-                        '• Architecture & Tools: Clean Architecture, Riverpod, Git Flow, CI/CD, Vector PDF Engine'
+                          '• Backend & Cloud: Supabase, PostgreSQL, Row-Level Security, REST APIs\n'
+                          '• Architecture & Tools: Clean Architecture, Riverpod, Git Flow, CI/CD, Vector PDF Engine'
                     : '• Ngôn ngữ & Framework: Flutter, Dart, TypeScript, Kotlin\n'
-                        '• Backend & Database: Supabase, PostgreSQL, Row-Level Security, REST API\n'
-                        '• Kiến trúc & Công cụ: Clean Architecture, Riverpod, Git Flow, Vector PDF Engine',
+                          '• Backend & Database: Supabase, PostgreSQL, Row-Level Security, REST API\n'
+                          '• Kiến trúc & Công cụ: Clean Architecture, Riverpod, Git Flow, Vector PDF Engine',
                 style: pw.TextStyle(
                   fontSize: 9.5 * scale,
                   lineSpacing: 2 * scale,
@@ -480,6 +457,7 @@ class PdfExportServiceImpl implements PdfExportService {
     final appDir = await getApplicationDocumentsDirectory();
     final primaryFile = File('${appDir.path}/$sanitizedName');
     await primaryFile.writeAsBytes(bytes, flush: true);
+    var savedPath = primaryFile.path;
 
     // Also attempt saving to external Download folder on Android if possible
     try {
@@ -488,13 +466,14 @@ class PdfExportServiceImpl implements PdfExportService {
         if (await downloadDir.exists()) {
           final dlFile = File('${downloadDir.path}/$sanitizedName');
           await dlFile.writeAsBytes(bytes, flush: true);
+          savedPath = dlFile.path;
         }
       }
     } catch (_) {
       // In case scoped storage restricts direct write, primaryFile is always safely stored
     }
 
-    return primaryFile.path;
+    return savedPath;
   }
 
   @override
@@ -503,13 +482,98 @@ class PdfExportServiceImpl implements PdfExportService {
     required String fileName,
   }) async {
     final sanitizedName = _sanitizeFileName(fileName);
-    await Printing.sharePdf(
-      bytes: bytes,
-      filename: sanitizedName,
+    await Printing.sharePdf(bytes: bytes, filename: sanitizedName);
+  }
+
+  static pw.Widget _buildPdfHeader({
+    required String fullName,
+    required String targetRole,
+    required String contact,
+    required double scale,
+    required _TemplateStyle style,
+    pw.MemoryImage? avatarImage,
+  }) {
+    final content = pw.Column(
+      crossAxisAlignment: style.centerHeader
+          ? pw.CrossAxisAlignment.center
+          : pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          fullName,
+          style: pw.TextStyle(
+            fontSize: style.nameSize * scale,
+            fontWeight: pw.FontWeight.bold,
+            letterSpacing: style.letterSpacing,
+            color: style.primary,
+          ),
+        ),
+        pw.SizedBox(height: 3 * scale),
+        pw.Text(
+          targetRole,
+          style: pw.TextStyle(
+            fontSize: 11 * scale,
+            fontWeight: pw.FontWeight.bold,
+            color: style.accent,
+          ),
+        ),
+        pw.SizedBox(height: 5 * scale),
+        pw.Text(
+          contact,
+          textAlign: style.centerHeader
+              ? pw.TextAlign.center
+              : pw.TextAlign.left,
+          style: pw.TextStyle(
+            fontSize: 9.5 * scale,
+            color: PdfColor.fromHex('#64748B'),
+          ),
+        ),
+      ],
+    );
+
+    final headerContent = avatarImage == null
+        ? content
+        : pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Expanded(child: content),
+              pw.SizedBox(width: 14 * scale),
+              pw.ClipOval(
+                child: pw.Container(
+                  width: 68 * scale,
+                  height: 68 * scale,
+                  child: pw.Image(avatarImage, fit: pw.BoxFit.cover),
+                ),
+              ),
+            ],
+          );
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+      children: [
+        if (style.headerFill != null)
+          pw.Container(
+            padding: pw.EdgeInsets.all(12 * scale),
+            decoration: pw.BoxDecoration(
+              color: style.headerFill,
+              borderRadius: pw.BorderRadius.circular(5),
+            ),
+            child: headerContent,
+          )
+        else if (style.centerHeader)
+          pw.Center(child: headerContent)
+        else
+          headerContent,
+        pw.SizedBox(height: 10 * scale),
+        pw.Container(height: 2 * scale, color: style.accent),
+      ],
     );
   }
 
-  static pw.Widget _buildPdfSectionHeader(String title, double scale) {
+  static pw.Widget _buildPdfSectionHeader(
+    String title,
+    double scale,
+    _TemplateStyle style,
+  ) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -519,10 +583,13 @@ class PdfExportServiceImpl implements PdfExportService {
             fontSize: 11 * scale,
             fontWeight: pw.FontWeight.bold,
             letterSpacing: 0.8,
-            color: PdfColors.black,
+            color: style.primary,
           ),
         ),
-        pw.Divider(color: PdfColors.black, thickness: 0.8 * scale),
+        pw.Divider(
+          color: style.accent,
+          thickness: style.dividerThickness * scale,
+        ),
       ],
     );
   }
@@ -610,4 +677,125 @@ class PdfExportServiceImpl implements PdfExportService {
     }
     return clean;
   }
+
+  static Future<_PdfFontSet> _loadBundledFonts() {
+    return _fontSetFuture ??= (() async {
+      final regularData = await rootBundle.load(
+        'assets/fonts/Roboto-Regular.ttf',
+      );
+      final boldData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
+
+      return _PdfFontSet(
+        regular: pw.Font.ttf(regularData),
+        bold: pw.Font.ttf(boldData),
+      );
+    })();
+  }
+
+  static Future<pw.MemoryImage?> _loadAvatarImage(
+    String? avatarPath, {
+    required bool enabled,
+  }) async {
+    if (!enabled || avatarPath == null || avatarPath.trim().isEmpty) {
+      return null;
+    }
+    try {
+      final file = File(avatarPath);
+      if (!await file.exists()) return null;
+      return pw.MemoryImage(await file.readAsBytes());
+    } catch (_) {
+      // A missing or damaged optional photo must never block PDF export.
+      return null;
+    }
+  }
+}
+
+final class _TemplateStyle {
+  const _TemplateStyle({
+    required this.primary,
+    required this.accent,
+    required this.pageMargin,
+    required this.centerHeader,
+    required this.nameSize,
+    required this.letterSpacing,
+    required this.dividerThickness,
+    required this.showPhoto,
+    this.headerFill,
+  });
+
+  final PdfColor primary;
+  final PdfColor accent;
+  final pw.EdgeInsets pageMargin;
+  final bool centerHeader;
+  final double nameSize;
+  final double letterSpacing;
+  final double dividerThickness;
+  final bool showPhoto;
+  final PdfColor? headerFill;
+
+  factory _TemplateStyle.fromId(String templateId) {
+    switch (templateId) {
+      case 'modern_minimalist':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#0F172A'),
+          accent: PdfColor.fromHex('#2563EB'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 38,
+            vertical: 34,
+          ),
+          centerHeader: false,
+          nameSize: 20,
+          letterSpacing: 0.4,
+          dividerThickness: 1.2,
+          showPhoto: false,
+        );
+      case 'minimalist_clean':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#134E4A'),
+          accent: PdfColor.fromHex('#0F766E'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 42,
+            vertical: 38,
+          ),
+          centerHeader: false,
+          nameSize: 19,
+          letterSpacing: 0.2,
+          dividerThickness: 0.55,
+          showPhoto: true,
+        );
+      case 'creative_tech':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#312E81'),
+          accent: PdfColor.fromHex('#7C3AED'),
+          headerFill: PdfColor.fromHex('#F5F3FF'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 32,
+            vertical: 30,
+          ),
+          centerHeader: false,
+          nameSize: 21,
+          letterSpacing: 0.3,
+          dividerThickness: 1.4,
+          showPhoto: true,
+        );
+      default:
+        return const _TemplateStyle(
+          primary: PdfColors.black,
+          accent: PdfColors.black,
+          pageMargin: pw.EdgeInsets.symmetric(horizontal: 36, vertical: 32),
+          centerHeader: true,
+          nameSize: 18,
+          letterSpacing: 1.1,
+          dividerThickness: 0.8,
+          showPhoto: false,
+        );
+    }
+  }
+}
+
+class _PdfFontSet {
+  const _PdfFontSet({required this.regular, required this.bold});
+
+  final pw.Font regular;
+  final pw.Font bold;
 }

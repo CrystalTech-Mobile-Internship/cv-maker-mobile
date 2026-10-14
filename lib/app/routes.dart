@@ -6,8 +6,8 @@ import '../features/cv_editor/domain/models/cv_model.dart';
 import '../features/cv_preview/presentation/screens/cv_preview_screen.dart';
 
 /// Application Declarative Routing Configuration
-final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+GoRouter createAppRouter({required bool startInGuestMode}) => GoRouter(
+  initialLocation: startInGuestMode ? '/home' : '/login',
   routes: [
     GoRoute(
       path: '/login',

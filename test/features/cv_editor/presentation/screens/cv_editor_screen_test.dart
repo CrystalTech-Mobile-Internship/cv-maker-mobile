@@ -6,6 +6,7 @@ import 'package:cv_maker_mobile/features/cv_preview/presentation/screens/cv_prev
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:printing/printing.dart';
 
 class MockCvRepo implements CvRepository {
   final List<CvModel> list = [];
@@ -20,8 +21,11 @@ class MockCvRepo implements CvRepository {
   }
 
   @override
-  Future<CvModel> duplicate(String sourceId,
-      {required String newId, DateTime? now}) async {
+  Future<CvModel> duplicate(
+    String sourceId, {
+    required String newId,
+    DateTime? now,
+  }) async {
     final cv = list.firstWhere((c) => c.id == sourceId);
     final dup = cv.copyWith(id: newId);
     list.add(dup);
@@ -36,7 +40,8 @@ class MockCvRepo implements CvRepository {
       list.where((c) => c.id == id).firstOrNull;
 
   @override
-  Future<List<CvDeletionRequest>> getPendingDeletions(String userId) async => [];
+  Future<List<CvDeletionRequest>> getPendingDeletions(String userId) async =>
+      [];
 
   @override
   Future<List<CvModel>> getPendingSync(String userId) async => [];
@@ -45,8 +50,11 @@ class MockCvRepo implements CvRepository {
   Future<bool> markSynced(String id) async => true;
 
   @override
-  Future<CvModel> save(CvModel cv,
-      {bool markAsLocalChange = true, DateTime? now}) async {
+  Future<CvModel> save(
+    CvModel cv, {
+    bool markAsLocalChange = true,
+    DateTime? now,
+  }) async {
     list.removeWhere((c) => c.id == cv.id);
     list.add(cv);
     return cv;
@@ -59,18 +67,15 @@ class MockCvRepo implements CvRepository {
 }
 
 void main() {
-  testWidgets('CvEditorScreen renders full-width tabs and toggles language',
-      (tester) async {
+  testWidgets('CvEditorScreen renders full-width tabs and toggles language', (
+    tester,
+  ) async {
     final repo = MockCvRepo();
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          cvRepositoryProvider.overrideWithValue(repo),
-        ],
-        child: const MaterialApp(
-          home: CvEditorScreen(),
-        ),
+        overrides: [cvRepositoryProvider.overrideWithValue(repo)],
+        child: const MaterialApp(home: CvEditorScreen()),
       ),
     );
 
@@ -94,13 +99,17 @@ void main() {
     expect(find.text('Experience'), findsOneWidget);
     expect(find.text('Skills'), findsOneWidget);
 
+    expect(find.byKey(const Key('pick-profile-photo')), findsOneWidget);
+
     // Verify English form fields
     expect(find.text('Full Name *'), findsOneWidget);
     expect(find.text('Target Role / Job Title *'), findsOneWidget);
   });
 
-  testWidgets('CvPreviewScreen renders dynamic CV Model values correctly',
-      (tester) async {
+  testWidgets('CvPreviewScreen renders the generated A4 PDF and controls', (
+    tester,
+  ) async {
+    final repo = MockCvRepo();
     final testCv = CvModel(
       id: 'preview-test-1',
       title: 'Senior Flutter Architect',
@@ -136,18 +145,22 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: CvPreviewScreen(cv: testCv),
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(repo)],
+        child: MaterialApp(home: CvPreviewScreen(cv: testCv)),
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    // Verify dynamic name and role are displayed
-    expect(find.text('TRẦN VĂN HOÀNG'), findsOneWidget);
-    expect(find.text('MOBILE TECH LEAD'), findsOneWidget);
-    expect(find.textContaining('hoang.tran@enterprise.com'), findsOneWidget);
-    expect(find.text('Kỹ sư kiến trúc hệ thống 5 năm kinh nghiệm.'), findsOneWidget);
-    expect(find.text('ĐẠI HỌC BÁCH KHOA ĐÀ NẴNG'), findsOneWidget);
+    // CV content is rasterized from the same PDF bytes used for export, so it
+    // is intentionally not duplicated as Flutter Text widgets anymore.
+    expect(find.byType(PdfPreview), findsOneWidget);
+    expect(find.text('Xem trước CV'), findsOneWidget);
+    expect(find.byKey(const Key('font-size-percentage-field')), findsOneWidget);
+    expect(find.byKey(const Key('decrease-font-size')), findsOneWidget);
+    expect(find.byKey(const Key('increase-font-size')), findsOneWidget);
+    expect(find.text('100'), findsOneWidget);
+    expect(find.text('Tải đúng bản A4 này'), findsOneWidget);
   });
 }

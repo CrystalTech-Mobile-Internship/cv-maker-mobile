@@ -10,6 +10,6 @@ class AppConstants {
   // Templates
   static const String templateHarvardAts = 'harvard_ats';
   static const String templateModernMinimalist = 'modern_minimalist';
-  static const String templateExecutiveClassic = 'executive_classic';
+  static const String templateMinimalistClean = 'minimalist_clean';
   static const String templateCreativeTech = 'creative_tech';
 }

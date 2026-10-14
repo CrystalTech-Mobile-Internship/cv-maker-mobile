@@ -6,7 +6,9 @@ void main() {
   testWidgets('App smoke test launches without crashing', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: CvMakerApp()));
+    await tester.pumpWidget(
+      ProviderScope(child: CvMakerApp(startInGuestMode: false)),
+    );
 
     // GoRouter requires pumpAndSettle to resolve initial route
     await tester.pumpAndSettle();
