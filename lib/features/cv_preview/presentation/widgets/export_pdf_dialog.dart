@@ -149,15 +149,15 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
             TextField(
               controller: _controller,
               autofocus: true,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               decoration: InputDecoration(
                 hintText: isEn ? 'e.g. My_Resume' : 'Ví dụ: CV_Nguyen_Tuan_Anh',
                 errorText: _errorText,
                 suffixIcon: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
                   margin: const EdgeInsets.only(right: 6),
                   alignment: Alignment.centerRight,
                   width: 52,
@@ -210,8 +210,8 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                   Expanded(
                     child: Text(
                       isEn
-                          ? 'The file will be saved directly into your device storage and opened in the system menu so you can save to Files, Google Drive, or share.'
-                          : 'Tệp sẽ được lưu trực tiếp vào bộ nhớ máy và mở bảng chọn để bạn lưu vào "Tệp của bạn" (My Files), Google Drive hoặc gửi qua Zalo/Email.',
+                          ? 'The CV and PDF are saved on this device first. Sharing to Drive, email, or messaging apps is optional and may require Internet.'
+                          : 'CV và PDF luôn được lưu trên thiết bị trước. Chia sẻ qua Drive, email hoặc ứng dụng nhắn tin là tùy chọn và có thể cần Internet.',
                       style: TextStyle(
                         fontSize: 11.5,
                         height: 1.4,
@@ -261,7 +261,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                     ),
                     icon: const Icon(Icons.download_rounded, size: 18),
                     label: Text(
-                      isEn ? 'Export File' : 'Xuất & Lưu',
+                      isEn ? 'Save Offline' : 'Lưu Offline',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
