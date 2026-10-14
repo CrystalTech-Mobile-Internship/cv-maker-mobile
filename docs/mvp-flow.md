@@ -29,7 +29,7 @@ MVP phải hoàn thành được hành trình cốt lõi sau:
 - Tự động lưu dữ liệu trên thiết bị.
 - Chỉnh sửa khi không có Internet.
 - Đồng bộ dữ liệu với Supabase sau khi đăng nhập.
-- Chọn giữa hai template Harvard ATS và Modern Minimalist, sau đó xem trước CV.
+- Chọn giữa bốn template Free trong catalog, sau đó xem trước CV.
 - Xuất PDF A4 và chia sẻ file bằng System Share Sheet.
 
 ### 1.2. Chức năng chưa bắt buộc trong MVP đầu tiên
@@ -400,6 +400,7 @@ Lỗi nhập liệu được hiển thị gần trường tương ứng và khô
 ### AC01 — Guest Mode
 
 Ứng dụng hoàn thành được luồng tạo, chỉnh sửa, đóng/mở lại, xem trước và xuất một CV khi thiết bị không có Internet.
+Sau khi người dùng chọn Guest Mode, ứng dụng ghi nhớ lựa chọn và mở thẳng Dashboard local ở lần khởi động tiếp theo.
 
 ### AC02 — Không mất dữ liệu
 
@@ -448,7 +449,7 @@ Nhóm đã chốt ngày 06/10/2026:
 
 1. **Tài khoản:** MVP có Guest Mode, đăng ký, đăng nhập và quên mật khẩu.
 2. **Dữ liệu Guest sau đăng nhập:** hỏi người dùng trước khi gắn và đồng bộ vào tài khoản.
-3. **Template MVP:** triển khai Harvard ATS và Modern Minimalist; không mở rộng thêm trước khi hai mẫu này ổn định.
+3. **Template MVP (cập nhật 13/10/2026):** cung cấp miễn phí Harvard ATS, Modern Minimalist, Minimalist Clean và Creative Tech; cả bốn dùng chung dữ liệu CV local và phải xuất được PDF thật.
 4. **PDF:** xuất A4 và chia sẻ bằng System Share Sheet là bắt buộc.
 5. **Đồng bộ:** hoàn thiện local trước, sau đó mới tích hợp Supabase.
 6. **AI:** Gemini được hoãn đến sau MVP cốt lõi.

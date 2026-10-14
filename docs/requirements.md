@@ -25,7 +25,7 @@
 ### 1.1. Phạm vi MVP đã được nhóm xác nhận ngày 06/10/2026
 
 - Ứng dụng hỗ trợ cả Guest Mode, đăng ký, đăng nhập và quên mật khẩu.
-- MVP có đúng hai template: Harvard ATS và Modern Minimalist.
+- MVP có bốn template Free: Harvard ATS, Modern Minimalist, Minimalist Clean và Creative Tech.
 - Xuất PDF A4 và chia sẻ bằng System Share Sheet là chức năng bắt buộc.
 - Dữ liệu được lưu local bằng Drift + SQLite trước; đồng bộ Supabase triển khai sau khi luồng local ổn định.
 - Gemini AI được hoãn đến sau khi các chức năng cốt lõi đạt tiêu chí nghiệm thu.
@@ -62,7 +62,7 @@ Nhập liệu Form động (Offline) ➔ Tự động gắn vào Template chuẩ
 * **UG-01:** Tôi muốn tạo mới và quản lý nhiều bản CV khác nhau trực tiếp trên điện thoại.
 * **UG-02:** Tôi muốn ứng dụng tự động lưu dữ liệu ngay cả khi mất mạng hoặc lỡ tay tắt app.
 * **UG-03 (sau MVP):** Tôi muốn được AI gợi ý cách diễn đạt kinh nghiệm làm việc chuyên nghiệp (Action Verbs + Metrics + Impact).
-* **UG-04:** Tôi muốn chuyển đổi giữa hai mẫu Harvard ATS và Modern Minimalist mà không bị mất dữ liệu đã nhập.
+* **UG-04:** Tôi muốn chuyển đổi giữa các mẫu Free mà không bị mất dữ liệu đã nhập.
 * **UG-05:** Tôi muốn xem trước tài liệu như bản in thật trên khổ A4 trước khi quyết định xuất file.
 * **UG-06:** Tôi muốn xuất file PDF vector sắc nét không lỗi font tiếng Việt và chia sẻ trực tiếp qua Zalo/Email.
 
@@ -85,8 +85,8 @@ Nhập liệu Form động (Offline) ➔ Tự động gắn vào Template chuẩ
 * **F10 - Thuật toán Ngắt trang thông minh (Smart Pagination):** Tự động tính toán chiều cao khối nội dung để phân tách nhiều trang A4, chống cắt đôi dòng chữ hoặc để tiêu đề lẻ loi cuối trang.
 * **F11 - Mẫu Template 01 (Harvard Academic):** Bố cục 1 cột truyền thống, tối ưu máy quét ATS, đường kẻ phân cách sắc sảo.
 * **F12 - Mẫu Template 02 (Modern Minimalist):** Bố cục 2 cột bất đối xứng (Sidebar thông tin/kỹ năng + Nội dung kinh nghiệm).
-* **F13 - Mẫu Template 03 (Minimalist Clean — sau MVP):** Phong cách Châu Âu thanh lịch, thoáng đãng, nhấn mạnh kiểu chữ.
-* **F14 - Mẫu Template 04 (Creative Tech Lead — sau MVP):** Thiết kế cho ngành Công nghệ/Sáng tạo có thanh Timeline quá trình công tác.
+* **F13 - Mẫu Template 03 (Minimalist Clean — Free):** Phong cách Châu Âu thanh lịch, thoáng đãng, phù hợp giáo dục, y tế và hỗ trợ ảnh đại diện tuỳ chọn.
+* **F14 - Mẫu Template 04 (Creative Tech — Free):** Thiết kế có màu nhấn dành cho ngành Công nghệ/Sáng tạo và hỗ trợ ảnh đại diện tuỳ chọn.
 * **F15 - Live Preview tương tác:** Trình xem trước PDF tương tác thời gian thực (phóng to, thu nhỏ, xoay trang).
 * **F16 - Bộ điều khiển giao diện (Styling Controls):** Đổi màu chủ đạo (Color Palette), tùy biến kích cỡ chữ (Font size) và khoảng cách dòng.
 
@@ -200,7 +200,7 @@ Nhằm chứng minh tính khả thi thương mại và bài toán sản phẩm t
 | :--- | :--- | :--- |
 | **Giá thành** | **0 VNĐ** | **49.000 VNĐ / tháng** hoặc **99.000 VNĐ vĩnh viễn** |
 | **Số lượng bản CV** | Tối đa 2 bản CV | **Không giới hạn** |
-| **Kho mẫu Template** | 2 mẫu tiêu chuẩn (Harvard ATS & Modern Minimalist) | **Toàn bộ 4+ mẫu** (bao gồm Minimalist Clean, Creative Tech Lead) |
+| **Kho mẫu Template** | 4 mẫu Free trong MVP | Các mẫu Premium bổ sung trong giai đoạn sau |
 | **Độ nét PDF** | Xuất PDF tiêu chuẩn | **Xuất PDF Vector A4 sắc nét tối đa** |
 | **Watermark** | Có dòng watermark nhỏ: *"Tạo bởi Smart CV Maker"* | **Không có Watermark (Bản in sạch 100%)** |
 | **Trợ lý AI** | 3 lượt dùng thử AI gợi ý cơ bản | **Không giới hạn lượt dùng AI** |
