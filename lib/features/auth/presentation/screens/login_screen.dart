@@ -7,6 +7,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/env_constants.dart';
 import '../../../../app/theme.dart';
 import '../../data/auth_service.dart';
+import '../../data/guest_session_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
+  final _guestSessionService = const GuestSessionService();
   StreamSubscription<AuthState>? _authSubscription;
   bool _isLoading = false;
   bool _isRegisterMode = false;
@@ -34,11 +36,11 @@ class _LoginScreenState extends State<LoginScreen> {
           state.session == null) {
         return;
       }
-      context.go('/home');
+      _finishSignedIn();
     });
     if (_authService.currentSession != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.go('/home');
+        if (mounted) _finishSignedIn();
       });
     }
   }
@@ -78,8 +80,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleGuestLogin() {
-    // Navigate straight to dashboard in guest / offline mode
+  Future<void> _finishSignedIn() async {
+    await _guestSessionService.setGuestMode(false);
+    if (mounted) context.go('/home');
+  }
+
+  Future<void> _handleGuestLogin() async {
+    await _guestSessionService.setGuestMode(true);
+    if (!mounted) return;
     context.go('/home');
   }
 
@@ -122,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       setState(() => _isLoading = false);
-      context.go('/home');
+      await _finishSignedIn();
     } on AuthException catch (error) {
       if (!mounted) return;
       setState(() => _isLoading = false);

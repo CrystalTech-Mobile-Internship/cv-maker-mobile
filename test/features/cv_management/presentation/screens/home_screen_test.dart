@@ -26,17 +26,26 @@ class FakeCvRepository implements CvRepository {
   Future<List<CvModel>> getPendingSync(String userId) async => [];
 
   @override
-  Future<List<CvDeletionRequest>> getPendingDeletions(String userId) async => [];
+  Future<List<CvDeletionRequest>> getPendingDeletions(String userId) async =>
+      [];
 
   @override
-  Future<CvModel> save(CvModel cv, {bool markAsLocalChange = true, DateTime? now}) async {
+  Future<CvModel> save(
+    CvModel cv, {
+    bool markAsLocalChange = true,
+    DateTime? now,
+  }) async {
     _cvs.removeWhere((item) => item.id == cv.id);
     _cvs.insert(0, cv);
     return cv;
   }
 
   @override
-  Future<CvModel> duplicate(String sourceId, {required String newId, DateTime? now}) async {
+  Future<CvModel> duplicate(
+    String sourceId, {
+    required String newId,
+    DateTime? now,
+  }) async {
     final source = await getById(sourceId);
     if (source == null) throw CvNotFoundException(sourceId);
     final dup = source.copyWith(id: newId, title: '${source.title} (Bản sao)');
@@ -58,17 +67,15 @@ class FakeCvRepository implements CvRepository {
 }
 
 void main() {
-  testWidgets('HomeScreen renders empty state and open create dialog', (tester) async {
+  testWidgets('HomeScreen renders empty state and open create dialog', (
+    tester,
+  ) async {
     final fakeRepo = FakeCvRepository();
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          cvRepositoryProvider.overrideWithValue(fakeRepo),
-        ],
-        child: const MaterialApp(
-          home: HomeScreen(),
-        ),
+        overrides: [cvRepositoryProvider.overrideWithValue(fakeRepo)],
+        child: const MaterialApp(home: HomeScreen()),
       ),
     );
 
@@ -87,10 +94,14 @@ void main() {
     // Verify create dialog appears
     expect(find.text('Tạo hồ sơ CV mới'), findsOneWidget);
     expect(find.text('Harvard ATS'), findsOneWidget);
+    expect(find.text('Minimalist Clean'), findsOneWidget);
+    expect(find.text('Creative Tech'), findsOneWidget);
     expect(find.text('🇻🇳 Tiếng Việt'), findsOneWidget);
   });
 
-  testWidgets('HomeScreen displays CV cards when repository has data', (tester) async {
+  testWidgets('HomeScreen displays CV cards when repository has data', (
+    tester,
+  ) async {
     final fakeRepo = FakeCvRepository();
     final now = DateTime.now().toUtc();
     await fakeRepo.save(
@@ -120,12 +131,8 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          cvRepositoryProvider.overrideWithValue(fakeRepo),
-        ],
-        child: const MaterialApp(
-          home: HomeScreen(),
-        ),
+        overrides: [cvRepositoryProvider.overrideWithValue(fakeRepo)],
+        child: const MaterialApp(home: HomeScreen()),
       ),
     );
 
@@ -135,5 +142,9 @@ void main() {
     expect(find.text('CV Kỹ sư Phần mềm'), findsOneWidget);
     expect(find.text('Senior Flutter Developer'), findsOneWidget);
     expect(find.text('Lưu trên máy'), findsOneWidget);
+    expect(
+      find.textContaining('1 hồ sơ dùng được khi offline'),
+      findsOneWidget,
+    );
   });
 }

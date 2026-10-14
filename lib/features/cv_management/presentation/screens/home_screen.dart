@@ -6,8 +6,11 @@ import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
 import '../../../auth/data/auth_service.dart';
+import '../../../auth/data/guest_session_service.dart';
 import '../../../cv_editor/data/repositories/cv_repository_provider.dart';
 import '../../../cv_editor/domain/models/models.dart';
+import '../widgets/cv_template_picker.dart';
+import '../widgets/offline_storage_summary.dart';
 
 /// Reactive provider that streams all locally stored CVs from Drift SQLite.
 final cvListStreamProvider = StreamProvider.autoDispose<List<CvModel>>((ref) {
@@ -74,22 +77,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
-                    SegmentedButton<String>(
-                      segments: const [
-                        ButtonSegment(
-                          value: 'harvard_ats',
-                          label: Text('Harvard ATS'),
-                          icon: Icon(Icons.description_outlined),
-                        ),
-                        ButtonSegment(
-                          value: 'modern_minimalist',
-                          label: Text('Minimalist'),
-                          icon: Icon(Icons.view_quilt_outlined),
-                        ),
-                      ],
-                      selected: {selectedTemplate},
-                      onSelectionChanged: (set) {
-                        setDialogState(() => selectedTemplate = set.first);
+                    CvTemplatePicker(
+                      selectedId: selectedTemplate,
+                      onChanged: (value) {
+                        setDialogState(() => selectedTemplate = value);
                       },
                     ),
                     const SizedBox(height: 16),
@@ -104,10 +95,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           value: 'vi',
                           label: Text('🇻🇳 Tiếng Việt'),
                         ),
-                        ButtonSegment(
-                          value: 'en',
-                          label: Text('🇬🇧 English'),
-                        ),
+                        ButtonSegment(value: 'en', label: Text('🇬🇧 English')),
                       ],
                       selected: {selectedLanguage},
                       onSelectionChanged: (set) {
@@ -165,9 +153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ? 'Hanoi University of Science and Technology'
               : 'Đại học Bách Khoa Hà Nội',
           degree: isEn ? 'Bachelor of Engineering' : 'Kỹ sư',
-          fieldOfStudy: isEn
-              ? 'Computer Science'
-              : 'Công nghệ Thông tin',
+          fieldOfStudy: isEn ? 'Computer Science' : 'Công nghệ Thông tin',
           startDate: DateTime(2020, 9, 1).toUtc(),
           endDate: DateTime(2024, 6, 30).toUtc(),
           gpa: '3.6 / 4.0',
@@ -286,6 +272,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  Future<void> _createOfflineBackup(CvModel cv) async {
+    try {
+      final now = DateTime.now();
+      final newId = 'backup-${now.microsecondsSinceEpoch}';
+      final duplicate = await ref
+          .read(cvRepositoryProvider)
+          .duplicate(cv.id, newId: newId, now: now.toUtc());
+      final backupTitle =
+          '${cv.title} — Sao lưu '
+          '${now.day.toString().padLeft(2, '0')}/'
+          '${now.month.toString().padLeft(2, '0')} '
+          '${now.hour.toString().padLeft(2, '0')}:'
+          '${now.minute.toString().padLeft(2, '0')}';
+      await ref
+          .read(cvRepositoryProvider)
+          .save(duplicate.copyWith(title: backupTitle));
+      if (mounted) {
+        _showMessage('Đã tạo bản sao dự phòng trên thiết bị.');
+      }
+    } catch (_) {
+      if (mounted) _showMessage('Không thể tạo bản sao dự phòng.');
+    }
+  }
+
   Future<void> _deleteCv(CvModel cv) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -330,8 +340,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       await ref.read(authServiceProvider).signOut();
     } finally {
+      await ref.read(guestSessionServiceProvider).setGuestMode(false);
       if (mounted) context.go('/login');
     }
+  }
+
+  Future<void> _openLogin() async {
+    await ref.read(guestSessionServiceProvider).setGuestMode(false);
+    if (mounted) context.go('/login');
   }
 
   void _showMessage(String message) {
@@ -353,7 +369,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icon(
               _isSignedIn ? Icons.logout_rounded : Icons.login_rounded,
             ),
-            onPressed: _isSignedIn ? _signOut : () => context.go('/login'),
+            onPressed: _isSignedIn ? _signOut : _openLogin,
           ),
         ],
       ),
@@ -467,6 +483,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            OfflineStorageSummary(
+              localCount: cvs.length,
+              pendingSyncCount: cvs.where((cv) => !cv.isSynced).length,
+            ),
+            const SizedBox(height: 14),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -474,14 +495,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Text(
                     'Danh sách hồ sơ của bạn',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primarySlate.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
@@ -598,6 +621,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         case 'duplicate':
                           _duplicateCv(cv);
                           break;
+                        case 'offline_backup':
+                          _createOfflineBackup(cv);
+                          break;
                         case 'delete':
                           _deleteCv(cv);
                           break;
@@ -628,8 +654,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         value: 'rename',
                         child: Row(
                           children: [
-                            Icon(Icons.drive_file_rename_outline_rounded,
-                                size: 20),
+                            Icon(
+                              Icons.drive_file_rename_outline_rounded,
+                              size: 20,
+                            ),
                             SizedBox(width: 10),
                             Text('Đổi tên'),
                           ],
@@ -642,6 +670,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Icon(Icons.copy_rounded, size: 20),
                             SizedBox(width: 10),
                             Text('Nhân bản'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'offline_backup',
+                        child: Row(
+                          children: [
+                            Icon(Icons.offline_bolt_outlined, size: 20),
+                            SizedBox(width: 10),
+                            Text('Tạo bản sao dự phòng'),
                           ],
                         ),
                       ),
@@ -707,8 +745,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: cv.isSynced
-                              ? Colors.green.shade800
-                              : Colors.amber.shade900,
+                                ? Colors.green.shade800
+                                : Colors.amber.shade900,
                           ),
                         ),
                       ],
@@ -717,10 +755,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   const Spacer(),
                   Text(
                     'Cập nhật: ${_formatDate(cv.updatedAt)}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade500,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                   ),
                 ],
               ),
@@ -774,9 +809,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: 12),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
