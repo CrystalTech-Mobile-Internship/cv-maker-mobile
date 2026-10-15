@@ -12,7 +12,7 @@ final profileImageServiceProvider = Provider<ProfileImageService>(
 
 final class ProfileImageServiceImpl implements ProfileImageService {
   ProfileImageServiceImpl({ImagePicker? picker})
-      : _picker = picker ?? ImagePicker();
+    : _picker = picker ?? ImagePicker();
 
   final ImagePicker _picker;
 

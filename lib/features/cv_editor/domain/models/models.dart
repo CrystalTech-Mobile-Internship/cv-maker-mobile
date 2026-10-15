@@ -1,3 +1,4 @@
+export 'certification_model.dart';
 export 'cv_model.dart';
 export 'cv_template.dart';
 export 'education_model.dart';

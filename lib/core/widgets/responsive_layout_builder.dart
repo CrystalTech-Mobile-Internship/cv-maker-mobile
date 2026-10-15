@@ -25,13 +25,16 @@ class ResponsiveLayoutBuilder extends StatelessWidget {
   });
 
   /// Widget displayed on mobile screens (< 600dp or < 900dp if tablet/desktop not provided).
-  final Widget Function(BuildContext context, BoxConstraints constraints) mobile;
+  final Widget Function(BuildContext context, BoxConstraints constraints)
+  mobile;
 
   /// Optional widget displayed on tablet screens (600dp <= width < 900dp).
-  final Widget Function(BuildContext context, BoxConstraints constraints)? tablet;
+  final Widget Function(BuildContext context, BoxConstraints constraints)?
+  tablet;
 
   /// Widget displayed on desktop / wide web browsers (width >= 900dp).
-  final Widget Function(BuildContext context, BoxConstraints constraints)? desktop;
+  final Widget Function(BuildContext context, BoxConstraints constraints)?
+  desktop;
 
   /// Check whether the current screen context is Desktop/Web wide layout.
   static bool isDesktop(BuildContext context) {

@@ -1,0 +1,120 @@
+{
+  "id": "50000000-0000-4000-8000-000000000001",
+  "userId": null,
+  "title": "CV Trần Văn Hòa - Thực tập sinh Phát triển phần mềm",
+  "templateId": "professional_sidebar",
+  "language": "vi",
+  "primaryColor": "#16324F",
+  "fontSizeScale": 1.0,
+  "personalInfo": {
+    "fullName": "Trần Văn Hòa",
+    "targetRole": "Thực tập sinh Phát triển phần mềm",
+    "email": "tranvanhoa.it@example.com",
+    "phone": "0909 123 456",
+    "address": "TP. Hồ Chí Minh",
+    "linkedInUrl": "https://linkedin.com/in/tranvanhoa-it",
+    "githubUrl": "https://github.com/tranvanhoa-it",
+    "avatarPath": null,
+    "avatarPosition": "left"
+  },
+  "summary": "Sinh viên ngành Công nghệ thông tin tại Đại học Công nghiệp TP.HCM, dự kiến tốt nghiệp năm 2027. Có nền tảng Flutter, Dart, REST API và cơ sở dữ liệu; mong muốn phát triển theo hướng lập trình mobile full-stack và tạo ra sản phẩm ổn định, dễ sử dụng.",
+  "educations": [
+    {
+      "id": "51000000-0000-4000-8000-000000000001",
+      "institution": "Đại học Công nghiệp TP. Hồ Chí Minh (IUH)",
+      "degree": "Kỹ sư",
+      "fieldOfStudy": "Công nghệ thông tin",
+      "startDate": "2023-09-01T00:00:00.000Z",
+      "endDate": "2027-06-30T00:00:00.000Z",
+      "isCurrent": true,
+      "gpa": "2.9 / 4.0",
+      "achievements": []
+    }
+  ],
+  "certifications": [
+    {
+      "id": "52000000-0000-4000-8000-000000000001",
+      "name": "TOEIC",
+      "issuer": "IIG Việt Nam",
+      "score": "700 / 990",
+      "issueDate": "2026-05-01T00:00:00.000Z",
+      "credentialUrl": null
+    }
+  ],
+  "experiences": [
+    {
+      "id": "53000000-0000-4000-8000-000000000001",
+      "jobTitle": "Thực tập sinh Flutter Full-stack",
+      "company": "Công ty XYZ",
+      "location": "TP. Hồ Chí Minh",
+      "startDate": "2026-06-01T00:00:00.000Z",
+      "endDate": "2026-08-31T00:00:00.000Z",
+      "isCurrent": false,
+      "bulletPoints": [
+        "Phát triển và hoàn thiện các màn hình Flutter theo thiết kế, bảo đảm hiển thị tốt trên nhiều kích thước Android.",
+        "Tích hợp REST API, xử lý trạng thái tải/lỗi và lưu dữ liệu cục bộ để ứng dụng vẫn hoạt động khi mất mạng.",
+        "Tham gia Git Flow, review code và kiểm thử chức năng cùng nhóm phát triển."
+      ]
+    }
+  ],
+  "skills": [
+    {"id": "54000000-0000-4000-8000-000000000001", "name": "Flutter, Dart, Material Design", "category": "hard", "proficiency": 75},
+    {"id": "54000000-0000-4000-8000-000000000002", "name": "Supabase, Firebase, REST API", "category": "hard", "proficiency": 65},
+    {"id": "54000000-0000-4000-8000-000000000003", "name": "SQLite, Drift, PostgreSQL", "category": "hard", "proficiency": 65},
+    {"id": "54000000-0000-4000-8000-000000000004", "name": "Git, GitHub, Postman, Figma", "category": "hard", "proficiency": 70},
+    {"id": "54000000-0000-4000-8000-000000000005", "name": "Làm việc nhóm, giao tiếp, tự học", "category": "soft", "proficiency": 75}
+  ],
+  "projects": [
+    {
+      "id": "55000000-0000-4000-8000-000000000001",
+      "name": "Smart CV Maker",
+      "role": "Mobile Full-stack Developer",
+      "description": "Xây dựng trình soạn CV offline-first, xem trước đúng khổ A4 và xuất PDF trên Android.\nThiết kế Clean Architecture, lưu cục bộ bằng Drift và chuẩn bị đồng bộ Supabase.\nTối ưu biểu mẫu động, template và trải nghiệm khách vãng lai.",
+      "technologies": ["Flutter", "Riverpod", "Drift", "Supabase"],
+      "sourceUrl": "https://github.com/tranvanhoa-it/smart-cv-maker",
+      "demoUrl": null,
+      "teamSize": 1,
+      "startDate": "2026-09-01T00:00:00.000Z",
+      "endDate": "2026-11-30T00:00:00.000Z"
+    },
+    {
+      "id": "55000000-0000-4000-8000-000000000002",
+      "name": "Ứng dụng Quản lý Chi tiêu",
+      "role": "Flutter Developer",
+      "description": "Phân loại giao dịch, thống kê theo tháng và cảnh báo vượt ngân sách.\nCài đặt đăng nhập, sao lưu dữ liệu và biểu đồ trực quan.\nViết kiểm thử cho nghiệp vụ tính tổng và bộ lọc giao dịch.",
+      "technologies": ["Flutter", "Firebase", "SQLite"],
+      "sourceUrl": "https://github.com/tranvanhoa-it/expense-tracker",
+      "demoUrl": null,
+      "teamSize": 1,
+      "startDate": "2026-02-01T00:00:00.000Z",
+      "endDate": "2026-04-30T00:00:00.000Z"
+    },
+    {
+      "id": "55000000-0000-4000-8000-000000000003",
+      "name": "Hệ thống Đặt lịch Khám bệnh",
+      "role": "Mobile Developer",
+      "description": "Phụ trách luồng tìm bác sĩ, đặt lịch và quản lý lịch hẹn trên ứng dụng mobile.\nTích hợp API, xác thực người dùng và thông báo trạng thái lịch hẹn.\nPhối hợp nhóm theo Scrum, quản lý source code bằng GitHub.",
+      "technologies": ["Flutter", "Spring Boot", "MySQL"],
+      "sourceUrl": "https://github.com/tranvanhoa-it/clinic-booking",
+      "demoUrl": null,
+      "teamSize": 4,
+      "startDate": "2025-09-01T00:00:00.000Z",
+      "endDate": "2025-12-15T00:00:00.000Z"
+    },
+    {
+      "id": "55000000-0000-4000-8000-000000000004",
+      "name": "Ứng dụng Bán hàng Mini Shop",
+      "role": "Full-stack Developer",
+      "description": "Xây dựng giỏ hàng, đặt hàng, lịch sử mua và quản lý sản phẩm.\nThiết kế bảng dữ liệu, chính sách truy cập và truy vấn Supabase.\nThực hiện kiểm thử luồng mua hàng và sửa lỗi hiển thị trên thiết bị thật.",
+      "technologies": ["Flutter", "Supabase", "PostgreSQL"],
+      "sourceUrl": "https://github.com/tranvanhoa-it/mini-shop",
+      "demoUrl": "https://mini-shop.example.com",
+      "teamSize": 3,
+      "startDate": "2025-03-01T00:00:00.000Z",
+      "endDate": "2025-06-30T00:00:00.000Z"
+    }
+  ],
+  "isSynced": false,
+  "createdAt": "2026-10-15T00:00:00.000Z",
+  "updatedAt": "2026-10-15T00:00:00.000Z"
+}

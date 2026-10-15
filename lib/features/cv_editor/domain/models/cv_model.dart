@@ -1,3 +1,4 @@
+import 'certification_model.dart';
 import 'education_model.dart';
 import 'experience_model.dart';
 import 'personal_info_model.dart';
@@ -25,10 +26,12 @@ class CvModel {
     List<ExperienceModel> experiences = const [],
     List<SkillModel> skills = const [],
     List<ProjectModel> projects = const [],
+    List<CertificationModel> certifications = const [],
   }) : educations = List.unmodifiable(educations),
        experiences = List.unmodifiable(experiences),
        skills = List.unmodifiable(skills),
-       projects = List.unmodifiable(projects);
+       projects = List.unmodifiable(projects),
+       certifications = List.unmodifiable(certifications);
 
   final String id;
   final String? userId;
@@ -43,6 +46,7 @@ class CvModel {
   final List<ExperienceModel> experiences;
   final List<SkillModel> skills;
   final List<ProjectModel> projects;
+  final List<CertificationModel> certifications;
   final bool isSynced;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -95,6 +99,10 @@ class CvModel {
       ),
       skills: _readModelList(json['skills'], SkillModel.fromJson),
       projects: _readModelList(json['projects'], ProjectModel.fromJson),
+      certifications: _readModelList(
+        json['certifications'],
+        CertificationModel.fromJson,
+      ),
       isSynced: json['isSynced'] as bool? ?? false,
       createdAt: json['createdAt'] == null
           ? updatedAt
@@ -118,6 +126,7 @@ class CvModel {
       'experiences': experiences.map((item) => item.toJson()).toList(),
       'skills': skills.map((item) => item.toJson()).toList(),
       'projects': projects.map((item) => item.toJson()).toList(),
+      'certifications': certifications.map((item) => item.toJson()).toList(),
       'isSynced': isSynced,
       'createdAt': createdAt.toUtc().toIso8601String(),
       'updatedAt': updatedAt.toUtc().toIso8601String(),
@@ -138,6 +147,7 @@ class CvModel {
     List<ExperienceModel>? experiences,
     List<SkillModel>? skills,
     List<ProjectModel>? projects,
+    List<CertificationModel>? certifications,
     bool? isSynced,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -158,6 +168,7 @@ class CvModel {
       experiences: experiences ?? this.experiences,
       skills: skills ?? this.skills,
       projects: projects ?? this.projects,
+      certifications: certifications ?? this.certifications,
       isSynced: isSynced ?? this.isSynced,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

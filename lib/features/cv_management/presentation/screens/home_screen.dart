@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -36,6 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final titleController = TextEditingController(text: 'CV của tôi');
     String selectedTemplate = 'harvard_ats';
     String selectedLanguage = 'vi'; // 'vi' or 'en'
+    bool useStudentSample = false;
 
     final created = await showDialog<bool>(
       context: context,
@@ -102,6 +106,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         setDialogState(() => selectedLanguage = set.first);
                       },
                     ),
+                    const SizedBox(height: 12),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      value: useStudentSample,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: const Text('Điền hồ sơ mẫu sinh viên CNTT'),
+                      subtitle: const Text(
+                        'Trần Văn Hòa • IUH • TOEIC 700 • 4 dự án',
+                      ),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          useStudentSample = value ?? false;
+                          if (useStudentSample) {
+                            titleController.text = 'CV Trần Văn Hòa';
+                            selectedTemplate =
+                                AppConstants.templateProfessionalSidebar;
+                            selectedLanguage = 'vi';
+                          }
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -126,6 +151,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final now = DateTime.now().toUtc();
     final isEn = selectedLanguage == 'en';
+    if (useStudentSample) {
+      try {
+        final source = await rootBundle.loadString(
+          'assets/mock_cvs/tran_van_hoa_cv.json',
+        );
+        final sample =
+            CvModel.fromJson(
+              jsonDecode(source) as Map<String, dynamic>,
+            ).copyWith(
+              id: 'local-${now.microsecondsSinceEpoch}',
+              userId: ref.read(authServiceProvider).currentUser?.id,
+              title: titleController.text.trim(),
+              templateId: selectedTemplate,
+              createdAt: now,
+              updatedAt: now,
+            );
+        await ref.read(cvRepositoryProvider).save(sample);
+        if (!mounted) return;
+        _showMessage('Đã tạo hồ sơ mẫu Trần Văn Hòa.');
+        await _openEditor(sample);
+      } catch (_) {
+        if (mounted) _showMessage('Không thể tải hồ sơ mẫu.');
+      }
+      return;
+    }
     final newCv = CvModel(
       id: 'local-${now.microsecondsSinceEpoch}',
       userId: ref.read(authServiceProvider).currentUser?.id,

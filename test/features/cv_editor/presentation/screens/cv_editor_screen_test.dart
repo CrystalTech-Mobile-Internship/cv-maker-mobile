@@ -81,11 +81,16 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Verify Vietnamese tabs are rendered by default
+    // The tab row uses the full width: selected tab shows text, inactive tabs
+    // show only their icons.
     expect(find.text('Cá nhân'), findsOneWidget);
+    expect(find.text('Học vấn'), findsNothing);
+    expect(find.byKey(const ValueKey('editor-tab-icon-1')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('editor-tab-icon-1')));
+    await tester.pumpAndSettle();
     expect(find.text('Học vấn'), findsOneWidget);
-    expect(find.text('Kinh nghiệm'), findsOneWidget);
-    expect(find.text('Kỹ năng'), findsOneWidget);
+    expect(find.text('Cá nhân'), findsNothing);
 
     // Switch to English via SegmentedButton '🇬🇧 EN'
     final enButton = find.text('🇬🇧 EN');
@@ -93,12 +98,14 @@ void main() {
     await tester.tap(enButton);
     await tester.pumpAndSettle();
 
-    // Verify English tabs are now rendered
-    expect(find.text('Personal'), findsOneWidget);
+    // The active Education tab changes language; inactive tabs remain icons.
+    expect(find.text('Personal'), findsNothing);
     expect(find.text('Education'), findsOneWidget);
-    expect(find.text('Experience'), findsOneWidget);
-    expect(find.text('Skills'), findsOneWidget);
+    expect(find.text('Experience'), findsNothing);
+    expect(find.byKey(const ValueKey('editor-tab-icon-2')), findsOneWidget);
 
+    await tester.tap(find.byKey(const ValueKey('editor-tab-icon-0')));
+    await tester.pumpAndSettle();
     expect(find.byKey(const Key('pick-profile-photo')), findsOneWidget);
 
     // Verify English form fields

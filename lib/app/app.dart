@@ -6,7 +6,7 @@ import 'theme.dart';
 /// Root application widget
 class CvMakerApp extends StatelessWidget {
   CvMakerApp({super.key, required bool startInGuestMode})
-      : _router = createAppRouter(startInGuestMode: startInGuestMode);
+    : _router = createAppRouter(startInGuestMode: startInGuestMode);
 
   final RouterConfig<Object> _router;
 

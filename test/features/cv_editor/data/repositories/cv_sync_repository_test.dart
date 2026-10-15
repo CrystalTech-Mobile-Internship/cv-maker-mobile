@@ -69,44 +69,50 @@ void main() {
     );
   }
 
-  test('saveAndSync persists locally and stays unsynced for guest mode (no userId)', () async {
-    final fakeRemote = FakeCvRemoteDataSource();
-    final syncRepo = CvSyncRepository(
-      localRepository: localRepository,
-      remoteDataSource: fakeRemote,
-    );
+  test(
+    'saveAndSync persists locally and stays unsynced for guest mode (no userId)',
+    () async {
+      final fakeRemote = FakeCvRemoteDataSource();
+      final syncRepo = CvSyncRepository(
+        localRepository: localRepository,
+        remoteDataSource: fakeRemote,
+      );
 
-    final cv = buildSampleCv(userId: null);
-    final result = await syncRepo.saveAndSync(cv, userId: null);
+      final cv = buildSampleCv(userId: null);
+      final result = await syncRepo.saveAndSync(cv, userId: null);
 
-    expect(result.hasError, isFalse);
-    expect(result.isSynced, isFalse);
-    expect(result.savedCv.title, cv.title);
-    expect(fakeRemote.lastUpserted, isNull);
+      expect(result.hasError, isFalse);
+      expect(result.isSynced, isFalse);
+      expect(result.savedCv.title, cv.title);
+      expect(fakeRemote.lastUpserted, isNull);
 
-    final inDb = await localRepository.getById(cv.id);
-    expect(inDb, isNotNull);
-    expect(inDb!.isSynced, isFalse);
-  });
+      final inDb = await localRepository.getById(cv.id);
+      expect(inDb, isNotNull);
+      expect(inDb!.isSynced, isFalse);
+    },
+  );
 
-  test('saveAndSync persists locally and syncs to cloud when userId is present', () async {
-    final fakeRemote = FakeCvRemoteDataSource();
-    final syncRepo = CvSyncRepository(
-      localRepository: localRepository,
-      remoteDataSource: fakeRemote,
-    );
+  test(
+    'saveAndSync persists locally and syncs to cloud when userId is present',
+    () async {
+      final fakeRemote = FakeCvRemoteDataSource();
+      final syncRepo = CvSyncRepository(
+        localRepository: localRepository,
+        remoteDataSource: fakeRemote,
+      );
 
-    final cv = buildSampleCv(userId: 'user-123');
-    final result = await syncRepo.saveAndSync(cv, userId: 'user-123');
+      final cv = buildSampleCv(userId: 'user-123');
+      final result = await syncRepo.saveAndSync(cv, userId: 'user-123');
 
-    expect(result.hasError, isFalse);
-    expect(result.isSynced, isTrue);
-    expect(fakeRemote.lastUpserted?.id, cv.id);
+      expect(result.hasError, isFalse);
+      expect(result.isSynced, isTrue);
+      expect(fakeRemote.lastUpserted?.id, cv.id);
 
-    final inDb = await localRepository.getById(cv.id);
-    expect(inDb, isNotNull);
-    expect(inDb!.isSynced, isTrue);
-  });
+      final inDb = await localRepository.getById(cv.id);
+      expect(inDb, isNotNull);
+      expect(inDb!.isSynced, isTrue);
+    },
+  );
 
   test('saveAndSync preserves local copy even if cloud sync fails', () async {
     final fakeRemote = FakeCvRemoteDataSource(

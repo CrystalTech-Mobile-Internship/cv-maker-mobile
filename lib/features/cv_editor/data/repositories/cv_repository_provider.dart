@@ -10,7 +10,5 @@ final cvRepositoryProvider = Provider<CvRepository>((ref) {
 });
 
 final cvSyncRepositoryProvider = Provider<CvSyncRepository>((ref) {
-  return CvSyncRepository(
-    localRepository: ref.watch(cvRepositoryProvider),
-  );
+  return CvSyncRepository(localRepository: ref.watch(cvRepositoryProvider));
 });

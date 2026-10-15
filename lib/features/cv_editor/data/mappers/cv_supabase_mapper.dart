@@ -49,6 +49,9 @@ final class CvSupabaseMapper {
       projects: (grouped['projects'] ?? const [])
           .map(_projectFromMap)
           .toList(growable: false),
+      certifications: (grouped['certifications'] ?? const [])
+          .map(_certificationFromMap)
+          .toList(growable: false),
       isSynced: true,
       createdAt: _date(row['created_at']) ?? updatedAt,
       updatedAt: updatedAt,
@@ -94,6 +97,13 @@ final class CvSupabaseMapper {
         title: 'Dự án',
         items: cv.projects.map(_projectToMap).toList(growable: false),
       ),
+      CvSectionPayload(
+        type: 'certifications',
+        title: 'Chứng chỉ',
+        items: cv.certifications
+            .map((item) => item.toJson())
+            .toList(growable: false),
+      ),
     ];
   }
 
@@ -109,6 +119,8 @@ final class CvSupabaseMapper {
       linkedInUrl: _firstString(data, ['linkedInUrl', 'linked_in_url']),
       githubUrl: _firstString(data, ['githubUrl', 'github_url']),
       avatarPath: _firstString(data, ['avatarPath', 'avatar_path']),
+      avatarPosition:
+          _firstString(data, ['avatarPosition', 'avatar_position']) ?? 'right',
     );
   }
 
@@ -121,6 +133,7 @@ final class CvSupabaseMapper {
     'linked_in_url': info.linkedInUrl,
     'github_url': info.githubUrl,
     'avatar_path': info.avatarPath,
+    'avatar_position': info.avatarPosition,
   };
 
   static EducationModel _educationFromMap(Map<String, dynamic> map) {
@@ -183,6 +196,7 @@ final class CvSupabaseMapper {
       technologies: _strings(map['technologies']),
       demoUrl: _firstString(map, ['demoUrl', 'demo_url']),
       sourceUrl: _firstString(map, ['sourceUrl', 'source_url']),
+      teamSize: _number(map['teamSize'] ?? map['team_size'])?.round(),
       startDate: _firstDate(map, ['startDate', 'start_date']),
       endDate: _firstDate(map, ['endDate', 'end_date']),
     );
@@ -191,6 +205,17 @@ final class CvSupabaseMapper {
   static Map<String, dynamic> _projectToMap(ProjectModel project) => {
     ...project.toJson(),
   };
+
+  static CertificationModel _certificationFromMap(Map<String, dynamic> map) {
+    return CertificationModel(
+      id: _requiredId(map),
+      name: _string(map['name']) ?? '',
+      issuer: _string(map['issuer']) ?? '',
+      score: _string(map['score']),
+      issueDate: _firstDate(map, ['issueDate', 'issue_date']),
+      credentialUrl: _firstString(map, ['credentialUrl', 'credential_url']),
+    );
+  }
 
   static List<Map<String, dynamic>> _maps(dynamic value) {
     if (value is! List) return const [];

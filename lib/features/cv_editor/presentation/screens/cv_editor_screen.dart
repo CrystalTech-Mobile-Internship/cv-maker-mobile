@@ -10,8 +10,11 @@ import '../../data/repositories/cv_repository_provider.dart';
 import '../../data/services/profile_image_service_impl.dart';
 import '../../domain/models/models.dart';
 import '../widgets/education_tab.dart';
+import '../widgets/certifications_tab.dart';
+import '../widgets/adaptive_editor_tab.dart';
 import '../widgets/experience_tab.dart';
 import '../widgets/personal_info_tab.dart';
+import '../widgets/projects_tab.dart';
 import '../widgets/skills_tab.dart';
 
 class CvEditorScreen extends ConsumerStatefulWidget {
@@ -38,11 +41,14 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   final _locationController = TextEditingController();
   final _summaryController = TextEditingController();
   String? _avatarPath;
+  String _avatarPosition = 'right';
 
   // Collections State
   List<EducationModel> _educations = [];
   List<ExperienceModel> _experiences = [];
   List<SkillModel> _skills = [];
+  List<ProjectModel> _projects = [];
+  List<CertificationModel> _certifications = [];
 
   bool _isSaving = false;
   Timer? _debounceTimer;
@@ -53,7 +59,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _selectedLanguage = widget.initialCv?.language ?? 'vi';
     _loadInitialCv();
   }
@@ -70,16 +76,22 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       _locationController.text = cv.personalInfo.address;
       _summaryController.text = cv.summary;
       _avatarPath = cv.personalInfo.avatarPath;
+      _avatarPosition = cv.personalInfo.avatarPosition;
       _educations = List.of(cv.educations);
       _experiences = List.of(cv.experiences);
       _skills = List.of(cv.skills);
+      _projects = List.of(cv.projects);
+      _certifications = List.of(cv.certifications);
     } else {
       // Default initial seed data
       _applyDefaultTemplateData(language: _selectedLanguage, notify: false);
     }
   }
 
-  void _applyDefaultTemplateData({required String language, bool notify = true}) {
+  void _applyDefaultTemplateData({
+    required String language,
+    bool notify = true,
+  }) {
     final isEn = language == 'en';
     setState(() {
       _selectedLanguage = language;
@@ -253,14 +265,16 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         final timeStr =
             '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
         setState(
-          () => _syncStatusText =
-              _isEn ? 'Auto-saved ($timeStr)' : 'Đã tự động lưu ($timeStr)',
+          () => _syncStatusText = _isEn
+              ? 'Auto-saved ($timeStr)'
+              : 'Đã tự động lưu ($timeStr)',
         );
       } catch (_) {
         if (mounted) {
           setState(
-            () => _syncStatusText =
-                _isEn ? 'Auto-save failed' : 'Lỗi tự động lưu',
+            () => _syncStatusText = _isEn
+                ? 'Auto-save failed'
+                : 'Lỗi tự động lưu',
           );
         }
       }
@@ -269,7 +283,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
   Future<void> _pickProfilePhoto() async {
     try {
-      final path = await ref.read(profileImageServiceProvider).pickAndStoreImage();
+      final path = await ref
+          .read(profileImageServiceProvider)
+          .pickAndStoreImage();
       if (path == null || !mounted) return;
       setState(() => _avatarPath = path);
       _onFieldChanged();
@@ -328,11 +344,13 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         phone: _phoneController.text.trim(),
         address: _locationController.text.trim(),
         avatarPath: _avatarPath,
+        avatarPosition: _avatarPosition,
       ),
       educations: _educations,
       experiences: _experiences,
       skills: _skills,
-      projects: existing?.projects ?? const [],
+      projects: _projects,
+      certifications: _certifications,
       isSynced: existing?.isSynced ?? false,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
@@ -402,7 +420,11 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.auto_awesome, color: AppTheme.accentCyan, size: 20),
+            const Icon(
+              Icons.auto_awesome,
+              color: AppTheme.accentCyan,
+              size: 20,
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -433,91 +455,124 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       text: editing?.endDate?.year.toString() ?? '2024',
     );
     final gpaCtrl = TextEditingController(text: editing?.gpa ?? '3.5 / 4.0');
+    var isCurrent = editing?.isCurrent ?? false;
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          isEdit
-              ? (_isEn ? 'Edit Education' : 'Sửa thông tin học vấn')
-              : (_isEn ? 'Add Education' : 'Thêm học vấn & bằng cấp'),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: instCtrl,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'University / Institution *' : 'Trường đại học / Cao đẳng *',
-                  hintText: _isEn ? 'e.g. Stanford University' : 'VD: Đại học Bách Khoa Hà Nội',
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            isEdit
+                ? (_isEn ? 'Edit Education' : 'Sửa thông tin học vấn')
+                : (_isEn ? 'Add Education' : 'Thêm học vấn & bằng cấp'),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: instCtrl,
+                  decoration: InputDecoration(
+                    labelText: _isEn
+                        ? 'University / Institution *'
+                        : 'Trường đại học / Cao đẳng *',
+                    hintText: _isEn
+                        ? 'e.g. Stanford University'
+                        : 'VD: Đại học Bách Khoa Hà Nội',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: degreeCtrl,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'Degree *' : 'Bằng cấp *',
-                  hintText: _isEn ? 'Bachelor of Science' : 'Kỹ sư / Cử nhân',
+                const SizedBox(height: 12),
+                TextField(
+                  controller: degreeCtrl,
+                  decoration: InputDecoration(
+                    labelText: _isEn ? 'Degree *' : 'Bằng cấp *',
+                    hintText: _isEn ? 'Bachelor of Science' : 'Kỹ sư / Cử nhân',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: fieldCtrl,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'Field of Study' : 'Chuyên ngành',
-                  hintText: _isEn ? 'Computer Science' : 'Công nghệ Thông tin',
+                const SizedBox(height: 12),
+                TextField(
+                  controller: fieldCtrl,
+                  decoration: InputDecoration(
+                    labelText: _isEn ? 'Field of Study' : 'Chuyên ngành',
+                    hintText: _isEn
+                        ? 'Computer Science'
+                        : 'Công nghệ Thông tin',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: startYearCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: _isEn ? 'Start Year' : 'Năm bắt đầu',
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: startYearCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: _isEn ? 'Start Year' : 'Năm bắt đầu',
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: endYearCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: _isEn ? 'End Year' : 'Năm tốt nghiệp',
+                    const SizedBox(width: 12),
+                    if (!isCurrent)
+                      Expanded(
+                        child: TextField(
+                          controller: endYearCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: _isEn ? 'End Year' : 'Năm tốt nghiệp',
+                          ),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        child: Text(
+                          _isEn ? 'Present' : 'Hiện tại',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: gpaCtrl,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'GPA (Optional)' : 'Điểm GPA (Không bắt buộc)',
-                  hintText: '3.6 / 4.0',
+                  ],
                 ),
-              ),
-            ],
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: isCurrent,
+                  onChanged: (value) {
+                    setDialogState(() => isCurrent = value ?? false);
+                  },
+                  title: Text(
+                    _isEn ? 'Currently studying here' : 'Đang học tại đây',
+                  ),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: gpaCtrl,
+                  decoration: InputDecoration(
+                    labelText: _isEn
+                        ? 'GPA (Optional)'
+                        : 'Điểm GPA (Không bắt buộc)',
+                    hintText: '3.6 / 4.0',
+                  ),
+                ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(_isEn ? 'Cancel' : 'Huỷ'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (instCtrl.text.trim().isEmpty) return;
+                Navigator.of(ctx).pop(true);
+              },
+              child: Text(_isEn ? 'Save' : 'Lưu'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(_isEn ? 'Cancel' : 'Huỷ'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (instCtrl.text.trim().isEmpty) return;
-              Navigator.of(ctx).pop(true);
-            },
-            child: Text(_isEn ? 'Save' : 'Lưu'),
-          ),
-        ],
       ),
     );
 
@@ -530,7 +585,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         degree: degreeCtrl.text.trim(),
         fieldOfStudy: fieldCtrl.text.trim(),
         startDate: DateTime(startYear, 9, 1).toUtc(),
-        endDate: DateTime(endYear, 6, 30).toUtc(),
+        endDate: isCurrent ? null : DateTime(endYear, 6, 30).toUtc(),
+        isCurrent: isCurrent,
         gpa: gpaCtrl.text.trim().isEmpty ? null : gpaCtrl.text.trim(),
       );
 
@@ -558,6 +614,19 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     final roleCtrl = TextEditingController(text: editing?.jobTitle ?? '');
     final compCtrl = TextEditingController(text: editing?.company ?? '');
     final locCtrl = TextEditingController(text: editing?.location ?? '');
+    final startMonthCtrl = TextEditingController(
+      text: (editing?.startDate.month ?? 1).toString(),
+    );
+    final startYearCtrl = TextEditingController(
+      text: (editing?.startDate.year ?? DateTime.now().year).toString(),
+    );
+    final endMonthCtrl = TextEditingController(
+      text: (editing?.endDate?.month ?? DateTime.now().month).toString(),
+    );
+    final endYearCtrl = TextEditingController(
+      text: (editing?.endDate?.year ?? DateTime.now().year).toString(),
+    );
+    var isCurrent = editing?.isCurrent ?? true;
     final bulletCtrl = TextEditingController(
       text: editing != null && editing.bulletPoints.isNotEmpty
           ? editing.bulletPoints.join('\n')
@@ -566,69 +635,144 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          isEdit
-              ? (_isEn ? 'Edit Experience' : 'Sửa kinh nghiệm làm việc')
-              : (_isEn ? 'Add Work Experience' : 'Thêm kinh nghiệm làm việc'),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            isEdit
+                ? (_isEn ? 'Edit Experience' : 'Sửa kinh nghiệm làm việc')
+                : (_isEn ? 'Add Work Experience' : 'Thêm kinh nghiệm làm việc'),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: roleCtrl,
+                  decoration: InputDecoration(
+                    labelText: _isEn
+                        ? 'Job Title / Role *'
+                        : 'Vị trí / Chức danh *',
+                    hintText: _isEn
+                        ? 'Mobile Engineer'
+                        : 'Kỹ sư phần mềm Flutter',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: compCtrl,
+                  decoration: InputDecoration(
+                    labelText: _isEn
+                        ? 'Company / Organization *'
+                        : 'Doanh nghiệp / Công ty *',
+                    hintText: _isEn
+                        ? 'Tech Innovations Inc.'
+                        : 'Công ty Cổ phần Công nghệ',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: locCtrl,
+                  decoration: InputDecoration(
+                    labelText: _isEn ? 'Location' : 'Địa điểm làm việc',
+                    hintText: _isEn ? 'Hanoi, Vietnam' : 'Hà Nội, Việt Nam',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: startMonthCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: _isEn ? 'Start month' : 'Tháng bắt đầu',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: startYearCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: _isEn ? 'Start year' : 'Năm bắt đầu',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: isCurrent,
+                  onChanged: (value) {
+                    setDialogState(() => isCurrent = value ?? false);
+                  },
+                  title: Text(
+                    _isEn ? 'Currently working here' : 'Đang làm việc tại đây',
+                  ),
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+                if (!isCurrent) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: endMonthCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: _isEn ? 'End month' : 'Tháng kết thúc',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: endYearCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: _isEn ? 'End year' : 'Năm kết thúc',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                TextField(
+                  controller: bulletCtrl,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    labelText: _isEn
+                        ? 'Key Achievements (1 per line)'
+                        : 'Mô tả & Thành tích (mỗi dòng 1 ý)',
+                    hintText: _isEn
+                        ? 'Engineered offline SQLite cache...\nAchieved 60fps UI performance...'
+                        : 'Thiết kế kiến trúc Clean Architecture...\nTối ưu hiệu năng ứng dụng di động...',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(_isEn ? 'Cancel' : 'Huỷ'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (roleCtrl.text.trim().isEmpty ||
+                    compCtrl.text.trim().isEmpty) {
+                  return;
+                }
+                Navigator.of(ctx).pop(true);
+              },
+              child: Text(_isEn ? 'Save' : 'Lưu'),
+            ),
+          ],
         ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: roleCtrl,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'Job Title / Role *' : 'Vị trí / Chức danh *',
-                  hintText: _isEn ? 'Mobile Engineer' : 'Kỹ sư phần mềm Flutter',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: compCtrl,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'Company / Organization *' : 'Doanh nghiệp / Công ty *',
-                  hintText: _isEn ? 'Tech Innovations Inc.' : 'Công ty Cổ phần Công nghệ',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: locCtrl,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'Location' : 'Địa điểm làm việc',
-                  hintText: _isEn ? 'Hanoi, Vietnam' : 'Hà Nội, Việt Nam',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: bulletCtrl,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'Key Achievements (1 per line)' : 'Mô tả & Thành tích (mỗi dòng 1 ý)',
-                  hintText: _isEn
-                      ? 'Engineered offline SQLite cache...\nAchieved 60fps UI performance...'
-                      : 'Thiết kế kiến trúc Clean Architecture...\nTối ưu hiệu năng ứng dụng di động...',
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(_isEn ? 'Cancel' : 'Huỷ'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (roleCtrl.text.trim().isEmpty || compCtrl.text.trim().isEmpty) {
-                return;
-              }
-              Navigator.of(ctx).pop(true);
-            },
-            child: Text(_isEn ? 'Save' : 'Lưu'),
-          ),
-        ],
       ),
     );
 
@@ -644,13 +788,22 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         jobTitle: roleCtrl.text.trim(),
         company: compCtrl.text.trim(),
         location: locCtrl.text.trim(),
-        startDate: editing?.startDate ?? DateTime(2023, 1, 1).toUtc(),
-        isCurrent: true,
+        startDate: DateTime(
+          int.tryParse(startYearCtrl.text.trim()) ?? DateTime.now().year,
+          (int.tryParse(startMonthCtrl.text.trim()) ?? 1).clamp(1, 12),
+        ).toUtc(),
+        endDate: isCurrent
+            ? null
+            : DateTime(
+                int.tryParse(endYearCtrl.text.trim()) ?? DateTime.now().year,
+                (int.tryParse(endMonthCtrl.text.trim()) ?? 1).clamp(1, 12),
+              ).toUtc(),
+        isCurrent: isCurrent,
         bulletPoints: bullets.isEmpty
             ? [
                 _isEn
                     ? 'Built cross-platform features adhering to Clean Architecture principles.'
-                    : 'Phát triển tính năng đa nền tảng tuân thủ kiến trúc Clean Architecture.'
+                    : 'Phát triển tính năng đa nền tảng tuân thủ kiến trúc Clean Architecture.',
               ]
             : bullets,
       );
@@ -674,17 +827,24 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     _onFieldChanged();
   }
 
-  Future<void> _showAddSkillDialog() async {
-    final nameCtrl = TextEditingController();
-    var category = SkillCategory.hard;
-    var proficiency = 85.0;
+  Future<void> _showAddSkillDialog([SkillModel? editing]) async {
+    final isEdit = editing != null;
+    final nameCtrl = TextEditingController(text: editing?.name ?? '');
+    var category = editing?.category ?? SkillCategory.hard;
+    var proficiency = (editing?.proficiency ?? 85).toDouble();
 
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(_isEn ? 'Add Skill' : 'Thêm kỹ năng'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Text(
+            isEdit
+                ? (_isEn ? 'Edit Skill' : 'Sửa kỹ năng')
+                : (_isEn ? 'Add Skill' : 'Thêm kỹ năng'),
+          ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -694,7 +854,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   controller: nameCtrl,
                   decoration: InputDecoration(
                     labelText: _isEn ? 'Skill Name *' : 'Tên kỹ năng *',
-                    hintText: _isEn ? 'e.g. Flutter, Clean Architecture' : 'VD: Flutter & Dart',
+                    hintText: _isEn
+                        ? 'e.g. Flutter, Clean Architecture'
+                        : 'VD: Flutter & Dart',
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -751,7 +913,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                 if (nameCtrl.text.trim().isEmpty) return;
                 Navigator.of(ctx).pop(true);
               },
-              child: Text(_isEn ? 'Add' : 'Thêm'),
+              child: Text(
+                isEdit ? (_isEn ? 'Save' : 'Lưu') : (_isEn ? 'Add' : 'Thêm'),
+              ),
             ),
           ],
         ),
@@ -760,13 +924,18 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
     if (result == true) {
       final newSkill = SkillModel(
-        id: 'skill-${DateTime.now().microsecondsSinceEpoch}',
+        id: editing?.id ?? 'skill-${DateTime.now().microsecondsSinceEpoch}',
         name: nameCtrl.text.trim(),
         category: category,
         proficiency: proficiency.round(),
       );
       setState(() {
-        _skills.add(newSkill);
+        if (isEdit) {
+          final index = _skills.indexWhere((skill) => skill.id == editing.id);
+          if (index != -1) _skills[index] = newSkill;
+        } else {
+          _skills.add(newSkill);
+        }
       });
       _onFieldChanged();
     }
@@ -777,6 +946,252 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       _skills.removeWhere((s) => s.id == id);
     });
     _onFieldChanged();
+  }
+
+  Future<void> _showProjectDialog([ProjectModel? editing]) async {
+    final name = TextEditingController(text: editing?.name ?? '');
+    final role = TextEditingController(text: editing?.role ?? '');
+    final team = TextEditingController(
+      text: editing?.teamSize?.toString() ?? '',
+    );
+    final tech = TextEditingController(
+      text: editing?.technologies.join(', ') ?? '',
+    );
+    final source = TextEditingController(text: editing?.sourceUrl ?? '');
+    final demo = TextEditingController(text: editing?.demoUrl ?? '');
+    final details = TextEditingController(text: editing?.description ?? '');
+    final start = TextEditingController(
+      text: editing?.startDate == null
+          ? ''
+          : '${editing!.startDate!.month}/${editing.startDate!.year}',
+    );
+    final end = TextEditingController(
+      text: editing?.endDate == null
+          ? ''
+          : '${editing!.endDate!.month}/${editing.endDate!.year}',
+    );
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          editing == null
+              ? (_isEn ? 'Add Project' : 'Thêm dự án')
+              : (_isEn ? 'Edit Project' : 'Sửa dự án'),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                decoration: InputDecoration(
+                  labelText: _isEn ? 'Project name *' : 'Tên dự án *',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: role,
+                decoration: InputDecoration(
+                  labelText: _isEn ? 'Role' : 'Vai trò',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: team,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: _isEn ? 'Team size' : 'Số người trong nhóm',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: tech,
+                decoration: InputDecoration(
+                  labelText: _isEn
+                      ? 'Technologies (comma separated)'
+                      : 'Công nghệ (ngăn cách bằng dấu phẩy)',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: source,
+                decoration: const InputDecoration(
+                  labelText: 'GitHub / Source URL',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: demo,
+                decoration: const InputDecoration(
+                  labelText: 'Website / Demo URL',
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: start,
+                      decoration: InputDecoration(
+                        labelText: _isEn
+                            ? 'Start (MM/YYYY)'
+                            : 'Bắt đầu (MM/YYYY)',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: end,
+                      decoration: InputDecoration(
+                        labelText: _isEn
+                            ? 'End (MM/YYYY)'
+                            : 'Kết thúc (MM/YYYY)',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: details,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  labelText: _isEn
+                      ? 'Tasks (one bullet per line)'
+                      : 'Công việc đã làm (mỗi dòng một ý)',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(_isEn ? 'Cancel' : 'Huỷ'),
+          ),
+          FilledButton(
+            onPressed: () =>
+                name.text.trim().isEmpty ? null : Navigator.pop(ctx, true),
+            child: Text(_isEn ? 'Save' : 'Lưu'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final item = ProjectModel(
+      id: editing?.id ?? 'project-${DateTime.now().microsecondsSinceEpoch}',
+      name: name.text.trim(),
+      role: role.text.trim(),
+      description: details.text.trim(),
+      teamSize: int.tryParse(team.text.trim()),
+      technologies: tech.text
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList(),
+      sourceUrl: source.text.trim().isEmpty ? null : source.text.trim(),
+      demoUrl: demo.text.trim().isEmpty ? null : demo.text.trim(),
+      startDate: _parseMonthYear(start.text),
+      endDate: _parseMonthYear(end.text),
+    );
+    setState(() {
+      final index = _projects.indexWhere((e) => e.id == item.id);
+      index < 0 ? _projects.add(item) : _projects[index] = item;
+    });
+    _onFieldChanged();
+  }
+
+  void _deleteProject(String id) {
+    setState(() => _projects.removeWhere((e) => e.id == id));
+    _onFieldChanged();
+  }
+
+  Future<void> _showCertificationDialog([CertificationModel? editing]) async {
+    final name = TextEditingController(text: editing?.name ?? '');
+    final score = TextEditingController(text: editing?.score ?? '');
+    final issuer = TextEditingController(text: editing?.issuer ?? '');
+    final url = TextEditingController(text: editing?.credentialUrl ?? '');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          editing == null
+              ? (_isEn ? 'Add certification' : 'Thêm chứng chỉ')
+              : (_isEn ? 'Edit certification' : 'Sửa chứng chỉ'),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                decoration: InputDecoration(
+                  labelText: _isEn ? 'Certification name *' : 'Tên chứng chỉ *',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: score,
+                decoration: InputDecoration(
+                  labelText: _isEn ? 'Score / level' : 'Điểm / cấp độ',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: issuer,
+                decoration: InputDecoration(
+                  labelText: _isEn ? 'Issuer' : 'Đơn vị cấp',
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: url,
+                decoration: const InputDecoration(labelText: 'Credential URL'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(_isEn ? 'Cancel' : 'Huỷ'),
+          ),
+          FilledButton(
+            onPressed: () =>
+                name.text.trim().isEmpty ? null : Navigator.pop(ctx, true),
+            child: Text(_isEn ? 'Save' : 'Lưu'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final item = CertificationModel(
+      id: editing?.id ?? 'cert-${DateTime.now().microsecondsSinceEpoch}',
+      name: name.text.trim(),
+      score: score.text.trim().isEmpty ? null : score.text.trim(),
+      issuer: issuer.text.trim(),
+      credentialUrl: url.text.trim().isEmpty ? null : url.text.trim(),
+    );
+    setState(() {
+      final index = _certifications.indexWhere((e) => e.id == item.id);
+      index < 0 ? _certifications.add(item) : _certifications[index] = item;
+    });
+    _onFieldChanged();
+  }
+
+  void _deleteCertification(String id) {
+    setState(() => _certifications.removeWhere((e) => e.id == id));
+    _onFieldChanged();
+  }
+
+  DateTime? _parseMonthYear(String value) {
+    final parts = value.trim().split('/');
+    if (parts.length != 2) return null;
+    final month = int.tryParse(parts[0]);
+    final year = int.tryParse(parts[1]);
+    if (month == null || year == null || month < 1 || month > 12) return null;
+    return DateTime(year, month).toUtc();
   }
 
   void _openPreview() {
@@ -820,7 +1235,6 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
           child: TabBar(
             controller: _tabController,
             isScrollable: false,
-            tabAlignment: TabAlignment.fill,
             labelColor: AppTheme.accentTeal,
             unselectedLabelColor: Colors.grey.shade600,
             indicatorColor: AppTheme.accentTeal,
@@ -829,21 +1243,41 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
             dividerColor: Colors.grey.shade200,
             labelPadding: EdgeInsets.zero,
             tabs: [
-              Tab(
-                icon: const Icon(Icons.person_outline),
-                text: isEn ? 'Personal' : 'Cá nhân',
+              AdaptiveEditorTab(
+                controller: _tabController,
+                index: 0,
+                icon: Icons.person_outline,
+                label: isEn ? 'Personal' : 'Cá nhân',
               ),
-              Tab(
-                icon: const Icon(Icons.school_outlined),
-                text: isEn ? 'Education' : 'Học vấn',
+              AdaptiveEditorTab(
+                controller: _tabController,
+                index: 1,
+                icon: Icons.school_outlined,
+                label: isEn ? 'Education' : 'Học vấn',
               ),
-              Tab(
-                icon: const Icon(Icons.work_outline),
-                text: isEn ? 'Experience' : 'Kinh nghiệm',
+              AdaptiveEditorTab(
+                controller: _tabController,
+                index: 2,
+                icon: Icons.work_outline,
+                label: isEn ? 'Experience' : 'Kinh nghiệm',
               ),
-              Tab(
-                icon: const Icon(Icons.psychology_outlined),
-                text: isEn ? 'Skills' : 'Kỹ năng',
+              AdaptiveEditorTab(
+                controller: _tabController,
+                index: 3,
+                icon: Icons.psychology_outlined,
+                label: isEn ? 'Skills' : 'Kỹ năng',
+              ),
+              AdaptiveEditorTab(
+                controller: _tabController,
+                index: 4,
+                icon: Icons.folder_copy_outlined,
+                label: isEn ? 'Projects' : 'Dự án',
+              ),
+              AdaptiveEditorTab(
+                controller: _tabController,
+                index: 5,
+                icon: Icons.workspace_premium_outlined,
+                label: isEn ? 'Certificates' : 'Chứng chỉ',
               ),
             ],
           ),
@@ -857,9 +1291,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.grey.shade50,
-              border: Border(
-                bottom: BorderSide(color: Colors.grey.shade200),
-              ),
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
             child: Row(
               children: [
@@ -880,14 +1312,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                 const Spacer(),
                 SegmentedButton<String>(
                   segments: const [
-                    ButtonSegment(
-                      value: 'vi',
-                      label: Text('🇻🇳 VI'),
-                    ),
-                    ButtonSegment(
-                      value: 'en',
-                      label: Text('🇬🇧 EN'),
-                    ),
+                    ButtonSegment(value: 'vi', label: Text('🇻🇳 VI')),
+                    ButtonSegment(value: 'en', label: Text('🇬🇧 EN')),
                   ],
                   selected: {_selectedLanguage},
                   style: ButtonStyle(
@@ -900,7 +1326,10 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   onSelectionChanged: (set) {
                     final newLang = set.first;
                     if (newLang != _selectedLanguage) {
-                      _applyDefaultTemplateData(language: newLang, notify: true);
+                      _applyDefaultTemplateData(
+                        language: newLang,
+                        notify: true,
+                      );
                     }
                   },
                 ),
@@ -928,13 +1357,20 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   avatarPath: _avatarPath,
                   onPickAvatar: _pickProfilePhoto,
                   onRemoveAvatar: _removeProfilePhoto,
-                  supportsProfilePhoto: const {
-                    AppConstants.templateMinimalistClean,
-                    AppConstants.templateCreativeTech,
-                  }.contains(
-                    widget.initialCv?.templateId ??
-                        AppConstants.templateHarvardAts,
-                  ),
+                  avatarPosition: _avatarPosition,
+                  onAvatarPositionChanged: (position) {
+                    setState(() => _avatarPosition = position);
+                    _onFieldChanged();
+                  },
+                  supportsProfilePhoto:
+                      const {
+                        AppConstants.templateMinimalistClean,
+                        AppConstants.templateCreativeTech,
+                        AppConstants.templateProfessionalSidebar,
+                      }.contains(
+                        widget.initialCv?.templateId ??
+                            AppConstants.templateHarvardAts,
+                      ),
                 ),
 
                 // Tab 2: Education
@@ -960,7 +1396,22 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   language: _selectedLanguage,
                   skills: _skills,
                   onAddSkill: _showAddSkillDialog,
+                  onEditSkill: _showAddSkillDialog,
                   onDeleteSkill: _deleteSkill,
+                ),
+                ProjectsTab(
+                  language: _selectedLanguage,
+                  projects: _projects,
+                  onAdd: () => _showProjectDialog(),
+                  onEdit: _showProjectDialog,
+                  onDelete: _deleteProject,
+                ),
+                CertificationsTab(
+                  language: _selectedLanguage,
+                  items: _certifications,
+                  onAdd: () => _showCertificationDialog(),
+                  onEdit: _showCertificationDialog,
+                  onDelete: _deleteCertification,
                 ),
               ],
             ),

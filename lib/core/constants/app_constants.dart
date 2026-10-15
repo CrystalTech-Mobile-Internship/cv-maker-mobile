@@ -12,4 +12,5 @@ class AppConstants {
   static const String templateModernMinimalist = 'modern_minimalist';
   static const String templateMinimalistClean = 'minimalist_clean';
   static const String templateCreativeTech = 'creative_tech';
+  static const String templateProfessionalSidebar = 'professional_sidebar';
 }

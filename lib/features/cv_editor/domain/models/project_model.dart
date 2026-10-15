@@ -12,6 +12,7 @@ class ProjectModel {
     this.sourceUrl,
     this.startDate,
     this.endDate,
+    this.teamSize,
   }) : technologies = List.unmodifiable(technologies);
 
   final String id;
@@ -23,6 +24,7 @@ class ProjectModel {
   final String? sourceUrl;
   final DateTime? startDate;
   final DateTime? endDate;
+  final int? teamSize;
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
@@ -41,6 +43,7 @@ class ProjectModel {
       endDate: json['endDate'] == null
           ? null
           : DateTime.parse(json['endDate'] as String).toUtc(),
+      teamSize: json['teamSize'] as int?,
     );
   }
 
@@ -55,6 +58,7 @@ class ProjectModel {
       'sourceUrl': sourceUrl,
       'startDate': startDate?.toUtc().toIso8601String(),
       'endDate': endDate?.toUtc().toIso8601String(),
+      'teamSize': teamSize,
     };
   }
 
@@ -68,6 +72,7 @@ class ProjectModel {
     Object? sourceUrl = _unsetProjectValue,
     Object? startDate = _unsetProjectValue,
     Object? endDate = _unsetProjectValue,
+    Object? teamSize = _unsetProjectValue,
   }) {
     return ProjectModel(
       id: id ?? this.id,
@@ -87,6 +92,9 @@ class ProjectModel {
       endDate: identical(endDate, _unsetProjectValue)
           ? this.endDate
           : endDate as DateTime?,
+      teamSize: identical(teamSize, _unsetProjectValue)
+          ? this.teamSize
+          : teamSize as int?,
     );
   }
 }
