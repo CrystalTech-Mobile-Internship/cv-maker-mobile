@@ -88,6 +88,7 @@ void main() {
       'assets/mock_cvs/fresher_cv.json',
       'assets/mock_cvs/experienced_cv.json',
       'assets/mock_cvs/tuananh_fullstack_cv.json',
+      'assets/mock_cvs/tran_van_hoa_cv.json',
     ];
 
     for (final assetPath in assetPaths) {

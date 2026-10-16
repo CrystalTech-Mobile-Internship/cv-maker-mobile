@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../../../cv_editor/domain/models/cv_model.dart';
+import '../../../cv_editor/domain/models/project_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../domain/services/pdf_export_service.dart';
 
@@ -43,6 +44,18 @@ class PdfExportServiceImpl implements PdfExportService {
       cv.personalInfo.avatarPath,
       enabled: templateStyle.showPhoto,
     );
+
+    if (templateId == 'professional_sidebar') {
+      _addProfessionalSidebarPage(
+        doc: doc,
+        cv: cv,
+        theme: theme,
+        avatarImage: avatarImage,
+        isEn: isEn,
+        scale: scale,
+      );
+      return doc.save();
+    }
 
     // Personal Info Resolvers
     final fullName = cv.personalInfo.fullName.isNotEmpty
@@ -86,6 +99,7 @@ class PdfExportServiceImpl implements PdfExportService {
               scale: scale,
               style: templateStyle,
               avatarImage: avatarImage,
+              avatarPosition: cv.personalInfo.avatarPosition,
             ),
             pw.SizedBox(height: 8 * scale),
 
@@ -106,14 +120,13 @@ class PdfExportServiceImpl implements PdfExportService {
             ),
             pw.SizedBox(height: 14 * scale),
 
-            // Section 2: Education
-            _buildPdfSectionHeader(
-              isEn ? 'EDUCATION' : 'HỌC VẤN',
-              scale,
-              templateStyle,
-            ),
-            pw.SizedBox(height: 4 * scale),
             if (cv.educations.isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'EDUCATION' : 'HỌC VẤN',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
               ...cv.educations.map((edu) {
                 final startYear = edu.startDate.year;
                 final endYear = edu.isCurrent
@@ -158,52 +171,17 @@ class PdfExportServiceImpl implements PdfExportService {
                   ),
                 );
               }),
-            ] else ...[
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Expanded(
-                    child: pw.Text(
-                      isEn
-                          ? 'HANOI UNIVERSITY OF SCIENCE AND TECH'
-                          : 'ĐẠI HỌC BÁCH KHOA HÀ NỘI',
-                      style: pw.TextStyle(
-                        fontSize: 10.5 * scale,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  pw.Text(
-                    '2020 - 2024',
-                    style: pw.TextStyle(
-                      fontSize: 9.5 * scale,
-                      fontStyle: pw.FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-              pw.Text(
-                isEn
-                    ? 'Bachelor of Engineering in Computer Science — GPA: 3.6 / 4.0'
-                    : 'Kỹ sư Công nghệ Thông tin - GPA: 3.6/4.0',
-                style: pw.TextStyle(
-                  fontSize: 9.5 * scale,
-                  color: PdfColors.grey800,
-                ),
-              ),
             ],
-            pw.SizedBox(height: 14 * scale),
+            if (cv.educations.isNotEmpty) pw.SizedBox(height: 14 * scale),
 
             // Section 3: Work Experience & Projects
-            _buildPdfSectionHeader(
-              isEn
-                  ? 'WORK EXPERIENCE & PROJECTS'
-                  : 'KINH NGHIỆM LÀM VIỆC & DỰ ÁN',
-              scale,
-              templateStyle,
-            ),
-            pw.SizedBox(height: 4 * scale),
             if (cv.experiences.isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'WORK EXPERIENCE' : 'KINH NGHIỆM LÀM VIỆC',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
               ...cv.experiences.map((exp) {
                 final startStr =
                     '${exp.startDate.month.toString().padLeft(2, '0')}/${exp.startDate.year}';
@@ -282,59 +260,6 @@ class PdfExportServiceImpl implements PdfExportService {
                   ),
                 );
               }),
-            ] else ...[
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Expanded(
-                    child: pw.Text(
-                      isEn
-                          ? 'TECH SOLUTIONS GLOBAL'
-                          : 'CÔNG TY CỔ PHẦN CÔNG NGHỆ TECH',
-                      style: pw.TextStyle(
-                        fontSize: 10.5 * scale,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  pw.Text(
-                    isEn ? '01/2023 - Present' : '01/2023 - Hiện tại',
-                    style: pw.TextStyle(
-                      fontSize: 9.5 * scale,
-                      fontStyle: pw.FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-              pw.Text(
-                isEn
-                    ? 'Lead Mobile & Fullstack Engineer'
-                    : 'Kỹ sư phần mềm Flutter',
-                style: pw.TextStyle(
-                  fontSize: 9.5 * scale,
-                  fontStyle: pw.FontStyle.italic,
-                  color: PdfColor.fromHex('#334155'),
-                ),
-              ),
-              pw.SizedBox(height: 3 * scale),
-              _buildPdfBulletPoint(
-                isEn
-                    ? 'Architected production mobile app using Clean Architecture, Riverpod, and Drift SQLite.'
-                    : 'Thiết kế kiến trúc Clean Architecture nhiều tầng tách biệt presentation, domain và data.',
-                scale,
-              ),
-              _buildPdfBulletPoint(
-                isEn
-                    ? 'Engineered high-performance A4 vector PDF engine with automated pagination.'
-                    : 'Tối ưu hóa công cụ render PDF A4 vector độ nét cao, ngăn chặn tràn trang thông minh.',
-                scale,
-              ),
-              _buildPdfBulletPoint(
-                isEn
-                    ? 'Integrated Supabase Singapore Cloud backend with real-time replication.'
-                    : 'Tích hợp xác thực và đồng bộ dữ liệu đám mây Supabase Singapore bảo mật cao.',
-                scale,
-              ),
             ],
             if (cv.projects.isNotEmpty) ...[
               pw.SizedBox(height: 14 * scale),
@@ -380,6 +305,10 @@ class PdfExportServiceImpl implements PdfExportService {
                         pw.Text(
                           [
                             if (proj.role.isNotEmpty) proj.role,
+                            if (proj.teamSize != null)
+                              isEn
+                                  ? 'Team of ${proj.teamSize}'
+                                  : 'Nhóm ${proj.teamSize} người',
                             if (proj.technologies.isNotEmpty)
                               proj.technologies.join(', '),
                           ].join(' | '),
@@ -397,48 +326,53 @@ class PdfExportServiceImpl implements PdfExportService {
                             color: PdfColor.fromHex('#2563EB'),
                           ),
                         ),
-                      if (proj.description.isNotEmpty) ...[
-                        pw.SizedBox(height: 2 * scale),
+                      if (proj.demoUrl != null && proj.demoUrl!.isNotEmpty)
                         pw.Text(
-                          proj.description,
+                          proj.demoUrl!,
                           style: pw.TextStyle(
-                            fontSize: 9.5 * scale,
-                            lineSpacing: 1.5 * scale,
-                            color: PdfColors.grey900,
+                            fontSize: 9 * scale,
+                            color: PdfColor.fromHex('#2563EB'),
                           ),
                         ),
+                      if (proj.description.isNotEmpty) ...[
+                        pw.SizedBox(height: 2 * scale),
+                        ...proj.description
+                            .split('\n')
+                            .map((line) => line.trim())
+                            .where((line) => line.isNotEmpty)
+                            .map((line) => _buildPdfBulletPoint(line, scale)),
                       ],
                     ],
                   ),
                 );
               }),
             ],
-            pw.SizedBox(height: 14 * scale),
-
-            // Section 4: Skills
-            _buildPdfSectionHeader(
-              isEn ? 'TECHNICAL & SOFT SKILLS' : 'KỸ NĂNG CHUYÊN MÔN & MỀM',
-              scale,
-              templateStyle,
-            ),
-            pw.SizedBox(height: 4 * scale),
-            if (cv.skills.isNotEmpty) ...[
-              _buildSkillsSection(cv.skills, isEn, scale),
-            ] else ...[
-              pw.Text(
-                isEn
-                    ? '• Languages & Frameworks: Flutter, Dart, TypeScript, Kotlin, SQL\n'
-                          '• Backend & Cloud: Supabase, PostgreSQL, Row-Level Security, REST APIs\n'
-                          '• Architecture & Tools: Clean Architecture, Riverpod, Git Flow, CI/CD, Vector PDF Engine'
-                    : '• Ngôn ngữ & Framework: Flutter, Dart, TypeScript, Kotlin\n'
-                          '• Backend & Database: Supabase, PostgreSQL, Row-Level Security, REST API\n'
-                          '• Kiến trúc & Công cụ: Clean Architecture, Riverpod, Git Flow, Vector PDF Engine',
-                style: pw.TextStyle(
-                  fontSize: 9.5 * scale,
-                  lineSpacing: 2 * scale,
-                  color: PdfColors.grey900,
+            if (cv.certifications.isNotEmpty) ...[
+              pw.SizedBox(height: 10 * scale),
+              _buildPdfSectionHeader(
+                isEn ? 'CERTIFICATIONS' : 'CHỨNG CHỈ',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
+              ...cv.certifications.map(
+                (cert) => pw.Text(
+                  '• ${cert.name}${cert.score?.isNotEmpty == true ? " — ${cert.score}" : ""}${cert.issuer.isNotEmpty ? " • ${cert.issuer}" : ""}',
+                  style: pw.TextStyle(fontSize: 9.5 * scale),
                 ),
               ),
+            ],
+            if (cv.skills.isNotEmpty) pw.SizedBox(height: 14 * scale),
+
+            // Section 4: Skills
+            if (cv.skills.isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'TECHNICAL & SOFT SKILLS' : 'KỸ NĂNG CHUYÊN MÔN & MỀM',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
+              _buildSkillsSection(cv.skills, isEn, scale),
             ],
           ];
         },
@@ -446,6 +380,325 @@ class PdfExportServiceImpl implements PdfExportService {
     );
 
     return doc.save();
+  }
+
+  static void _addProfessionalSidebarPage({
+    required pw.Document doc,
+    required CvModel cv,
+    required pw.ThemeData theme,
+    required pw.MemoryImage? avatarImage,
+    required bool isEn,
+    required double scale,
+  }) {
+    final navy = PdfColor.fromHex('#16324F');
+    final teal = PdfColor.fromHex('#18A999');
+    final small = 9.2 * scale;
+    final nameParts = cv.personalInfo.fullName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
+    final initials = nameParts.isEmpty
+        ? 'CV'
+        : nameParts.length == 1
+        ? nameParts.first.substring(0, 1).toUpperCase()
+        : '${nameParts.first.substring(0, 1)}${nameParts.last.substring(0, 1)}'
+              .toUpperCase();
+    pw.Widget heading(String value, {bool light = false}) => pw.Padding(
+      padding: pw.EdgeInsets.only(top: 7 * scale, bottom: 3 * scale),
+      child: pw.Text(
+        value,
+        style: pw.TextStyle(
+          fontSize: 11.5 * scale,
+          fontWeight: pw.FontWeight.bold,
+          color: light ? PdfColors.white : navy,
+        ),
+      ),
+    );
+    pw.Widget bullet(String value) => pw.Padding(
+      padding: pw.EdgeInsets.only(bottom: 2.5 * scale),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            '• ',
+            style: pw.TextStyle(fontSize: small, color: teal),
+          ),
+          pw.Expanded(
+            child: pw.Text(
+              value,
+              style: pw.TextStyle(fontSize: small, lineSpacing: 1.5 * scale),
+            ),
+          ),
+        ],
+      ),
+    );
+    String period(DateTime? start, DateTime? end) => start == null
+        ? ''
+        : '${start.month.toString().padLeft(2, '0')}/${start.year} – ${end == null ? (isEn ? 'Present' : 'Nay') : '${end.month.toString().padLeft(2, '0')}/${end.year}'}';
+    pw.Widget project(ProjectModel item) => pw.Padding(
+      padding: pw.EdgeInsets.only(bottom: 8 * scale),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(
+            children: [
+              pw.Expanded(
+                child: pw.Text(
+                  item.name,
+                  style: pw.TextStyle(
+                    fontSize: 10.5 * scale,
+                    fontWeight: pw.FontWeight.bold,
+                    color: navy,
+                  ),
+                ),
+              ),
+              pw.Text(
+                period(item.startDate, item.endDate),
+                style: pw.TextStyle(
+                  fontSize: 8.2 * scale,
+                  fontStyle: pw.FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+          pw.Text(
+            [
+              item.role,
+              if (item.teamSize != null)
+                (isEn
+                    ? 'Team ${item.teamSize}'
+                    : 'Nhóm ${item.teamSize} người'),
+              if (item.technologies.isNotEmpty) item.technologies.join(', '),
+            ].where((e) => e.isNotEmpty).join(' | '),
+            style: pw.TextStyle(
+              fontSize: 8.6 * scale,
+              fontStyle: pw.FontStyle.italic,
+            ),
+          ),
+          if (item.sourceUrl?.isNotEmpty == true)
+            pw.Text(
+              item.sourceUrl!,
+              style: pw.TextStyle(
+                fontSize: 8 * scale,
+                color: PdfColors.blue700,
+              ),
+            ),
+          ...item.description
+              .split('\n')
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .map(bullet),
+        ],
+      ),
+    );
+
+    doc.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.zero,
+        theme: theme,
+        build: (_) => pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+          children: [
+            pw.Container(
+              width: PdfPageFormat.a4.width / 3,
+              color: navy,
+              padding: pw.EdgeInsets.symmetric(
+                horizontal: 16 * scale,
+                vertical: 24 * scale,
+              ),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Center(
+                    child: avatarImage != null
+                        ? pw.ClipOval(
+                            child: pw.Container(
+                              width: 78 * scale,
+                              height: 78 * scale,
+                              child: pw.Image(
+                                avatarImage,
+                                fit: pw.BoxFit.cover,
+                              ),
+                            ),
+                          )
+                        : pw.Container(
+                            width: 78 * scale,
+                            height: 78 * scale,
+                            alignment: pw.Alignment.center,
+                            decoration: pw.BoxDecoration(
+                              shape: pw.BoxShape.circle,
+                              color: PdfColors.white,
+                              border: pw.Border.all(color: teal, width: 2),
+                            ),
+                            child: pw.Text(
+                              initials,
+                              style: pw.TextStyle(
+                                fontSize: 24 * scale,
+                                fontWeight: pw.FontWeight.bold,
+                                color: navy,
+                              ),
+                            ),
+                          ),
+                  ),
+                  heading(isEn ? 'CONTACT' : 'LIÊN HỆ', light: true),
+                  ...[
+                        cv.personalInfo.email,
+                        cv.personalInfo.phone,
+                        cv.personalInfo.address,
+                        cv.personalInfo.githubUrl ?? '',
+                        cv.personalInfo.linkedInUrl ?? '',
+                      ]
+                      .where((e) => e.isNotEmpty)
+                      .map(
+                        (e) => pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 3),
+                          child: pw.Text(
+                            e,
+                            style: pw.TextStyle(
+                              fontSize: small,
+                              color: PdfColors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                  if (cv.educations.isNotEmpty) ...[
+                    heading(isEn ? 'EDUCATION' : 'HỌC VẤN', light: true),
+                    ...cv.educations.map(
+                      (e) => pw.Padding(
+                        padding: const pw.EdgeInsets.only(bottom: 5),
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              e.institution,
+                              style: pw.TextStyle(
+                                fontSize: 9.5 * scale,
+                                fontWeight: pw.FontWeight.bold,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                            pw.Text(
+                              '${e.fieldOfStudy}\n${e.startDate.year} – ${e.endDate?.year ?? 2027}${e.gpa == null ? '' : '\nGPA: ${e.gpa}'}',
+                              style: pw.TextStyle(
+                                fontSize: small,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (cv.certifications.isNotEmpty) ...[
+                    heading(isEn ? 'CERTIFICATIONS' : 'CHỨNG CHỈ', light: true),
+                    ...cv.certifications.map(
+                      (e) => pw.Text(
+                        '• ${e.name}${e.score?.isNotEmpty == true ? ' ${e.score}' : ''}',
+                        style: pw.TextStyle(
+                          fontSize: small,
+                          color: PdfColors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (cv.skills.isNotEmpty) ...[
+                    heading(isEn ? 'SKILLS' : 'KỸ NĂNG', light: true),
+                    ...cv.skills.map(
+                      (e) => pw.Padding(
+                        padding: const pw.EdgeInsets.only(bottom: 3),
+                        child: pw.Text(
+                          '• ${e.name}',
+                          style: pw.TextStyle(
+                            fontSize: small,
+                            color: PdfColors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            pw.Expanded(
+              child: pw.Padding(
+                padding: pw.EdgeInsets.symmetric(
+                  horizontal: 20 * scale,
+                  vertical: 24 * scale,
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      cv.personalInfo.fullName.toUpperCase(),
+                      style: pw.TextStyle(
+                        fontSize: 23 * scale,
+                        fontWeight: pw.FontWeight.bold,
+                        color: navy,
+                      ),
+                    ),
+                    pw.Text(
+                      cv.personalInfo.targetRole.toUpperCase(),
+                      style: pw.TextStyle(
+                        fontSize: 11.5 * scale,
+                        fontWeight: pw.FontWeight.bold,
+                        color: teal,
+                      ),
+                    ),
+                    if (cv.summary.isNotEmpty) ...[
+                      heading(isEn ? 'PROFILE' : 'MỤC TIÊU NGHỀ NGHIỆP'),
+                      pw.Text(
+                        cv.summary,
+                        style: pw.TextStyle(
+                          fontSize: small,
+                          lineSpacing: 1.6 * scale,
+                        ),
+                      ),
+                    ],
+                    if (cv.experiences.isNotEmpty) ...[
+                      heading(isEn ? 'EXPERIENCE' : 'KINH NGHIỆM'),
+                      ...cv.experiences.map(
+                        (e) => pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 5),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Row(
+                                children: [
+                                  pw.Expanded(
+                                    child: pw.Text(
+                                      '${e.jobTitle} — ${e.company}',
+                                      style: pw.TextStyle(
+                                        fontSize: 10.5 * scale,
+                                        fontWeight: pw.FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  pw.Text(
+                                    period(e.startDate, e.endDate),
+                                    style: pw.TextStyle(fontSize: 8.2 * scale),
+                                  ),
+                                ],
+                              ),
+                              ...e.bulletPoints.map(bullet),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (cv.projects.isNotEmpty) ...[
+                      heading(isEn ? 'PROJECTS' : 'DỰ ÁN'),
+                      ...cv.projects.map(project),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -492,6 +745,7 @@ class PdfExportServiceImpl implements PdfExportService {
     required double scale,
     required _TemplateStyle style,
     pw.MemoryImage? avatarImage,
+    String avatarPosition = 'right',
   }) {
     final content = pw.Column(
       crossAxisAlignment: style.centerHeader
@@ -511,7 +765,7 @@ class PdfExportServiceImpl implements PdfExportService {
         pw.Text(
           targetRole,
           style: pw.TextStyle(
-            fontSize: 11 * scale,
+            fontSize: 12.5 * scale,
             fontWeight: pw.FontWeight.bold,
             color: style.accent,
           ),
@@ -530,21 +784,30 @@ class PdfExportServiceImpl implements PdfExportService {
       ],
     );
 
-    final headerContent = avatarImage == null
+    final photo = avatarImage == null
+        ? null
+        : pw.ClipOval(
+            child: pw.Container(
+              width: 68 * scale,
+              height: 68 * scale,
+              child: pw.Image(avatarImage, fit: pw.BoxFit.cover),
+            ),
+          );
+    final headerContent = photo == null
         ? content
         : pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
-            children: [
-              pw.Expanded(child: content),
-              pw.SizedBox(width: 14 * scale),
-              pw.ClipOval(
-                child: pw.Container(
-                  width: 68 * scale,
-                  height: 68 * scale,
-                  child: pw.Image(avatarImage, fit: pw.BoxFit.cover),
-                ),
-              ),
-            ],
+            children: avatarPosition == 'left'
+                ? [
+                    photo,
+                    pw.SizedBox(width: 14 * scale),
+                    pw.Expanded(child: content),
+                  ]
+                : [
+                    pw.Expanded(child: content),
+                    pw.SizedBox(width: 14 * scale),
+                    photo,
+                  ],
           );
 
     return pw.Column(
@@ -776,6 +1039,17 @@ final class _TemplateStyle {
           nameSize: 21,
           letterSpacing: 0.3,
           dividerThickness: 1.4,
+          showPhoto: true,
+        );
+      case 'professional_sidebar':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#16324F'),
+          accent: PdfColor.fromHex('#18A999'),
+          pageMargin: pw.EdgeInsets.zero,
+          centerHeader: false,
+          nameSize: 20,
+          letterSpacing: 0.2,
+          dividerThickness: 1,
           showPhoto: true,
         );
       default:

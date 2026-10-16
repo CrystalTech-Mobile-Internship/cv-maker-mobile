@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ResponsiveLayoutBuilder', () {
-    testWidgets('renders mobile layout when width is less than 600', (tester) async {
+    testWidgets('renders mobile layout when width is less than 600', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -40,7 +42,9 @@ void main() {
       expect(find.text('Mobile Layout'), findsNothing);
     });
 
-    testWidgets('renders tablet layout when width is between 600 and 899', (tester) async {
+    testWidgets('renders tablet layout when width is between 600 and 899', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(768, 1024);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -66,10 +70,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: WebConstrainedWidth(
-              maxWidth: 800,
-              child: Text('Content'),
-            ),
+            body: WebConstrainedWidth(maxWidth: 800, child: Text('Content')),
           ),
         ),
       );

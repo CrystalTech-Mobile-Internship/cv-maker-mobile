@@ -29,8 +29,8 @@ class CvSyncRepository {
   CvSyncRepository({
     required CvRepository localRepository,
     CvRemoteDataSource? remoteDataSource,
-  })  : _localRepository = localRepository,
-        _remoteDataSource = remoteDataSource ?? CvRemoteDataSource();
+  }) : _localRepository = localRepository,
+       _remoteDataSource = remoteDataSource ?? CvRemoteDataSource();
 
   final CvRepository _localRepository;
   final CvRemoteDataSource _remoteDataSource;

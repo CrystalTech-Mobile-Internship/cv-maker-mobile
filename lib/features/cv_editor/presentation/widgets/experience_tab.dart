@@ -43,10 +43,9 @@ class ExperienceTab extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 _isEn ? 'Work Experience' : 'Kinh nghiệm làm việc',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
@@ -54,10 +53,9 @@ class ExperienceTab extends StatelessWidget {
                 _isEn
                     ? 'Describe projects, roles, key achievements, and impact.'
                     : 'Mô tả dự án, vị trí công tác và kết quả đo lường được.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: Colors.grey.shade600),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -81,8 +79,8 @@ class ExperienceTab extends StatelessWidget {
           final endStr = item.isCurrent
               ? (_isEn ? 'Present' : 'Hiện tại')
               : (item.endDate != null
-                  ? '${item.endDate!.month.toString().padLeft(2, '0')}/${item.endDate!.year}'
-                  : '');
+                    ? '${item.endDate!.month.toString().padLeft(2, '0')}/${item.endDate!.year}'
+                    : '');
           final period = '$startStr - $endStr';
 
           return Card(
@@ -212,7 +210,7 @@ class ExperienceTab extends StatelessWidget {
           onPressed: onAddExperience,
           icon: const Icon(Icons.add_rounded),
           label: Text(
-            _isEn ? '+ Add Another Experience' : '+ Thêm mục kinh nghiệm',
+            _isEn ? 'Add Another Experience' : 'Thêm mục kinh nghiệm',
           ),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 14),

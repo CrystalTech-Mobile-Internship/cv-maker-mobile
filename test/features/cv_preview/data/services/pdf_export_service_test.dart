@@ -124,4 +124,37 @@ void main() {
       expect(bytes.length, greaterThan(2500));
     },
   );
+
+  test('Trần Văn Hòa sample generates the 1/3–2/3 sidebar CV', () async {
+    final source = await rootBundle.loadString(
+      'assets/mock_cvs/tran_van_hoa_cv.json',
+    );
+    final cv = CvModel.fromJson(jsonDecode(source) as Map<String, dynamic>);
+    expect(cv.projects, hasLength(4));
+    expect(cv.certifications.single.score, '700 / 990');
+
+    final bytes = await PdfExportServiceImpl().generateCvPdf(
+      cv: cv,
+      language: 'vi',
+      templateId: cv.templateId,
+    );
+
+    expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-');
+    expect(bytes.length, greaterThan(4000));
+  });
+
+  test('sidebar template renders without a selected profile photo', () async {
+    final cv = CvModel.empty(id: 'sidebar-initials').copyWith(
+      templateId: 'professional_sidebar',
+      personalInfo: const PersonalInfoModel(fullName: 'Trần Văn Hòa'),
+    );
+
+    final bytes = await PdfExportServiceImpl().generateCvPdf(
+      cv: cv,
+      language: 'vi',
+      templateId: cv.templateId,
+    );
+
+    expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-');
+  });
 }

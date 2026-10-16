@@ -34,6 +34,11 @@ abstract final class CvTemplateCatalog {
       name: 'Creative Tech',
       audience: 'Công nghệ • Thiết kế • Có ảnh',
     ),
+    CvTemplate(
+      id: AppConstants.templateProfessionalSidebar,
+      name: 'Professional Sidebar',
+      audience: 'Sinh viên • CNTT • Bố cục 1/3–2/3',
+    ),
   ];
 
   static CvTemplate byId(String id) => freeTemplates.firstWhere(

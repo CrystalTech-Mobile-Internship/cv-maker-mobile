@@ -21,6 +21,8 @@ class PersonalInfoTab extends StatelessWidget {
     required this.onPickAvatar,
     required this.onRemoveAvatar,
     required this.supportsProfilePhoto,
+    required this.avatarPosition,
+    required this.onAvatarPositionChanged,
     this.language = 'vi',
   });
 
@@ -37,6 +39,8 @@ class PersonalInfoTab extends StatelessWidget {
   final Future<void> Function() onPickAvatar;
   final VoidCallback onRemoveAvatar;
   final bool supportsProfilePhoto;
+  final String avatarPosition;
+  final ValueChanged<String> onAvatarPositionChanged;
   final String language;
 
   bool get _isEn => language == 'en';
@@ -65,9 +69,9 @@ class PersonalInfoTab extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 _isEn ? 'Basic Information' : 'Thông tin cơ bản',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 14),
               _ProfilePhotoPicker(
@@ -76,6 +80,8 @@ class PersonalInfoTab extends StatelessWidget {
                 supportsProfilePhoto: supportsProfilePhoto,
                 onPickAvatar: onPickAvatar,
                 onRemoveAvatar: onRemoveAvatar,
+                avatarPosition: avatarPosition,
+                onAvatarPositionChanged: onAvatarPositionChanged,
               ),
               const SizedBox(height: 14),
               TextField(
@@ -154,10 +160,9 @@ class PersonalInfoTab extends StatelessWidget {
                       _isEn
                           ? 'Professional Summary'
                           : 'Tóm tắt bản thân (Summary)',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   FilledButton.tonalIcon(
@@ -181,8 +186,11 @@ class PersonalInfoTab extends StatelessWidget {
               TextField(
                 controller: summaryController,
                 onChanged: onFieldChanged,
-                maxLines: 4,
+                minLines: 5,
+                maxLines: 7,
+                textAlignVertical: TextAlignVertical.top,
                 decoration: InputDecoration(
+                  alignLabelWithHint: true,
                   hintText: _isEn
                       ? 'Write 2-3 concise sentences highlighting core technical strengths, measurable achievements, and career focus...'
                       : 'Viết 2-3 câu ngắn gọn mô tả năng lực cốt lõi, thành tựu nổi bật và định hướng nghề nghiệp...',
@@ -204,6 +212,8 @@ final class _ProfilePhotoPicker extends StatelessWidget {
     required this.supportsProfilePhoto,
     required this.onPickAvatar,
     required this.onRemoveAvatar,
+    required this.avatarPosition,
+    required this.onAvatarPositionChanged,
   });
 
   final String language;
@@ -211,6 +221,8 @@ final class _ProfilePhotoPicker extends StatelessWidget {
   final bool supportsProfilePhoto;
   final Future<void> Function() onPickAvatar;
   final VoidCallback onRemoveAvatar;
+  final String avatarPosition;
+  final ValueChanged<String> onAvatarPositionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +260,9 @@ final class _ProfilePhotoPicker extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    isEn ? 'Profile photo (optional)' : 'Ảnh đại diện (tuỳ chọn)',
+                    isEn
+                        ? 'Profile photo (optional)'
+                        : 'Ảnh đại diện (tuỳ chọn)',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 3),
@@ -259,7 +273,7 @@ final class _ProfilePhotoPicker extends StatelessWidget {
                               : 'Hiển thị trên Minimalist Clean và Creative Tech.')
                         : (isEn
                               ? 'Choose a photo template in Preview to display it.'
-                              : 'Chọn mẫu có ảnh ở màn hình Xem trước để hiển thị.'),
+                              : 'Hỗ trợ Minimalist Clean, Creative Tech và Professional Sidebar.'),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),
@@ -286,6 +300,24 @@ final class _ProfilePhotoPicker extends StatelessWidget {
                         ),
                     ],
                   ),
+                  if (hasImage) ...[
+                    const SizedBox(height: 8),
+                    SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(
+                          value: 'left',
+                          label: Text(isEn ? 'Left' : 'Trái'),
+                        ),
+                        ButtonSegment(
+                          value: 'right',
+                          label: Text(isEn ? 'Right' : 'Phải'),
+                        ),
+                      ],
+                      selected: {avatarPosition},
+                      onSelectionChanged: (value) =>
+                          onAvatarPositionChanged(value.first),
+                    ),
+                  ],
                 ],
               ),
             ),

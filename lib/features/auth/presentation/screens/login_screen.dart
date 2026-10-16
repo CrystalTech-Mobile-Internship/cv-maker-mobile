@@ -28,9 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _authSubscription = _authService.onAuthStateChange?.listen((
-      state,
-    ) {
+    _authSubscription = _authService.onAuthStateChange?.listen((state) {
       if (!mounted ||
           state.event != AuthChangeEvent.signedIn ||
           state.session == null) {

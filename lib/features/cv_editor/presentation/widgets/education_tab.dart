@@ -43,10 +43,9 @@ class EducationTab extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 _isEn ? 'Education & Degrees' : 'Học vấn & Bằng cấp',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
@@ -54,10 +53,9 @@ class EducationTab extends StatelessWidget {
                 _isEn
                     ? 'Add universities, degree levels, graduation year, and GPA.'
                     : 'Thêm thông tin trường đại học, niên khóa, bằng cấp và GPA của bạn.',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: Colors.grey.shade600),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -194,7 +192,7 @@ class EducationTab extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: onAddEducation,
           icon: const Icon(Icons.add_rounded),
-          label: Text(_isEn ? '+ Add Another Education' : '+ Thêm mục học vấn'),
+          label: Text(_isEn ? 'Add Another Education' : 'Thêm mục học vấn'),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(

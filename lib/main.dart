@@ -22,9 +22,5 @@ Future<void> main() async {
   final startInGuestMode = await const GuestSessionService().isGuestMode();
 
   // Run app inside Riverpod ProviderScope
-  runApp(
-    ProviderScope(
-      child: CvMakerApp(startInGuestMode: startInGuestMode),
-    ),
-  );
+  runApp(ProviderScope(child: CvMakerApp(startInGuestMode: startInGuestMode)));
 }
