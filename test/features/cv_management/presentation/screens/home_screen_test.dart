@@ -97,6 +97,13 @@ void main() {
     expect(find.text('Minimalist Clean'), findsOneWidget);
     expect(find.text('Creative Tech'), findsOneWidget);
     expect(find.text('🇻🇳 Tiếng Việt'), findsOneWidget);
+    expect(find.text('Điền hồ sơ mẫu sinh viên CNTT'), findsNothing);
+    expect(find.text('VD: CV Flutter Software Engineer'), findsOneWidget);
+
+    final createButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Tạo ngay'),
+    );
+    expect(createButton.onPressed, isNull);
   });
 
   testWidgets('HomeScreen displays CV cards when repository has data', (

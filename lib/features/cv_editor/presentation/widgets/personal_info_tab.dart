@@ -186,8 +186,11 @@ class PersonalInfoTab extends StatelessWidget {
               TextField(
                 controller: summaryController,
                 onChanged: onFieldChanged,
-                maxLines: 4,
+                minLines: 5,
+                maxLines: 7,
+                textAlignVertical: TextAlignVertical.top,
                 decoration: InputDecoration(
+                  alignLabelWithHint: true,
                   hintText: _isEn
                       ? 'Write 2-3 concise sentences highlighting core technical strengths, measurable achievements, and career focus...'
                       : 'Viết 2-3 câu ngắn gọn mô tả năng lực cốt lõi, thành tựu nổi bật và định hướng nghề nghiệp...',

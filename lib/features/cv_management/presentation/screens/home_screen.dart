@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -36,10 +33,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _showCreateCvDialog() async {
-    final titleController = TextEditingController(text: 'CV của tôi');
+    final titleController = TextEditingController();
     String selectedTemplate = 'harvard_ats';
     String selectedLanguage = 'vi'; // 'vi' or 'en'
-    bool useStudentSample = false;
 
     final created = await showDialog<bool>(
       context: context,
@@ -70,6 +66,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     TextField(
                       controller: titleController,
                       autofocus: true,
+                      onChanged: (_) => setDialogState(() {}),
                       decoration: const InputDecoration(
                         hintText: 'VD: CV Flutter Software Engineer',
                         prefixIcon: Icon(Icons.edit_note_rounded),
@@ -106,27 +103,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         setDialogState(() => selectedLanguage = set.first);
                       },
                     ),
-                    const SizedBox(height: 12),
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      value: useStudentSample,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      title: const Text('Điền hồ sơ mẫu sinh viên CNTT'),
-                      subtitle: const Text(
-                        'Trần Văn Hòa • IUH • TOEIC 700 • 4 dự án',
-                      ),
-                      onChanged: (value) {
-                        setDialogState(() {
-                          useStudentSample = value ?? false;
-                          if (useStudentSample) {
-                            titleController.text = 'CV Trần Văn Hòa';
-                            selectedTemplate =
-                                AppConstants.templateProfessionalSidebar;
-                            selectedLanguage = 'vi';
-                          }
-                        });
-                      },
-                    ),
                   ],
                 ),
               ),
@@ -136,7 +112,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: const Text('Huỷ'),
                 ),
                 FilledButton.icon(
-                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  onPressed: titleController.text.trim().isEmpty
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(true),
                   icon: const Icon(Icons.check_rounded),
                   label: const Text('Tạo ngay'),
                 ),
@@ -150,109 +128,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (created != true) return;
 
     final now = DateTime.now().toUtc();
-    final isEn = selectedLanguage == 'en';
-    if (useStudentSample) {
-      try {
-        final source = await rootBundle.loadString(
-          'assets/mock_cvs/tran_van_hoa_cv.json',
-        );
-        final sample =
-            CvModel.fromJson(
-              jsonDecode(source) as Map<String, dynamic>,
-            ).copyWith(
-              id: 'local-${now.microsecondsSinceEpoch}',
-              userId: ref.read(authServiceProvider).currentUser?.id,
-              title: titleController.text.trim(),
-              templateId: selectedTemplate,
-              createdAt: now,
-              updatedAt: now,
-            );
-        await ref.read(cvRepositoryProvider).save(sample);
-        if (!mounted) return;
-        _showMessage('Đã tạo hồ sơ mẫu Trần Văn Hòa.');
-        await _openEditor(sample);
-      } catch (_) {
-        if (mounted) _showMessage('Không thể tải hồ sơ mẫu.');
-      }
-      return;
-    }
     final newCv = CvModel(
       id: 'local-${now.microsecondsSinceEpoch}',
       userId: ref.read(authServiceProvider).currentUser?.id,
-      title: titleController.text.trim().isEmpty
-          ? (isEn ? 'Software Engineer Resume' : 'CV của tôi')
-          : titleController.text.trim(),
+      title: titleController.text.trim(),
       templateId: selectedTemplate,
       language: selectedLanguage,
       primaryColor: '#1E293B',
       fontSizeScale: 1.0,
-      summary: isEn
-          ? 'Motivated software engineer with experience in cross-platform mobile development, clean architecture, and modern state management.'
-          : 'Kỹ sư phần mềm nhiệt huyết chuyên sâu về ứng dụng đa nền tảng, kiến trúc sạch và tối ưu hiệu năng.',
-      personalInfo: PersonalInfoModel(
-        fullName: isEn ? 'Nguyen Tuan Anh' : 'Nguyễn Tuấn Anh',
-        targetRole: isEn ? 'Software Engineer' : 'Kỹ sư phần mềm Flutter',
-        email: 'tuananh@example.com',
-        phone: '0901 234 567',
-        address: isEn ? 'Hanoi, Vietnam' : 'Hà Nội, Việt Nam',
-      ),
-      educations: [
-        EducationModel(
-          id: 'edu-1',
-          institution: isEn
-              ? 'Hanoi University of Science and Technology'
-              : 'Đại học Bách Khoa Hà Nội',
-          degree: isEn ? 'Bachelor of Engineering' : 'Kỹ sư',
-          fieldOfStudy: isEn ? 'Computer Science' : 'Công nghệ Thông tin',
-          startDate: DateTime(2020, 9, 1).toUtc(),
-          endDate: DateTime(2024, 6, 30).toUtc(),
-          gpa: '3.6 / 4.0',
-        ),
-      ],
-      experiences: [
-        ExperienceModel(
-          id: 'exp-1',
-          jobTitle: isEn
-              ? 'Flutter Software Engineer'
-              : 'Kỹ sư phần mềm Flutter',
-          company: isEn
-              ? 'Tech Solutions Global'
-              : 'Công ty Cổ phần Công nghệ Tech',
-          location: isEn ? 'Hanoi, Vietnam' : 'Hà Nội',
-          startDate: DateTime(2023, 1, 1).toUtc(),
-          isCurrent: true,
-          bulletPoints: isEn
-              ? [
-                  'Architected production mobile app using Clean Architecture and Riverpod.',
-                  'Engineered offline-first SQLite synchronization with automated Supabase cloud replication.',
-                ]
-              : [
-                  'Phát triển ứng dụng di động đa nền tảng áp dụng kiến trúc Clean Architecture.',
-                  'Tối ưu hóa bộ nhớ và thiết kế luồng đồng bộ SQLite offline-first.',
-                ],
-        ),
-      ],
-      skills: const [
-        SkillModel(
-          id: 's-1',
-          name: 'Flutter & Dart',
-          category: SkillCategory.hard,
-          proficiency: 90,
-        ),
-        SkillModel(
-          id: 's-2',
-          name: 'Clean Architecture',
-          category: SkillCategory.hard,
-          proficiency: 85,
-        ),
-        SkillModel(
-          id: 's-3',
-          name: 'SQLite / Drift',
-          category: SkillCategory.hard,
-          proficiency: 80,
-        ),
-      ],
-      projects: const [],
+      summary: '',
+      personalInfo: const PersonalInfoModel(),
       isSynced: false,
       createdAt: now,
       updatedAt: now,

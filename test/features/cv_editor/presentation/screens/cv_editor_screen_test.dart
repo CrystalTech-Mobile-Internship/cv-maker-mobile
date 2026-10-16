@@ -111,6 +111,13 @@ void main() {
     // Verify English form fields
     expect(find.text('Full Name *'), findsOneWidget);
     expect(find.text('Target Role / Job Title *'), findsOneWidget);
+    expect(
+      tester
+          .widgetList<TextField>(find.byType(TextField))
+          .every((field) => field.controller?.text.isEmpty ?? true),
+      isTrue,
+      reason: 'Changing language must not insert or overwrite CV data.',
+    );
   });
 
   testWidgets('CvPreviewScreen renders the generated A4 PDF and controls', (

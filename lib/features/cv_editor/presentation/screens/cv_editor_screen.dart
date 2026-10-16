@@ -66,7 +66,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
   void _loadInitialCv() {
     final cv = widget.initialCv;
-    _titleController.text = cv?.title ?? (_isEn ? 'My Resume' : 'CV của tôi');
+    _titleController.text = cv?.title ?? '';
 
     if (cv != null) {
       _fullNameController.text = cv.personalInfo.fullName;
@@ -82,159 +82,12 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       _skills = List.of(cv.skills);
       _projects = List.of(cv.projects);
       _certifications = List.of(cv.certifications);
-    } else {
-      // Default initial seed data
-      _applyDefaultTemplateData(language: _selectedLanguage, notify: false);
     }
   }
 
-  void _applyDefaultTemplateData({
-    required String language,
-    bool notify = true,
-  }) {
+  void _changeLanguage({required String language, bool notify = true}) {
     final isEn = language == 'en';
-    setState(() {
-      _selectedLanguage = language;
-      if (isEn) {
-        _titleController.text = 'Software Engineer Resume';
-        _fullNameController.text = 'Nguyen Tuan Anh';
-        _roleController.text = 'Flutter Software Engineer';
-        _emailController.text = 'tuananh.dev@example.com';
-        _phoneController.text = '(+84) 901 234 567';
-        _locationController.text = 'Hanoi, Vietnam';
-        _summaryController.text =
-            'Results-driven Software Engineer specializing in cross-platform mobile architectures '
-            'with Flutter, Dart, Clean Architecture, and Riverpod. Proven track record in offline-first '
-            'SQLite synchronization and scalable Supabase cloud backends.';
-        _educations = [
-          EducationModel(
-            id: 'edu-1',
-            institution: 'Hanoi University of Science and Technology',
-            degree: 'Bachelor of Engineering',
-            fieldOfStudy: 'Computer Science & Software Engineering',
-            startDate: DateTime(2020, 9, 1).toUtc(),
-            endDate: DateTime(2024, 6, 30).toUtc(),
-            gpa: '3.6 / 4.0',
-          ),
-        ];
-        _experiences = [
-          ExperienceModel(
-            id: 'exp-1',
-            jobTitle: 'Flutter Software Engineer',
-            company: 'Tech Solutions Global',
-            location: 'Hanoi, Vietnam',
-            startDate: DateTime(2023, 1, 1).toUtc(),
-            isCurrent: true,
-            bulletPoints: [
-              'Architected production mobile app using Clean Architecture and Riverpod.',
-              'Engineered offline-first SQLite synchronization with automated Supabase cloud replication.',
-              'Achieved 60fps smooth UI rendering across 15+ screen flows.',
-            ],
-          ),
-        ];
-        _skills = const [
-          SkillModel(
-            id: 's-1',
-            name: 'Flutter & Dart',
-            category: SkillCategory.hard,
-            proficiency: 90,
-          ),
-          SkillModel(
-            id: 's-2',
-            name: 'Clean Architecture',
-            category: SkillCategory.hard,
-            proficiency: 85,
-          ),
-          SkillModel(
-            id: 's-3',
-            name: 'SQLite / Drift',
-            category: SkillCategory.hard,
-            proficiency: 80,
-          ),
-          SkillModel(
-            id: 's-4',
-            name: 'Supabase Cloud',
-            category: SkillCategory.hard,
-            proficiency: 75,
-          ),
-          SkillModel(
-            id: 's-5',
-            name: 'Agile & Teamwork',
-            category: SkillCategory.soft,
-            proficiency: 90,
-          ),
-        ];
-      } else {
-        _titleController.text = 'CV Flutter Software Engineer';
-        _fullNameController.text = 'Nguyễn Tuấn Anh';
-        _roleController.text = 'Kỹ sư phần mềm Flutter';
-        _emailController.text = 'tuananh@example.com';
-        _phoneController.text = '0901 234 567';
-        _locationController.text = 'Hà Nội, Việt Nam';
-        _summaryController.text =
-            'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, '
-            'Riverpod và Supabase. Có kinh nghiệm tối ưu hóa hiệu năng ứng dụng di động '
-            'và xử lý cơ sở dữ liệu SQLite ngoại tuyến mượt mà.';
-        _educations = [
-          EducationModel(
-            id: 'edu-1',
-            institution: 'Đại học Bách Khoa Hà Nội',
-            degree: 'Kỹ sư',
-            fieldOfStudy: 'Công nghệ Thông tin',
-            startDate: DateTime(2020, 9, 1).toUtc(),
-            endDate: DateTime(2024, 6, 30).toUtc(),
-            gpa: '3.6 / 4.0',
-          ),
-        ];
-        _experiences = [
-          ExperienceModel(
-            id: 'exp-1',
-            jobTitle: 'Kỹ sư phần mềm Flutter',
-            company: 'Tech Solutions Vietnam',
-            location: 'Hà Nội',
-            startDate: DateTime(2023, 1, 1).toUtc(),
-            isCurrent: true,
-            bulletPoints: [
-              'Phát triển ứng dụng di động đa nền tảng áp dụng kiến trúc Clean Architecture.',
-              'Tối ưu hóa bộ nhớ và thiết kế luồng đồng bộ SQLite offline-first.',
-              'Tích hợp xác thực và lưu trữ dữ liệu thời gian thực trên Supabase.',
-            ],
-          ),
-        ];
-        _skills = const [
-          SkillModel(
-            id: 's-1',
-            name: 'Flutter & Dart',
-            category: SkillCategory.hard,
-            proficiency: 90,
-          ),
-          SkillModel(
-            id: 's-2',
-            name: 'Clean Architecture',
-            category: SkillCategory.hard,
-            proficiency: 85,
-          ),
-          SkillModel(
-            id: 's-3',
-            name: 'SQLite / Drift',
-            category: SkillCategory.hard,
-            proficiency: 80,
-          ),
-          SkillModel(
-            id: 's-4',
-            name: 'Supabase Cloud',
-            category: SkillCategory.hard,
-            proficiency: 75,
-          ),
-          SkillModel(
-            id: 's-5',
-            name: 'Làm việc nhóm & Agile',
-            category: SkillCategory.soft,
-            proficiency: 90,
-          ),
-        ];
-      }
-    });
+    setState(() => _selectedLanguage = language);
 
     if (notify) {
       _onFieldChanged();
@@ -242,8 +95,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         SnackBar(
           content: Text(
             isEn
-                ? 'Applied ATS English template data!'
-                : 'Đã áp dụng dữ liệu mẫu tiếng Việt!',
+                ? 'Language changed to English.'
+                : 'Đã chuyển sang tiếng Việt.',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -743,8 +596,11 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                 ],
                 TextField(
                   controller: bulletCtrl,
-                  maxLines: 4,
+                  minLines: 5,
+                  maxLines: 7,
+                  textAlignVertical: TextAlignVertical.top,
                   decoration: InputDecoration(
+                    alignLabelWithHint: true,
                     labelText: _isEn
                         ? 'Key Achievements (1 per line)'
                         : 'Mô tả & Thành tích (mỗi dòng 1 ý)',
@@ -1055,8 +911,11 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
               const SizedBox(height: 10),
               TextField(
                 controller: details,
-                maxLines: 5,
+                minLines: 5,
+                maxLines: 8,
+                textAlignVertical: TextAlignVertical.top,
                 decoration: InputDecoration(
+                  alignLabelWithHint: true,
                   labelText: _isEn
                       ? 'Tasks (one bullet per line)'
                       : 'Công việc đã làm (mỗi dòng một ý)',
@@ -1326,10 +1185,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   onSelectionChanged: (set) {
                     final newLang = set.first;
                     if (newLang != _selectedLanguage) {
-                      _applyDefaultTemplateData(
-                        language: newLang,
-                        notify: true,
-                      );
+                      _changeLanguage(language: newLang, notify: true);
                     }
                   },
                 ),

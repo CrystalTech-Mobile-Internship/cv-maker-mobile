@@ -13,6 +13,7 @@ class AppTheme {
   static const Color dangerRose = Color(0xFFF43F5E);
   static const Color surfaceLight = Color(0xFFF8FAFC);
   static const Color surfaceCard = Color(0xFFFFFFFF);
+  static const Color inputSurface = Color(0xFFF1F7FC);
 
   /// Light Theme
   static ThemeData get lightTheme {
@@ -57,18 +58,20 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: inputSurface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 14,
+          vertical: 16,
         ),
+        prefixIconColor: primarySlate.withValues(alpha: 0.78),
+        suffixIconColor: primarySlate.withValues(alpha: 0.78),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
