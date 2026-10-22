@@ -15,8 +15,16 @@ class CvTemplatePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final templates = [
+      ...CvTemplateCatalog.freeTemplates.where(
+        (template) => template.id == selectedId,
+      ),
+      ...CvTemplateCatalog.freeTemplates.where(
+        (template) => template.id != selectedId,
+      ),
+    ];
     return Column(
-      children: CvTemplateCatalog.freeTemplates
+      children: templates
           .map((template) {
             final isSelected = template.id == selectedId;
             final foreground = isSelected
@@ -90,7 +98,7 @@ class CvTemplatePicker extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          'FREE',
+                          isSelected ? 'ĐÃ CHỌN' : 'FREE',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w800,

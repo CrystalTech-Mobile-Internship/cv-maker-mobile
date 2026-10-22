@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 /// Application Material 3 Theme Configuration
 class AppTheme {
   // Brand Color Palette (Slate Navy & Modern Teal)
+  static const Color brandIndigo = Color(0xFF4F46E5);
   static const Color primarySlate = Color(0xFF1E293B);
   static const Color primaryNavy = Color(0xFF0F172A);
   static const Color accentTeal = Color(0xFF0EA5E9);
@@ -23,7 +24,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: ColorScheme.light(
-        primary: primarySlate,
+        primary: brandIndigo,
         onPrimary: Colors.white,
         secondary: accentTeal,
         onSecondary: Colors.white,
@@ -112,7 +113,7 @@ class AppTheme {
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: accentTeal,
+        backgroundColor: brandIndigo,
         foregroundColor: Colors.white,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
