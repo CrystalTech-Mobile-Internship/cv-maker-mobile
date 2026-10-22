@@ -12,8 +12,8 @@ class SupabaseService {
 
     if (!EnvConstants.isSupabaseConfigured) {
       debugPrint(
-        '⚠️ [SupabaseService] SUPABASE_URL hoặc SUPABASE_ANON_KEY chưa được cấu hình thực tế.\n'
-        'Ứng dụng sẽ hoạt động ở chế độ Local / Offline Guest cho đến khi nhận key từ Phong.',
+        '⚠️ [SupabaseService] Supabase profile đang chọn chưa được cấu hình.\n'
+        'Ứng dụng sẽ hoạt động ở chế độ Local / Offline Guest.',
       );
       return;
     }
@@ -25,7 +25,9 @@ class SupabaseService {
         anonKey: EnvConstants.supabaseAnonKey,
       );
       _initialized = true;
-      debugPrint('✅ [SupabaseService] Supabase đã khởi tạo thành công.');
+      debugPrint(
+        '✅ [SupabaseService] Đã khởi tạo ${EnvConstants.supabaseProfileLabel}.',
+      );
     } catch (e) {
       debugPrint('❌ [SupabaseService] Lỗi khởi tạo Supabase: $e');
     }
@@ -37,14 +39,16 @@ class SupabaseService {
     return Supabase.instance.client;
   }
 
+  static String get activeProfileLabel =>
+      _initialized ? EnvConstants.supabaseProfileLabel : 'Không khả dụng';
+
   /// Throws a clear configuration error instead of returning a nullable client
   /// deep inside a data source.
   static SupabaseClient get requiredClient {
     final value = client;
     if (value == null) {
       throw StateError(
-        'Supabase chưa được cấu hình. Kiểm tra SUPABASE_URL và '
-        'SUPABASE_ANON_KEY trong file .env.',
+        'Supabase chưa được cấu hình. Kiểm tra profile và URL/key trong .env.',
       );
     }
     return value;

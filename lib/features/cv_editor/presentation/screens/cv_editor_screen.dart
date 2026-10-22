@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../auth/data/auth_service.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../data/repositories/cv_repository_provider.dart';
 import '../../data/services/profile_image_service_impl.dart';
 import '../../domain/models/models.dart';
@@ -177,7 +177,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
   CvModel _buildCvModel() {
     final existing = widget.initialCv;
-    final currentUserId = ref.read(authServiceProvider).currentUser?.id;
+    final currentUserId = ref.read(currentAuthUserProvider)?.id;
     final title = _titleController.text.trim();
     final now = DateTime.now().toUtc();
 
@@ -213,7 +213,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   Future<void> _handleSave() async {
     setState(() => _isSaving = true);
     final model = _buildCvModel();
-    final userId = ref.read(authServiceProvider).currentUser?.id;
+    final userId = ref.read(currentAuthUserProvider)?.id;
 
     final result = await ref
         .read(cvSyncRepositoryProvider)
@@ -1059,7 +1059,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isSignedIn = ref.watch(authServiceProvider).currentUser != null;
+    final isSignedIn = ref.watch(currentAuthUserProvider) != null;
     final isEn = _isEn;
 
     return Scaffold(
