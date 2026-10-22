@@ -93,6 +93,13 @@ final class LocalCvRepository implements CvRepository {
   }
 
   @override
+  Future<CvModel> replaceWithSynced(String localId, CvModel syncedCv) async {
+    final canonical = syncedCv.copyWith(isSynced: true);
+    await _database.replaceCv(localId, _toCompanion(canonical));
+    return canonical;
+  }
+
+  @override
   Future<bool> deleteById(String id, {DateTime? now}) {
     return _database.deleteCvAndQueueRemoteDeletion(
       id,

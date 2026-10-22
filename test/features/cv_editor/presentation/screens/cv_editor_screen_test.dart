@@ -50,6 +50,13 @@ class MockCvRepo implements CvRepository {
   Future<bool> markSynced(String id) async => true;
 
   @override
+  Future<CvModel> replaceWithSynced(String localId, CvModel syncedCv) async {
+    list.removeWhere((cv) => cv.id == localId);
+    list.add(syncedCv);
+    return syncedCv;
+  }
+
+  @override
   Future<CvModel> save(
     CvModel cv, {
     bool markAsLocalChange = true,

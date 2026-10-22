@@ -119,6 +119,10 @@ final class _FakeCvRepository implements CvRepository {
   Future<bool> markSynced(String id) async => true;
 
   @override
+  Future<CvModel> replaceWithSynced(String localId, CvModel syncedCv) async =>
+      syncedCv;
+
+  @override
   Future<bool> deleteById(String id, {DateTime? now}) async => true;
 
   @override

@@ -7,14 +7,21 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeCvRemoteDataSource implements CvRemoteDataSource {
-  FakeCvRemoteDataSource({this.shouldThrow = false, this.errorMessage});
+  FakeCvRemoteDataSource({
+    this.shouldThrow = false,
+    this.errorMessage,
+    this.assignedId,
+    this.remoteCvs = const [],
+  });
 
   final bool shouldThrow;
   final String? errorMessage;
+  final String? assignedId;
+  final List<CvModel> remoteCvs;
   CvModel? lastUpserted;
 
   @override
-  Future<List<CvModel>> fetchUserCvs() async => const [];
+  Future<List<CvModel>> fetchUserCvs() async => remoteCvs;
 
   @override
   Future<CvModel> upsertCv(CvModel cv) async {
@@ -22,7 +29,7 @@ class FakeCvRemoteDataSource implements CvRemoteDataSource {
       throw CvRemoteDataSourceException(errorMessage ?? 'Sync error');
     }
     lastUpserted = cv;
-    return cv.copyWith(isSynced: true);
+    return cv.copyWith(id: assignedId, isSynced: true);
   }
 
   @override
@@ -136,5 +143,35 @@ void main() {
     expect(inDb, isNotNull);
     expect(inDb!.isSynced, isFalse);
     expect(inDb.title, cv.title);
+  });
+
+  test('syncAccount claims guest drafts and stores the cloud UUID', () async {
+    final guestCv = buildSampleCv(id: 'local-guest');
+    await localRepository.save(guestCv);
+    final cloudCv = buildSampleCv(
+      id: '22222222-2222-4222-8222-222222222222',
+      userId: 'user-123',
+    ).copyWith(isSynced: true);
+    final fakeRemote = FakeCvRemoteDataSource(
+      assignedId: '11111111-1111-4111-8111-111111111111',
+      remoteCvs: [cloudCv],
+    );
+    final syncRepo = CvSyncRepository(
+      localRepository: localRepository,
+      remoteDataSource: fakeRemote,
+    );
+
+    final result = await syncRepo.syncAccount('user-123');
+
+    expect(result.isSuccess, isTrue);
+    expect(result.uploadedCount, 1);
+    expect(result.downloadedCount, 1);
+    expect(await localRepository.getById('local-guest'), isNull);
+    final claimed = await localRepository.getById(
+      '11111111-1111-4111-8111-111111111111',
+    );
+    expect(claimed?.userId, 'user-123');
+    expect(claimed?.isSynced, isTrue);
+    expect(await localRepository.getById(cloudCv.id), isNotNull);
   });
 }

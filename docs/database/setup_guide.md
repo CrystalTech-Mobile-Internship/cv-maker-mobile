@@ -1,36 +1,41 @@
 # Smart CV Maker - database setup
 
-Tài liệu này dùng cho phần backend dữ liệu của tuần 5. Schema hiện tại tập trung
-vào hồ sơ người dùng, CV và các mục nội dung CV. AI, Storage và seed template
-chưa nằm trong phạm vi của bước này.
+Tài liệu này mô tả backend Supabase và cơ chế SQLite offline-first của ứng dụng.
+Schema tập trung vào tài khoản, CV, nội dung CV và danh mục template. AI và
+Storage chưa nằm trong phạm vi hiện tại.
 
 ## 1. Tạo project Supabase
 
-Project đang dùng cho môi trường Singapore là `smart-cv-maker-sg` trong tổ chức
-Supabase `Smart CV Maker`, region `Southeast Asia (Singapore)`
-(`ap-southeast-1`). Project Tokyo `smart-cv-maker` được giữ nguyên và không bị
-xoá. Không đưa `service_role` key vào ứng dụng Flutter.
+Project phát triển hiện tại là `smart-cv-maker-dev`. Không đưa `service_role`
+key vào ứng dụng Flutter.
 
 ## 2. Chạy schema
 
 1. Mở **SQL Editor** của project.
-2. Mở file `supabase/schema.sql` trong repository.
+2. Với project trống, mở file `supabase/schema.sql`. Với project đã có schema,
+   chạy migration mới nhất trong `supabase/migrations/`.
 3. Dán toàn bộ nội dung vào một query mới.
 4. Chạy query một lần.
 5. Kiểm tra trong **Table Editor** có các bảng:
    `profiles`, `cvs`, `cv_sections`, `cv_items`, `templates`.
 
-File có thể chạy lại an toàn ở mức migration ban đầu: các bảng, index và trigger
-được tạo theo kiểu `if not exists`; các policy được xoá trước khi tạo lại.
+Migration `20261021000100_enable_offline_cloud_sync.sql` hỗ trợ cả project mới
+và schema cũ, đồng thời bật RLS cho toàn bộ dữ liệu người dùng.
 
 ## 3. Cấu hình Flutter
 
 Tạo file `.env` từ `.env.example` trong thư mục project:
 
 ```env
-SUPABASE_URL=https://<project-ref>.supabase.co
-SUPABASE_ANON_KEY=<publishable-or-anon-key>
+SUPABASE_PRIMARY_URL=https://<primary-project-ref>.supabase.co
+SUPABASE_PRIMARY_ANON_KEY=<primary-publishable-or-anon-key>
+SUPABASE_SECONDARY_URL=https://<secondary-project-ref>.supabase.co
+SUPABASE_SECONDARY_ANON_KEY=<secondary-publishable-or-anon-key>
+SUPABASE_ACTIVE_PROFILE=secondary
 ```
+
+Ứng dụng chỉ kết nối **một** profile trong mỗi lần chạy. Không trộn session hoặc
+user ID giữa hai project Supabase.
 
 Chỉ sử dụng publishable/anon key trong app. Không commit `.env` và không dùng
 service-role key ở phía client.
@@ -49,14 +54,16 @@ sẽ báo lỗi cấu hình thay vì âm thầm ghi dữ liệu.
 
 ## 4. Đăng nhập và lưu CV
 
-Màn hình đăng nhập hiện dùng Supabase Auth với email và mật khẩu:
+Luồng tài khoản dùng Supabase Auth với email/mật khẩu và Google:
 
-- Chọn **Đăng ký** lần đầu để tạo user trong `Authentication -> Users`.
+- Mở **Tạo tài khoản** để đăng ký bằng họ tên, email và mật khẩu.
 - Nếu project yêu cầu xác nhận email, mở email xác nhận trước khi đăng nhập.
-- Sau khi đăng nhập, màn hình Home tải các CV thuộc user hiện tại qua
-  `CvRemoteDataSource.fetchUserCvs()`.
-- Trong màn hình Editor, nút **Lưu lên cloud** gọi `upsertCv()`; nút xoá trên
-  Home gọi `deleteRemoteCv()`.
+- Sau khi đăng nhập, Home chỉ hiển thị CV khách trên thiết bị và CV thuộc user
+  hiện tại.
+- Nút **Đồng bộ ngay** tải các bản local chưa đồng bộ lên cloud, sau đó tải CV
+  của tài khoản hiện tại về SQLite.
+- Lưu trong Editor luôn ghi SQLite trước. Mất mạng không làm mất CV; bản local
+  được giữ ở trạng thái chờ đồng bộ.
 - RLS bảo đảm user chỉ đọc, sửa và xoá CV có `user_id = auth.uid()`.
 
 ## 5. Đăng nhập Google trên Android
@@ -64,7 +71,7 @@ Màn hình đăng nhập hiện dùng Supabase Auth với email và mật khẩu
 Code Flutter đã có nút **Tiếp tục với Google** và dùng deep link:
 
 ```text
-com.example.cv_maker_mobile://login-callback
+com.example.cvmakermobile://login-callback
 ```
 
 Để bật provider, trong Google Cloud Console tạo OAuth Client ID loại **Web
@@ -117,15 +124,14 @@ Nếu thấy `localhost refused to connect`, kiểm tra terminal còn tiến tr�
 
 ## 7. Phạm vi dữ liệu local và cloud
 
-- Local/UI state: nội dung đang nhập dở, trạng thái loading/error, tab hiện tại
-  và bản nháp chưa bấm lưu.
-- Cloud/Supabase: CV đã lưu, `personal_info`, summary, template, và các mục
-  education/experience/skills/projects trong `cv_sections` + `cv_items`.
-- Đồng bộ: `CvRemoteDataSource.upsertCv()` ghi một CV và các section con; khi
-  xoá CV, các section/item con bị xoá theo foreign key cascade.
-- Bản hiện tại chưa thêm Hive/SQLite. Khi cần offline-first, thêm local data
-  source và một lớp repository để đồng bộ theo `updated_at`; không gọi Supabase
-  trực tiếp từ widget.
+- SQLite/Drift là nguồn dữ liệu chính khi người dùng chỉnh sửa CV.
+- Khách chưa đăng nhập vẫn tạo, sửa, xem trước và xuất PDF bằng dữ liệu local.
+- Supabase lưu bản sao theo tài khoản: `personal_info`, summary, template và các
+  mục education/experience/skills/projects/certifications.
+- `CvSyncRepository` điều phối local và remote; widget không gọi Supabase trực
+  tiếp.
+- Năm template trong tab **Mẫu CV** là thiết kế, không được tính là năm CV đã
+  lưu. Chỉ các dòng trong bảng SQLite `local_cvs` mới xuất hiện ở bộ đếm đồng bộ.
 
 ## 8. Kiểm tra RLS tối thiểu
 

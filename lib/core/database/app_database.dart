@@ -82,7 +82,9 @@ class AppDatabase extends _$AppDatabase {
   Future<List<LocalCvRow>> getPendingSyncCvs(String userId) {
     return (select(localCvs)
           ..where(
-            (row) => row.userId.equals(userId) & row.isSynced.equals(false),
+            (row) =>
+                (row.userId.isNull() | row.userId.equals(userId)) &
+                row.isSynced.equals(false),
           )
           ..orderBy([(row) => OrderingTerm.asc(row.updatedAt)]))
         .get();
@@ -90,6 +92,13 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> upsertCv(LocalCvsCompanion cv) {
     return into(localCvs).insertOnConflictUpdate(cv);
+  }
+
+  Future<void> replaceCv(String localId, LocalCvsCompanion syncedCv) {
+    return transaction(() async {
+      await (delete(localCvs)..where((row) => row.id.equals(localId))).go();
+      await into(localCvs).insertOnConflictUpdate(syncedCv);
+    });
   }
 
   Future<List<PendingCvDeletionRow>> getPendingCvDeletions(String userId) {
