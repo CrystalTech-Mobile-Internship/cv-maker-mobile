@@ -19,6 +19,7 @@ class FakeCvRemoteDataSource implements CvRemoteDataSource {
   final String? assignedId;
   final List<CvModel> remoteCvs;
   CvModel? lastUpserted;
+  final List<String> deletedIds = [];
 
   @override
   Future<List<CvModel>> fetchUserCvs() async => remoteCvs;
@@ -33,7 +34,12 @@ class FakeCvRemoteDataSource implements CvRemoteDataSource {
   }
 
   @override
-  Future<void> deleteRemoteCv(String cvId) async {}
+  Future<void> deleteRemoteCv(String cvId) async {
+    if (shouldThrow) {
+      throw CvRemoteDataSourceException(errorMessage ?? 'Delete error');
+    }
+    deletedIds.add(cvId);
+  }
 }
 
 void main() {
@@ -49,12 +55,18 @@ void main() {
     await database.close();
   });
 
-  CvModel buildSampleCv({String id = 'cv-1', String? userId}) {
-    final now = DateTime.utc(2026, 10, 12, 10);
+  CvModel buildSampleCv({
+    String id = 'cv-1',
+    String? userId,
+    String title = 'CV Kỹ sư phần mềm',
+    DateTime? updatedAt,
+    bool isSynced = false,
+  }) {
+    final now = updatedAt ?? DateTime.utc(2026, 10, 12, 10);
     return CvModel(
       id: id,
       userId: userId,
-      title: 'CV Kỹ sư phần mềm',
+      title: title,
       templateId: 'harvard_ats',
       primaryColor: '#1E293B',
       fontSizeScale: 1.0,
@@ -70,7 +82,7 @@ void main() {
       experiences: const [],
       skills: const [],
       projects: const [],
-      isSynced: false,
+      isSynced: isSynced,
       createdAt: now,
       updatedAt: now,
     );
@@ -173,5 +185,143 @@ void main() {
     expect(claimed?.userId, 'user-123');
     expect(claimed?.isSynced, isTrue);
     expect(await localRepository.getById(cloudCv.id), isNotNull);
+  });
+
+  test('syncAccount downloads cloud CV when cloud version is newer', () async {
+    const cvId = '33333333-3333-4333-8333-333333333333';
+    final localTime = DateTime.utc(2026, 10, 20, 8);
+    final cloudTime = DateTime.utc(2026, 10, 20, 9);
+    await localRepository.save(
+      buildSampleCv(
+        id: cvId,
+        userId: 'user-123',
+        title: 'Bản local cũ',
+        updatedAt: localTime,
+      ),
+      now: localTime,
+    );
+    final fakeRemote = FakeCvRemoteDataSource(
+      remoteCvs: [
+        buildSampleCv(
+          id: cvId,
+          userId: 'user-123',
+          title: 'Bản cloud mới',
+          updatedAt: cloudTime,
+          isSynced: true,
+        ),
+      ],
+    );
+    final syncRepo = CvSyncRepository(
+      localRepository: localRepository,
+      remoteDataSource: fakeRemote,
+    );
+
+    final result = await syncRepo.syncAccount('user-123');
+
+    expect(result.uploadedCount, 0);
+    expect(result.downloadedCount, 1);
+    expect(result.conflictCount, 1);
+    expect(fakeRemote.lastUpserted, isNull);
+    expect((await localRepository.getById(cvId))?.title, 'Bản cloud mới');
+  });
+
+  test('syncAccount uploads local CV when local version is newer', () async {
+    const cvId = '44444444-4444-4444-8444-444444444444';
+    final cloudTime = DateTime.utc(2026, 10, 20, 8);
+    final localTime = DateTime.utc(2026, 10, 20, 9);
+    await localRepository.save(
+      buildSampleCv(
+        id: cvId,
+        userId: 'user-123',
+        title: 'Bản local mới',
+        updatedAt: localTime,
+      ),
+      now: localTime,
+    );
+    final fakeRemote = FakeCvRemoteDataSource(
+      remoteCvs: [
+        buildSampleCv(
+          id: cvId,
+          userId: 'user-123',
+          title: 'Bản cloud cũ',
+          updatedAt: cloudTime,
+          isSynced: true,
+        ),
+      ],
+    );
+    final syncRepo = CvSyncRepository(
+      localRepository: localRepository,
+      remoteDataSource: fakeRemote,
+    );
+
+    final result = await syncRepo.syncAccount('user-123');
+
+    expect(result.uploadedCount, 1);
+    expect(result.downloadedCount, 0);
+    expect(result.conflictCount, 1);
+    expect(fakeRemote.lastUpserted?.title, 'Bản local mới');
+  });
+
+  test('syncAccount flushes the offline cloud deletion queue', () async {
+    const cvId = '55555555-5555-4555-8555-555555555555';
+    final cloudTime = DateTime.utc(2026, 10, 20, 8);
+    final deletionTime = DateTime.utc(2026, 10, 20, 9);
+    final existing = buildSampleCv(
+      id: cvId,
+      userId: 'user-123',
+      updatedAt: cloudTime,
+      isSynced: true,
+    );
+    await localRepository.save(existing, markAsLocalChange: false);
+    await localRepository.deleteById(cvId, now: deletionTime);
+    final fakeRemote = FakeCvRemoteDataSource(remoteCvs: [existing]);
+    final syncRepo = CvSyncRepository(
+      localRepository: localRepository,
+      remoteDataSource: fakeRemote,
+    );
+
+    final result = await syncRepo.syncAccount('user-123');
+
+    expect(result.deletedCount, 1);
+    expect(fakeRemote.deletedIds, [cvId]);
+    expect(await localRepository.getPendingDeletions('user-123'), isEmpty);
+    expect(await localRepository.getById(cvId), isNull);
+  });
+
+  test('newer cloud CV wins over an older offline deletion', () async {
+    const cvId = '66666666-6666-4666-8666-666666666666';
+    final localTime = DateTime.utc(2026, 10, 20, 7);
+    final deletionTime = DateTime.utc(2026, 10, 20, 8);
+    final cloudTime = DateTime.utc(2026, 10, 20, 9);
+    final localCv = buildSampleCv(
+      id: cvId,
+      userId: 'user-123',
+      title: 'Bản đã xoá trên máy',
+      updatedAt: localTime,
+      isSynced: true,
+    );
+    await localRepository.save(localCv, markAsLocalChange: false);
+    await localRepository.deleteById(cvId, now: deletionTime);
+    final cloudCv = buildSampleCv(
+      id: cvId,
+      userId: 'user-123',
+      title: 'Bản cloud vừa sửa',
+      updatedAt: cloudTime,
+      isSynced: true,
+    );
+    final fakeRemote = FakeCvRemoteDataSource(remoteCvs: [cloudCv]);
+    final syncRepo = CvSyncRepository(
+      localRepository: localRepository,
+      remoteDataSource: fakeRemote,
+    );
+
+    final result = await syncRepo.syncAccount('user-123');
+
+    expect(result.deletedCount, 0);
+    expect(result.downloadedCount, 1);
+    expect(result.conflictCount, 1);
+    expect(fakeRemote.deletedIds, isEmpty);
+    expect((await localRepository.getById(cvId))?.title, 'Bản cloud vừa sửa');
+    expect(await localRepository.getPendingDeletions('user-123'), isEmpty);
   });
 }

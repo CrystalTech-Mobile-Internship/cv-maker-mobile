@@ -60,8 +60,10 @@ Luồng tài khoản dùng Supabase Auth với email/mật khẩu và Google:
 - Nếu project yêu cầu xác nhận email, mở email xác nhận trước khi đăng nhập.
 - Sau khi đăng nhập, Home chỉ hiển thị CV khách trên thiết bị và CV thuộc user
   hiện tại.
-- Nút **Đồng bộ ngay** tải các bản local chưa đồng bộ lên cloud, sau đó tải CV
-  của tài khoản hiện tại về SQLite.
+- Nút **Đồng bộ ngay** tải snapshot cloud trước, so sánh `updatedAt` UTC rồi
+  upload/download theo quy tắc bản mới hơn thắng.
+- Hàng đợi xóa offline được đẩy lên cloud trong cùng lượt đồng bộ. Nếu cloud có
+  bản sửa mới hơn thời điểm xóa, CV được phục hồi về SQLite để tránh mất dữ liệu.
 - Lưu trong Editor luôn ghi SQLite trước. Mất mạng không làm mất CV; bản local
   được giữ ở trạng thái chờ đồng bộ.
 - RLS bảo đảm user chỉ đọc, sửa và xoá CV có `user_id = auth.uid()`.

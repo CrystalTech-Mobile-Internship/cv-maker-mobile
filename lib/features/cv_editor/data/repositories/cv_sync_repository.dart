@@ -25,16 +25,20 @@ class CvSyncResult {
     required this.uploadedCount,
     required this.downloadedCount,
     required this.failedCount,
+    this.deletedCount = 0,
+    this.conflictCount = 0,
     this.errorMessage,
   });
 
   final int uploadedCount;
   final int downloadedCount;
   final int failedCount;
+  final int deletedCount;
+  final int conflictCount;
   final String? errorMessage;
 
   bool get isSuccess => failedCount == 0 && errorMessage == null;
-  int get synchronizedCount => uploadedCount + downloadedCount;
+  int get synchronizedCount => uploadedCount + downloadedCount + deletedCount;
 }
 
 /// Repository responsible for coordinating Local-First SQLite persistence
@@ -93,9 +97,10 @@ class CvSyncRepository {
     }
   }
 
-  /// Uploads unsynchronized local and guest CVs, then downloads the current
-  /// account's cloud CVs into SQLite. Each local draft remains intact when an
-  /// individual cloud operation fails.
+  /// Reconciles SQLite and Supabase using a last-write-wins strategy based on
+  /// UTC [CvModel.updatedAt]. Cloud data is fetched before any upload so an
+  /// older local draft can never overwrite a newer version from another
+  /// device. Pending offline deletions are handled with the same rule.
   Future<CvSyncResult> syncAccount(String userId) async {
     if (userId.isEmpty) {
       return const CvSyncResult(
@@ -106,52 +111,114 @@ class CvSyncRepository {
       );
     }
 
-    var uploaded = 0;
-    var failed = 0;
-    final pending = await _localRepository.getPendingSync(userId);
-    for (final cv in pending) {
-      try {
-        final remoteCv = await _remote.upsertCv(cv.copyWith(userId: userId));
-        await _localRepository.replaceWithSynced(
-          cv.id,
-          remoteCv.copyWith(userId: userId, isSynced: true),
-        );
-        uploaded++;
-      } catch (_) {
-        failed++;
-      }
-    }
-
     try {
       final remoteCvs = await _remote.fetchUserCvs();
-      for (final cv in remoteCvs) {
-        await _localRepository.save(
-          cv.copyWith(userId: userId, isSynced: true),
-          markAsLocalChange: false,
-        );
+      final remoteById = {for (final cv in remoteCvs) cv.id: cv};
+      var uploaded = 0;
+      var downloaded = 0;
+      var deleted = 0;
+      var conflicts = 0;
+      var failed = 0;
+
+      final pendingDeletions = await _localRepository.getPendingDeletions(
+        userId,
+      );
+      for (final deletion in pendingDeletions) {
+        final remoteCv = remoteById.remove(deletion.cvId);
+        try {
+          if (remoteCv != null &&
+              remoteCv.updatedAt.isAfter(deletion.deletedAt)) {
+            await _storeRemote(remoteCv, userId);
+            downloaded++;
+            conflicts++;
+          } else {
+            if (remoteCv != null) {
+              await _remote.deleteRemoteCv(deletion.cvId);
+            }
+            deleted++;
+          }
+          await _localRepository.confirmDeletionSynced(deletion.cvId);
+        } catch (_) {
+          failed++;
+        }
       }
+
+      final pending = await _localRepository.getPendingSync(userId);
+      for (final localCv in pending) {
+        final remoteCv = remoteById.remove(localCv.id);
+        if (remoteCv != null && remoteCv.updatedAt.isAfter(localCv.updatedAt)) {
+          try {
+            await _storeRemote(remoteCv, userId);
+            downloaded++;
+            conflicts++;
+          } catch (_) {
+            failed++;
+          }
+          continue;
+        }
+
+        try {
+          final uploadedCv = await _remote.upsertCv(
+            localCv.copyWith(userId: userId),
+          );
+          await _localRepository.replaceWithSynced(
+            localCv.id,
+            uploadedCv.copyWith(userId: userId, isSynced: true),
+          );
+          remoteById.remove(uploadedCv.id);
+          uploaded++;
+          if (remoteCv != null) conflicts++;
+        } catch (_) {
+          failed++;
+        }
+      }
+
+      for (final remoteCv in remoteById.values) {
+        final localCv = await _localRepository.getById(remoteCv.id);
+        final belongsToAnotherAccount =
+            localCv?.userId != null && localCv?.userId != userId;
+        if (belongsToAnotherAccount) continue;
+        if (localCv == null || remoteCv.updatedAt.isAfter(localCv.updatedAt)) {
+          try {
+            await _storeRemote(remoteCv, userId);
+            downloaded++;
+          } catch (_) {
+            failed++;
+          }
+        }
+      }
+
       return CvSyncResult(
         uploadedCount: uploaded,
-        downloadedCount: remoteCvs.length,
+        downloadedCount: downloaded,
+        deletedCount: deleted,
+        conflictCount: conflicts,
         failedCount: failed,
         errorMessage: failed == 0
             ? null
-            : '$failed CV chưa thể tải lên. Bản local vẫn an toàn.',
+            : '$failed thao tác chưa thể đồng bộ. Dữ liệu local vẫn an toàn.',
       );
     } on CvRemoteDataSourceException catch (error) {
       return CvSyncResult(
-        uploadedCount: uploaded,
+        uploadedCount: 0,
         downloadedCount: 0,
-        failedCount: failed + 1,
+        failedCount: 1,
         errorMessage: error.message,
       );
     } catch (_) {
       return CvSyncResult(
-        uploadedCount: uploaded,
+        uploadedCount: 0,
         downloadedCount: 0,
-        failedCount: failed + 1,
+        failedCount: 1,
         errorMessage: 'Không thể tải dữ liệu cloud. CV local vẫn an toàn.',
       );
     }
+  }
+
+  Future<void> _storeRemote(CvModel cv, String userId) {
+    return _localRepository.save(
+      cv.copyWith(userId: userId, isSynced: true),
+      markAsLocalChange: false,
+    );
   }
 }
