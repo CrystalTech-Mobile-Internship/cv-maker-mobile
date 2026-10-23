@@ -134,6 +134,17 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     });
   }
 
+  void _showInputValidationError(String vietnamese, String english) {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(_isEn ? english : vietnamese),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _pickProfilePhoto() async {
     try {
       final path = await ref
@@ -419,7 +430,36 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
             ),
             FilledButton(
               onPressed: () {
-                if (instCtrl.text.trim().isEmpty) return;
+                if (instCtrl.text.trim().isEmpty ||
+                    degreeCtrl.text.trim().isEmpty) {
+                  _showInputValidationError(
+                    'Vui lòng nhập tên trường và bằng cấp.',
+                    'Enter an institution and degree.',
+                  );
+                  return;
+                }
+                final startYear = int.tryParse(startYearCtrl.text.trim());
+                final endYear = int.tryParse(endYearCtrl.text.trim());
+                if (startYear == null ||
+                    startYear < 1900 ||
+                    startYear > 2100 ||
+                    (!isCurrent &&
+                        (endYear == null ||
+                            endYear < 1900 ||
+                            endYear > 2100))) {
+                  _showInputValidationError(
+                    'Năm học phải là số từ 1900 đến 2100.',
+                    'Enter study years between 1900 and 2100.',
+                  );
+                  return;
+                }
+                if (!isCurrent && endYear! < startYear) {
+                  _showInputValidationError(
+                    'Năm tốt nghiệp không thể trước năm bắt đầu.',
+                    'The graduation year cannot precede the start year.',
+                  );
+                  return;
+                }
                 Navigator.of(ctx).pop(true);
               },
               child: Text(_isEn ? 'Save' : 'Lưu'),
@@ -430,15 +470,15 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     );
 
     if (result == true) {
-      final startYear = int.tryParse(startYearCtrl.text.trim()) ?? 2020;
-      final endYear = int.tryParse(endYearCtrl.text.trim()) ?? 2024;
+      final startYear = int.parse(startYearCtrl.text.trim());
+      final endYear = isCurrent ? null : int.parse(endYearCtrl.text.trim());
       final newItem = EducationModel(
         id: editing?.id ?? 'edu-${DateTime.now().microsecondsSinceEpoch}',
         institution: instCtrl.text.trim(),
         degree: degreeCtrl.text.trim(),
         fieldOfStudy: fieldCtrl.text.trim(),
-        startDate: DateTime(startYear, 9, 1).toUtc(),
-        endDate: isCurrent ? null : DateTime(endYear, 6, 30).toUtc(),
+        startDate: DateTime.utc(startYear, 9, 15),
+        endDate: endYear == null ? null : DateTime.utc(endYear, 6, 15),
         isCurrent: isCurrent,
         gpa: gpaCtrl.text.trim().isEmpty ? null : gpaCtrl.text.trim(),
       );
@@ -621,6 +661,44 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
               onPressed: () {
                 if (roleCtrl.text.trim().isEmpty ||
                     compCtrl.text.trim().isEmpty) {
+                  _showInputValidationError(
+                    'Vui lòng nhập vị trí và tên công ty.',
+                    'Enter a job title and company.',
+                  );
+                  return;
+                }
+                final startMonth = int.tryParse(startMonthCtrl.text.trim());
+                final startYear = int.tryParse(startYearCtrl.text.trim());
+                final endMonth = int.tryParse(endMonthCtrl.text.trim());
+                final endYear = int.tryParse(endYearCtrl.text.trim());
+                if (startMonth == null ||
+                    startMonth < 1 ||
+                    startMonth > 12 ||
+                    startYear == null ||
+                    startYear < 1900 ||
+                    startYear > 2100 ||
+                    (!isCurrent &&
+                        (endMonth == null ||
+                            endMonth < 1 ||
+                            endMonth > 12 ||
+                            endYear == null ||
+                            endYear < 1900 ||
+                            endYear > 2100))) {
+                  _showInputValidationError(
+                    'Nhập tháng từ 1 đến 12 và năm từ 1900 đến 2100.',
+                    'Enter months from 1 to 12 and years from 1900 to 2100.',
+                  );
+                  return;
+                }
+                if (!isCurrent &&
+                    DateTime(
+                      endYear!,
+                      endMonth!,
+                    ).isBefore(DateTime(startYear, startMonth))) {
+                  _showInputValidationError(
+                    'Thời gian kết thúc không thể trước thời gian bắt đầu.',
+                    'The end date cannot precede the start date.',
+                  );
                   return;
                 }
                 Navigator.of(ctx).pop(true);
@@ -639,21 +717,17 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
           .where((s) => s.isNotEmpty)
           .toList();
 
+      final startMonth = int.parse(startMonthCtrl.text.trim());
+      final startYear = int.parse(startYearCtrl.text.trim());
+      final endMonth = isCurrent ? null : int.parse(endMonthCtrl.text.trim());
+      final endYear = isCurrent ? null : int.parse(endYearCtrl.text.trim());
       final newItem = ExperienceModel(
         id: editing?.id ?? 'exp-${DateTime.now().microsecondsSinceEpoch}',
         jobTitle: roleCtrl.text.trim(),
         company: compCtrl.text.trim(),
         location: locCtrl.text.trim(),
-        startDate: DateTime(
-          int.tryParse(startYearCtrl.text.trim()) ?? DateTime.now().year,
-          (int.tryParse(startMonthCtrl.text.trim()) ?? 1).clamp(1, 12),
-        ).toUtc(),
-        endDate: isCurrent
-            ? null
-            : DateTime(
-                int.tryParse(endYearCtrl.text.trim()) ?? DateTime.now().year,
-                (int.tryParse(endMonthCtrl.text.trim()) ?? 1).clamp(1, 12),
-              ).toUtc(),
+        startDate: DateTime.utc(startYear, startMonth),
+        endDate: isCurrent ? null : DateTime.utc(endYear!, endMonth!),
         isCurrent: isCurrent,
         bulletPoints: bullets.isEmpty
             ? [
@@ -766,7 +840,13 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
             ),
             FilledButton(
               onPressed: () {
-                if (nameCtrl.text.trim().isEmpty) return;
+                if (nameCtrl.text.trim().isEmpty) {
+                  _showInputValidationError(
+                    'Vui lòng nhập tên kỹ năng.',
+                    'Enter a skill name.',
+                  );
+                  return;
+                }
                 Navigator.of(ctx).pop(true);
               },
               child: Text(
