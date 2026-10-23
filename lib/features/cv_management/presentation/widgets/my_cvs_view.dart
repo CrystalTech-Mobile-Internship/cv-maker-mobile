@@ -8,6 +8,7 @@ import '../../../cv_editor/domain/models/cv_template.dart';
 import 'cloud_sync_card.dart';
 import 'dashboard_header.dart';
 import 'template_thumbnail.dart';
+import 'upcoming_tools_row.dart';
 
 class MyCvsView extends StatelessWidget {
   const MyCvsView({
@@ -20,6 +21,8 @@ class MyCvsView extends StatelessWidget {
     required this.onSync,
     required this.onLogin,
     required this.onCreate,
+    required this.onOpenAts,
+    required this.onOpenPro,
     required this.onRetry,
     required this.onEdit,
     required this.onPreview,
@@ -37,6 +40,8 @@ class MyCvsView extends StatelessWidget {
   final VoidCallback onSync;
   final VoidCallback onLogin;
   final VoidCallback onCreate;
+  final VoidCallback onOpenAts;
+  final VoidCallback onOpenPro;
   final VoidCallback onRetry;
   final ValueChanged<CvModel> onEdit;
   final ValueChanged<CvModel> onPreview;
@@ -80,6 +85,8 @@ class MyCvsView extends StatelessWidget {
           onSync: onSync,
           onLogin: onLogin,
         ),
+        const SizedBox(height: 16),
+        UpcomingToolsRow(onOpenAts: onOpenAts, onOpenPro: onOpenPro),
         const SizedBox(height: 20),
         _sectionHeader(context, cvs.length),
         const SizedBox(height: 14),
@@ -210,7 +217,7 @@ class MyCvsView extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           color: Color(0xFF64748B),
                         ),
                       ),
@@ -220,7 +227,7 @@ class MyCvsView extends StatelessWidget {
                           Text(
                             'Hoàn thiện $completion%',
                             style: const TextStyle(
-                              fontSize: 11,
+                              fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -304,14 +311,14 @@ class _SyncBadge extends StatelessWidget {
       children: [
         Icon(
           isSynced ? Icons.cloud_done_rounded : Icons.phone_android_rounded,
-          size: 13,
+          size: 15,
           color: color,
         ),
-        const SizedBox(width: 3),
+        const SizedBox(width: 4),
         Text(
           isSynced ? 'Cloud' : 'Trên máy',
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: FontWeight.w700,
             color: color,
           ),
@@ -429,6 +436,7 @@ class _MessageCard extends StatelessWidget {
           const SizedBox(height: 18),
           FilledButton.icon(
             onPressed: onPressed,
+            style: AppTheme.createCvButton,
             icon: const Icon(Icons.add_rounded, size: 18),
             label: Text(action),
           ),

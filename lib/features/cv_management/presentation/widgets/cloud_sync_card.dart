@@ -68,8 +68,9 @@ class CloudSyncCard extends StatelessWidget {
                           ? '$localCount CV đã lưu • $pendingCount chờ đồng bộ'
                           : 'Đăng nhập để sao lưu CV đang có trên máy.',
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF64748B),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.mutedText,
                       ),
                     ),
                   ],

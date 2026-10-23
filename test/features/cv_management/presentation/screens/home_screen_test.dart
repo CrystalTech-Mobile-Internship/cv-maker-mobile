@@ -172,6 +172,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text('Chấm điểm ATS'), findsOneWidget);
+    expect(find.text('Nâng cấp Pro'), findsOneWidget);
+
     await tester.tap(find.text('Mẫu CV'));
     await tester.pumpAndSettle();
 
@@ -180,6 +183,59 @@ void main() {
     expect(find.text('Premium & AI sắp ra mắt'), findsOneWidget);
     expect(find.text('Harvard ATS'), findsOneWidget);
     expect(find.text('Mẫu CV miễn phí'), findsNothing);
+
+    await tester.tap(find.text('Premium'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sắp ra mắt'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('premium availability label fits on a narrow screen', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(FakeCvRepository())],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mẫu CV'));
+    await tester.pumpAndSettle();
+    final premiumFilter = find.widgetWithText(ChoiceChip, 'Premium');
+    await tester.scrollUntilVisible(
+      premiumFilter,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    final filterRect = tester.getRect(premiumFilter);
+    expect(filterRect.left, greaterThanOrEqualTo(0));
+    expect(filterRect.right, lessThanOrEqualTo(320));
+    await tester.tap(premiumFilter);
+    await tester.pumpAndSettle();
+
+    final label = find.text('Sắp ra mắt').first;
+    await tester.scrollUntilVisible(
+      label,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    final button = find
+        .ancestor(of: label, matching: find.byType(OutlinedButton))
+        .first;
+    final labelRect = tester.getRect(label);
+    final buttonRect = tester.getRect(button);
+    expect(labelRect.left, greaterThanOrEqualTo(buttonRect.left));
+    expect(labelRect.right, lessThanOrEqualTo(buttonRect.right));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('catalog selection is prioritized in the create dialog', (

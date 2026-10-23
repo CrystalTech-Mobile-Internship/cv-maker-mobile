@@ -6,8 +6,8 @@ import '../../../../app/theme.dart';
 import '../../../auth/data/guest_session_service.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../cv_editor/data/repositories/cv_repository_provider.dart';
+import '../../../cv_editor/data/repositories/cv_sync_repository.dart';
 import '../../../cv_editor/domain/models/models.dart';
-import '../../../cv_editor/domain/models/cv_template.dart';
 import '../controllers/dashboard_sync_controller.dart';
 import '../widgets/create_cv_dialog.dart';
 import '../widgets/home_dialogs.dart';
@@ -154,9 +154,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _showMessage(
       result.synchronizedCount == 0
           ? 'Chưa có CV đã lưu để đồng bộ. Mẫu CV chỉ là thiết kế.'
-          : 'Đã tải ${result.uploadedCount} CV lên và '
-                '${result.downloadedCount} CV về máy.',
+          : _syncSuccessMessage(result),
     );
+  }
+
+  String _syncSuccessMessage(CvSyncResult result) {
+    final actions = <String>[
+      if (result.uploadedCount > 0) '${result.uploadedCount} tải lên',
+      if (result.downloadedCount > 0) '${result.downloadedCount} tải về',
+      if (result.deletedCount > 0) '${result.deletedCount} xoá trên cloud',
+    ];
+    final conflicts = result.conflictCount > 0
+        ? ' • ${result.conflictCount} xung đột đã xử lý'
+        : '';
+    return 'Đồng bộ xong: ${actions.join(', ')}$conflicts.';
   }
 
   @override
@@ -177,7 +188,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               color: AppTheme.brandIndigo,
             ),
             const SizedBox(width: 8),
-            Text(isMyCvs ? 'CV của tôi' : 'Mẫu CV'),
+            Flexible(
+              child: Text(
+                isMyCvs ? 'CV của tôi' : 'Mẫu CV',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -203,6 +220,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 onSync: _syncAll,
                 onLogin: _openLogin,
                 onCreate: _createCv,
+                onOpenAts: () => context.push('/ats-scorer'),
+                onOpenPro: () => context.push('/upgrade-pro'),
                 onRetry: () => ref.invalidate(cvListStreamProvider),
                 onEdit: _openEditor,
                 onPreview: (cv) => context.push('/preview', extra: cv),
@@ -214,15 +233,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             : TemplateCatalogView(
                 onUseTemplate: (template) =>
                     _createCv(initialTemplate: template.id),
-                onPremiumTap: (template) =>
-                    showPremiumTemplateInfo(context, template),
+                onPremiumTap: (template) => showPremiumTemplateInfo(
+                  context,
+                  template,
+                  onViewProPlans: () => context.push('/upgrade-pro'),
+                ),
               ),
       ),
       floatingActionButton: isMyCvs
           ? FloatingActionButton.extended(
               onPressed: _createCv,
+              backgroundColor: AppTheme.createAction,
+              foregroundColor: Colors.white,
               icon: const Icon(Icons.add_rounded),
-              label: const Text('Tạo CV mới'),
+              label: const Text(
+                'Tạo CV mới',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
             )
           : null,
       bottomNavigationBar: NavigationBar(

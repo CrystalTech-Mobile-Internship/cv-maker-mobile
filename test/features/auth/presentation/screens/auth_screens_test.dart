@@ -119,7 +119,44 @@ void main() {
 
     expect(find.text('owner@example.com'), findsOneWidget);
     expect(find.text('Đã xác nhận'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Chấm điểm ATS'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Chấm điểm ATS'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Nâng cấp Pro'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Nâng cấp Pro'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Lưu hồ sơ tài khoản'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Lưu hồ sơ tài khoản'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Đăng xuất'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Đăng xuất'), findsOneWidget);
+
+    final logout = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Đăng xuất'),
+    );
+    expect(logout.style?.foregroundColor?.resolve({}), const Color(0xFFE11D48));
+    expect(logout.style?.backgroundColor?.resolve({}), Colors.white);
   });
 
   testWidgets('auth screens fit a Samsung A11-sized logical viewport', (

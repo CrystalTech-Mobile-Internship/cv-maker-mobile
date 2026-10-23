@@ -6,6 +6,8 @@ import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/reset_password_screen.dart';
+import '../features/ai_tools/presentation/screens/ats_scorer_screen.dart';
+import '../features/billing/presentation/screens/pro_upgrade_screen.dart';
 import '../features/cv_management/presentation/screens/home_screen.dart';
 import '../features/cv_editor/presentation/screens/cv_editor_screen.dart';
 import '../features/cv_editor/domain/models/cv_model.dart';
@@ -70,6 +72,16 @@ GoRouter createAppRouter({
       builder: (context, state) => CvPreviewScreen(
         cv: state.extra is CvModel ? state.extra as CvModel : null,
       ),
+    ),
+    GoRoute(
+      path: '/ats-scorer',
+      name: 'ats-scorer',
+      builder: (context, state) => const AtsScorerScreen(),
+    ),
+    GoRoute(
+      path: '/upgrade-pro',
+      name: 'upgrade-pro',
+      builder: (context, state) => const ProUpgradeScreen(),
     ),
   ],
 );

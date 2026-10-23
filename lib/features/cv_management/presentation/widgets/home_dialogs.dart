@@ -62,8 +62,9 @@ Future<bool> showDeleteCvConfirmation(BuildContext context, CvModel cv) async {
 
 Future<void> showPremiumTemplateInfo(
   BuildContext context,
-  CvTemplate template,
-) {
+  CvTemplate template, {
+  VoidCallback? onViewProPlans,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
@@ -100,9 +101,16 @@ Future<void> showPremiumTemplateInfo(
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Đã hiểu'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  onViewProPlans?.call();
+                },
+                child: const Text('Xem gói Pro'),
               ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Để sau'),
             ),
           ],
         ),

@@ -35,17 +35,19 @@ class DashboardHeader extends StatelessWidget {
                   ? Icons.cloud_done_rounded
                   : Icons.person_outline_rounded,
               size: 15,
-              color: isSignedIn
-                  ? AppTheme.successGreen
-                  : const Color(0xFF64748B),
+              color: isSignedIn ? AppTheme.successGreen : AppTheme.mutedText,
             ),
             const SizedBox(width: 6),
-            Text(
-              isSignedIn ? 'Đã kết nối tài khoản' : 'Đang dùng chế độ khách',
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF64748B),
-                fontWeight: FontWeight.w600,
+            Expanded(
+              child: Text(
+                isSignedIn ? 'Đã kết nối tài khoản' : 'Đang dùng chế độ khách',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppTheme.mutedText,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

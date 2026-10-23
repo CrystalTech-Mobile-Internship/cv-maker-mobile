@@ -52,16 +52,15 @@ class _TemplateCatalogViewState extends State<TemplateCatalogView> {
               const SizedBox(height: 14),
               _PremiumBanner(onTap: () => _setFilter(TemplateFilter.premium)),
               const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _filterChip('Tất cả', TemplateFilter.all),
-                    _filterChip('Có ảnh', TemplateFilter.photo),
-                    _filterChip('Không ảnh', TemplateFilter.noPhoto),
-                    _filterChip('Premium', TemplateFilter.premium),
-                  ],
-                ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  _filterChip('Tất cả', TemplateFilter.all),
+                  _filterChip('Có ảnh', TemplateFilter.photo),
+                  _filterChip('Không ảnh', TemplateFilter.noPhoto),
+                  _filterChip('Premium', TemplateFilter.premium),
+                ],
               ),
               const SizedBox(height: 14),
             ],
@@ -71,8 +70,8 @@ class _TemplateCatalogViewState extends State<TemplateCatalogView> {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 104),
           sliver: SliverGrid(
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 230,
-              mainAxisExtent: 342,
+              maxCrossAxisExtent: 240,
+              mainAxisExtent: 380,
               crossAxisSpacing: 12,
               mainAxisSpacing: 14,
             ),
@@ -134,7 +133,11 @@ class _CatalogIntro extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '$freeCount mẫu miễn phí • Xem trước trực quan',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.mutedText,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
@@ -199,7 +202,7 @@ class _PremiumBanner extends StatelessWidget {
                       'Nhiều mẫu hơn • Gợi ý nội dung thông minh',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 11, color: Color(0xFFDDE2FF)),
+                      style: TextStyle(fontSize: 12, color: Color(0xFFDDE2FF)),
                     ),
                   ],
                 ),
@@ -289,28 +292,57 @@ class _TemplateCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       template.audience,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 10.5,
+                        fontSize: 12,
                         color: Color(0xFF64748B),
                       ),
                     ),
                     const SizedBox(height: 9),
                     SizedBox(
                       width: double.infinity,
-                      height: 36,
+                      height: 48,
                       child: template.isPremium
-                          ? OutlinedButton.icon(
+                          ? OutlinedButton(
                               onPressed: onTap,
-                              icon: const Icon(
-                                Icons.lock_outline_rounded,
-                                size: 15,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF9A3412),
+                                backgroundColor: const Color(0xFFFFF7ED),
+                                side: const BorderSide(
+                                  color: Color(0xFFEA580C),
+                                  width: 1.4,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
-                              label: const Text('Sắp ra mắt'),
+                              child: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  'Sắp ra mắt',
+                                  maxLines: 1,
+                                  softWrap: false,
+                                ),
+                              ),
                             )
                           : FilledButton(
                               onPressed: onTap,
+                              style: AppTheme.createCvButton.copyWith(
+                                padding: const WidgetStatePropertyAll(
+                                  EdgeInsets.symmetric(horizontal: 8),
+                                ),
+                                textStyle: const WidgetStatePropertyAll(
+                                  TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
                               child: const Text('Dùng mẫu'),
                             ),
                     ),
@@ -358,7 +390,7 @@ class _StatusBadge extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 9,
+          fontSize: 10,
           fontWeight: FontWeight.w900,
           color: foreground,
         ),
