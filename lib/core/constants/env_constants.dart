@@ -74,23 +74,9 @@ class EnvConstants {
   static String get supabaseProfileLabel =>
       activeSupabaseEnvironment?.label ?? 'Chưa cấu hình';
 
-  static String get geminiApiKey {
-    return _value('GEMINI_API_KEY');
-  }
-
-  static String get groqApiKey {
-    return _value('GROQ_API_KEY');
-  }
-
   /// Checks if Supabase credentials are valid (not empty and not sample placeholders)
   static bool get isSupabaseConfigured {
     return activeSupabaseEnvironment?.isConfigured ?? false;
   }
 
-  /// Checks if Gemini AI key is configured
-  static bool get isGeminiConfigured {
-    if (geminiApiKey.isEmpty) return false;
-    if (geminiApiKey.contains('YourGeminiApiKeyHere')) return false;
-    return true;
-  }
 }

@@ -74,6 +74,31 @@ class MockCvRepo implements CvRepository {
 }
 
 void main() {
+  testWidgets('new CV keeps one stable local id across auto-saves', (
+    tester,
+  ) async {
+    final repo = MockCvRepo();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(repo)],
+        child: const MaterialApp(home: CvEditorScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).at(1), 'Nguyễn Văn A');
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump();
+    final firstId = repo.list.single.id;
+
+    await tester.enterText(find.byType(TextField).at(2), 'Flutter Developer');
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump();
+
+    expect(repo.list, hasLength(1));
+    expect(repo.list.single.id, firstId);
+  });
+
   testWidgets('CvEditorScreen renders full-width tabs and toggles language', (
     tester,
   ) async {
