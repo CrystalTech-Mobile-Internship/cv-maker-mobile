@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../ai_tools/domain/models/summary_polish_request.dart';
+import '../../../ai_tools/presentation/controllers/summary_polish_controller.dart';
+import '../../../ai_tools/presentation/widgets/summary_polish_preview_sheet.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../data/repositories/cv_repository_provider.dart';
 import '../../data/services/profile_image_service_impl.dart';
@@ -29,6 +32,8 @@ class CvEditorScreen extends ConsumerStatefulWidget {
 class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late final String _draftId;
+  late final DateTime _draftCreatedAt;
 
   late String _selectedLanguage;
 
@@ -60,6 +65,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
+    final now = DateTime.now().toUtc();
+    _draftId = widget.initialCv?.id ?? 'local-${now.microsecondsSinceEpoch}';
+    _draftCreatedAt = widget.initialCv?.createdAt ?? now;
     _selectedLanguage = widget.initialCv?.language ?? 'vi';
     _loadInitialCv();
   }
@@ -193,7 +201,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     final now = DateTime.now().toUtc();
 
     return CvModel(
-      id: existing?.id ?? 'local-${now.microsecondsSinceEpoch}',
+      id: _draftId,
       userId: existing?.userId ?? currentUserId,
       title: title.isEmpty ? (_isEn ? 'My Resume' : 'CV của tôi') : title,
       templateId: existing?.templateId ?? 'harvard_ats',
@@ -216,7 +224,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       projects: _projects,
       certifications: _certifications,
       isSynced: existing?.isSynced ?? false,
-      createdAt: existing?.createdAt ?? now,
+      createdAt: _draftCreatedAt,
       updatedAt: now,
     );
   }
@@ -271,38 +279,97 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     context.pop(result.savedCv);
   }
 
-  void _handleAiOptimizeSummary() {
-    final isEn = _isEn;
-    setState(() {
-      _summaryController.text = isEn
-          ? 'Impact-driven Mobile Engineer with expertise in Flutter, Clean Architecture, and Riverpod. Specialized in architecting offline-first SQLite caching, high-performance vector A4 PDF rendering engines, and scalable Supabase cloud integrations that ensure maximum ATS score and reliability.'
-          : 'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, và State Management (Riverpod). Đã phát triển thành công giải pháp đồng bộ SQLite offline-first, công cụ kết xuất PDF A4 vector độ nét cao và tích hợp backend Supabase chuẩn mực đạt điểm tối ưu hệ thống tuyển dụng ATS.';
-    });
-    _onFieldChanged();
+  Future<void> _handleAiOptimizeSummary() async {
+    final user = ref.read(currentAuthUserProvider);
+    final original = _summaryController.text.trim();
+    final targetRole = _roleController.text.trim();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(
-              Icons.auto_awesome,
-              color: AppTheme.accentCyan,
-              size: 20,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                isEn
-                    ? 'AI Gemini: Successfully generated ATS-optimized summary!'
-                    : 'AI Gemini: Đã tối ưu hóa tóm tắt năng lực chuẩn ATS thành công!',
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: AppTheme.primarySlate,
-        behavior: SnackBarBehavior.floating,
+    if (user == null) {
+      _showInputValidationError(
+        'Đăng nhập để sử dụng trợ lý AI an toàn.',
+        'Sign in to use the AI writing assistant.',
+      );
+      return;
+    }
+    if (targetRole.isEmpty) {
+      _showInputValidationError(
+        'Hãy nhập vị trí ứng tuyển trước khi tối ưu.',
+        'Enter a target role before optimizing.',
+      );
+      return;
+    }
+    if (original.length < 40) {
+      _showInputValidationError(
+        'Tóm tắt cần ít nhất 40 ký tự để AI có đủ ngữ cảnh.',
+        'The summary needs at least 40 characters.',
+      );
+      return;
+    }
+
+    final notifier = ref.read(summaryPolishControllerProvider.notifier);
+    await notifier.polish(
+      SummaryPolishRequest(
+        currentSummary: original,
+        targetRole: targetRole,
+        language: _selectedLanguage,
+        skills: _skills
+            .map((skill) => skill.name.trim())
+            .where((name) => name.isNotEmpty)
+            .take(20)
+            .toList(growable: false),
       ),
     );
+    if (!mounted) return;
+
+    final state = ref.read(summaryPolishControllerProvider);
+    final suggestion = state.suggestedSummary;
+    if (state.status != SummaryPolishStatus.success || suggestion == null) {
+      _showInputValidationError(
+        state.errorMessage ?? 'Không thể tối ưu lúc này. Hãy thử lại.',
+        state.errorMessage ?? 'AI is unavailable. Please try again.',
+      );
+      return;
+    }
+
+    final shouldApply = await showSummaryPolishPreviewSheet(
+      context: context,
+      original: original,
+      suggested: suggestion,
+      provider: state.provider ?? 'AI',
+      isEnglish: _isEn,
+    );
+    if (!mounted) return;
+    notifier.reset();
+    if (!shouldApply) return;
+
+    _debounceTimer?.cancel();
+    setState(() {
+      _summaryController.text = suggestion;
+      _syncStatusText = _isEn
+          ? 'Saving AI suggestion locally...'
+          : 'Đang lưu gợi ý AI trên máy...';
+    });
+
+    try {
+      await ref.read(cvRepositoryProvider).save(_buildCvModel());
+      if (!mounted) return;
+      setState(
+        () => _syncStatusText = _isEn
+            ? 'AI suggestion saved on device'
+            : 'Đã lưu gợi ý AI trên máy',
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _syncStatusText = _isEn
+            ? 'Could not save AI suggestion'
+            : 'Không thể lưu gợi ý AI',
+      );
+      _showInputValidationError(
+        'Không thể lưu gợi ý AI. Nội dung gốc vẫn an toàn.',
+        'Could not save the suggestion. Original content is safe.',
+      );
+    }
   }
 
   // --- Collection Interactive Dialogs ---
@@ -1139,6 +1206,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
   @override
   Widget build(BuildContext context) {
+    final summaryPolishState = ref.watch(summaryPolishControllerProvider);
     final isSignedIn = ref.watch(currentAuthUserProvider) != null;
     final isEn = _isEn;
 
@@ -1290,6 +1358,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   summaryController: _summaryController,
                   onFieldChanged: _onFieldChanged,
                   onAiOptimize: _handleAiOptimizeSummary,
+                  isAiLoading: summaryPolishState.isLoading,
                   avatarPath: _avatarPath,
                   onPickAvatar: _pickProfilePhoto,
                   onRemoveAvatar: _removeProfilePhoto,

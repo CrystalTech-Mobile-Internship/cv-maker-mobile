@@ -17,6 +17,7 @@ class PersonalInfoTab extends StatelessWidget {
     required this.summaryController,
     required this.onFieldChanged,
     required this.onAiOptimize,
+    required this.isAiLoading,
     required this.avatarPath,
     required this.onPickAvatar,
     required this.onRemoveAvatar,
@@ -35,6 +36,7 @@ class PersonalInfoTab extends StatelessWidget {
   final TextEditingController summaryController;
   final ValueChanged<String>? onFieldChanged;
   final VoidCallback onAiOptimize;
+  final bool isAiLoading;
   final String? avatarPath;
   final Future<void> Function() onPickAvatar;
   final VoidCallback onRemoveAvatar;
@@ -166,14 +168,22 @@ class PersonalInfoTab extends StatelessWidget {
                     ),
                   ),
                   FilledButton.tonalIcon(
-                    onPressed: onAiOptimize,
-                    icon: const Icon(
-                      Icons.auto_awesome,
-                      size: 16,
-                      color: AppTheme.accentTeal,
-                    ),
+                    key: const Key('polish-summary-with-ai'),
+                    onPressed: isAiLoading ? null : onAiOptimize,
+                    icon: isAiLoading
+                        ? const SizedBox.square(
+                            dimension: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(
+                            Icons.auto_awesome,
+                            size: 16,
+                            color: AppTheme.accentTeal,
+                          ),
                     label: Text(
-                      _isEn ? 'AI Optimize' : 'Tối ưu AI',
+                      isAiLoading
+                          ? (_isEn ? 'Optimizing...' : 'Đang tối ưu...')
+                          : (_isEn ? 'AI Optimize' : 'Tối ưu AI'),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
