@@ -75,19 +75,20 @@ Nếu không truyền tùy chọn này, thao tác lưu được xem là chỉnh 
 - Lưu bền vững sau khi đóng và mở lại SQLite.
 - Lọc thay đổi theo tài khoản.
 - Hàng đợi xóa cloud.
+- Dashboard và Editor đọc/ghi qua repository.
+- Đồng bộ hai chiều với Supabase theo `updatedAt` UTC.
+- Xử lý hàng đợi xóa và xung đột theo quy tắc bản mới hơn thắng.
 - Kiểm thử cho các hành vi trên.
 
 Chưa hoàn thành:
 
-- Dashboard và Editor chưa đọc/ghi qua repository.
 - Chưa có debounce để tự động lưu khi nhập liệu.
-- Đã có migration Supabase và RLS ở mức source code; chưa xác minh trên cloud và chưa có sync engine.
-- Chưa có xử lý xung đột giữa nhiều thiết bị.
+- Chưa có background retry worker tự chạy khi mạng trở lại.
+- Chưa xử lý merge chi tiết theo từng section; MVP dùng toàn bộ snapshot mới hơn.
 
 ## 6. Bước tiếp theo
 
-1. Kết nối Dashboard với `cvRepositoryProvider` thay cho dữ liệu hard-code.
-2. Truyền `cvId` vào Editor và tải đúng CV từ repository.
-3. Thêm auto-save có debounce; luôn chờ thao tác ghi local hoàn tất.
-4. Tạo Supabase development project, migration và RLS.
-5. Viết sync engine sử dụng danh sách CV chưa đồng bộ và hàng đợi xóa.
+1. Thêm auto-save có debounce; luôn chờ thao tác ghi local hoàn tất.
+2. Theo dõi trạng thái kết nối để tự thử lại khi mạng trở lại.
+3. Kiểm thử đồng bộ giữa hai thiết bị thật với thời gian UTC.
+4. Bổ sung telemetry/log chẩn đoán không chứa nội dung CV nhạy cảm.

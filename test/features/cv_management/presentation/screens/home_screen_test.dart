@@ -57,6 +57,13 @@ class FakeCvRepository implements CvRepository {
   Future<bool> markSynced(String id) async => true;
 
   @override
+  Future<CvModel> replaceWithSynced(String localId, CvModel syncedCv) async {
+    _cvs.removeWhere((item) => item.id == localId);
+    _cvs.insert(0, syncedCv);
+    return syncedCv;
+  }
+
+  @override
   Future<bool> deleteById(String id, {DateTime? now}) async {
     _cvs.removeWhere((item) => item.id == id);
     return true;
@@ -148,10 +155,113 @@ void main() {
 
     expect(find.text('CV Kỹ sư Phần mềm'), findsOneWidget);
     expect(find.text('Senior Flutter Developer'), findsOneWidget);
-    expect(find.text('Lưu trên máy'), findsOneWidget);
-    expect(
-      find.textContaining('1 hồ sơ dùng được khi offline'),
-      findsOneWidget,
+    expect(find.text('Trên máy'), findsOneWidget);
+    expect(find.text('Đăng nhập để đồng bộ'), findsOneWidget);
+  });
+
+  testWidgets('Mẫu CV is a real catalog tab with free and premium states', (
+    tester,
+  ) async {
+    final fakeRepo = FakeCvRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(fakeRepo)],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
     );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chấm điểm ATS'), findsOneWidget);
+    expect(find.text('Nâng cấp Pro'), findsOneWidget);
+
+    await tester.tap(find.text('Mẫu CV'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chọn phong cách của bạn'), findsOneWidget);
+    expect(find.text('8 mẫu miễn phí • Xem trước trực quan'), findsOneWidget);
+    expect(find.text('Premium & AI sắp ra mắt'), findsOneWidget);
+    expect(find.text('Harvard ATS'), findsOneWidget);
+    expect(find.text('Mẫu CV miễn phí'), findsNothing);
+
+    await tester.tap(find.text('Premium'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sắp ra mắt'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('premium availability label fits on a narrow screen', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(FakeCvRepository())],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Mẫu CV'));
+    await tester.pumpAndSettle();
+    final premiumFilter = find.widgetWithText(ChoiceChip, 'Premium');
+    await tester.scrollUntilVisible(
+      premiumFilter,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    final filterRect = tester.getRect(premiumFilter);
+    expect(filterRect.left, greaterThanOrEqualTo(0));
+    expect(filterRect.right, lessThanOrEqualTo(320));
+    await tester.tap(premiumFilter);
+    await tester.pumpAndSettle();
+
+    final label = find.text('Sắp ra mắt').first;
+    await tester.scrollUntilVisible(
+      label,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    final button = find
+        .ancestor(of: label, matching: find.byType(OutlinedButton))
+        .first;
+    final labelRect = tester.getRect(label);
+    final buttonRect = tester.getRect(button);
+    expect(labelRect.left, greaterThanOrEqualTo(buttonRect.left));
+    expect(labelRect.right, lessThanOrEqualTo(buttonRect.right));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('catalog selection is prioritized in the create dialog', (
+    tester,
+  ) async {
+    final fakeRepo = FakeCvRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(fakeRepo)],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Mẫu CV'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Có ảnh'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Dùng mẫu').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dùng mẫu').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tạo hồ sơ CV mới'), findsOneWidget);
+    expect(find.text('Minimalist Clean'), findsNWidgets(2));
+    expect(find.text('ĐÃ CHỌN'), findsOneWidget);
   });
 }

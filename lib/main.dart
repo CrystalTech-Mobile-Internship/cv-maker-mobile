@@ -20,7 +20,16 @@ Future<void> main() async {
   // Initialize Supabase if keys are provided
   await SupabaseService.initialize();
   final startInGuestMode = await const GuestSessionService().isGuestMode();
+  final startAuthenticated =
+      SupabaseService.client?.auth.currentSession != null;
 
   // Run app inside Riverpod ProviderScope
-  runApp(ProviderScope(child: CvMakerApp(startInGuestMode: startInGuestMode)));
+  runApp(
+    ProviderScope(
+      child: CvMakerApp(
+        startInGuestMode: startInGuestMode,
+        startAuthenticated: startAuthenticated,
+      ),
+    ),
+  );
 }

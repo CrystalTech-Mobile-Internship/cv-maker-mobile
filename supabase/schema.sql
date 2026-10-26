@@ -31,6 +31,21 @@ create table if not exists public.templates (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+insert into public.templates (id, name, description)
+values
+  ('harvard_ats', 'Harvard ATS', 'Một cột, ưu tiên hệ thống ATS'),
+  ('modern_minimalist', 'Modern Minimalist', 'Hiện đại và tối giản'),
+  ('minimalist_clean', 'Minimalist Clean', 'Sạch, phù hợp nhiều ngành'),
+  ('creative_tech', 'Creative Tech', 'Dành cho công nghệ và sáng tạo'),
+  ('professional_sidebar', 'Professional Sidebar', 'Bố cục 1/3 và 2/3'),
+  ('executive_navy', 'Executive Navy', 'Doanh nghiệp, quản lý và kinh doanh'),
+  ('academic_classic', 'Academic Classic', 'Giáo dục và nghiên cứu'),
+  ('fresh_profile', 'Fresh Profile', 'Marketing, dịch vụ và hồ sơ có ảnh')
+on conflict (id) do update set
+  name = excluded.name,
+  description = excluded.description,
+  is_active = true;
+
 create table if not exists public.cvs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -50,7 +65,9 @@ create table if not exists public.cv_sections (
   id uuid primary key default gen_random_uuid(),
   cv_id uuid not null references public.cvs(id) on delete cascade,
   section_type text not null check (
-    section_type in ('education', 'experience', 'skills', 'projects')
+    section_type in (
+      'education', 'experience', 'skills', 'projects', 'certifications'
+    )
   ),
   title text not null,
   order_index integer not null default 0,

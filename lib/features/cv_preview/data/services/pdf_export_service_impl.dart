@@ -1052,6 +1052,49 @@ final class _TemplateStyle {
           dividerThickness: 1,
           showPhoto: true,
         );
+      case 'executive_navy':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#172554'),
+          accent: PdfColor.fromHex('#1E3A8A'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 38,
+            vertical: 32,
+          ),
+          centerHeader: false,
+          nameSize: 21,
+          letterSpacing: 0.5,
+          dividerThickness: 1.5,
+          showPhoto: false,
+        );
+      case 'academic_classic':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#431407'),
+          accent: PdfColor.fromHex('#9A3412'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 44,
+            vertical: 38,
+          ),
+          centerHeader: true,
+          nameSize: 19,
+          letterSpacing: 0.8,
+          dividerThickness: 0.65,
+          showPhoto: false,
+        );
+      case 'fresh_profile':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#064E3B'),
+          accent: PdfColor.fromHex('#047857'),
+          headerFill: PdfColor.fromHex('#ECFDF5'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 34,
+            vertical: 31,
+          ),
+          centerHeader: false,
+          nameSize: 20,
+          letterSpacing: 0.25,
+          dividerThickness: 1.1,
+          showPhoto: true,
+        );
       default:
         return const _TemplateStyle(
           primary: PdfColors.black,

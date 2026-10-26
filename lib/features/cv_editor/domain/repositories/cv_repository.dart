@@ -26,6 +26,10 @@ abstract interface class CvRepository {
 
   Future<bool> markSynced(String id);
 
+  /// Replaces a local draft with the canonical cloud snapshot. Supabase may
+  /// assign a new UUID when an older local-only ID is synchronized.
+  Future<CvModel> replaceWithSynced(String localId, CvModel syncedCv);
+
   Future<bool> deleteById(String id, {DateTime? now});
 
   Future<bool> confirmDeletionSynced(String id);

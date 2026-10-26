@@ -50,6 +50,13 @@ class MockCvRepo implements CvRepository {
   Future<bool> markSynced(String id) async => true;
 
   @override
+  Future<CvModel> replaceWithSynced(String localId, CvModel syncedCv) async {
+    list.removeWhere((cv) => cv.id == localId);
+    list.add(syncedCv);
+    return syncedCv;
+  }
+
+  @override
   Future<CvModel> save(
     CvModel cv, {
     bool markAsLocalChange = true,
@@ -118,6 +125,92 @@ void main() {
       isTrue,
       reason: 'Changing language must not insert or overwrite CV data.',
     );
+  });
+
+  testWidgets('education form rejects missing and invalid date input', (
+    tester,
+  ) async {
+    final repo = MockCvRepo();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(repo)],
+        child: const MaterialApp(home: CvEditorScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('editor-tab-icon-1')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Thêm mục mới'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Lưu'));
+    await tester.pumpAndSettle();
+    expect(find.text('Vui lòng nhập tên trường và bằng cấp.'), findsOneWidget);
+    expect(repo.list, isEmpty);
+
+    var fields = tester.widgetList<TextField>(find.byType(TextField)).toList();
+    await tester.enterText(find.byType(TextField).at(0), 'Đại học Đà Nẵng');
+    await tester.enterText(find.byType(TextField).at(1), 'Cử nhân');
+    await tester.enterText(find.byType(TextField).at(3), '2025');
+    await tester.enterText(find.byType(TextField).at(4), '2024');
+    await tester.tap(find.text('Lưu'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Năm tốt nghiệp không thể trước năm bắt đầu.'),
+      findsOneWidget,
+    );
+    expect(repo.list, isEmpty);
+
+    fields = tester.widgetList<TextField>(find.byType(TextField)).toList();
+    expect(fields, hasLength(6));
+    await tester.enterText(find.byType(TextField).at(4), '2025');
+    await tester.tap(find.text('Lưu'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 650));
+    await tester.pump();
+
+    expect(repo.list.single.educations.single.institution, 'Đại học Đà Nẵng');
+    expect(repo.list.single.educations.single.degree, 'Cử nhân');
+    expect(repo.list.single.educations.single.startDate.year, 2025);
+    expect(repo.list.single.educations.single.endDate?.year, 2025);
+  });
+
+  testWidgets('experience form rejects out-of-range months', (tester) async {
+    final repo = MockCvRepo();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(repo)],
+        child: const MaterialApp(home: CvEditorScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const ValueKey('editor-tab-icon-2')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Thêm mục mới'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).at(0), 'Kỹ sư Flutter');
+    await tester.enterText(find.byType(TextField).at(1), 'Công ty công nghệ');
+    await tester.enterText(find.byType(TextField).at(3), '13');
+    await tester.tap(find.text('Lưu'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Nhập tháng từ 1 đến 12 và năm từ 1900 đến 2100.'),
+      findsOneWidget,
+    );
+    expect(repo.list, isEmpty);
+
+    await tester.enterText(find.byType(TextField).at(3), '12');
+    await tester.tap(find.text('Lưu'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 650));
+    await tester.pump();
+
+    expect(repo.list.single.experiences.single.jobTitle, 'Kỹ sư Flutter');
+    expect(repo.list.single.experiences.single.startDate.month, 12);
+    expect(repo.list.single.experiences.single.isCurrent, isTrue);
   });
 
   testWidgets('CvPreviewScreen renders the generated A4 PDF and controls', (

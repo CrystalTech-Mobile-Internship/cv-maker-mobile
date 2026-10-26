@@ -103,7 +103,7 @@ void main() {
 
       final pending = await repository.getPendingSync('user-1');
 
-      expect(pending.map((cv) => cv.id), ['user-1-pending']);
+      expect(pending.map((cv) => cv.id), ['user-1-pending', 'guest-pending']);
     });
 
     test('duplicates a CV with a new identity and unsynced state', () async {
