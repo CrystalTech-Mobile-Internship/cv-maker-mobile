@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
@@ -33,7 +35,10 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
       previous,
       next,
     ) {
-      next.whenData(_handleAuthChange);
+      next.whenData((change) {
+        unawaited(_persistAuthenticatedSession(change));
+        _handleAuthChange(change);
+      });
     });
 
     return MaterialApp.router(
@@ -42,6 +47,23 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
       theme: AppTheme.lightTheme,
       routerConfig: _router,
     );
+  }
+
+  Future<void> _persistAuthenticatedSession(AuthSessionChange change) async {
+    try {
+      await ref
+          .read(authControllerProvider.notifier)
+          .handleSessionChange(change);
+    } catch (error, stackTrace) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'authentication',
+          context: ErrorDescription('while persisting authenticated session'),
+        ),
+      );
+    }
   }
 
   void _handleAuthChange(AuthSessionChange change) {

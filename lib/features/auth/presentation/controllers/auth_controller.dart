@@ -114,9 +114,21 @@ class AuthController extends StateNotifier<AuthActionState> {
       if (!launched) {
         throw const AuthFailure('Không thể mở trang đăng nhập Google.');
       }
-      await _guestSessionService.setGuestMode(false);
       return AuthActionResult.success(message: 'Đã mở trang đăng nhập Google.');
     });
+  }
+
+  /// OAuth only opens an external browser. Guest mode must be cleared after
+  /// Supabase confirms a real session, not when the browser merely launches.
+  Future<void> handleSessionChange(AuthSessionChange change) async {
+    final isAuthenticated =
+        change.user != null &&
+        (change.event == AuthSessionEvent.signedIn ||
+            change.event == AuthSessionEvent.initial ||
+            change.event == AuthSessionEvent.tokenRefreshed);
+    if (isAuthenticated) {
+      await _guestSessionService.setGuestMode(false);
+    }
   }
 
   Future<AuthActionResult> continueAsGuest() {
