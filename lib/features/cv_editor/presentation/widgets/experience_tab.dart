@@ -107,7 +107,7 @@ class ExperienceTab extends StatelessWidget {
                         ),
                         child: const Icon(
                           Icons.work_outline,
-                          color: AppTheme.accentTeal,
+                          color: AppTheme.primarySlate,
                           size: 22,
                         ),
                       ),

@@ -102,7 +102,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                   ),
                   child: const Icon(
                     Icons.picture_as_pdf_rounded,
-                    color: Color(0xFFDC2626),
+                    color: AppTheme.primarySlate,
                     size: 28,
                   ),
                 ),
@@ -181,7 +181,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: const BorderSide(
-                    color: AppTheme.accentTeal,
+                    color: AppTheme.primarySlate,
                     width: 2,
                   ),
                 ),

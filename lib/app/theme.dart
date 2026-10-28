@@ -39,6 +39,8 @@ class AppTheme {
         onError: Colors.white,
       ),
       scaffoldBackgroundColor: surfaceLight,
+      iconTheme: const IconThemeData(color: primarySlate, size: 24),
+      primaryIconTheme: const IconThemeData(color: primarySlate, size: 24),
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: false,

@@ -21,7 +21,6 @@ class UpcomingToolsRow extends StatelessWidget {
             title: 'Chấm điểm ATS',
             subtitle: 'So khớp JD',
             icon: Icons.analytics_outlined,
-            color: AppTheme.brandIndigo,
             onTap: onOpenAts,
           ),
         ),
@@ -31,7 +30,6 @@ class UpcomingToolsRow extends StatelessWidget {
             title: 'Nâng cấp Pro',
             subtitle: 'VietQR • Mẫu VIP',
             icon: Icons.workspace_premium_rounded,
-            color: const Color(0xFFB45309),
             onTap: onOpenPro,
           ),
         ),
@@ -45,14 +43,12 @@ class _ToolTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
-    required this.color,
     required this.onTap,
   });
 
   final String title;
   final String subtitle;
   final IconData icon;
-  final Color color;
   final VoidCallback onTap;
 
   @override
@@ -75,10 +71,10 @@ class _ToolTile extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
+                  color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: color),
+                child: Icon(icon, color: AppTheme.primarySlate),
               ),
               const SizedBox(width: 10),
               Expanded(

@@ -136,7 +136,7 @@ class SkillsTab extends StatelessWidget {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppTheme.accentTeal),
+        Icon(icon, size: 18, color: AppTheme.primarySlate),
         const SizedBox(width: 8),
         Text(
           title,
@@ -158,7 +158,7 @@ class SkillsTab extends StatelessWidget {
       avatar: const Icon(
         Icons.check_circle_rounded,
         size: 16,
-        color: AppTheme.accentTeal,
+        color: AppTheme.primarySlate,
       ),
       label: Text(
         skill.proficiency > 0

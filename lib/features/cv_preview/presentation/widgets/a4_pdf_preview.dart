@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
+import '../../../../app/theme.dart';
+
 /// Displays the exact PDF bytes that are later saved/shared by the app.
 ///
 /// Using [PdfPreview] keeps the on-screen paper size, whitespace and page
@@ -86,7 +88,7 @@ class _A4PdfPreviewState extends State<A4PdfPreview> {
               const Icon(
                 Icons.picture_as_pdf_outlined,
                 size: 48,
-                color: Color(0xFFDC2626),
+                color: AppTheme.primarySlate,
               ),
               const SizedBox(height: 12),
               Text(

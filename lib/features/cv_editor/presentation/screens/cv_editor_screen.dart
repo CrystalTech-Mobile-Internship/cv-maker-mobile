@@ -5,9 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../ai_tools/domain/models/summary_polish_request.dart';
 import '../../../ai_tools/presentation/controllers/summary_polish_controller.dart';
-import '../../../ai_tools/presentation/widgets/summary_polish_preview_sheet.dart';
+import '../../../ai_tools/presentation/controllers/summary_polish_flow_coordinator.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../data/repositories/cv_repository_provider.dart';
 import '../../data/services/profile_image_service_impl.dart';
@@ -283,92 +282,54 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     final user = ref.read(currentAuthUserProvider);
     final original = _summaryController.text.trim();
     final targetRole = _roleController.text.trim();
-
-    if (user == null) {
-      _showInputValidationError(
-        'Đăng nhập để sử dụng trợ lý AI an toàn.',
-        'Sign in to use the AI writing assistant.',
-      );
-      return;
-    }
-    if (targetRole.isEmpty) {
-      _showInputValidationError(
-        'Hãy nhập vị trí ứng tuyển trước khi tối ưu.',
-        'Enter a target role before optimizing.',
-      );
-      return;
-    }
-    if (original.length < 40) {
-      _showInputValidationError(
-        'Tóm tắt cần ít nhất 40 ký tự để AI có đủ ngữ cảnh.',
-        'The summary needs at least 40 characters.',
-      );
-      return;
-    }
-
     final notifier = ref.read(summaryPolishControllerProvider.notifier);
-    await notifier.polish(
-      SummaryPolishRequest(
-        currentSummary: original,
-        targetRole: targetRole,
-        language: _selectedLanguage,
-        skills: _skills
-            .map((skill) => skill.name.trim())
-            .where((name) => name.isNotEmpty)
-            .take(20)
-            .toList(growable: false),
-      ),
+    final result = await const SummaryPolishFlowCoordinator().run(
+      context: context,
+      controller: notifier,
+      isAuthenticated: user != null,
+      original: original,
+      targetRole: targetRole,
+      language: _selectedLanguage,
+      skills: _skills
+          .map((skill) => skill.name.trim())
+          .where((name) => name.isNotEmpty)
+          .take(20)
+          .toList(growable: false),
+      onSaving: () {
+        if (!mounted) return;
+        _debounceTimer?.cancel();
+        setState(
+          () => _syncStatusText = _isEn
+              ? 'Saving AI suggestion locally...'
+              : 'Đang lưu gợi ý AI trên máy...',
+        );
+      },
+      persistSuggestion: (suggestion) async {
+        final candidate = _buildCvModel().copyWith(summary: suggestion);
+        await ref.read(cvRepositoryProvider).save(candidate);
+      },
     );
     if (!mounted) return;
 
-    final state = ref.read(summaryPolishControllerProvider);
-    final suggestion = state.suggestedSummary;
-    if (state.status != SummaryPolishStatus.success || suggestion == null) {
+    if (result.status == SummaryPolishFlowStatus.failed) {
+      setState(
+        () => _syncStatusText = _isEn
+            ? 'AI suggestion was not applied'
+            : 'Chưa áp dụng gợi ý AI',
+      );
       _showInputValidationError(
-        state.errorMessage ?? 'Không thể tối ưu lúc này. Hãy thử lại.',
-        state.errorMessage ?? 'AI is unavailable. Please try again.',
+        result.messageVi ?? 'Không thể tối ưu lúc này. Hãy thử lại.',
+        result.messageEn ?? 'AI is unavailable. Please try again.',
       );
       return;
     }
-
-    final shouldApply = await showSummaryPolishPreviewSheet(
-      context: context,
-      original: original,
-      suggested: suggestion,
-      provider: state.provider ?? 'AI',
-      isEnglish: _isEn,
-    );
-    if (!mounted) return;
-    notifier.reset();
-    if (!shouldApply) return;
-
-    _debounceTimer?.cancel();
-    setState(() {
-      _summaryController.text = suggestion;
-      _syncStatusText = _isEn
-          ? 'Saving AI suggestion locally...'
-          : 'Đang lưu gợi ý AI trên máy...';
-    });
-
-    try {
-      await ref.read(cvRepositoryProvider).save(_buildCvModel());
-      if (!mounted) return;
-      setState(
-        () => _syncStatusText = _isEn
+    if (result.status == SummaryPolishFlowStatus.applied) {
+      setState(() {
+        _summaryController.text = result.suggestion!;
+        _syncStatusText = _isEn
             ? 'AI suggestion saved on device'
-            : 'Đã lưu gợi ý AI trên máy',
-      );
-    } catch (_) {
-      if (!mounted) return;
-      setState(
-        () => _syncStatusText = _isEn
-            ? 'Could not save AI suggestion'
-            : 'Không thể lưu gợi ý AI',
-      );
-      _showInputValidationError(
-        'Không thể lưu gợi ý AI. Nội dung gốc vẫn an toàn.',
-        'Could not save the suggestion. Original content is safe.',
-      );
+            : 'Đã lưu gợi ý AI trên máy';
+      });
     }
   }
 
@@ -1300,27 +1261,13 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
               color: Colors.grey.shade50,
               border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.language_rounded,
-                  size: 18,
-                  color: Colors.grey.shade700,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  isEn ? 'Language:' : 'Ngôn ngữ CV:',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade800,
-                  ),
-                ),
-                const Spacer(),
-                SegmentedButton<String>(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final selector = SegmentedButton<String>(
+                  showSelectedIcon: false,
                   segments: const [
-                    ButtonSegment(value: 'vi', label: Text('🇻🇳 VI')),
-                    ButtonSegment(value: 'en', label: Text('🇬🇧 EN')),
+                    ButtonSegment(value: 'vi', label: Text('VI')),
+                    ButtonSegment(value: 'en', label: Text('EN')),
                   ],
                   selected: {_selectedLanguage},
                   style: ButtonStyle(
@@ -1336,8 +1283,39 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       _changeLanguage(language: newLang, notify: true);
                     }
                   },
-                ),
-              ],
+                );
+                final label = Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.language_rounded,
+                      size: 18,
+                      color: Colors.grey.shade700,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      isEn ? 'Language:' : 'Ngôn ngữ CV:',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                  ],
+                );
+
+                if (constraints.maxWidth < 360) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      label,
+                      const SizedBox(height: 8),
+                      Align(alignment: Alignment.centerRight, child: selector),
+                    ],
+                  );
+                }
+                return Row(children: [label, const Spacer(), selector]);
+              },
             ),
           ),
 

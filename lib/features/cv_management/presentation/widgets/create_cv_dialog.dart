@@ -51,7 +51,7 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: const Row(
         children: [
-          Icon(Icons.post_add_rounded, color: AppTheme.brandIndigo),
+          Icon(Icons.post_add_rounded, color: AppTheme.primarySlate),
           SizedBox(width: 8),
           Text('Tạo hồ sơ CV mới'),
         ],

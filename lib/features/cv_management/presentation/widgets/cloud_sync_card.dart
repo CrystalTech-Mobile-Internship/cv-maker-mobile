@@ -47,7 +47,7 @@ class CloudSyncCard extends StatelessWidget {
                   isSignedIn
                       ? Icons.cloud_sync_rounded
                       : Icons.cloud_off_rounded,
-                  color: AppTheme.brandIndigo,
+                  color: AppTheme.primarySlate,
                 ),
               ),
               const SizedBox(width: 12),

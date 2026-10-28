@@ -79,7 +79,7 @@ Future<void> showPremiumTemplateInfo(
               backgroundColor: Color(0xFFEEF2FF),
               child: Icon(
                 Icons.workspace_premium_rounded,
-                color: AppTheme.brandIndigo,
+                color: AppTheme.primarySlate,
                 size: 30,
               ),
             ),
