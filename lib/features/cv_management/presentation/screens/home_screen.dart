@@ -185,7 +185,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Icon(
               isMyCvs ? Icons.description_rounded : Icons.palette_rounded,
-              color: AppTheme.brandIndigo,
+              color: AppTheme.primarySlate,
             ),
             const SizedBox(width: 8),
             Flexible(
@@ -240,18 +240,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
       ),
-      floatingActionButton: isMyCvs
-          ? FloatingActionButton.extended(
-              onPressed: _createCv,
-              backgroundColor: AppTheme.createAction,
-              foregroundColor: Colors.white,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Tạo CV mới',
-                style: TextStyle(fontWeight: FontWeight.w800),
-              ),
-            )
-          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
