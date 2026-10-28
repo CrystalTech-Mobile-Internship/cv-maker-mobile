@@ -97,6 +97,7 @@ class PersonalInfoTab extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               TextField(
+                key: const Key('target-role-field'),
                 controller: roleController,
                 onChanged: onFieldChanged,
                 decoration: InputDecoration(
@@ -110,34 +111,48 @@ class PersonalInfoTab extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: emailController,
-                      onChanged: onFieldChanged,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: _isEn ? 'Email *' : 'Email *',
-                        hintText: 'user@example.com',
-                        prefixIcon: const Icon(Icons.email_outlined),
-                      ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final emailField = TextField(
+                    key: const Key('email-field'),
+                    controller: emailController,
+                    onChanged: onFieldChanged,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Email *',
+                      hintText: 'user@example.com',
+                      prefixIcon: Icon(Icons.email_outlined),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: phoneController,
-                      onChanged: onFieldChanged,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: _isEn ? 'Phone Number *' : 'Số điện thoại *',
-                        hintText: '0901 234 567',
-                        prefixIcon: const Icon(Icons.phone_outlined),
-                      ),
+                  );
+                  final phoneField = TextField(
+                    key: const Key('phone-field'),
+                    controller: phoneController,
+                    onChanged: onFieldChanged,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      labelText: _isEn ? 'Phone Number *' : 'Số điện thoại *',
+                      hintText: '0901 234 567',
+                      prefixIcon: const Icon(Icons.phone_outlined),
                     ),
-                  ),
-                ],
+                  );
+
+                  if (constraints.maxWidth < 520) {
+                    return Column(
+                      children: [
+                        emailField,
+                        const SizedBox(height: 14),
+                        phoneField,
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      Expanded(child: emailField),
+                      const SizedBox(width: 12),
+                      Expanded(child: phoneField),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 14),
               TextField(
@@ -175,11 +190,7 @@ class PersonalInfoTab extends StatelessWidget {
                             dimension: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(
-                            Icons.auto_awesome,
-                            size: 16,
-                            color: AppTheme.accentTeal,
-                          ),
+                        : const Icon(Icons.auto_awesome, size: 16),
                     label: Text(
                       isAiLoading
                           ? (_isEn ? 'Optimizing...' : 'Đang tối ưu...')
@@ -194,6 +205,7 @@ class PersonalInfoTab extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               TextField(
+                key: const Key('summary-field'),
                 controller: summaryController,
                 onChanged: onFieldChanged,
                 minLines: 5,

@@ -5,7 +5,10 @@ import '../../../../app/theme.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
+import '../../../cv_editor/domain/services/cv_completion_service.dart';
 import 'cloud_sync_card.dart';
+import 'cv_completion_sheet.dart';
+import 'cv_library_section.dart';
 import 'dashboard_header.dart';
 import 'template_thumbnail.dart';
 import 'upcoming_tools_row.dart';
@@ -112,29 +115,10 @@ class MyCvsView extends StatelessWidget {
                 onPressed: onCreate,
               );
             }
-            if (!isDesktop) {
-              return Column(
-                children: items
-                    .map(
-                      (cv) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _cvCard(context, cv),
-                      ),
-                    )
-                    .toList(growable: false),
-              );
-            }
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 420,
-                mainAxisExtent: 238,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: items.length,
-              itemBuilder: (context, index) => _cvCard(context, items[index]),
+            return CvLibrarySection(
+              items: items,
+              isDesktop: isDesktop,
+              itemBuilder: _cvCard,
             );
           },
         ),
@@ -154,6 +138,13 @@ class MyCvsView extends StatelessWidget {
             ),
           ),
         ),
+        IconButton.filledTonal(
+          key: const Key('create-cv-header'),
+          tooltip: 'Tạo CV mới',
+          onPressed: onCreate,
+          icon: const Icon(Icons.add_rounded),
+        ),
+        const SizedBox(width: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
@@ -174,7 +165,7 @@ class MyCvsView extends StatelessWidget {
   }
 
   Widget _cvCard(BuildContext context, CvModel cv) {
-    final completion = _completion(cv);
+    final completion = CvCompletionService.evaluate(cv).percentage;
     final template = CvTemplateCatalog.byId(cv.templateId);
     return Material(
       color: Colors.white,
@@ -224,14 +215,18 @@ class MyCvsView extends StatelessWidget {
                       const SizedBox(height: 11),
                       Row(
                         children: [
-                          Text(
-                            'Hoàn thiện $completion%',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
+                          Expanded(
+                            child: Text(
+                              'Hoàn thiện $completion%',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
-                          const Spacer(),
+                          const SizedBox(width: 6),
                           _SyncBadge(isSynced: cv.isSynced),
                         ],
                       ),
@@ -275,26 +270,23 @@ class MyCvsView extends StatelessWidget {
                   onPressed: () => onPreview(cv),
                   icon: const Icon(Icons.visibility_outlined),
                 ),
+                const SizedBox(width: 6),
+                IconButton.outlined(
+                  key: ValueKey('cv-checklist-${cv.id}'),
+                  tooltip: 'Checklist hoàn thiện',
+                  onPressed: () => showCvCompletionSheet(
+                    context,
+                    cv,
+                    onContinueEditing: () => onEdit(cv),
+                  ),
+                  icon: const Icon(Icons.fact_check_outlined),
+                ),
               ],
             ),
           ],
         ),
       ),
     );
-  }
-
-  int _completion(CvModel cv) {
-    final completed = <bool>[
-      cv.personalInfo.fullName.trim().isNotEmpty,
-      cv.personalInfo.email.trim().isNotEmpty,
-      cv.personalInfo.phone.trim().isNotEmpty,
-      cv.summary.trim().isNotEmpty,
-      cv.educations.isNotEmpty,
-      cv.experiences.isNotEmpty,
-      cv.skills.isNotEmpty,
-      cv.projects.isNotEmpty,
-    ].where((value) => value).length;
-    return (completed / 8 * 100).round();
   }
 }
 
@@ -419,7 +411,7 @@ class _MessageCard extends StatelessWidget {
               color: Color(0xFFEEF2FF),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 34, color: AppTheme.brandIndigo),
+            child: Icon(icon, size: 34, color: AppTheme.primarySlate),
           ),
           const SizedBox(height: 14),
           Text(

@@ -6,9 +6,13 @@ import '../../domain/repositories/ai_writing_repository.dart';
 import '../datasources/ai_writing_remote_data_source.dart';
 
 class SupabaseAiWritingRepository implements AiWritingRepository {
-  SupabaseAiWritingRepository(this._remoteDataSource);
+  SupabaseAiWritingRepository(
+    this._remoteDataSource, {
+    Duration timeout = const Duration(seconds: 30),
+  }) : _timeout = timeout;
 
   final AiWritingRemoteDataSource _remoteDataSource;
+  final Duration _timeout;
 
   @override
   Future<SummaryPolishResult> polishSummary(
@@ -17,7 +21,7 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
     try {
       final data = await _remoteDataSource
           .polishSummary(request)
-          .timeout(const Duration(seconds: 30));
+          .timeout(_timeout);
       final suggested = data['suggestedSummary']?.toString().trim() ?? '';
       if (suggested.isEmpty) {
         throw const AiWritingFailure(

@@ -45,24 +45,14 @@ class _TemplateCatalogViewState extends State<TemplateCatalogView> {
       key: const PageStorageKey('template-catalog'),
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
           sliver: SliverList.list(
             children: [
-              _CatalogIntro(freeCount: CvTemplateCatalog.freeTemplates.length),
-              const SizedBox(height: 14),
-              _PremiumBanner(onTap: () => _setFilter(TemplateFilter.premium)),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: [
-                  _filterChip('Tất cả', TemplateFilter.all),
-                  _filterChip('Có ảnh', TemplateFilter.photo),
-                  _filterChip('Không ảnh', TemplateFilter.noPhoto),
-                  _filterChip('Premium', TemplateFilter.premium),
-                ],
+              _CatalogHeader(
+                templateCount: CvTemplateCatalog.allTemplates.length,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 10),
+              _TemplateFilterBar(selected: _filter, onSelected: _setFilter),
             ],
           ),
         ),
@@ -90,127 +80,102 @@ class _TemplateCatalogViewState extends State<TemplateCatalogView> {
     );
   }
 
-  Widget _filterChip(String label, TemplateFilter value) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        selected: _filter == value,
-        label: Text(label),
-        showCheckmark: false,
-        avatar: value == TemplateFilter.premium
-            ? const Icon(Icons.workspace_premium_rounded, size: 17)
-            : null,
-        onSelected: (_) => _setFilter(value),
-      ),
-    );
-  }
-
   void _setFilter(TemplateFilter value) {
     setState(() => _filter = value);
   }
 }
 
-class _CatalogIntro extends StatelessWidget {
-  const _CatalogIntro({required this.freeCount});
+class _CatalogHeader extends StatelessWidget {
+  const _CatalogHeader({required this.templateCount});
 
-  final int freeCount;
+  final int templateCount;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Chọn phong cách của bạn',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.primaryNavy,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$freeCount mẫu miễn phí • Xem trước trực quan',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.mutedText,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+        Text(
+          'Chọn mẫu CV',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: AppTheme.primaryNavy,
           ),
         ),
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: const Color(0xFFEEF2FF),
-            borderRadius: BorderRadius.circular(13),
+        const Spacer(),
+        Text(
+          '$templateCount mẫu',
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppTheme.mutedText,
+            fontWeight: FontWeight.w600,
           ),
-          child: const Icon(Icons.auto_awesome, color: AppTheme.brandIndigo),
         ),
       ],
     );
   }
 }
 
-class _PremiumBanner extends StatelessWidget {
-  const _PremiumBanner({required this.onTap});
+class _TemplateFilterBar extends StatelessWidget {
+  const _TemplateFilterBar({required this.selected, required this.onSelected});
 
-  final VoidCallback onTap;
+  final TemplateFilter selected;
+  final ValueChanged<TemplateFilter> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFF312E81),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.workspace_premium_rounded,
-                  color: Color(0xFFFDE68A),
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Premium & AI sắp ra mắt',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
+    const filters = [
+      (TemplateFilter.all, 'Tất cả'),
+      (TemplateFilter.photo, 'Có ảnh'),
+      (TemplateFilter.noPhoto, 'Không ảnh'),
+      (TemplateFilter.premium, 'Premium'),
+    ];
+    return Container(
+      key: const Key('template-filter-row'),
+      height: 42,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: filters
+            .map((filter) {
+              final isSelected = selected == filter.$1;
+              return Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1.5),
+                  child: Material(
+                    color: isSelected ? Colors.white : Colors.transparent,
+                    borderRadius: BorderRadius.circular(9),
+                    child: InkWell(
+                      key: ValueKey('template-filter-${filter.$1.name}'),
+                      borderRadius: BorderRadius.circular(9),
+                      onTap: () => onSelected(filter.$1),
+                      child: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            filter.$2,
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
+                              color: isSelected
+                                  ? AppTheme.brandIndigo
+                                  : AppTheme.mutedText,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Nhiều mẫu hơn • Gợi ý nội dung thông minh',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: Color(0xFFDDE2FF)),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-              const Icon(Icons.chevron_right_rounded, color: Colors.white),
-            ],
-          ),
-        ),
+              );
+            })
+            .toList(growable: false),
       ),
     );
   }

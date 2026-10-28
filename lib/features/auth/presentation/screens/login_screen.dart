@@ -176,10 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             const _OrDivider(),
                             OutlinedButton.icon(
                               onPressed: isLoading ? null : _continueAsGuest,
-                              icon: const Icon(
-                                Icons.offline_bolt_outlined,
-                                color: AppTheme.accentTeal,
-                              ),
+                              icon: const Icon(Icons.offline_bolt_outlined),
                               label: const Text('Trải nghiệm Offline (Khách)'),
                             ),
                           ],
@@ -219,7 +216,7 @@ class _BrandHeader extends StatelessWidget {
           child: const Icon(
             Icons.description_rounded,
             size: 40,
-            color: AppTheme.accentCyan,
+            color: AppTheme.primarySlate,
           ),
         ),
         const SizedBox(height: 20),

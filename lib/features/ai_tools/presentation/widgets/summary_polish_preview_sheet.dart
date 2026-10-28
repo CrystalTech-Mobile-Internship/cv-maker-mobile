@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-Future<bool> showSummaryPolishPreviewSheet({
+enum SummaryPolishPreviewAction { apply, retry, keepOriginal }
+
+Future<SummaryPolishPreviewAction> showSummaryPolishPreviewSheet({
   required BuildContext context,
   required String original,
   required String suggested,
   required String provider,
   required bool isEnglish,
 }) async {
-  return await showModalBottomSheet<bool>(
+  return await showModalBottomSheet<SummaryPolishPreviewAction>(
         context: context,
         isScrollControlled: true,
         showDragHandle: true,
@@ -49,14 +51,28 @@ Future<bool> showSummaryPolishPreviewSheet({
                   const SizedBox(height: 18),
                   FilledButton.icon(
                     key: const Key('apply-ai-summary'),
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pop(SummaryPolishPreviewAction.apply),
                     icon: const Icon(Icons.check_rounded),
                     label: Text(
                       isEnglish ? 'Apply suggestion' : 'Áp dụng đề xuất',
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    key: const Key('retry-ai-summary'),
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pop(SummaryPolishPreviewAction.retry),
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: Text(isEnglish ? 'Try again' : 'Thử lại'),
+                  ),
                   TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
+                    key: const Key('keep-original-summary'),
+                    onPressed: () => Navigator.of(
+                      context,
+                    ).pop(SummaryPolishPreviewAction.keepOriginal),
                     child: Text(isEnglish ? 'Keep original' : 'Giữ bản gốc'),
                   ),
                 ],
@@ -65,7 +81,7 @@ Future<bool> showSummaryPolishPreviewSheet({
           ),
         ),
       ) ??
-      false;
+      SummaryPolishPreviewAction.keepOriginal;
 }
 
 class _SummaryCard extends StatelessWidget {

@@ -101,7 +101,7 @@ class EducationTab extends StatelessWidget {
                     ),
                     child: const Icon(
                       Icons.school_outlined,
-                      color: AppTheme.accentTeal,
+                      color: AppTheme.primarySlate,
                       size: 22,
                     ),
                   ),

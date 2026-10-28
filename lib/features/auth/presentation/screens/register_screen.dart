@@ -306,7 +306,7 @@ class _LocalDataNotice extends StatelessWidget {
       ),
       child: const Row(
         children: [
-          Icon(Icons.cloud_sync_outlined, color: AppTheme.brandIndigo),
+          Icon(Icons.cloud_sync_outlined, color: AppTheme.primarySlate),
           SizedBox(width: 12),
           Expanded(
             child: Text(

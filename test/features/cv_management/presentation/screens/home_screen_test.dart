@@ -92,10 +92,10 @@ void main() {
 
     // Verify empty state is rendered
     expect(find.text('Chưa có hồ sơ CV nào'), findsOneWidget);
-    expect(find.text('Tạo CV mới'), findsOneWidget);
+    expect(find.byKey(const Key('create-cv-header')), findsOneWidget);
 
-    // Tap '+ Tạo CV mới' floating action button
-    await tester.tap(find.text('Tạo CV mới'));
+    // Tap the create action in the CV library header.
+    await tester.tap(find.byKey(const Key('create-cv-header')));
     await tester.pumpAndSettle();
 
     // Verify create dialog appears
@@ -159,6 +159,103 @@ void main() {
     expect(find.text('Đăng nhập để đồng bộ'), findsOneWidget);
   });
 
+  testWidgets('CV library supports search, filtering, sorting and checklist', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final fakeRepo = FakeCvRepository();
+    final now = DateTime.now().toUtc();
+    await fakeRepo.save(
+      CvModel(
+        id: 'flutter-cv',
+        title: 'Flutter Developer',
+        templateId: 'harvard_ats',
+        primaryColor: '#1E293B',
+        fontSizeScale: 1,
+        summary: 'Flutter summary',
+        personalInfo: const PersonalInfoModel(
+          fullName: 'Nguyễn An',
+          targetRole: 'Mobile Developer',
+          email: 'an@example.com',
+          phone: '0901000000',
+        ),
+        isSynced: true,
+        createdAt: now.subtract(const Duration(days: 2)),
+        updatedAt: now.subtract(const Duration(days: 1)),
+      ),
+    );
+    await fakeRepo.save(
+      CvModel(
+        id: 'backend-cv',
+        title: 'Backend Engineer',
+        templateId: 'modern_blue',
+        primaryColor: '#1E293B',
+        fontSizeScale: 1,
+        summary: '',
+        personalInfo: const PersonalInfoModel(targetRole: 'Java Developer'),
+        isSynced: false,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(fakeRepo)],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('cv-library-search')),
+      'Flutter',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Flutter Developer'), findsOneWidget);
+    expect(find.text('Backend Engineer'), findsNothing);
+
+    await tester.enterText(find.byKey(const Key('cv-library-search')), '');
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('cv-library-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Đã lên Cloud').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Flutter Developer'), findsOneWidget);
+    expect(find.text('Backend Engineer'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('cv-library-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tất cả').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('cv-library-sort')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Tên A–Z').last);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(find.text('Backend Engineer')).dy,
+      lessThan(tester.getTopLeft(find.text('Flutter Developer')).dy),
+    );
+
+    final checklist = find.byKey(const ValueKey('cv-checklist-flutter-cv'));
+    await tester.scrollUntilVisible(
+      checklist,
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(checklist);
+    await tester.pumpAndSettle();
+    expect(find.text('Checklist hoàn thiện CV'), findsOneWidget);
+    expect(find.text('Còn thiếu'), findsNWidgets(4));
+    expect(find.byKey(const Key('continue-cv-editing')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Mẫu CV is a real catalog tab with free and premium states', (
     tester,
   ) async {
@@ -178,9 +275,9 @@ void main() {
     await tester.tap(find.text('Mẫu CV'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Chọn phong cách của bạn'), findsOneWidget);
-    expect(find.text('8 mẫu miễn phí • Xem trước trực quan'), findsOneWidget);
-    expect(find.text('Premium & AI sắp ra mắt'), findsOneWidget);
+    expect(find.text('Chọn mẫu CV'), findsOneWidget);
+    expect(find.text('Premium & AI sắp ra mắt'), findsNothing);
+    expect(find.byKey(const Key('template-filter-row')), findsOneWidget);
     expect(find.text('Harvard ATS'), findsOneWidget);
     expect(find.text('Mẫu CV miễn phí'), findsNothing);
 
@@ -207,7 +304,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Mẫu CV'));
     await tester.pumpAndSettle();
-    final premiumFilter = find.widgetWithText(ChoiceChip, 'Premium');
+    final premiumFilter = find.byKey(const ValueKey('template-filter-premium'));
     await tester.scrollUntilVisible(
       premiumFilter,
       200,
@@ -217,6 +314,10 @@ void main() {
     final filterRect = tester.getRect(premiumFilter);
     expect(filterRect.left, greaterThanOrEqualTo(0));
     expect(filterRect.right, lessThanOrEqualTo(320));
+    final filterCenters = ['all', 'photo', 'noPhoto', 'premium'].map(
+      (name) => tester.getCenter(find.byKey(ValueKey('template-filter-$name'))),
+    );
+    expect(filterCenters.map((center) => center.dy).toSet(), hasLength(1));
     await tester.tap(premiumFilter);
     await tester.pumpAndSettle();
 

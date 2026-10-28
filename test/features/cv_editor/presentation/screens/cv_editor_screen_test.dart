@@ -1,3 +1,9 @@
+import 'package:cv_maker_mobile/features/ai_tools/domain/models/summary_polish_request.dart';
+import 'package:cv_maker_mobile/features/ai_tools/domain/models/summary_polish_result.dart';
+import 'package:cv_maker_mobile/features/ai_tools/domain/repositories/ai_writing_repository.dart';
+import 'package:cv_maker_mobile/features/ai_tools/presentation/controllers/summary_polish_controller.dart';
+import 'package:cv_maker_mobile/features/auth/domain/models/auth_user.dart';
+import 'package:cv_maker_mobile/features/auth/presentation/providers/auth_providers.dart';
 import 'package:cv_maker_mobile/features/cv_editor/data/repositories/cv_repository_provider.dart';
 import 'package:cv_maker_mobile/features/cv_editor/domain/models/models.dart';
 import 'package:cv_maker_mobile/features/cv_editor/domain/repositories/cv_repository.dart';
@@ -9,6 +15,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:printing/printing.dart';
 
 class MockCvRepo implements CvRepository {
+  MockCvRepo({this.shouldFailSave});
+
+  final bool Function(CvModel cv)? shouldFailSave;
   final List<CvModel> list = [];
 
   @override
@@ -62,6 +71,9 @@ class MockCvRepo implements CvRepository {
     bool markAsLocalChange = true,
     DateTime? now,
   }) async {
+    if (shouldFailSave?.call(cv) == true) {
+      throw StateError('Simulated local save failure');
+    }
     list.removeWhere((c) => c.id == cv.id);
     list.add(cv);
     return cv;
@@ -73,7 +85,178 @@ class MockCvRepo implements CvRepository {
   }
 }
 
+class _SequencedAiRepository implements AiWritingRepository {
+  int calls = 0;
+
+  @override
+  Future<SummaryPolishResult> polishSummary(
+    SummaryPolishRequest request,
+  ) async {
+    calls++;
+    return SummaryPolishResult(
+      suggestedSummary: calls == 1
+          ? 'Gợi ý AI lần đầu vẫn chỉ là bản xem trước cho người dùng.'
+          : 'Gợi ý AI lần hai được người dùng xác nhận và lưu trên thiết bị.',
+      provider: 'Test AI',
+    );
+  }
+}
+
+const _signedInUser = AuthUser(
+  id: 'user-ai-test',
+  email: 'owner@example.com',
+  displayName: 'Owner',
+  provider: 'email',
+  isEmailConfirmed: true,
+);
+
 void main() {
+  testWidgets('contact fields stack at Samsung A11 logical width', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(MockCvRepo())],
+        child: const MaterialApp(home: CvEditorScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final emailField = find.byKey(const Key('email-field'));
+    final phoneField = find.byKey(const Key('phone-field'));
+    await tester.ensureVisible(emailField);
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(emailField).width, greaterThan(300));
+    expect(tester.getSize(phoneField).width, greaterThan(300));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'project and certification empty states stay vertically centered',
+    (tester) async {
+      tester.view.physicalSize = const Size(360, 780);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [cvRepositoryProvider.overrideWithValue(MockCvRepo())],
+          child: const MaterialApp(home: CvEditorScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('editor-tab-icon-4')));
+      await tester.pumpAndSettle();
+      final projects = find.byKey(const Key('projects-empty-state'));
+      expect(projects, findsOneWidget);
+      expect(tester.getCenter(projects).dy, inInclusiveRange(350, 620));
+
+      await tester.tap(find.byKey(const ValueKey('editor-tab-icon-5')));
+      await tester.pumpAndSettle();
+      final certifications = find.byKey(
+        const Key('certifications-empty-state'),
+      );
+      expect(certifications, findsOneWidget);
+      expect(tester.getCenter(certifications).dy, inInclusiveRange(350, 620));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('AI retry saves only the suggestion the user applies', (
+    tester,
+  ) async {
+    final repo = MockCvRepo();
+    final aiRepository = _SequencedAiRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          cvRepositoryProvider.overrideWithValue(repo),
+          currentAuthUserProvider.overrideWithValue(_signedInUser),
+          aiWritingRepositoryProvider.overrideWithValue(aiRepository),
+        ],
+        child: const MaterialApp(home: CvEditorScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('target-role-field')),
+      'Flutter Developer',
+    );
+    await tester.enterText(
+      find.byKey(const Key('summary-field')),
+      'Lập trình viên Flutter tập trung vào ứng dụng mobile ổn định và trải nghiệm người dùng.',
+    );
+    final aiButton = find.byKey(const Key('polish-summary-with-ai'));
+    await tester.ensureVisible(aiButton);
+    await tester.tap(aiButton);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Gợi ý AI lần đầu'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('retry-ai-summary')));
+    await tester.pumpAndSettle();
+
+    expect(aiRepository.calls, 2);
+    expect(find.textContaining('Gợi ý AI lần hai'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('apply-ai-summary')));
+    await tester.pumpAndSettle();
+
+    expect(repo.list.single.summary, contains('lần hai'));
+    expect(repo.list.single.summary, isNot(contains('lần đầu')));
+  });
+
+  testWidgets('AI save failure keeps the original summary in UI and local CV', (
+    tester,
+  ) async {
+    const original =
+        'Lập trình viên Flutter tập trung vào ứng dụng mobile ổn định và trải nghiệm người dùng.';
+    final repo = MockCvRepo(
+      shouldFailSave: (cv) => cv.summary.startsWith('Gợi ý AI'),
+    );
+    final aiRepository = _SequencedAiRepository();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          cvRepositoryProvider.overrideWithValue(repo),
+          currentAuthUserProvider.overrideWithValue(_signedInUser),
+          aiWritingRepositoryProvider.overrideWithValue(aiRepository),
+        ],
+        child: const MaterialApp(home: CvEditorScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('target-role-field')),
+      'Flutter Developer',
+    );
+    await tester.enterText(find.byKey(const Key('summary-field')), original);
+    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump();
+
+    final aiButton = find.byKey(const Key('polish-summary-with-ai'));
+    await tester.ensureVisible(aiButton);
+    await tester.tap(aiButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('apply-ai-summary')));
+    await tester.pumpAndSettle();
+
+    final summaryField = tester.widget<TextField>(
+      find.byKey(const Key('summary-field')),
+    );
+    expect(summaryField.controller?.text, original);
+    expect(repo.list.single.summary, original);
+    expect(find.text('Chưa áp dụng gợi ý AI'), findsOneWidget);
+  });
+
   testWidgets('new CV keeps one stable local id across auto-saves', (
     tester,
   ) async {
@@ -124,8 +307,8 @@ void main() {
     expect(find.text('Học vấn'), findsOneWidget);
     expect(find.text('Cá nhân'), findsNothing);
 
-    // Switch to English via SegmentedButton '🇬🇧 EN'
-    final enButton = find.text('🇬🇧 EN');
+    // Switch to English via the compact language selector.
+    final enButton = find.text('EN');
     expect(enButton, findsOneWidget);
     await tester.tap(enButton);
     await tester.pumpAndSettle();

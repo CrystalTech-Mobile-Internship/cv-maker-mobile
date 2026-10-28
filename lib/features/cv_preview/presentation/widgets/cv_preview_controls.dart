@@ -174,7 +174,7 @@ class _CvPreviewControlsState extends State<CvPreviewControls> {
                       child: Icon(
                         Icons.info_outline_rounded,
                         size: 19,
-                        color: Color(0xFF0369A1),
+                        color: AppTheme.primarySlate,
                       ),
                     ),
                   ),

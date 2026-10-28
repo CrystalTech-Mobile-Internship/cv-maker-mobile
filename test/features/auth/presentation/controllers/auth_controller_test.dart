@@ -77,11 +77,26 @@ void main() {
   test(
     'Google OAuth reports success after the browser flow launches',
     () async {
+      await const GuestSessionService().setGuestMode(true);
+
       final result = await controller.signInWithGoogle();
 
       expect(result.isSuccess, isTrue);
       expect(result.message, 'Đã mở trang đăng nhập Google.');
       expect(repository.googleSignInCalls, 1);
+      expect(
+        await const GuestSessionService().isGuestMode(),
+        isTrue,
+        reason: 'Launching OAuth is not proof that sign-in completed.',
+      );
+
+      await controller.handleSessionChange(
+        const AuthSessionChange(
+          event: AuthSessionEvent.signedIn,
+          user: _FakeAuthRepository.user,
+        ),
+      );
+      expect(await const GuestSessionService().isGuestMode(), isFalse);
     },
   );
 

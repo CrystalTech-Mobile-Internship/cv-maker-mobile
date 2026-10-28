@@ -170,7 +170,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   tileColor: Colors.white,
                   leading: const Icon(
                     Icons.analytics_outlined,
-                    color: AppTheme.brandIndigo,
+                    color: AppTheme.primarySlate,
                   ),
                   title: const Text('Chấm điểm ATS'),
                   subtitle: const Text('Giao diện so khớp JD'),
@@ -186,7 +186,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   tileColor: Colors.white,
                   leading: const Icon(
                     Icons.workspace_premium_rounded,
-                    color: Color(0xFFB45309),
+                    color: AppTheme.primarySlate,
                   ),
                   title: const Text('Nâng cấp Pro'),
                   subtitle: const Text('VietQR • Mẫu Premium'),
@@ -246,7 +246,7 @@ class _AccountInfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: AppTheme.brandIndigo),
+      leading: Icon(icon, color: AppTheme.primarySlate),
       title: Text(label),
       subtitle: Text(
         value,
