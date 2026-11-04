@@ -324,4 +324,54 @@ void main() {
     expect((await localRepository.getById(cvId))?.title, 'Bản cloud vừa sửa');
     expect(await localRepository.getPendingDeletions('user-123'), isEmpty);
   });
+
+  test('inspectSyncPreview returns pending upload, download, and conflict counts without mutating database', () async {
+    const cvLocalOnly = '11111111-1111-4111-8111-111111111111';
+    const cvRemoteOnly = '22222222-2222-4222-8222-222222222222';
+    const cvConflict = '33333333-3333-4333-8333-333333333333';
+
+    // Local-only CV (needs upload)
+    await localRepository.save(
+      buildSampleCv(id: cvLocalOnly, userId: 'user-123', updatedAt: DateTime.utc(2026, 10, 20, 10), isSynced: false),
+      markAsLocalChange: true,
+    );
+
+    // Conflict CV: local has edit, remote also has edit
+    await localRepository.save(
+      buildSampleCv(id: cvConflict, userId: 'user-123', updatedAt: DateTime.utc(2026, 10, 20, 12), isSynced: false),
+      markAsLocalChange: true,
+    );
+
+    final remoteCvs = [
+      buildSampleCv(id: cvRemoteOnly, userId: 'user-123', updatedAt: DateTime.utc(2026, 10, 20, 11), isSynced: true),
+      buildSampleCv(id: cvConflict, userId: 'user-123', updatedAt: DateTime.utc(2026, 10, 20, 14), isSynced: true),
+    ];
+
+    final fakeRemote = FakeCvRemoteDataSource(remoteCvs: remoteCvs);
+    final syncRepo = CvSyncRepository(
+      localRepository: localRepository,
+      remoteDataSource: fakeRemote,
+    );
+
+    final preview = await syncRepo.inspectSyncPreview(
+      userId: 'user-123',
+      userEmail: 'tuananh@example.com',
+      backendLabel: 'Supabase Primary',
+    );
+
+    expect(preview.hasError, isFalse);
+    expect(preview.targetBackend, 'Supabase Primary');
+    expect(preview.userEmail, 'tuananh@example.com');
+    expect(preview.localCvCount, 2);
+    expect(preview.remoteCvCount, 2);
+    expect(preview.hasChanges, isTrue);
+    expect(preview.pendingDownloadCount, greaterThanOrEqualTo(1));
+    expect(preview.conflictCount, greaterThanOrEqualTo(1));
+
+    // Guarantee read-only: local DB was not modified!
+    final localAfter = await localRepository.getAll();
+    expect(localAfter.length, 2);
+    expect(await localRepository.getById(cvRemoteOnly), isNull);
+  });
+
 }

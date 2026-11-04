@@ -15,6 +15,7 @@ import '../../../resume_import/data/repositories/resume_import_provider.dart';
 import '../../../resume_import/domain/repositories/resume_import_repository.dart';
 import '../../../resume_import/presentation/widgets/resume_import_review_dialog.dart';
 import '../controllers/dashboard_sync_controller.dart';
+import '../widgets/cloud_sync_preview_sheet.dart';
 import '../widgets/create_cv_dialog.dart';
 import '../widgets/home_dialogs.dart';
 import '../widgets/my_cvs_view.dart';
@@ -245,6 +246,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _syncAll() async {
     final user = ref.read(currentAuthUserProvider);
     if (user == null) return _openLogin();
+
+    final backendLabel = ref.read(authRepositoryProvider).backendLabel;
+    final preview = await ref.read(cvSyncRepositoryProvider).inspectSyncPreview(
+      userId: user.id,
+      userEmail: user.email,
+      backendLabel: backendLabel,
+    );
+
+    if (!mounted) return;
+
+    final confirmed = await CloudSyncPreviewSheet.show(
+      context,
+      preview: preview,
+      onExportBackup: () {
+        _exportAllCvs();
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
 
     final result = await ref
         .read(dashboardSyncControllerProvider.notifier)
