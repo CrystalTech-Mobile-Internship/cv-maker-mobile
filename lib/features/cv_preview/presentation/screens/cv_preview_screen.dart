@@ -10,6 +10,8 @@ import '../../../cv_editor/domain/models/cv_template.dart';
 import '../controllers/offline_pdf_export_controller.dart';
 import '../../domain/services/cv_sample_content_service.dart';
 import '../providers/pdf_export_provider.dart';
+import '../providers/docx_export_provider.dart';
+import '../../data/services/pdf_platform_storage.dart';
 import '../widgets/a4_pdf_preview.dart';
 import '../widgets/cv_preview_controls.dart';
 import '../widgets/export_pdf_dialog.dart';
@@ -116,6 +118,22 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
     setState(() => _isExporting = true);
 
     try {
+      if (chosenFileName.toLowerCase().endsWith('.docx')) {
+        final docxService = ref.read(docxExportServiceProvider);
+        final docxBytes = await docxService.generateDocx(
+          cv: _previewCv,
+          language: _workingCv.language,
+        );
+        final savedPath = await savePdfBytes(docxBytes, chosenFileName);
+        await sharePdfBytes(docxBytes, chosenFileName);
+        if (!mounted) return;
+        _showMessage(
+          _isEnglish
+              ? 'Saved Word document "$chosenFileName" locally ($savedPath).'
+              : 'Đã lưu tệp Word "$chosenFileName" tại $savedPath.',
+        );
+        return;
+      }
       final bytes = await _pdfBytes;
       final pdfService = ref.read(pdfExportServiceProvider);
       final result =

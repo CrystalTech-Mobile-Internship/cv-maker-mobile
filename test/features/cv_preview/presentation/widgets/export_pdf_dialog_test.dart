@@ -64,4 +64,30 @@ void main() {
     expect(find.text('File name cannot be empty'), findsOneWidget);
     expect(exportedName, isNull);
   });
+
+  testWidgets('ExportPdfDialog allows switching to Word .docx export', (tester) async {
+    String? exportedName;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ExportPdfDialog(
+            initialFileName: 'CV_Nguyen_Tuan_Anh.pdf',
+            isEnglish: false,
+            onConfirm: (name) => exportedName = name,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Word (.docx)'), findsOneWidget);
+    await tester.tap(find.text('Word (.docx)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('.docx'), findsOneWidget);
+    await tester.tap(find.text('Lưu Offline'));
+    await tester.pumpAndSettle();
+
+    expect(exportedName, 'CV_Nguyen_Tuan_Anh.docx');
+  });
 }

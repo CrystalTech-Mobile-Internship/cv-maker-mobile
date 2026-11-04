@@ -45,6 +45,7 @@ class ExportPdfDialog extends StatefulWidget {
 class _ExportPdfDialogState extends State<ExportPdfDialog> {
   late final TextEditingController _controller;
   String? _errorText;
+  String _format = 'pdf'; // 'pdf' or 'docx'
 
   @override
   void initState() {
@@ -52,6 +53,9 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
     var name = widget.initialFileName.trim();
     if (name.toLowerCase().endsWith('.pdf')) {
       name = name.substring(0, name.length - 4);
+    } else if (name.toLowerCase().endsWith('.docx')) {
+      name = name.substring(0, name.length - 5);
+      _format = 'docx';
     }
     _controller = TextEditingController(text: name);
   }
@@ -74,7 +78,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
     }
 
     final sanitized = text.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
-    final finalFileName = '$sanitized.pdf';
+    final finalFileName = '$sanitized.$_format';
     widget.onConfirm(finalFileName);
   }
 
@@ -137,6 +141,27 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
             ),
             const SizedBox(height: 18),
 
+            // Format Selector (PDF vs Word DOCX)
+            SegmentedButton<String>(
+              segments: [
+                ButtonSegment(
+                  value: 'pdf',
+                  icon: const Icon(Icons.picture_as_pdf_rounded),
+                  label: Text(isEn ? 'PDF (Vector A4)' : 'PDF (Chuẩn A4)'),
+                ),
+                ButtonSegment(
+                  value: 'docx',
+                  icon: const Icon(Icons.description_rounded),
+                  label: Text(isEn ? 'Word (.docx)' : 'Word (.docx)'),
+                ),
+              ],
+              selected: {_format},
+              onSelectionChanged: (set) {
+                setState(() => _format = set.first);
+              },
+            ),
+            const SizedBox(height: 14),
+
             // Form Input Field for Filename
             Text(
               isEn ? 'File Name:' : 'Đặt tên cho tệp PDF:',
@@ -163,7 +188,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                   alignment: Alignment.centerRight,
                   width: 52,
                   child: Text(
-                    '.pdf',
+                    '.$_format',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
