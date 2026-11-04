@@ -29,7 +29,9 @@
 - Xuất PDF A4 và chia sẻ bằng System Share Sheet là chức năng bắt buộc.
 - Dữ liệu được lưu local bằng Drift + SQLite trước; đồng bộ Supabase triển khai sau khi luồng local ổn định.
 - Gemini AI được hoãn đến sau khi các chức năng cốt lõi đạt tiêu chí nghiệm thu.
-- Không nhập CV từ PDF hoặc Word trong MVP.
+- Nhập CV từ PDF hoặc Word không thuộc MVP ban đầu. Tính năng này đã được triển
+  khai như phần mở rộng sau MVP theo hướng local-first; phạm vi và giới hạn nằm
+  tại `docs/resume-import.md`.
 - Giao diện MVP dùng tiếng Việt.
 - Android là nền tảng kiểm thử chính. Mã nguồn vẫn phải tương thích iOS, nhưng chưa bắt buộc tạo bản build iOS khi nhóm không có macOS.
 

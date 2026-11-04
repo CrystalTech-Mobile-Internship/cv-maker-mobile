@@ -15,6 +15,12 @@
 
 Không đặt AI key trong `.env` của Flutter. Thiết lập secret ở backend:
 
+1. Tạo **Auth API key mới** trong Google AI Studio. Từ tháng 09/2026,
+   Standard key cũ không còn được Gemini API chấp nhận.
+2. Chỉ cấp quyền dùng Gemini API cho key này và không dùng chung với dịch vụ khác.
+3. Lưu key bằng Supabase Secrets; không dán key vào Dashboard frontend, Flutter,
+   `.env` của ứng dụng hoặc Git.
+
 ```powershell
 supabase link --project-ref <project-ref>
 supabase secrets set GEMINI_API_KEY=<key>
@@ -25,6 +31,8 @@ supabase functions deploy polish-summary
 ```
 
 Có thể chỉ cấu hình một provider; Gemini được gọi trước và Groq là fallback.
+Nếu endpoint trả HTTP 404 thì Edge Function chưa được deploy. Ứng dụng sẽ hiển
+thị thông báo cấu hình an toàn thay vì lộ phản hồi kỹ thuật từ gateway.
 
 ## Checklist nghiệm thu
 

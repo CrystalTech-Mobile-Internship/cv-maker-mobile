@@ -1,6 +1,6 @@
 # Smart CV Maker Mobile
 
-Ứng dụng Flutter giúp sinh viên, fresher và người đi làm tạo CV chuyên nghiệp ngay trên điện thoại. Dự án hướng tới trải nghiệm offline-first: người dùng có thể tạo và chỉnh sửa CV khi không có mạng, sau đó đồng bộ với Supabase khi đăng nhập và có kết nối.
+Ứng dụng Flutter giúp sinh viên, fresher và người đi làm tạo CV chuyên nghiệp trên Android, iOS và Web. Dự án hướng tới trải nghiệm offline-first: người dùng có thể tạo và chỉnh sửa CV khi không có mạng, sau đó đồng bộ với Supabase khi đăng nhập và có kết nối.
 
 ## Trạng thái dự án
 
@@ -8,23 +8,24 @@ Dự án đang ở giai đoạn xây dựng MVP.
 
 Đã có:
 
-- Flutter project cho Android và iOS.
+- Flutter project cho Android, iOS và Web.
 - Material 3 theme.
 - Riverpod và GoRouter.
 - Khung màn hình Login, Dashboard, CV Editor và Preview.
 - Chế độ Khách khi chưa cấu hình Supabase.
 - Tài liệu yêu cầu và luồng MVP.
 - Bộ domain model CV, JSON serialization và ba hồ sơ mẫu.
-- Drift + SQLite, repository lưu CV local và hàng đợi xóa trên cloud.
+- Drift + SQLite/WASM, repository lưu CV local và hàng đợi xóa trên cloud.
+- Xem trước và xuất PDF A4; Web tải tệp qua trình duyệt.
+- AI Polish Summary qua Supabase Edge Function, không nhúng AI key vào client.
 
 Đang phát triển:
 
-- Kết nối Dashboard/Editor với repository và tự động lưu.
-- Supabase Auth, schema, RLS và đồng bộ.
-- Form động cho học vấn, kinh nghiệm, kỹ năng và dự án.
-- Preview bằng dữ liệu thật và xuất PDF A4.
+- Deploy và kiểm thử Edge Function AI bằng Supabase Secrets.
+- Hoàn thiện retry đồng bộ, RLS và kiểm thử hai tài khoản.
+- Hoàn thiện bố cục Web split-view cho Editor và Preview.
 
-Các màn hình hiện tại vẫn chứa một số dữ liệu hard-code và thao tác mô phỏng; chúng chưa phải bản chức năng hoàn chỉnh.
+ATS Scorer, thanh toán Pro và một số mẫu Premium hiện vẫn là giao diện chuẩn bị; chưa phải chức năng backend hoàn chỉnh.
 
 ## Công nghệ
 
@@ -125,6 +126,17 @@ Chạy ứng dụng:
 flutter run
 ```
 
+Chạy bản Web:
+
+```bash
+flutter run -d chrome
+```
+
+Bản Web sử dụng `web/sqlite3.wasm` và `web/drift_worker.js` để lưu CV bằng
+SQLite trong IndexedDB/OPFS. Khi nâng phiên bản Drift/SQLite, cần cập nhật hai
+asset này theo phiên bản tương ứng. Chi tiết xem tại
+[docs/web-support.md](docs/web-support.md).
+
 Khi chưa có URL/key Supabase hợp lệ, ứng dụng vẫn cho phép vào chế độ Khách. Biến môi trường phải giữ đúng tên mà code hiện tại đang đọc trong `lib/core/constants/env_constants.dart`.
 
 ## Bảo mật cấu hình
@@ -198,6 +210,9 @@ Không commit hoặc push khi format, analyze hoặc test quan trọng vẫn đa
 
 ## Tài liệu
 
+- [Nhập CV Word/PDF và dùng lại hồ sơ](docs/resume-import.md)
+- [Sao lưu và khôi phục CV trên thiết bị](docs/local-backup.md)
+
 - [Đặc tả yêu cầu](docs/requirements.md)
 - [Phạm vi MVP đã chốt](docs/mvp-scope.md)
 - [Luồng người dùng MVP](docs/mvp-flow.md)
@@ -207,6 +222,7 @@ Không commit hoặc push khi format, analyze hoặc test quan trọng vẫn đa
 - [Mapping dữ liệu local và cloud](docs/database/local-cloud-mapping.md)
 - [Hướng dẫn Supabase development](docs/database/supabase-setup.md)
 - [Quy trình làm việc với agent](docs/agent-workflow.md)
+- [Hướng dẫn chạy và kiểm thử Web](docs/web-support.md)
 
 ## Nhóm thực hiện
 
