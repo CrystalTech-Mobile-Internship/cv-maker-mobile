@@ -41,7 +41,16 @@ class PendingCvDeletions extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  AppDatabase.defaults() : super(driftDatabase(name: 'smart_cv_maker'));
+  AppDatabase.defaults()
+    : super(
+        driftDatabase(
+          name: 'smart_cv_maker',
+          web: DriftWebOptions(
+            sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+            driftWorker: Uri.parse('drift_worker.js'),
+          ),
+        ),
+      );
 
   @override
   int get schemaVersion => 2;
