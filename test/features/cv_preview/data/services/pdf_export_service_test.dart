@@ -176,4 +176,25 @@ void main() {
 
     expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-');
   });
+
+  test('PdfExportServiceImpl exports PDF successfully with customized sectionOrder', () async {
+    final service = PdfExportServiceImpl();
+    final cv = CvModel.empty(id: 'reordered-cv').copyWith(
+      sectionOrder: [
+        'projects',
+        'skills',
+        'education',
+        'experience',
+        'summary',
+        'certifications',
+      ],
+    );
+    final bytes = await service.generateCvPdf(
+      cv: cv,
+      language: 'vi',
+      templateId: 'harvard_ats',
+    );
+    expect(bytes, isNotEmpty);
+    expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-');
+  });
 }

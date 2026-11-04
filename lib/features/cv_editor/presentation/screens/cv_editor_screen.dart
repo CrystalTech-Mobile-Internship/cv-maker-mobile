@@ -22,6 +22,9 @@ import '../widgets/experience_tab.dart';
 import '../widgets/personal_info_tab.dart';
 import '../widgets/projects_tab.dart';
 import '../widgets/skills_tab.dart';
+import '../widgets/section_reorder_sheet.dart';
+import '../widgets/starter_sample_picker_sheet.dart';
+import '../widgets/editor_typography_toolbar.dart';
 
 class CvEditorScreen extends ConsumerStatefulWidget {
   const CvEditorScreen({super.key, this.initialCv});
@@ -57,6 +60,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   List<SkillModel> _skills = [];
   List<ProjectModel> _projects = [];
   List<CertificationModel> _certifications = [];
+  List<String> _sectionOrder = List.of(CvModel.defaultSectionOrder);
+  double _fontSizeScale = 1.0;
 
   bool _isSaving = false;
   Timer? _debounceTimer;
@@ -98,6 +103,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       _skills = List.of(cv.skills);
       _projects = List.of(cv.projects);
       _certifications = List.of(cv.certifications);
+      _sectionOrder = List.of(cv.effectiveSectionOrder);
+      _fontSizeScale = cv.fontSizeScale;
     }
   }
 
@@ -214,6 +221,49 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     _onFieldChanged();
   }
 
+  void _openSectionReorderSheet() {
+    SectionReorderSheet.show(
+      context: context,
+      currentOrder: _sectionOrder,
+      language: _selectedLanguage,
+      onOrderChanged: (newOrder) {
+        setState(() => _sectionOrder = List.of(newOrder));
+        _onFieldChanged();
+      },
+    );
+  }
+
+  void _openStarterSamplePicker() {
+    StarterSamplePickerSheet.show(
+      context: context,
+      language: _selectedLanguage,
+      onSelectSummary: (summary) {
+        setState(() => _summaryController.text = summary);
+        _onFieldChanged();
+      },
+      onAddExperiences: (samples) {
+        setState(() => _experiences.addAll(samples));
+        _onFieldChanged();
+      },
+      onAddProjects: (samples) {
+        setState(() => _projects.addAll(samples));
+        _onFieldChanged();
+      },
+      onAddSkills: (samples) {
+        setState(() => _skills.addAll(samples));
+        _onFieldChanged();
+      },
+      onAddEducation: (samples) {
+        setState(() => _educations.addAll(samples));
+        _onFieldChanged();
+      },
+      onAddCertifications: (samples) {
+        setState(() => _certifications.addAll(samples));
+        _onFieldChanged();
+      },
+    );
+  }
+
   @override
   void dispose() {
     _debounceTimer?.cancel();
@@ -242,7 +292,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       templateId: existing?.templateId ?? 'harvard_ats',
       language: _selectedLanguage,
       primaryColor: existing?.primaryColor ?? '#1E293B',
-      fontSizeScale: existing?.fontSizeScale ?? 1.0,
+      fontSizeScale: _fontSizeScale,
+      sectionOrder: _sectionOrder,
       summary: _summaryController.text.trim(),
       personalInfo: PersonalInfoModel(
         fullName: _fullNameController.text.trim(),
@@ -1230,6 +1281,16 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         ),
         actions: [
           IconButton(
+            tooltip: isEn ? 'Starter Samples' : 'Mẫu gợi ý',
+            icon: const Icon(Icons.lightbulb_outline_rounded),
+            onPressed: _openStarterSamplePicker,
+          ),
+          IconButton(
+            tooltip: isEn ? 'Reorder Sections' : 'Sắp xếp bố cục',
+            icon: const Icon(Icons.swap_vert_rounded),
+            onPressed: _openSectionReorderSheet,
+          ),
+          IconButton(
             tooltip: isEn ? 'Preview Vector PDF' : 'Xem trước PDF',
             icon: const Icon(Icons.picture_as_pdf_outlined),
             onPressed: _openPreview,
@@ -1363,6 +1424,22 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                     }
                     return Row(children: [label, const Spacer(), selector]);
                   },
+                ),
+              ),
+
+              // Quick formatting, sizing, samples & reorder toolbar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
+                child: EditorTypographyToolbar(
+                  currentScale: _fontSizeScale,
+                  language: _selectedLanguage,
+                  onScaleChanged: (scale) {
+                    setState(() => _fontSizeScale = scale);
+                    _onFieldChanged();
+                  },
+                  onOpenSectionReorder: _openSectionReorderSheet,
+                  onOpenStarterSamples: _openStarterSamplePicker,
+                  textController: _tabController.index == 0 ? _summaryController : null,
                 ),
               ),
 

@@ -27,11 +27,22 @@ class CvModel {
     List<SkillModel> skills = const [],
     List<ProjectModel> projects = const [],
     List<CertificationModel> certifications = const [],
+    List<String> sectionOrder = defaultSectionOrder,
   }) : educations = List.unmodifiable(educations),
        experiences = List.unmodifiable(experiences),
        skills = List.unmodifiable(skills),
        projects = List.unmodifiable(projects),
-       certifications = List.unmodifiable(certifications);
+       certifications = List.unmodifiable(certifications),
+       sectionOrder = List.unmodifiable(sectionOrder);
+
+  static const List<String> defaultSectionOrder = [
+    'summary',
+    'experience',
+    'projects',
+    'education',
+    'skills',
+    'certifications',
+  ];
 
   final String id;
   final String? userId;
@@ -47,9 +58,20 @@ class CvModel {
   final List<SkillModel> skills;
   final List<ProjectModel> projects;
   final List<CertificationModel> certifications;
+  final List<String> sectionOrder;
   final bool isSynced;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  List<String> get effectiveSectionOrder {
+    final current = List<String>.from(sectionOrder);
+    for (final section in defaultSectionOrder) {
+      if (!current.contains(section)) {
+        current.add(section);
+      }
+    }
+    return current;
+  }
 
   factory CvModel.empty({
     required String id,
@@ -72,6 +94,7 @@ class CvModel {
       isSynced: false,
       createdAt: timestamp,
       updatedAt: timestamp,
+      sectionOrder: defaultSectionOrder,
     );
   }
 
@@ -103,6 +126,10 @@ class CvModel {
         json['certifications'],
         CertificationModel.fromJson,
       ),
+      sectionOrder: (json['sectionOrder'] as List<dynamic>?)
+              ?.map((item) => item.toString())
+              .toList() ??
+          defaultSectionOrder,
       isSynced: json['isSynced'] as bool? ?? false,
       createdAt: json['createdAt'] == null
           ? updatedAt
@@ -127,6 +154,7 @@ class CvModel {
       'skills': skills.map((item) => item.toJson()).toList(),
       'projects': projects.map((item) => item.toJson()).toList(),
       'certifications': certifications.map((item) => item.toJson()).toList(),
+      'sectionOrder': sectionOrder,
       'isSynced': isSynced,
       'createdAt': createdAt.toUtc().toIso8601String(),
       'updatedAt': updatedAt.toUtc().toIso8601String(),
@@ -148,6 +176,7 @@ class CvModel {
     List<SkillModel>? skills,
     List<ProjectModel>? projects,
     List<CertificationModel>? certifications,
+    List<String>? sectionOrder,
     bool? isSynced,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -169,6 +198,7 @@ class CvModel {
       skills: skills ?? this.skills,
       projects: projects ?? this.projects,
       certifications: certifications ?? this.certifications,
+      sectionOrder: sectionOrder ?? this.sectionOrder,
       isSynced: isSynced ?? this.isSynced,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
