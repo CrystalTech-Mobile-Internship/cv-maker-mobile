@@ -9,14 +9,20 @@ class CvPreviewControls extends StatefulWidget {
     super.key,
     required this.language,
     required this.fontSizeScale,
+    required this.showSampleContent,
     required this.onLanguageChanged,
     required this.onFontSizeScaleChanged,
+    required this.onSampleContentChanged,
+    required this.onResetFormatting,
   });
 
   final String language;
   final double fontSizeScale;
+  final bool showSampleContent;
   final ValueChanged<String> onLanguageChanged;
   final ValueChanged<double> onFontSizeScaleChanged;
+  final ValueChanged<bool> onSampleContentChanged;
+  final VoidCallback onResetFormatting;
 
   @override
   State<CvPreviewControls> createState() => _CvPreviewControlsState();
@@ -106,80 +112,112 @@ class _CvPreviewControlsState extends State<CvPreviewControls> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 700),
-            child: SizedBox(
-              height: 42,
-              child: Row(
-                children: [
-                  _LanguageMenu(
-                    language: widget.language,
-                    onChanged: widget.onLanguageChanged,
-                  ),
-                  const _ToolbarDivider(),
-                  const Icon(
-                    Icons.format_size_rounded,
-                    size: 19,
-                    color: AppTheme.primarySlate,
-                  ),
-                  const SizedBox(width: 4),
-                  _ToolbarButton(
-                    key: const Key('decrease-font-size'),
-                    tooltip: _isEnglish ? 'Decrease text size' : 'Giảm cỡ chữ',
-                    onPressed: widget.fontSizeScale <= _minimumScale
-                        ? null
-                        : () => _stepScale(-1),
-                    child: const Text(
-                      'A−',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  const SizedBox(width: 3),
-                  _PercentageField(
-                    controller: _scaleController,
-                    focusNode: _scaleFocusNode,
-                    onSubmitted: (_) => _applyTypedScale(),
-                    tooltip: _isEnglish
-                        ? 'Enter 75–150%'
-                        : 'Nhập cỡ chữ từ 75–150%',
-                  ),
-                  const SizedBox(width: 3),
-                  _ToolbarButton(
-                    key: const Key('increase-font-size'),
-                    tooltip: _isEnglish ? 'Increase text size' : 'Tăng cỡ chữ',
-                    onPressed: widget.fontSizeScale >= _maximumScale
-                        ? null
-                        : () => _stepScale(1),
-                    child: const Text(
-                      'A+',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  const Spacer(),
-                  _ToolbarButton(
-                    key: const Key('reset-font-size'),
-                    tooltip: _isEnglish ? 'Reset to 100%' : 'Đặt lại 100%',
-                    onPressed: (widget.fontSizeScale - 1).abs() < 0.001
-                        ? null
-                        : () {
-                            _scaleController.text = '100';
-                            _changeScale(1);
-                          },
-                    child: const Icon(Icons.restart_alt_rounded, size: 19),
-                  ),
-                  Tooltip(
-                    message: notice,
-                    triggerMode: TooltipTriggerMode.tap,
-                    showDuration: const Duration(seconds: 4),
-                    child: const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.info_outline_rounded,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 42,
+                  child: Row(
+                    children: [
+                      _LanguageMenu(
+                        language: widget.language,
+                        onChanged: widget.onLanguageChanged,
+                      ),
+                      const _ToolbarDivider(),
+                      const Icon(
+                        Icons.format_size_rounded,
                         size: 19,
                         color: AppTheme.primarySlate,
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      _ToolbarButton(
+                        key: const Key('decrease-font-size'),
+                        tooltip: _isEnglish
+                            ? 'Decrease text size'
+                            : 'Giảm cỡ chữ',
+                        onPressed: widget.fontSizeScale <= _minimumScale
+                            ? null
+                            : () => _stepScale(-1),
+                        child: const Text(
+                          'A−',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      const SizedBox(width: 3),
+                      _PercentageField(
+                        controller: _scaleController,
+                        focusNode: _scaleFocusNode,
+                        onSubmitted: (_) => _applyTypedScale(),
+                        tooltip: _isEnglish
+                            ? 'Enter 75–150%'
+                            : 'Nhập cỡ chữ từ 75–150%',
+                      ),
+                      const SizedBox(width: 3),
+                      _ToolbarButton(
+                        key: const Key('increase-font-size'),
+                        tooltip: _isEnglish
+                            ? 'Increase text size'
+                            : 'Tăng cỡ chữ',
+                        onPressed: widget.fontSizeScale >= _maximumScale
+                            ? null
+                            : () => _stepScale(1),
+                        child: const Text(
+                          'A+',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      const Spacer(),
+                      _ToolbarButton(
+                        key: const Key('reset-font-size'),
+                        tooltip: _isEnglish
+                            ? 'Reset document formatting'
+                            : 'Đặt lại định dạng tài liệu',
+                        onPressed: widget.onResetFormatting,
+                        child: const Icon(Icons.restart_alt_rounded, size: 19),
+                      ),
+                      Tooltip(
+                        message: notice,
+                        triggerMode: TooltipTriggerMode.tap,
+                        showDuration: const Duration(seconds: 4),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.info_outline_rounded,
+                            size: 19,
+                            color: AppTheme.primarySlate,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _isEnglish
+                            ? 'Keep headings and examples for empty sections'
+                            : 'Giữ đề mục và nội dung mẫu cho phần còn trống',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primarySlate,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Switch.adaptive(
+                      key: const Key('preview-sample-content-toggle'),
+                      value: widget.showSampleContent,
+                      onChanged: widget.onSampleContentChanged,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -217,8 +255,8 @@ class _LanguageMenu extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           items: const [
-            DropdownMenuItem(value: 'vi', child: Text('🇻🇳 VI')),
-            DropdownMenuItem(value: 'en', child: Text('🇬🇧 EN')),
+            DropdownMenuItem(value: 'vi', child: Text('VI')),
+            DropdownMenuItem(value: 'en', child: Text('EN')),
           ],
           onChanged: (value) {
             if (value != null && value != language) onChanged(value);

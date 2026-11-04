@@ -6,6 +6,7 @@ import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/reset_password_screen.dart';
+import '../features/auth/presentation/auth_redirect.dart';
 import '../features/ai_tools/presentation/screens/ats_scorer_screen.dart';
 import '../features/billing/presentation/screens/pro_upgrade_screen.dart';
 import '../features/cv_management/presentation/screens/home_screen.dart';
@@ -32,12 +33,16 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/login',
       name: 'login',
-      builder: (context, state) => const LoginScreen(),
+      builder: (context, state) => LoginScreen(
+        redirectPath: safeAuthRedirect(state.uri.queryParameters['redirect']),
+      ),
     ),
     GoRoute(
       path: '/register',
       name: 'register',
-      builder: (context, state) => const RegisterScreen(),
+      builder: (context, state) => RegisterScreen(
+        redirectPath: safeAuthRedirect(state.uri.queryParameters['redirect']),
+      ),
     ),
     GoRoute(
       path: '/forgot-password',

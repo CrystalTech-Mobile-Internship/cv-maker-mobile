@@ -93,6 +93,13 @@ void main() {
     // Verify empty state is rendered
     expect(find.text('Chưa có hồ sơ CV nào'), findsOneWidget);
     expect(find.byKey(const Key('create-cv-header')), findsOneWidget);
+    final createButton = tester.widget<IconButton>(
+      find.byKey(const Key('create-cv-header')),
+    );
+    expect(
+      createButton.style?.foregroundColor?.resolve(<WidgetState>{}),
+      Colors.white,
+    );
 
     // Tap the create action in the CV library header.
     await tester.tap(find.byKey(const Key('create-cv-header')));
@@ -103,14 +110,14 @@ void main() {
     expect(find.text('Harvard ATS'), findsOneWidget);
     expect(find.text('Minimalist Clean'), findsOneWidget);
     expect(find.text('Creative Tech'), findsOneWidget);
-    expect(find.text('🇻🇳 Tiếng Việt'), findsOneWidget);
+    expect(find.text('Tiếng Việt'), findsOneWidget);
     expect(find.text('Điền hồ sơ mẫu sinh viên CNTT'), findsNothing);
     expect(find.text('VD: CV Flutter Software Engineer'), findsOneWidget);
 
-    final createButton = tester.widget<FilledButton>(
+    final submitButton = tester.widget<FilledButton>(
       find.widgetWithText(FilledButton, 'Tạo ngay'),
     );
-    expect(createButton.onPressed, isNull);
+    expect(submitButton.onPressed, isNull);
   });
 
   testWidgets('HomeScreen displays CV cards when repository has data', (
@@ -156,6 +163,16 @@ void main() {
     expect(find.text('CV Kỹ sư Phần mềm'), findsOneWidget);
     expect(find.text('Senior Flutter Developer'), findsOneWidget);
     expect(find.text('Trên máy'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Đăng nhập để đồng bộ'),
+      240,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const PageStorageKey('my-cvs')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
     expect(find.text('Đăng nhập để đồng bộ'), findsOneWidget);
   });
 
@@ -269,8 +286,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Chấm điểm ATS'), findsOneWidget);
-    expect(find.text('Nâng cấp Pro'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('import-existing-resume')),
+      240,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const PageStorageKey('my-cvs')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    expect(find.text('Nhập CV Word hoặc PDF'), findsOneWidget);
 
     await tester.tap(find.text('Mẫu CV'));
     await tester.pumpAndSettle();
@@ -285,6 +311,30 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Sắp ra mắt'), findsWidgets);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('account is an in-place tab and keeps bottom navigation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(FakeCvRepository())],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byTooltip('Đăng nhập'), findsNothing);
+    await tester.tap(find.text('Tài khoản'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Đăng nhập để quản lý tài khoản và đồng bộ CV'),
+      findsOneWidget,
+    );
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(BackButton), findsNothing);
   });
 
   testWidgets('premium availability label fits on a narrow screen', (

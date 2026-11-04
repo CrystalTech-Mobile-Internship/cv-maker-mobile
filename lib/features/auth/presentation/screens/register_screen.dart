@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
+import '../auth_redirect.dart';
 import '../providers/auth_providers.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.redirectPath});
+
+  final String? redirectPath;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -53,9 +56,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _showMessage(result.message, isError: !result.isSuccess);
     if (!result.isSuccess) return;
     if (result.requiresEmailConfirmation) {
-      context.go('/login');
+      context.go(authEntryLocation('/login', widget.redirectPath));
     } else {
-      context.go('/home');
+      context.go(safeAuthRedirect(widget.redirectPath) ?? '/home');
     }
   }
 
@@ -87,7 +90,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(
         leading: IconButton(
           tooltip: 'Quay lại',
-          onPressed: () => context.go('/login'),
+          onPressed: () =>
+              context.go(authEntryLocation('/login', widget.redirectPath)),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         title: const Text('Tạo tài khoản'),
@@ -224,7 +228,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       TextButton(
                         onPressed: isLoading
                             ? null
-                            : () => context.go('/login'),
+                            : () => context.go(
+                                authEntryLocation(
+                                  '/login',
+                                  widget.redirectPath,
+                                ),
+                              ),
                         child: const Text('Đã có tài khoản? Đăng nhập'),
                       ),
                     ],

@@ -73,6 +73,34 @@ void main() {
     });
   }
 
+  test('maps a missing Edge Function to a safe setup message', () async {
+    final repository = SupabaseAiWritingRepository(
+      _FakeRemoteDataSource(
+        () async => throw const AiWritingRemoteException(
+          'Requested function was not found.',
+          statusCode: 404,
+        ),
+      ),
+    );
+
+    await expectLater(
+      repository.polishSummary(_request),
+      throwsA(
+        isA<AiWritingFailure>()
+            .having(
+              (error) => error.code,
+              'code',
+              AiWritingFailureCode.unavailable,
+            )
+            .having(
+              (error) => error.message,
+              'message',
+              contains('chưa được kích hoạt'),
+            ),
+      ),
+    );
+  });
+
   test(
     'maps an Edge Function timeout without exposing implementation data',
     () async {

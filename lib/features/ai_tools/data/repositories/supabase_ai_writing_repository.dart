@@ -36,6 +36,13 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
     } on AiWritingFailure {
       rethrow;
     } on AiWritingRemoteException catch (error) {
+      if (error.statusCode == 404) {
+        throw AiWritingFailure(
+          'Trợ lý AI chưa được kích hoạt trên máy chủ. Hãy thử lại sau.',
+          code: AiWritingFailureCode.unavailable,
+          cause: error,
+        );
+      }
       throw AiWritingFailure(
         error.message,
         code: _codeFor(error.statusCode),

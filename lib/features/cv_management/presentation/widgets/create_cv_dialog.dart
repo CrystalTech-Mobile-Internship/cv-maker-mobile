@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
+import '../../../cv_editor/domain/models/cv_model.dart';
 import 'cv_template_picker.dart';
 
 final class CreateCvRequest {
@@ -8,27 +9,37 @@ final class CreateCvRequest {
     required this.title,
     required this.templateId,
     required this.language,
+    this.sourceCv,
   });
 
   final String title;
   final String templateId;
   final String language;
+  final CvModel? sourceCv;
 }
 
 Future<CreateCvRequest?> showCreateCvDialog(
   BuildContext context, {
   String initialTemplate = 'harvard_ats',
+  List<CvModel> existingCvs = const [],
 }) {
   return showDialog<CreateCvRequest>(
     context: context,
-    builder: (_) => _CreateCvDialog(initialTemplate: initialTemplate),
+    builder: (_) => _CreateCvDialog(
+      initialTemplate: initialTemplate,
+      existingCvs: existingCvs,
+    ),
   );
 }
 
 class _CreateCvDialog extends StatefulWidget {
-  const _CreateCvDialog({required this.initialTemplate});
+  const _CreateCvDialog({
+    required this.initialTemplate,
+    required this.existingCvs,
+  });
 
   final String initialTemplate;
+  final List<CvModel> existingCvs;
 
   @override
   State<_CreateCvDialog> createState() => _CreateCvDialogState();
@@ -38,6 +49,7 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
   final _titleController = TextEditingController();
   late String _selectedTemplate = widget.initialTemplate;
   String _language = 'vi';
+  String? _sourceCvId;
 
   @override
   void dispose() {
@@ -76,6 +88,34 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
               ),
             ),
             const SizedBox(height: 16),
+            const Text(
+              'Dữ liệu ban đầu',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String?>(
+              initialValue: _sourceCvId,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.content_copy_outlined),
+                helperText: 'Dùng lại thông tin nhưng tạo một CV độc lập.',
+              ),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text('Bắt đầu với hồ sơ trống'),
+                ),
+                for (final cv in widget.existingCvs)
+                  DropdownMenuItem<String?>(
+                    value: cv.id,
+                    child: Text(
+                      'Dùng dữ liệu: ${cv.title}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _sourceCvId = value),
+            ),
+            const SizedBox(height: 16),
             const Text('Mẫu CV', style: TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             CvTemplatePicker(
@@ -90,8 +130,16 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
             const SizedBox(height: 8),
             SegmentedButton<String>(
               segments: const [
-                ButtonSegment(value: 'vi', label: Text('🇻🇳 Tiếng Việt')),
-                ButtonSegment(value: 'en', label: Text('🇬🇧 English')),
+                ButtonSegment(
+                  value: 'vi',
+                  icon: Icon(Icons.translate_rounded, size: 17),
+                  label: Text('Tiếng Việt'),
+                ),
+                ButtonSegment(
+                  value: 'en',
+                  icon: Icon(Icons.language_rounded, size: 17),
+                  label: Text('English'),
+                ),
               ],
               selected: {_language},
               onSelectionChanged: (value) {
@@ -114,6 +162,9 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
                     title: _titleController.text.trim(),
                     templateId: _selectedTemplate,
                     language: _language,
+                    sourceCv: widget.existingCvs
+                        .where((cv) => cv.id == _sourceCvId)
+                        .firstOrNull,
                   ),
                 ),
           icon: const Icon(Icons.check_rounded),

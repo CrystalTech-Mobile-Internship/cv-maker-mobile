@@ -10,10 +10,12 @@ class TemplateCatalogView extends StatefulWidget {
   const TemplateCatalogView({
     super.key,
     required this.onUseTemplate,
+    required this.onPreviewTemplate,
     required this.onPremiumTap,
   });
 
   final ValueChanged<CvTemplate> onUseTemplate;
+  final ValueChanged<CvTemplate> onPreviewTemplate;
   final ValueChanged<CvTemplate> onPremiumTap;
 
   @override
@@ -69,6 +71,9 @@ class _TemplateCatalogViewState extends State<TemplateCatalogView> {
               final template = templates[index];
               return _TemplateCard(
                 template: template,
+                onPreview: template.isPremium
+                    ? null
+                    : () => widget.onPreviewTemplate(template),
                 onTap: () => template.isPremium
                     ? widget.onPremiumTap(template)
                     : widget.onUseTemplate(template),
@@ -182,10 +187,15 @@ class _TemplateFilterBar extends StatelessWidget {
 }
 
 class _TemplateCard extends StatelessWidget {
-  const _TemplateCard({required this.template, required this.onTap});
+  const _TemplateCard({
+    required this.template,
+    required this.onTap,
+    required this.onPreview,
+  });
 
   final CvTemplate template;
   final VoidCallback onTap;
+  final VoidCallback? onPreview;
 
   @override
   Widget build(BuildContext context) {
@@ -295,20 +305,46 @@ class _TemplateCard extends StatelessWidget {
                                 ),
                               ),
                             )
-                          : FilledButton(
-                              onPressed: onTap,
-                              style: AppTheme.createCvButton.copyWith(
-                                padding: const WidgetStatePropertyAll(
-                                  EdgeInsets.symmetric(horizontal: 8),
-                                ),
-                                textStyle: const WidgetStatePropertyAll(
-                                  TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w800,
+                          : Row(
+                              children: [
+                                SizedBox(
+                                  width: 46,
+                                  child: OutlinedButton(
+                                    key: ValueKey(
+                                      'preview-template-${template.id}',
+                                    ),
+                                    onPressed: onPreview,
+                                    style: OutlinedButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    child: const Icon(
+                                      Icons.visibility_outlined,
+                                      size: 18,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              child: const Text('Dùng mẫu'),
+                                const SizedBox(width: 7),
+                                Expanded(
+                                  child: FilledButton(
+                                    onPressed: onTap,
+                                    style: AppTheme.createCvButton.copyWith(
+                                      padding: const WidgetStatePropertyAll(
+                                        EdgeInsets.symmetric(horizontal: 6),
+                                      ),
+                                      textStyle: const WidgetStatePropertyAll(
+                                        TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                    ),
+                                    child: const FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text('Dùng mẫu'),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                     ),
                   ],

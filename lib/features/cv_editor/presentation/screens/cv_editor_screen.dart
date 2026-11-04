@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,8 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../ai_tools/presentation/controllers/summary_polish_controller.dart';
 import '../../../ai_tools/presentation/controllers/summary_polish_flow_coordinator.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../cv_preview/presentation/providers/pdf_export_provider.dart';
+import '../../../cv_preview/presentation/widgets/a4_pdf_preview.dart';
 import '../../data/repositories/cv_repository_provider.dart';
 import '../../data/services/profile_image_service_impl.dart';
 import '../../domain/models/models.dart';
@@ -56,6 +60,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
   bool _isSaving = false;
   Timer? _debounceTimer;
+  Timer? _previewDebounceTimer;
+  Future<Uint8List>? _desktopPdfBytes;
   String _syncStatusText = 'Đã lưu trên thiết bị';
 
   bool get _isEn => _selectedLanguage == 'en';
@@ -69,6 +75,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     _draftCreatedAt = widget.initialCv?.createdAt ?? now;
     _selectedLanguage = widget.initialCv?.language ?? 'vi';
     _loadInitialCv();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduleDesktopPreview(immediate: true);
+    });
   }
 
   void _loadInitialCv() {
@@ -113,6 +122,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
   void _onFieldChanged([String? _]) {
     _debounceTimer?.cancel();
+    _scheduleDesktopPreview();
     if (_syncStatusText != 'Đang tự động lưu...') {
       setState(() => _syncStatusText = 'Đang tự động lưu...');
     }
@@ -139,6 +149,31 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         }
       }
     });
+  }
+
+  void _scheduleDesktopPreview({bool immediate = false}) {
+    _previewDebounceTimer?.cancel();
+    if (!mounted || MediaQuery.sizeOf(context).width < 1100) return;
+
+    void refresh() {
+      if (!mounted) return;
+      final cv = _buildCvModel();
+      setState(() {
+        _desktopPdfBytes = ref
+            .read(pdfExportServiceProvider)
+            .generateCvPdf(
+              cv: cv,
+              language: cv.language,
+              templateId: cv.templateId,
+            );
+      });
+    }
+
+    if (immediate) {
+      refresh();
+      return;
+    }
+    _previewDebounceTimer = Timer(const Duration(milliseconds: 450), refresh);
   }
 
   void _showInputValidationError(String vietnamese, String english) {
@@ -182,6 +217,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   @override
   void dispose() {
     _debounceTimer?.cancel();
+    _previewDebounceTimer?.cancel();
     _tabController.dispose();
     _titleController.dispose();
     _fullNameController.dispose();
@@ -330,6 +366,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
             ? 'AI suggestion saved on device'
             : 'Đã lưu gợi ý AI trên máy';
       });
+      _scheduleDesktopPreview();
     }
   }
 
@@ -1251,155 +1288,228 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
           ),
         ),
       ),
-      body: Column(
-        children: [
-          // Language Switcher Banner
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final selector = SegmentedButton<String>(
-                  showSelectedIcon: false,
-                  segments: const [
-                    ButtonSegment(value: 'vi', label: Text('VI')),
-                    ButtonSegment(value: 'en', label: Text('EN')),
-                  ],
-                  selected: {_selectedLanguage},
-                  style: ButtonStyle(
-                    visualDensity: VisualDensity.compact,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: WidgetStateProperty.all(
-                      const EdgeInsets.symmetric(horizontal: 10),
-                    ),
+      body: LayoutBuilder(
+        builder: (context, pageConstraints) {
+          final editorPane = Column(
+            children: [
+              // Language Switcher Banner
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade200),
                   ),
-                  onSelectionChanged: (set) {
-                    final newLang = set.first;
-                    if (newLang != _selectedLanguage) {
-                      _changeLanguage(language: newLang, notify: true);
-                    }
-                  },
-                );
-                final label = Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.language_rounded,
-                      size: 18,
-                      color: Colors.grey.shade700,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      isEn ? 'Language:' : 'Ngôn ngữ CV:',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
+                ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final selector = SegmentedButton<String>(
+                      showSelectedIcon: false,
+                      segments: const [
+                        ButtonSegment(value: 'vi', label: Text('VI')),
+                        ButtonSegment(value: 'en', label: Text('EN')),
+                      ],
+                      selected: {_selectedLanguage},
+                      style: ButtonStyle(
+                        visualDensity: VisualDensity.compact,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: WidgetStateProperty.all(
+                          const EdgeInsets.symmetric(horizontal: 10),
+                        ),
                       ),
+                      onSelectionChanged: (set) {
+                        final newLang = set.first;
+                        if (newLang != _selectedLanguage) {
+                          _changeLanguage(language: newLang, notify: true);
+                        }
+                      },
+                    );
+                    final label = Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.language_rounded,
+                          size: 18,
+                          color: Colors.grey.shade700,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          isEn ? 'Language:' : 'Ngôn ngữ CV:',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ],
+                    );
+
+                    if (constraints.maxWidth < 360) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          label,
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: selector,
+                          ),
+                        ],
+                      );
+                    }
+                    return Row(children: [label, const Spacer(), selector]);
+                  },
+                ),
+              ),
+
+              // Main Tabs Content
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // Tab 1: Personal Info
+                    PersonalInfoTab(
+                      language: _selectedLanguage,
+                      titleController: _titleController,
+                      fullNameController: _fullNameController,
+                      roleController: _roleController,
+                      emailController: _emailController,
+                      phoneController: _phoneController,
+                      locationController: _locationController,
+                      summaryController: _summaryController,
+                      onFieldChanged: _onFieldChanged,
+                      onAiOptimize: _handleAiOptimizeSummary,
+                      isAiLoading: summaryPolishState.isLoading,
+                      avatarPath: _avatarPath,
+                      onPickAvatar: _pickProfilePhoto,
+                      onRemoveAvatar: _removeProfilePhoto,
+                      avatarPosition: _avatarPosition,
+                      onAvatarPositionChanged: (position) {
+                        setState(() => _avatarPosition = position);
+                        _onFieldChanged();
+                      },
+                      supportsProfilePhoto:
+                          const {
+                            AppConstants.templateMinimalistClean,
+                            AppConstants.templateCreativeTech,
+                            AppConstants.templateProfessionalSidebar,
+                          }.contains(
+                            widget.initialCv?.templateId ??
+                                AppConstants.templateHarvardAts,
+                          ),
+                    ),
+
+                    // Tab 2: Education
+                    EducationTab(
+                      language: _selectedLanguage,
+                      educations: _educations,
+                      onAddEducation: () => _showAddEducationDialog(),
+                      onEditEducation: _showAddEducationDialog,
+                      onDeleteEducation: _deleteEducation,
+                    ),
+
+                    // Tab 3: Experience
+                    ExperienceTab(
+                      language: _selectedLanguage,
+                      experiences: _experiences,
+                      onAddExperience: () => _showAddExperienceDialog(),
+                      onEditExperience: _showAddExperienceDialog,
+                      onDeleteExperience: _deleteExperience,
+                    ),
+
+                    // Tab 4: Skills
+                    SkillsTab(
+                      language: _selectedLanguage,
+                      skills: _skills,
+                      onAddSkill: _showAddSkillDialog,
+                      onEditSkill: _showAddSkillDialog,
+                      onDeleteSkill: _deleteSkill,
+                    ),
+                    ProjectsTab(
+                      language: _selectedLanguage,
+                      projects: _projects,
+                      onAdd: () => _showProjectDialog(),
+                      onEdit: _showProjectDialog,
+                      onDelete: _deleteProject,
+                    ),
+                    CertificationsTab(
+                      language: _selectedLanguage,
+                      items: _certifications,
+                      onAdd: () => _showCertificationDialog(),
+                      onEdit: _showCertificationDialog,
+                      onDelete: _deleteCertification,
                     ),
                   ],
-                );
+                ),
+              ),
+            ],
+          );
 
-                if (constraints.maxWidth < 360) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+          if (pageConstraints.maxWidth < 1100) return editorPane;
+
+          final pdfBytes = _desktopPdfBytes;
+          return Row(
+            children: [
+              Expanded(flex: 11, child: editorPane),
+              const VerticalDivider(width: 1, color: AppTheme.softBorder),
+              Expanded(
+                flex: 9,
+                child: ColoredBox(
+                  color: const Color(0xFFF1F5F9),
+                  child: Column(
                     children: [
-                      label,
-                      const SizedBox(height: 8),
-                      Align(alignment: Alignment.centerRight, child: selector),
-                    ],
-                  );
-                }
-                return Row(children: [label, const Spacer(), selector]);
-              },
-            ),
-          ),
-
-          // Main Tabs Content
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Tab 1: Personal Info
-                PersonalInfoTab(
-                  language: _selectedLanguage,
-                  titleController: _titleController,
-                  fullNameController: _fullNameController,
-                  roleController: _roleController,
-                  emailController: _emailController,
-                  phoneController: _phoneController,
-                  locationController: _locationController,
-                  summaryController: _summaryController,
-                  onFieldChanged: _onFieldChanged,
-                  onAiOptimize: _handleAiOptimizeSummary,
-                  isAiLoading: summaryPolishState.isLoading,
-                  avatarPath: _avatarPath,
-                  onPickAvatar: _pickProfilePhoto,
-                  onRemoveAvatar: _removeProfilePhoto,
-                  avatarPosition: _avatarPosition,
-                  onAvatarPositionChanged: (position) {
-                    setState(() => _avatarPosition = position);
-                    _onFieldChanged();
-                  },
-                  supportsProfilePhoto:
-                      const {
-                        AppConstants.templateMinimalistClean,
-                        AppConstants.templateCreativeTech,
-                        AppConstants.templateProfessionalSidebar,
-                      }.contains(
-                        widget.initialCv?.templateId ??
-                            AppConstants.templateHarvardAts,
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.fromLTRB(18, 12, 18, 10),
+                        color: Colors.white,
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.description_outlined,
+                              size: 20,
+                              color: AppTheme.brandIndigo,
+                            ),
+                            const SizedBox(width: 9),
+                            Expanded(
+                              child: Text(
+                                isEn
+                                    ? 'Live A4 preview'
+                                    : 'Xem trước A4 trực tiếp',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: AppTheme.primaryNavy,
+                                ),
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: _openPreview,
+                              icon: const Icon(Icons.open_in_full_rounded),
+                              label: Text(isEn ? 'Open' : 'Mở rộng'),
+                            ),
+                          ],
+                        ),
                       ),
+                      Expanded(
+                        child: pdfBytes == null
+                            ? const Center(child: CircularProgressIndicator())
+                            : A4PdfPreview(
+                                pdfBytes: pdfBytes,
+                                isEnglish: isEn,
+                                onRetry: () =>
+                                    _scheduleDesktopPreview(immediate: true),
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
-
-                // Tab 2: Education
-                EducationTab(
-                  language: _selectedLanguage,
-                  educations: _educations,
-                  onAddEducation: () => _showAddEducationDialog(),
-                  onEditEducation: _showAddEducationDialog,
-                  onDeleteEducation: _deleteEducation,
-                ),
-
-                // Tab 3: Experience
-                ExperienceTab(
-                  language: _selectedLanguage,
-                  experiences: _experiences,
-                  onAddExperience: () => _showAddExperienceDialog(),
-                  onEditExperience: _showAddExperienceDialog,
-                  onDeleteExperience: _deleteExperience,
-                ),
-
-                // Tab 4: Skills
-                SkillsTab(
-                  language: _selectedLanguage,
-                  skills: _skills,
-                  onAddSkill: _showAddSkillDialog,
-                  onEditSkill: _showAddSkillDialog,
-                  onDeleteSkill: _deleteSkill,
-                ),
-                ProjectsTab(
-                  language: _selectedLanguage,
-                  projects: _projects,
-                  onAdd: () => _showProjectDialog(),
-                  onEdit: _showProjectDialog,
-                  onDelete: _deleteProject,
-                ),
-                CertificationsTab(
-                  language: _selectedLanguage,
-                  items: _certifications,
-                  onAdd: () => _showCertificationDialog(),
-                  onEdit: _showCertificationDialog,
-                  onDelete: _deleteCertification,
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),

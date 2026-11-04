@@ -5,9 +5,15 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme.dart';
 import '../../../auth/data/guest_session_service.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../auth/presentation/screens/account_screen.dart';
+import '../../../cv_backup/data/repositories/cv_backup_provider.dart';
+import '../../../cv_backup/domain/repositories/cv_backup_repository.dart';
 import '../../../cv_editor/data/repositories/cv_repository_provider.dart';
 import '../../../cv_editor/data/repositories/cv_sync_repository.dart';
 import '../../../cv_editor/domain/models/models.dart';
+import '../../../resume_import/data/repositories/resume_import_provider.dart';
+import '../../../resume_import/domain/repositories/resume_import_repository.dart';
+import '../../../resume_import/presentation/widgets/resume_import_review_dialog.dart';
 import '../controllers/dashboard_sync_controller.dart';
 import '../widgets/create_cv_dialog.dart';
 import '../widgets/home_dialogs.dart';
@@ -42,13 +48,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _createCv({String initialTemplate = 'harvard_ats'}) async {
+    final existingCvs =
+        ref.read(cvListStreamProvider).asData?.value ?? const [];
     final request = await showCreateCvDialog(
       context,
       initialTemplate: initialTemplate,
+      existingCvs: existingCvs,
     );
     if (request == null) return;
 
     final now = DateTime.now().toUtc();
+    final source = request.sourceCv;
     final cv = CvModel(
       id: 'local-${now.microsecondsSinceEpoch}',
       userId: ref.read(currentAuthUserProvider)?.id,
@@ -57,8 +67,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       language: request.language,
       primaryColor: CvTemplateCatalog.byId(request.templateId).accentHex,
       fontSizeScale: 1,
-      summary: '',
-      personalInfo: const PersonalInfoModel(),
+      summary: source?.summary ?? '',
+      personalInfo: source?.personalInfo ?? const PersonalInfoModel(),
+      educations: source?.educations ?? const [],
+      experiences: source?.experiences ?? const [],
+      skills: source?.skills ?? const [],
+      projects: source?.projects ?? const [],
+      certifications: source?.certifications ?? const [],
       isSynced: false,
       createdAt: now,
       updatedAt: now,
@@ -72,6 +87,94 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await _openEditor(cv);
     } catch (_) {
       if (mounted) _showMessage('Không thể tạo CV. Hãy thử lại.');
+    }
+  }
+
+  Future<void> _importResume() async {
+    try {
+      final draft = await ref
+          .read(resumeImportRepositoryProvider)
+          .pickAndParse();
+      if (draft == null || !mounted) return;
+      final review = await showResumeImportReviewDialog(context, draft);
+      if (review == null || !mounted) return;
+
+      final now = DateTime.now().toUtc();
+      final template = CvTemplateCatalog.byId(review.templateId);
+      final cv = draft.toCv(
+        id: 'import-${now.microsecondsSinceEpoch}',
+        userId: ref.read(currentAuthUserProvider)?.id,
+        title: review.title,
+        templateId: review.templateId,
+        primaryColor: template.accentHex,
+        language: review.language,
+        now: now,
+        correctedFullName: review.fullName,
+        correctedTargetRole: review.targetRole,
+        correctedEmail: review.email,
+        correctedPhone: review.phone,
+        correctedAddress: review.address,
+        correctedSummary: review.summary,
+      );
+      await ref.read(cvRepositoryProvider).save(cv);
+      if (!mounted) return;
+      _showMessage('Đã nhập CV và lưu an toàn trên thiết bị.');
+      await _openEditor(cv);
+    } on ResumeImportException catch (error) {
+      if (mounted) _showMessage(error.message);
+    } catch (_) {
+      if (mounted) _showMessage('Không thể nhập CV. Hãy kiểm tra lại tệp.');
+    }
+  }
+
+  Future<void> _exportAllCvs() async {
+    final cvs = ref.read(cvListStreamProvider).asData?.value ?? const [];
+    if (cvs.isEmpty) {
+      _showMessage('Chưa có CV nào để sao lưu.');
+      return;
+    }
+    try {
+      final uri = await ref.read(cvBackupRepositoryProvider).exportBackup(cvs);
+      if (!mounted || uri == null) return;
+      _showMessage('Đã xuất bản sao của ${cvs.length} CV.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể xuất bản sao dữ liệu.');
+    }
+  }
+
+  Future<void> _restoreCvBackup() async {
+    try {
+      final imported = await ref
+          .read(cvBackupRepositoryProvider)
+          .importBackup();
+      if (imported == null || !mounted) return;
+      final userId = ref.read(currentAuthUserProvider)?.id;
+      final baseTime = DateTime.now().toUtc();
+      for (var index = 0; index < imported.length; index++) {
+        final source = imported[index];
+        final restoredAt = baseTime.add(Duration(microseconds: index));
+        await ref
+            .read(cvRepositoryProvider)
+            .save(
+              source.copyWith(
+                id: 'restored-${restoredAt.microsecondsSinceEpoch}-$index',
+                userId: userId,
+                title: '${source.title} — Khôi phục',
+                isSynced: false,
+                createdAt: restoredAt,
+                updatedAt: restoredAt,
+              ),
+            );
+      }
+      if (mounted) {
+        _showMessage(
+          'Đã khôi phục ${imported.length} CV thành bản mới trên thiết bị.',
+        );
+      }
+    } on CvBackupException catch (error) {
+      if (mounted) _showMessage(error.message);
+    } catch (_) {
+      if (mounted) _showMessage('Không thể khôi phục tệp sao lưu.');
     }
   }
 
@@ -173,9 +276,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentAuthUserProvider);
+    final backendLabel = ref.watch(authRepositoryProvider).backendLabel;
     final cvsAsync = ref.watch(cvListStreamProvider);
     final syncState = ref.watch(dashboardSyncControllerProvider);
-    final isMyCvs = _selectedIndex == 0;
+    final title = switch (_selectedIndex) {
+      0 => 'CV của tôi',
+      1 => 'Mẫu CV',
+      _ => 'Tài khoản',
+    };
+    final titleIcon = switch (_selectedIndex) {
+      0 => Icons.description_rounded,
+      1 => Icons.palette_rounded,
+      _ => Icons.account_circle_outlined,
+    };
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -183,71 +296,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isMyCvs ? Icons.description_rounded : Icons.palette_rounded,
-              color: AppTheme.primarySlate,
-            ),
+            Icon(titleIcon, color: AppTheme.primarySlate),
             const SizedBox(width: 8),
             Flexible(
-              child: Text(
-                isMyCvs ? 'CV của tôi' : 'Mẫu CV',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            tooltip: user == null ? 'Đăng nhập' : 'Tài khoản',
-            onPressed: user == null
-                ? _openLogin
-                : () => context.push('/account'),
-            icon: Icon(
-              user == null ? Icons.login_rounded : Icons.account_circle_rounded,
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
-        child: isMyCvs
-            ? MyCvsView(
-                cvsAsync: cvsAsync,
-                isSignedIn: user != null,
-                displayName: user?.displayName,
-                isSyncing: syncState.isSyncing,
-                lastSyncedAt: syncState.lastSyncedAt,
-                onSync: _syncAll,
-                onLogin: _openLogin,
-                onCreate: _createCv,
-                onOpenAts: () => context.push('/ats-scorer'),
-                onOpenPro: () => context.push('/upgrade-pro'),
-                onRetry: () => ref.invalidate(cvListStreamProvider),
-                onEdit: _openEditor,
-                onPreview: (cv) => context.push('/preview', extra: cv),
-                onRename: _renameCv,
-                onDuplicate: _duplicateCv,
-                onBackup: _createBackup,
-                onDelete: _deleteCv,
-              )
-            : TemplateCatalogView(
-                onUseTemplate: (template) =>
-                    _createCv(initialTemplate: template.id),
-                onPremiumTap: (template) => showPremiumTemplateInfo(
-                  context,
-                  template,
-                  onViewProPlans: () => context.push('/upgrade-pro'),
-                ),
-              ),
+        child: switch (_selectedIndex) {
+          0 => MyCvsView(
+            cvsAsync: cvsAsync,
+            isSignedIn: user != null,
+            displayName: user?.displayName,
+            backendLabel: backendLabel,
+            isSyncing: syncState.isSyncing,
+            lastSyncedAt: syncState.lastSyncedAt,
+            onSync: _syncAll,
+            onLogin: _openLogin,
+            onCreate: _createCv,
+            onImport: _importResume,
+            onExportAll: _exportAllCvs,
+            onRestoreBackup: _restoreCvBackup,
+            onOpenAts: () => context.push('/ats-scorer'),
+            onOpenPro: () => context.push('/upgrade-pro'),
+            onRetry: () => ref.invalidate(cvListStreamProvider),
+            onEdit: _openEditor,
+            onPreview: (cv) => context.push('/preview', extra: cv),
+            onRename: _renameCv,
+            onDuplicate: _duplicateCv,
+            onBackup: _createBackup,
+            onDelete: _deleteCv,
+          ),
+          1 => TemplateCatalogView(
+            onUseTemplate: (template) =>
+                _createCv(initialTemplate: template.id),
+            onPreviewTemplate: (template) {
+              final sample =
+                  CvModel.empty(id: 'template-preview-${template.id}').copyWith(
+                    title: template.name,
+                    templateId: template.id,
+                    primaryColor: template.accentHex,
+                  );
+              context.push('/preview', extra: sample);
+            },
+            onPremiumTap: (template) => showPremiumTemplateInfo(
+              context,
+              template,
+              onViewProPlans: () => context.push('/upgrade-pro'),
+            ),
+          ),
+          _ => const AccountScreen(embedded: true),
+        },
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
-          if (index < 2) {
-            setState(() => _selectedIndex = index);
-            return;
-          }
-          user == null ? _openLogin() : context.push('/account');
+          setState(() => _selectedIndex = index);
         },
         destinations: const [
           NavigationDestination(

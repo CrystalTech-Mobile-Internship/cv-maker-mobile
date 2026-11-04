@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../features/auth/domain/models/auth_user.dart';
+import '../features/auth/presentation/auth_redirect.dart';
 import '../features/auth/presentation/providers/auth_providers.dart';
 import 'routes.dart';
 import 'theme.dart';
@@ -69,7 +70,9 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
   void _handleAuthChange(AuthSessionChange change) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final path = _router.routeInformationProvider.value.uri.path;
+      final uri = _router.routeInformationProvider.value.uri;
+      final path = uri.path;
+      final redirectPath = safeAuthRedirect(uri.queryParameters['redirect']);
       if (change.event == AuthSessionEvent.passwordRecovery) {
         _router.go('/reset-password');
         return;
@@ -86,7 +89,7 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
               change.event == AuthSessionEvent.initial) &&
           change.user != null &&
           isAuthEntry) {
-        _router.go('/home');
+        _router.go(redirectPath ?? '/home');
       }
     });
   }

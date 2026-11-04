@@ -8,6 +8,7 @@ class CloudSyncCard extends StatelessWidget {
     required this.isSignedIn,
     required this.localCount,
     required this.pendingCount,
+    required this.backendLabel,
     required this.isSyncing,
     required this.onSync,
     required this.onLogin,
@@ -17,6 +18,7 @@ class CloudSyncCard extends StatelessWidget {
   final bool isSignedIn;
   final int localCount;
   final int pendingCount;
+  final String backendLabel;
   final bool isSyncing;
   final VoidCallback onSync;
   final VoidCallback onLogin;
@@ -27,9 +29,9 @@ class CloudSyncCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFEEF2FF),
+        color: AppTheme.indigoSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFC7D2FE)),
+        border: Border.all(color: AppTheme.brandIndigo.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +49,7 @@ class CloudSyncCard extends StatelessWidget {
                   isSignedIn
                       ? Icons.cloud_sync_rounded
                       : Icons.cloud_off_rounded,
-                  color: AppTheme.primarySlate,
+                  color: isSignedIn ? AppTheme.brandIndigo : AppTheme.mutedText,
                 ),
               ),
               const SizedBox(width: 12),
@@ -73,6 +75,19 @@ class CloudSyncCard extends StatelessWidget {
                         color: AppTheme.mutedText,
                       ),
                     ),
+                    if (isSignedIn) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        'Đích đồng bộ: $backendLabel',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.brandIndigo,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

@@ -111,6 +111,29 @@ const _signedInUser = AuthUser(
 );
 
 void main() {
+  testWidgets('desktop editor shows a restrained live A4 preview pane', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(MockCvRepo())],
+        child: const MaterialApp(home: CvEditorScreen()),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+
+    expect(find.text('Xem trước A4 trực tiếp'), findsOneWidget);
+    expect(find.byIcon(Icons.description_outlined), findsOneWidget);
+    expect(find.byType(PdfPreview), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('contact fields stack at Samsung A11 logical width', (
     tester,
   ) async {

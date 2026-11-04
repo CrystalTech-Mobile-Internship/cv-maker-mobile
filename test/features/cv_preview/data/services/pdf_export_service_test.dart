@@ -84,6 +84,25 @@ void main() {
     expect(bytes.length, greaterThan(2500));
   });
 
+  test('photo template embeds a Web data URI avatar', () async {
+    const avatarDataUri =
+        'data:image/png;base64,'
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+    final cv = CvModel.empty(id: 'web-photo-template').copyWith(
+      templateId: 'creative_tech',
+      personalInfo: const PersonalInfoModel(avatarPath: avatarDataUri),
+    );
+
+    final bytes = await PdfExportServiceImpl().generateCvPdf(
+      cv: cv,
+      language: 'vi',
+      templateId: cv.templateId,
+    );
+
+    expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-');
+    expect(bytes.length, greaterThan(2500));
+  });
+
   test('missing optional avatar does not block PDF export', () async {
     final service = PdfExportServiceImpl();
     final cv = CvModel.empty(id: 'missing-photo').copyWith(

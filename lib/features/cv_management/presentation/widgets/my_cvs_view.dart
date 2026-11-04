@@ -10,6 +10,7 @@ import 'cloud_sync_card.dart';
 import 'cv_completion_sheet.dart';
 import 'cv_library_section.dart';
 import 'dashboard_header.dart';
+import 'local_data_tools_card.dart';
 import 'template_thumbnail.dart';
 import 'upcoming_tools_row.dart';
 
@@ -19,11 +20,15 @@ class MyCvsView extends StatelessWidget {
     required this.cvsAsync,
     required this.isSignedIn,
     required this.displayName,
+    required this.backendLabel,
     required this.isSyncing,
     required this.lastSyncedAt,
     required this.onSync,
     required this.onLogin,
     required this.onCreate,
+    required this.onImport,
+    required this.onExportAll,
+    required this.onRestoreBackup,
     required this.onOpenAts,
     required this.onOpenPro,
     required this.onRetry,
@@ -38,11 +43,15 @@ class MyCvsView extends StatelessWidget {
   final AsyncValue<List<CvModel>> cvsAsync;
   final bool isSignedIn;
   final String? displayName;
+  final String backendLabel;
   final bool isSyncing;
   final DateTime? lastSyncedAt;
   final VoidCallback onSync;
   final VoidCallback onLogin;
   final VoidCallback onCreate;
+  final VoidCallback onImport;
+  final VoidCallback onExportAll;
+  final VoidCallback onRestoreBackup;
   final VoidCallback onOpenAts;
   final VoidCallback onOpenPro;
   final VoidCallback onRetry;
@@ -78,18 +87,6 @@ class MyCvsView extends StatelessWidget {
       ),
       children: [
         DashboardHeader(isSignedIn: isSignedIn, displayName: displayName),
-        const SizedBox(height: 16),
-        CloudSyncCard(
-          isSignedIn: isSignedIn,
-          localCount: cvs.length,
-          pendingCount: cvs.where((cv) => !cv.isSynced).length,
-          isSyncing: isSyncing,
-          lastSyncedAt: lastSyncedAt,
-          onSync: onSync,
-          onLogin: onLogin,
-        ),
-        const SizedBox(height: 16),
-        UpcomingToolsRow(onOpenAts: onOpenAts, onOpenPro: onOpenPro),
         const SizedBox(height: 20),
         _sectionHeader(context, cvs.length),
         const SizedBox(height: 14),
@@ -122,6 +119,23 @@ class MyCvsView extends StatelessWidget {
             );
           },
         ),
+        const SizedBox(height: 18),
+        _ImportResumeCard(onImport: onImport),
+        const SizedBox(height: 12),
+        LocalDataToolsCard(onExport: onExportAll, onRestore: onRestoreBackup),
+        const SizedBox(height: 12),
+        CloudSyncCard(
+          isSignedIn: isSignedIn,
+          localCount: cvs.length,
+          pendingCount: cvs.where((cv) => !cv.isSynced).length,
+          backendLabel: backendLabel,
+          isSyncing: isSyncing,
+          lastSyncedAt: lastSyncedAt,
+          onSync: onSync,
+          onLogin: onLogin,
+        ),
+        const SizedBox(height: 12),
+        UpcomingToolsRow(onOpenAts: onOpenAts, onOpenPro: onOpenPro),
       ],
     );
   }
@@ -143,6 +157,10 @@ class MyCvsView extends StatelessWidget {
           tooltip: 'Tạo CV mới',
           onPressed: onCreate,
           icon: const Icon(Icons.add_rounded),
+          style: const ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll(AppTheme.brandIndigo),
+            foregroundColor: WidgetStatePropertyAll(Colors.white),
+          ),
         ),
         const SizedBox(width: 8),
         Container(
@@ -284,6 +302,64 @@ class MyCvsView extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ImportResumeCard extends StatelessWidget {
+  const _ImportResumeCard({required this.onImport});
+
+  final VoidCallback onImport;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppTheme.tealSurface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        key: const Key('import-existing-resume'),
+        onTap: onImport,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AppTheme.accentTeal.withValues(alpha: 0.22),
+            ),
+          ),
+          child: const Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                foregroundColor: AppTheme.accentTeal,
+                child: Icon(Icons.upload_file_outlined),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Nhập CV Word hoặc PDF',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.primaryNavy,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'Lấy nhanh thông tin, kiểm tra rồi đổi sang mẫu mới.',
+                      style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: AppTheme.accentTeal),
+            ],
+          ),
         ),
       ),
     );

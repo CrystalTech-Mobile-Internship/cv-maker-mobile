@@ -1,15 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/project_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../domain/services/pdf_export_service.dart';
+import 'pdf_platform_storage.dart' as platform;
 
 class PdfExportServiceImpl implements PdfExportService {
   static Future<_PdfFontSet>? _fontSetFuture;
@@ -60,29 +57,17 @@ class PdfExportServiceImpl implements PdfExportService {
     // Personal Info Resolvers
     final fullName = cv.personalInfo.fullName.isNotEmpty
         ? cv.personalInfo.fullName.toUpperCase()
-        : (isEn ? 'TUAN ANH NGUYEN' : 'NGUYỄN TUẤN ANH');
+        : (isEn ? 'YOUR NAME' : 'HỌ VÀ TÊN');
 
     final targetRole = cv.personalInfo.targetRole.isNotEmpty
         ? cv.personalInfo.targetRole.toUpperCase()
-        : (isEn ? 'FULLSTACK SOFTWARE ENGINEER' : 'KỸ SƯ PHẦN MỀM FLUTTER');
+        : (isEn ? 'TARGET ROLE' : 'VỊ TRÍ ỨNG TUYỂN');
 
-    final address = cv.personalInfo.address.isNotEmpty
-        ? cv.personalInfo.address
-        : (isEn ? 'Hanoi, Vietnam' : 'Hà Nội, Việt Nam');
-
-    final phone = cv.personalInfo.phone.isNotEmpty
-        ? cv.personalInfo.phone
-        : '0901 234 567';
-
-    final email = cv.personalInfo.email.isNotEmpty
-        ? cv.personalInfo.email
-        : 'tuananh@example.com';
-
-    final summary = cv.summary.isNotEmpty
-        ? cv.summary
-        : (isEn
-              ? 'Results-driven Fullstack Software Engineer specializing in cross-platform mobile architectures with Flutter, Dart, Clean Architecture, and Riverpod. Proven track record in engineering offline-first SQLite databases, vector PDF document rendering engines, and scalable Supabase cloud integrations.'
-              : 'Kỹ sư phần mềm mobile chuyên sâu về Flutter, kiến trúc Clean Architecture, State Management (Riverpod) và tích hợp Backend-as-a-Service (Supabase). Đam mê tối ưu hóa trải nghiệm người dùng và xây dựng hệ thống bền vững.');
+    final contact = [
+      cv.personalInfo.address,
+      cv.personalInfo.phone,
+      cv.personalInfo.email,
+    ].where((value) => value.trim().isNotEmpty).join(' • ');
 
     doc.addPage(
       pw.MultiPage(
@@ -95,7 +80,7 @@ class PdfExportServiceImpl implements PdfExportService {
             _buildPdfHeader(
               fullName: fullName,
               targetRole: targetRole,
-              contact: '$address • $phone • $email',
+              contact: contact,
               scale: scale,
               style: templateStyle,
               avatarImage: avatarImage,
@@ -103,22 +88,23 @@ class PdfExportServiceImpl implements PdfExportService {
             ),
             pw.SizedBox(height: 8 * scale),
 
-            // Section 1: Summary
-            _buildPdfSectionHeader(
-              isEn ? 'PROFESSIONAL SUMMARY' : 'TÓM TẮT MỤC TIÊU NGHỀ NGHIỆP',
-              scale,
-              templateStyle,
-            ),
-            pw.SizedBox(height: 4 * scale),
-            pw.Text(
-              summary,
-              style: pw.TextStyle(
-                fontSize: 10 * scale,
-                lineSpacing: 2 * scale,
-                color: PdfColors.grey900,
+            if (cv.summary.trim().isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'PROFESSIONAL SUMMARY' : 'TÓM TẮT MỤC TIÊU NGHỀ NGHIỆP',
+                scale,
+                templateStyle,
               ),
-            ),
-            pw.SizedBox(height: 14 * scale),
+              pw.SizedBox(height: 4 * scale),
+              pw.Text(
+                cv.summary,
+                style: pw.TextStyle(
+                  fontSize: 10 * scale,
+                  lineSpacing: 2 * scale,
+                  color: PdfColors.grey900,
+                ),
+              ),
+              pw.SizedBox(height: 14 * scale),
+            ],
 
             if (cv.educations.isNotEmpty) ...[
               _buildPdfSectionHeader(
@@ -707,26 +693,7 @@ class PdfExportServiceImpl implements PdfExportService {
     required String fileName,
   }) async {
     final sanitizedName = _sanitizeFileName(fileName);
-    final appDir = await getApplicationDocumentsDirectory();
-    final primaryFile = File('${appDir.path}/$sanitizedName');
-    await primaryFile.writeAsBytes(bytes, flush: true);
-    var savedPath = primaryFile.path;
-
-    // Also attempt saving to external Download folder on Android if possible
-    try {
-      if (Platform.isAndroid) {
-        final downloadDir = Directory('/storage/emulated/0/Download');
-        if (await downloadDir.exists()) {
-          final dlFile = File('${downloadDir.path}/$sanitizedName');
-          await dlFile.writeAsBytes(bytes, flush: true);
-          savedPath = dlFile.path;
-        }
-      }
-    } catch (_) {
-      // In case scoped storage restricts direct write, primaryFile is always safely stored
-    }
-
-    return savedPath;
+    return platform.savePdfBytes(bytes, sanitizedName);
   }
 
   @override
@@ -735,7 +702,7 @@ class PdfExportServiceImpl implements PdfExportService {
     required String fileName,
   }) async {
     final sanitizedName = _sanitizeFileName(fileName);
-    await Printing.sharePdf(bytes: bytes, filename: sanitizedName);
+    await platform.sharePdfBytes(bytes, sanitizedName);
   }
 
   static pw.Widget _buildPdfHeader({
@@ -963,9 +930,8 @@ class PdfExportServiceImpl implements PdfExportService {
       return null;
     }
     try {
-      final file = File(avatarPath);
-      if (!await file.exists()) return null;
-      return pw.MemoryImage(await file.readAsBytes());
+      final bytes = await platform.loadAvatarBytes(avatarPath);
+      return bytes == null ? null : pw.MemoryImage(bytes);
     } catch (_) {
       // A missing or damaged optional photo must never block PDF export.
       return null;
@@ -1094,6 +1060,93 @@ final class _TemplateStyle {
           letterSpacing: 0.25,
           dividerThickness: 1.1,
           showPhoto: true,
+        );
+      case 'chronological_slate':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#0F172A'),
+          accent: PdfColor.fromHex('#334155'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 40,
+            vertical: 34,
+          ),
+          centerHeader: false,
+          nameSize: 20,
+          letterSpacing: 0.35,
+          dividerThickness: 1,
+          showPhoto: false,
+        );
+      case 'graduate_skills':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#0C4A6E'),
+          accent: PdfColor.fromHex('#0369A1'),
+          headerFill: PdfColor.fromHex('#F0F9FF'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 34,
+            vertical: 30,
+          ),
+          centerHeader: false,
+          nameSize: 21,
+          letterSpacing: 0.2,
+          dividerThickness: 1.15,
+          showPhoto: false,
+        );
+      case 'finance_precision':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#0F2742'),
+          accent: PdfColor.fromHex('#1E3A5F'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 42,
+            vertical: 34,
+          ),
+          centerHeader: true,
+          nameSize: 20,
+          letterSpacing: 0.7,
+          dividerThickness: 1.35,
+          showPhoto: false,
+        );
+      case 'healthcare_calm':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#134E4A'),
+          accent: PdfColor.fromHex('#0F766E'),
+          headerFill: PdfColor.fromHex('#F0FDFA'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 40,
+            vertical: 36,
+          ),
+          centerHeader: false,
+          nameSize: 19.5,
+          letterSpacing: 0.2,
+          dividerThickness: 0.75,
+          showPhoto: false,
+        );
+      case 'sales_impact':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#451A03'),
+          accent: PdfColor.fromHex('#B45309'),
+          headerFill: PdfColor.fromHex('#FFF7ED'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 36,
+            vertical: 31,
+          ),
+          centerHeader: false,
+          nameSize: 21,
+          letterSpacing: 0.3,
+          dividerThickness: 1.4,
+          showPhoto: false,
+        );
+      case 'international_compact':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#111827'),
+          accent: PdfColor.fromHex('#111827'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 34,
+            vertical: 28,
+          ),
+          centerHeader: true,
+          nameSize: 18.5,
+          letterSpacing: 0.8,
+          dividerThickness: 0.65,
+          showPhoto: false,
         );
       default:
         return const _TemplateStyle(

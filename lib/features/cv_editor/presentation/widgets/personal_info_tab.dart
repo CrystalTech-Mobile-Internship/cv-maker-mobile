@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
+import 'profile_avatar_image_provider.dart';
 
 /// Form tab for editing personal information and career summary.
 class PersonalInfoTab extends StatelessWidget {
@@ -249,8 +248,8 @@ final class _ProfilePhotoPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isEn = language == 'en';
-    final file = avatarPath == null ? null : File(avatarPath!);
-    final hasImage = file?.existsSync() ?? false;
+    final avatarImage = profileAvatarImageProvider(avatarPath);
+    final hasImage = avatarImage != null;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -271,7 +270,7 @@ final class _ProfilePhotoPicker extends StatelessWidget {
             CircleAvatar(
               radius: 36,
               backgroundColor: Colors.grey.shade200,
-              foregroundImage: hasImage ? FileImage(file!) : null,
+              foregroundImage: avatarImage,
               child: hasImage
                   ? null
                   : const Icon(Icons.person_rounded, size: 38),

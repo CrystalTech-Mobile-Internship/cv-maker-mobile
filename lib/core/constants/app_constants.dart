@@ -16,4 +16,10 @@ class AppConstants {
   static const String templateExecutiveNavy = 'executive_navy';
   static const String templateAcademicClassic = 'academic_classic';
   static const String templateFreshProfile = 'fresh_profile';
+  static const String templateChronologicalSlate = 'chronological_slate';
+  static const String templateGraduateSkills = 'graduate_skills';
+  static const String templateFinancePrecision = 'finance_precision';
+  static const String templateHealthcareCalm = 'healthcare_calm';
+  static const String templateSalesImpact = 'sales_impact';
+  static const String templateInternationalCompact = 'international_compact';
 }

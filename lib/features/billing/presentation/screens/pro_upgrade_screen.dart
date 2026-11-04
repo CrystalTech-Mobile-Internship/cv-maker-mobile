@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
+import '../../../auth/presentation/auth_redirect.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
-class ProUpgradeScreen extends StatefulWidget {
+class ProUpgradeScreen extends ConsumerStatefulWidget {
   const ProUpgradeScreen({super.key});
 
   @override
-  State<ProUpgradeScreen> createState() => _ProUpgradeScreenState();
+  ConsumerState<ProUpgradeScreen> createState() => _ProUpgradeScreenState();
 }
 
-class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
+class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
   String _plan = 'lifetime';
 
   void _showPaymentPlaceholder() {
@@ -26,6 +30,7 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
   @override
   Widget build(BuildContext context) {
     final isLifetime = _plan == 'lifetime';
+    final authUser = ref.watch(currentAuthUserProvider);
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(title: const Text('Nâng cấp Pro')),
@@ -80,78 +85,171 @@ class _ProUpgradeScreenState extends State<ProUpgradeScreen> {
               onTap: () => setState(() => _plan = 'lifetime'),
             ),
             const SizedBox(height: 18),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
+            if (authUser == null)
+              _LoginRequiredCard(
+                onLogin: () =>
+                    context.push(authEntryLocation('/login', '/upgrade-pro')),
+                onRegister: () => context.push(
+                  authEntryLocation('/register', '/upgrade-pro'),
+                ),
+              )
+            else
+              _AuthenticatedPaymentSection(
+                isLifetime: isLifetime,
+                accountEmail: authUser.email,
+                onConfirm: _showPaymentPlaceholder,
               ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Quét VietQR để nâng cấp',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: 180,
-                    height: 180,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFCBD5E1)),
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.qr_code_2_rounded,
-                          size: 84,
-                          color: AppTheme.primaryNavy,
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'QR minh họa',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.mutedText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    isLifetime
-                        ? 'Nội dung CK: CVPRO-LIFETIME'
-                        : 'Nội dung CK: CVPRO-MONTHLY',
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _showPaymentPlaceholder,
-              style: AppTheme.createCvButton,
-              icon: const Icon(Icons.verified_rounded),
-              label: const Text('Tôi đã chuyển khoản'),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Thanh toán thật và mở khóa tài khoản Pro sẽ được xử lý ở bước sau.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.mutedText,
-              ),
-            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LoginRequiredCard extends StatelessWidget {
+  const _LoginRequiredCard({required this.onLogin, required this.onRegister});
+
+  final VoidCallback onLogin;
+  final VoidCallback onRegister;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEEF2FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFC7D2FE)),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.account_circle_outlined,
+            size: 38,
+            color: AppTheme.primarySlate,
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Đăng nhập để nâng cấp',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Gói Pro cần được gắn với tài khoản để mở khóa an toàn và dùng lại trên các thiết bị.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.mutedText, height: 1.35),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: onLogin,
+              child: const Text('Đăng nhập'),
+            ),
+          ),
+          TextButton(
+            onPressed: onRegister,
+            child: const Text('Chưa có tài khoản? Đăng ký'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AuthenticatedPaymentSection extends StatelessWidget {
+  const _AuthenticatedPaymentSection({
+    required this.isLifetime,
+    required this.accountEmail,
+    required this.onConfirm,
+  });
+
+  final bool isLifetime;
+  final String accountEmail;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            children: [
+              const Text(
+                'Quét VietQR để nâng cấp',
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                accountEmail,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 12, color: AppTheme.mutedText),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: 180,
+                height: 180,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                ),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.qr_code_2_rounded,
+                      size: 84,
+                      color: AppTheme.primaryNavy,
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'QR minh họa',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.mutedText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                isLifetime
+                    ? 'Nội dung CK: CVPRO-LIFETIME'
+                    : 'Nội dung CK: CVPRO-MONTHLY',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: onConfirm,
+          style: AppTheme.createCvButton,
+          icon: const Icon(Icons.verified_rounded),
+          label: const Text('Tôi đã chuyển khoản'),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Thanh toán thật và mở khóa tài khoản Pro sẽ được xử lý ở bước sau.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.mutedText,
+          ),
+        ),
+      ],
     );
   }
 }

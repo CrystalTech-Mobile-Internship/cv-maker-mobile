@@ -1,13 +1,14 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../cv_editor/data/repositories/cv_repository_provider.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
 import '../controllers/offline_pdf_export_controller.dart';
+import '../../domain/services/cv_sample_content_service.dart';
 import '../providers/pdf_export_provider.dart';
 import '../widgets/a4_pdf_preview.dart';
 import '../widgets/cv_preview_controls.dart';
@@ -26,15 +27,23 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
   late CvModel _workingCv;
   late Future<Uint8List> _pdfBytes;
   bool _isExporting = false;
+  late bool _showSampleContent;
 
   bool get _isEnglish => _workingCv.language == 'en';
+  bool get _isEphemeralPreview =>
+      widget.cv == null || _workingCv.id.startsWith('template-preview-');
 
   @override
   void initState() {
     super.initState();
     _workingCv = widget.cv ?? CvModel.empty(id: 'preview-sample');
-    _pdfBytes = _generatePdf(_workingCv);
+    _showSampleContent = CvSampleContentService.hasMissingSections(_workingCv);
+    _pdfBytes = _generatePdf(_previewCv);
   }
+
+  CvModel get _previewCv => _showSampleContent
+      ? CvSampleContentService.fillMissing(_workingCv)
+      : _workingCv;
 
   Future<Uint8List> _generatePdf(CvModel cv) {
     return ref
@@ -61,10 +70,10 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
 
     setState(() {
       _workingCv = updated;
-      _pdfBytes = _generatePdf(updated);
+      _pdfBytes = _generatePdf(_previewCv);
     });
 
-    if (widget.cv == null) return;
+    if (_isEphemeralPreview) return;
 
     try {
       await ref.read(cvRepositoryProvider).save(updated);
@@ -80,7 +89,14 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
   }
 
   void _retryPreview() {
-    setState(() => _pdfBytes = _generatePdf(_workingCv));
+    setState(() => _pdfBytes = _generatePdf(_previewCv));
+  }
+
+  void _toggleSampleContent(bool value) {
+    setState(() {
+      _showSampleContent = value;
+      _pdfBytes = _generatePdf(_previewCv);
+    });
   }
 
   Future<void> _handleExportPdf() async {
@@ -110,7 +126,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
             cv: _workingCv,
             pdfBytes: bytes,
             fileName: chosenFileName,
-            persistCv: widget.cv != null,
+            persistCv: !_isEphemeralPreview,
           );
       _workingCv = result.cv;
 
@@ -126,9 +142,13 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
 
       if (!mounted) return;
       _showMessage(
-        _isEnglish
-            ? 'Saved offline and opened sharing for "$chosenFileName".'
-            : 'Đã lưu offline và mở chia sẻ "$chosenFileName".',
+        kIsWeb
+            ? (_isEnglish
+                  ? 'The browser is downloading "$chosenFileName".'
+                  : 'Trình duyệt đang tải "$chosenFileName".')
+            : (_isEnglish
+                  ? 'Saved offline and opened sharing for "$chosenFileName".'
+                  : 'Đã lưu offline và mở chia sẻ "$chosenFileName".'),
       );
     } catch (error) {
       if (!mounted) return;
@@ -159,6 +179,12 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       appBar: AppBar(
         title: Text(_isEnglish ? 'Resume Preview' : 'Xem trước CV'),
         actions: [
+          if (!_isEphemeralPreview)
+            IconButton(
+              tooltip: _isEnglish ? 'Edit content' : 'Chỉnh nội dung',
+              onPressed: () => context.push('/editor', extra: _workingCv),
+              icon: const Icon(Icons.edit_outlined),
+            ),
           DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: _workingCv.templateId,
@@ -189,6 +215,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
           CvPreviewControls(
             language: _workingCv.language,
             fontSizeScale: _workingCv.fontSizeScale,
+            showSampleContent: _showSampleContent,
+            onSampleContentChanged: _toggleSampleContent,
             onLanguageChanged: (value) {
               if (value != _workingCv.language) {
                 _updateDocumentSettings(language: value);
@@ -199,6 +227,11 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                 _updateDocumentSettings(fontSizeScale: value);
               }
             },
+            onResetFormatting: () => _updateDocumentSettings(
+              language: 'vi',
+              templateId: 'harvard_ats',
+              fontSizeScale: 1,
+            ),
           ),
           Expanded(
             child: A4PdfPreview(

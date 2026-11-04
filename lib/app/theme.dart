@@ -3,12 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 
 /// Application Material 3 Theme Configuration
 class AppTheme {
-  // Brand Color Palette (Slate Navy & Modern Teal)
+  // Restrained product palette: neutral slate surfaces, indigo for primary
+  // actions, teal for create/save actions, and semantic colors only for state.
   static const Color brandIndigo = Color(0xFF4338CA);
   static const Color primarySlate = Color(0xFF1E293B);
   static const Color primaryNavy = Color(0xFF0F172A);
-  static const Color accentTeal = Color(0xFF0EA5E9);
-  static const Color accentCyan = Color(0xFF38BDF8);
+  static const Color accentTeal = Color(0xFF0F766E);
   static const Color createAction = Color(0xFF0F766E);
   static const Color createActionDark = Color(0xFF115E59);
   static const Color successGreen = Color(0xFF047857);
@@ -18,6 +18,10 @@ class AppTheme {
   static const Color surfaceCard = Color(0xFFFFFFFF);
   static const Color inputSurface = Color(0xFFEEF6FB);
   static const Color mutedText = Color(0xFF475569);
+  static const Color softBorder = Color(0xFFE2E8F0);
+  static const Color indigoSurface = Color(0xFFEEF2FF);
+  static const Color tealSurface = Color(0xFFECFDF5);
+  static const Color amberSurface = Color(0xFFFFF7ED);
 
   /// Light Theme
   static ThemeData get lightTheme {
@@ -58,10 +62,7 @@ class AppTheme {
         shadowColor: primarySlate.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: Colors.grey.withValues(alpha: 0.15),
-            width: 1,
-          ),
+          side: BorderSide(color: softBorder, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -75,11 +76,11 @@ class AppTheme {
         suffixIconColor: primarySlate.withValues(alpha: 0.78),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+          borderSide: const BorderSide(color: softBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+          borderSide: const BorderSide(color: softBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -146,7 +147,7 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: const Color(0xFFE0E7FF),
+        indicatorColor: indigoSurface,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return GoogleFonts.inter(
@@ -164,7 +165,7 @@ class AppTheme {
         }),
       ),
       chipTheme: ChipThemeData(
-        selectedColor: const Color(0xFFE0E7FF),
+        selectedColor: indigoSurface,
         backgroundColor: Colors.white,
         disabledColor: const Color(0xFFE2E8F0),
         labelStyle: GoogleFonts.inter(
@@ -177,7 +178,7 @@ class AppTheme {
           fontWeight: FontWeight.w700,
           color: brandIndigo,
         ),
-        side: const BorderSide(color: Color(0xFFCBD5E1)),
+        side: const BorderSide(color: softBorder),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       textTheme: textTheme.copyWith(

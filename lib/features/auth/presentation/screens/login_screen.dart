@@ -4,10 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../auth_redirect.dart';
 import '../providers/auth_providers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.redirectPath});
+
+  final String? redirectPath;
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -34,7 +37,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
     _showMessage(result.message, isError: !result.isSuccess);
     if (result.isSuccess && !result.requiresEmailConfirmation) {
-      context.go('/home');
+      context.go(safeAuthRedirect(widget.redirectPath) ?? '/home');
     }
   }
 
@@ -168,7 +171,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             TextButton(
                               onPressed: isLoading
                                   ? null
-                                  : () => context.push('/register'),
+                                  : () => context.push(
+                                      authEntryLocation(
+                                        '/register',
+                                        widget.redirectPath,
+                                      ),
+                                    ),
                               child: const Text(
                                 'Chưa có tài khoản? Tạo tài khoản',
                               ),
