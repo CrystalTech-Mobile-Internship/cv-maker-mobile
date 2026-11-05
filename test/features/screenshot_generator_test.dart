@@ -15,6 +15,9 @@ import 'package:cv_maker_mobile/features/cv_editor/presentation/widgets/experien
 import 'package:cv_maker_mobile/features/cv_editor/presentation/widgets/section_reorder_sheet.dart';
 import 'package:cv_maker_mobile/features/cv_management/presentation/widgets/cloud_sync_preview_sheet.dart';
 import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/export_pdf_dialog.dart';
+import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/cv_interactive_section_reorder.dart';
+import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/template_gallery_sheet.dart';
+import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/cv_preview_color_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -677,5 +680,293 @@ void main() {
 
     await tester.pump();
     await saveScreenshot(tester, key, 'screenshot_08_color_palette_dialog.png');
+  });
+
+  testWidgets('09 Capture Preview Screen with Segmented Mode & ATS Badge', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1200);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+    final cv = getSampleCv();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Xem trước CV'),
+            actions: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFF15803D).withAlpha(80)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.verified_rounded, size: 13, color: Color(0xFF15803D)),
+                    SizedBox(width: 4),
+                    Text('100% ATS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF15803D))),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    const Icon(Icons.palette_outlined),
+                    Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                    ),
+                  ],
+                ),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: const Icon(Icons.style_outlined),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () {},
+              ),
+            ],
+          ),
+          body: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: const Color(0xFFF1F5F9),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    color: Colors.white,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<int>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 0,
+                            icon: Icon(Icons.picture_as_pdf_outlined, size: 16),
+                            label: Text('Trang A4 (PDF)'),
+                          ),
+                          ButtonSegment(
+                            value: 1,
+                            icon: Icon(Icons.drag_indicator_rounded, size: 16),
+                            label: Text('Bố cục kéo thả'),
+                          ),
+                        ],
+                        selected: const {0},
+                        onSelectionChanged: (_) {},
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: const [
+                          BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 4)),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Text(
+                              cv.personalInfo.fullName.toUpperCase(),
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Center(
+                            child: Text(
+                              cv.personalInfo.targetRole.toUpperCase(),
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF4F46E5)),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Divider(),
+                          const SizedBox(height: 8),
+                          const Text('MỤC TIÊU NGHỀ NGHIỆP', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                          const SizedBox(height: 4),
+                          Text(cv.summary, style: const TextStyle(fontSize: 11, height: 1.4)),
+                          const SizedBox(height: 14),
+                          const Text('KINH NGHIỆM LÀM VIỆC', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                          const SizedBox(height: 4),
+                          Text('${cv.experiences.first.jobTitle} • ${cv.experiences.first.company}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_09_preview_segmented_mode.png');
+  });
+
+  testWidgets('10 Capture Preview Screen Interactive Drag and Drop Mode', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1300);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+    final cv = getSampleCv();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Xem trước CV'),
+            actions: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFF15803D).withAlpha(80)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.verified_rounded, size: 13, color: Color(0xFF15803D)),
+                    SizedBox(width: 4),
+                    Text('100% ATS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF15803D))),
+                  ],
+                ),
+              ),
+              IconButton(icon: const Icon(Icons.palette_outlined), onPressed: () {}),
+              IconButton(icon: const Icon(Icons.style_outlined), onPressed: () {}),
+            ],
+          ),
+          body: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: const Color(0xFFF8FAFC),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    color: Colors.white,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: SegmentedButton<int>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 0,
+                            icon: Icon(Icons.picture_as_pdf_outlined, size: 16),
+                            label: Text('Trang A4 (PDF)'),
+                          ),
+                          ButtonSegment(
+                            value: 1,
+                            icon: Icon(Icons.drag_indicator_rounded, size: 16),
+                            label: Text('Bố cục kéo thả'),
+                          ),
+                        ],
+                        selected: const {1},
+                        onSelectionChanged: (_) {},
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: CvInteractiveSectionReorder(
+                      cv: cv,
+                      language: 'vi',
+                      onOrderChanged: (_) {},
+                      onResetToDefault: () {},
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_10_preview_interactive_drag_drop.png');
+  });
+
+  testWidgets('11 Capture Template Gallery Picker Sheet', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1100);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: Colors.black54,
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                constraints: const BoxConstraints(maxHeight: 520),
+                child: TemplateGallerySheet(
+                  selectedTemplateId: 'harvard_ats',
+                  isEnglish: false,
+                  onSelectTemplate: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_11_preview_template_gallery.png');
+  });
+
+  testWidgets('12 Capture Preview Color Theme Palette Sheet', (tester) async {
+    tester.view.physicalSize = const Size(1000, 950);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: Colors.black54,
+              alignment: Alignment.bottomCenter,
+              child: CvPreviewColorSheet(
+                currentColor: '#1E293B',
+                isEnglish: false,
+                onColorSelected: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_12_preview_color_theme_sheet.png');
   });
 }
