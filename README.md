@@ -18,6 +18,11 @@ Dự án đã hoàn thành toàn bộ các mốc tính năng cốt lõi và mở
   - `EditorTypographyToolbar` cho phép người dùng tự do điều chỉnh tỉ lệ font từ **75% đến 140%**, kèm các mốc nhanh (**85%**, **100%**, **115%**, **130%**) và badge hiển thị % trực tiếp.
   - Phím tắt soạn thảo nhanh: In đậm (`**`), Gạch đầu dòng (`•`), Chèn liên kết (`🔗`).
 - **Kho 17 Mẫu CV đa dạng**: 14 template Free (*Harvard ATS, Modern Minimalist, Tech Lead, Executive, Compact, ...*) và 3 template Pro với hệ màu sắc và bố cục phong phú.
+- **Không gian xem trước tương tác (Interactive Preview & Drag-and-Drop Workspace)**:
+  - Chế độ kép chuyển đổi linh hoạt: **[📄 Trang A4 (PDF)]** ↔ **[🔀 Bố cục kéo thả]**.
+  - Kéo thả sắp xếp trực tiếp các section trên màn hình xem trước (`CvInteractiveSectionReorder`), tự động lưu SQLite và cập nhật tức thì vào bản in.
+  - Bộ sưu tập đổi mẫu CV 1-chạm (`TemplateGallerySheet`) và bảng chọn 8 màu sắc chủ đạo (`CvPreviewColorSheet`) ngay tại màn hình xem trước.
+  - Huy hiệu điểm ATS và checklist 8 tiêu chí chuẩn tuyển dụng quốc tế.
 
 ### 2. Đầu ra tài liệu đa định dạng (PDF Vector & Microsoft Word DOCX)
 - **Xuất PDF Vector A4 sắc nét**: Hỗ trợ hiển thị chuẩn kích thước A4 (595.28 × 841.89 pt), ngắt trang thông minh, nhúng ảnh đại diện và font tiếng Việt Unicode đầy đủ.
