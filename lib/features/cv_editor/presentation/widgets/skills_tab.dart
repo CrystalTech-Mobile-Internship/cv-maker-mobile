@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../domain/models/skill_model.dart';
+import 'skill_bank_sheet.dart';
 
 /// Tab for displaying and managing Technical & Professional Skills.
 class SkillsTab extends StatelessWidget {
@@ -9,6 +10,7 @@ class SkillsTab extends StatelessWidget {
     super.key,
     required this.skills,
     required this.onAddSkill,
+    this.onAddSkillModel,
     this.onEditSkill,
     this.onDeleteSkill,
     this.onUseStarterSkills,
@@ -17,12 +19,24 @@ class SkillsTab extends StatelessWidget {
 
   final List<SkillModel> skills;
   final VoidCallback onAddSkill;
+  final ValueChanged<SkillModel>? onAddSkillModel;
   final ValueChanged<SkillModel>? onEditSkill;
   final ValueChanged<String>? onDeleteSkill;
   final VoidCallback? onUseStarterSkills;
   final String language;
 
   bool get _isEn => language == 'en';
+
+  void _openSkillBank(BuildContext context) {
+    SkillBankSheet.show(
+      context: context,
+      existingSkills: skills,
+      language: language,
+      onAddSkill: (newSkill) {
+        onAddSkillModel?.call(newSkill);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,17 +75,29 @@ class SkillsTab extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              FilledButton.icon(
-                onPressed: onAddSkill,
-                icon: const Icon(Icons.add_rounded),
-                label: Text(_isEn ? 'Add Skill' : 'Thêm mục mới'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FilledButton.icon(
+                    onPressed: onAddSkill,
+                    icon: const Icon(Icons.add_rounded),
+                    label: Text(_isEn ? 'Add Custom' : 'Tự thêm'),
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton.tonalIcon(
+                    key: const Key('open-skill-bank-empty-btn'),
+                    onPressed: () => _openSkillBank(context),
+                    icon: const Icon(Icons.auto_awesome, size: 18),
+                    label: Text(_isEn ? 'Skill Bank' : 'Kho kỹ năng'),
+                  ),
+                ],
               ),
               if (onUseStarterSkills != null) ...[
                 const SizedBox(height: 12),
-                FilledButton.tonalIcon(
+                OutlinedButton.icon(
                   key: const Key('use-starter-skills-btn'),
                   onPressed: onUseStarterSkills,
-                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  icon: const Icon(Icons.playlist_add_check_rounded, size: 18),
                   label: Text(_isEn ? 'Use Starter Skills ("Fill-in")' : 'Dùng bộ kỹ năng mẫu ("Điền mẫu nhanh")'),
                 ),
               ],
@@ -91,6 +117,44 @@ class SkillsTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       children: [
+        // Skill bank banner & quick discovery action
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppTheme.brandIndigo.withAlpha(12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.brandIndigo.withAlpha(35)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.tips_and_updates_outlined, size: 20, color: AppTheme.brandIndigo),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  _isEn
+                      ? '${skills.length} skills added. Need more ideas?'
+                      : 'Đã thêm ${skills.length} kỹ năng. Muốn thêm gợi ý?',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.brandIndigo,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                key: const Key('open-skill-bank-header-btn'),
+                onPressed: () => _openSkillBank(context),
+                icon: const Icon(Icons.auto_awesome, size: 16),
+                label: Text(_isEn ? 'Skill Bank' : 'Kho kỹ năng'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.brandIndigo,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ],
+          ),
+        ),
         if (hardSkills.isNotEmpty) ...[
           _buildCategoryHeader(
             context,

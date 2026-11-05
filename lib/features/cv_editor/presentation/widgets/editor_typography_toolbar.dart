@@ -13,6 +13,7 @@ class EditorTypographyToolbar extends StatelessWidget {
     this.onOpenSectionReorder,
     this.currentColor,
     this.onColorChanged,
+    this.onOpenActionVerbs,
   });
 
   final double currentScale;
@@ -23,6 +24,7 @@ class EditorTypographyToolbar extends StatelessWidget {
   final VoidCallback? onOpenSectionReorder;
   final String? currentColor;
   final ValueChanged<String>? onColorChanged;
+  final VoidCallback? onOpenActionVerbs;
 
   bool get _isEn => language == 'en';
 
@@ -392,6 +394,23 @@ class EditorTypographyToolbar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
               ),
             const SizedBox(width: 6),
+            // Action Verbs ActionChip
+            if (onOpenActionVerbs != null) ...[
+              ActionChip(
+                key: const Key('toolbar-action-verbs-chip'),
+                avatar: const Icon(Icons.bolt_rounded, size: 16, color: Colors.deepOrange),
+                label: Text(
+                  _isEn ? 'Action Verbs' : 'Từ khóa ATS',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+                onPressed: onOpenActionVerbs,
+                backgroundColor: Colors.deepOrange.withAlpha(15),
+                side: BorderSide(color: Colors.deepOrange.withAlpha(50)),
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+              ),
+              const SizedBox(width: 6),
+            ],
             // Font Scale pill button
             ActionChip(
               avatar: const Icon(Icons.format_size_rounded, size: 16, color: AppTheme.brandIndigo),

@@ -25,6 +25,7 @@ import '../widgets/projects_tab.dart';
 import '../widgets/skills_tab.dart';
 import '../widgets/section_reorder_sheet.dart';
 import '../widgets/starter_sample_picker_sheet.dart';
+import '../widgets/ats_action_verbs_sheet.dart';
 import '../widgets/editor_typography_toolbar.dart';
 import '../../domain/services/cv_completion_service.dart';
 import '../../../cv_management/presentation/widgets/cv_completion_sheet.dart';
@@ -1498,6 +1499,34 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   },
                   onOpenSectionReorder: _openSectionReorderSheet,
                   onOpenStarterSamples: _openStarterSamplePicker,
+                  onOpenActionVerbs: () {
+                    AtsActionVerbsSheet.show(
+                      context: context,
+                      language: _selectedLanguage,
+                      onInsertVerb: (verb) {
+                        final controller = _tabController.index == 0 ? _summaryController : null;
+                        if (controller != null) {
+                          final curText = controller.text;
+                          final sel = controller.selection;
+                          final pos = sel.isValid ? sel.start : curText.length;
+                          final prefix = (pos > 0 && !curText.endsWith('\n') && !curText.endsWith(' ')) ? ' ' : '';
+                          controller.value = TextEditingValue(
+                            text: curText.replaceRange(pos, pos, '$prefix$verb '),
+                            selection: TextSelection.collapsed(offset: pos + prefix.length + verb.length + 1),
+                          );
+                          _onFieldChanged();
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _isEn ? 'Inserted action verb "$verb".' : 'Đã chèn từ khóa hành động "$verb".',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                    );
+                  },
                   textController: _tabController.index == 0 ? _summaryController : null,
                 ),
               ),
@@ -1588,6 +1617,20 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       language: _selectedLanguage,
                       skills: _skills,
                       onAddSkill: _showAddSkillDialog,
+                      onAddSkillModel: (newSkill) {
+                        setState(() => _skills.add(newSkill));
+                        _onFieldChanged();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _isEn
+                                  ? 'Added skill "${newSkill.name}".'
+                                  : 'Đã thêm kỹ năng "${newSkill.name}".',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                       onEditSkill: _showAddSkillDialog,
                       onDeleteSkill: _deleteSkill,
                       onUseStarterSkills: () {

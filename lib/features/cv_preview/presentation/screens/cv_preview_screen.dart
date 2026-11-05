@@ -19,6 +19,7 @@ import '../widgets/export_pdf_dialog.dart';
 import '../widgets/cv_interactive_section_reorder.dart';
 import '../widgets/template_gallery_sheet.dart';
 import '../widgets/cv_preview_color_sheet.dart';
+import '../widgets/cv_page_fit_sheet.dart';
 
 enum _PreviewMode {
   pdfA4,
@@ -267,6 +268,22 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         title: Text(_isEnglish ? 'Resume Preview' : 'Xem trước CV'),
         actions: [
           _buildAtsBadge(),
+          // Page Fit & Layout Optimizer (1-Page Auto-fit)
+          IconButton(
+            key: const Key('preview-page-fit-btn'),
+            tooltip: _isEnglish ? 'Page fit & layout' : 'Căn chỉnh 1 trang',
+            icon: const Icon(Icons.auto_fix_high_outlined),
+            onPressed: () {
+              CvPageFitSheet.show(
+                context: context,
+                currentScale: _workingCv.fontSizeScale,
+                isEnglish: _isEnglish,
+                onScaleChanged: (newScale) {
+                  _updateDocumentSettings(fontSizeScale: newScale);
+                },
+              );
+            },
+          ),
           // Quick Color Theme Picker
           IconButton(
             key: const Key('preview-color-theme-btn'),
