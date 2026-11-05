@@ -63,3 +63,4 @@ void main() {
     expect(pickedColor, equals('#4338CA'));
   });
 }
+

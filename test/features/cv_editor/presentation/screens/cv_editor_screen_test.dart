@@ -499,6 +499,6 @@ void main() {
     expect(find.byKey(const Key('decrease-font-size')), findsOneWidget);
     expect(find.byKey(const Key('increase-font-size')), findsOneWidget);
     expect(find.text('100'), findsOneWidget);
-    expect(find.text('Tải đúng bản A4 này'), findsOneWidget);
+    expect(find.text('Tải tệp (PDF / Word)'), findsOneWidget);
   });
 }

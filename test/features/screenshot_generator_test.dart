@@ -18,6 +18,9 @@ import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/export_
 import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/cv_interactive_section_reorder.dart';
 import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/template_gallery_sheet.dart';
 import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/cv_preview_color_sheet.dart';
+import 'package:cv_maker_mobile/features/cv_editor/presentation/widgets/skill_bank_sheet.dart';
+import 'package:cv_maker_mobile/features/cv_editor/presentation/widgets/ats_action_verbs_sheet.dart';
+import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/cv_page_fit_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -968,5 +971,97 @@ void main() {
 
     await tester.pump();
     await saveScreenshot(tester, key, 'screenshot_12_preview_color_theme_sheet.png');
+  });
+
+  testWidgets('13 Capture Skill Bank Sheet', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1100);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: Colors.black54,
+              alignment: Alignment.bottomCenter,
+              child: SkillBankSheet(
+                existingSkills: const [
+                  SkillModel(id: 's1', name: 'Flutter & Dart', category: SkillCategory.hard),
+                  SkillModel(id: 's2', name: 'SQLite / Drift Database', category: SkillCategory.hard),
+                ],
+                onAddSkill: (_) {},
+                language: 'vi',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_13_skill_bank_sheet.png');
+  });
+
+  testWidgets('14 Capture ATS Action Verbs & Formula Sheet', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1150);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: Colors.black54,
+              alignment: Alignment.bottomCenter,
+              child: AtsActionVerbsSheet(
+                language: 'vi',
+                onInsertVerb: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_14_ats_action_verbs_sheet.png');
+  });
+
+  testWidgets('15 Capture Preview Page Fit & Layout Optimizer Sheet', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1100);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: Colors.black54,
+              alignment: Alignment.bottomCenter,
+              child: CvPageFitSheet(
+                currentScale: 0.85,
+                isEnglish: false,
+                onScaleChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_15_preview_page_fit_sheet.png');
   });
 }
