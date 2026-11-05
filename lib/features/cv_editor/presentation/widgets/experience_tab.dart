@@ -11,6 +11,7 @@ class ExperienceTab extends StatelessWidget {
     required this.onAddExperience,
     this.onEditExperience,
     this.onDeleteExperience,
+    this.onUseStarterExperience,
     this.language = 'vi',
   });
 
@@ -18,6 +19,7 @@ class ExperienceTab extends StatelessWidget {
   final VoidCallback onAddExperience;
   final ValueChanged<ExperienceModel>? onEditExperience;
   final ValueChanged<String>? onDeleteExperience;
+  final VoidCallback? onUseStarterExperience;
   final String language;
 
   bool get _isEn => language == 'en';
@@ -64,6 +66,15 @@ class ExperienceTab extends StatelessWidget {
                 icon: const Icon(Icons.add_rounded),
                 label: Text(_isEn ? 'Add Experience' : 'Thêm mục mới'),
               ),
+              if (onUseStarterExperience != null) ...[
+                const SizedBox(height: 12),
+                FilledButton.tonalIcon(
+                  key: const Key('use-starter-experience-btn'),
+                  onPressed: onUseStarterExperience,
+                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  label: Text(_isEn ? 'Use Starter Sample ("Fill-in")' : 'Dùng mẫu kinh nghiệm ("Điền mẫu nhanh")'),
+                ),
+              ],
             ],
           ),
         ),

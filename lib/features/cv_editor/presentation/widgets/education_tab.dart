@@ -11,6 +11,7 @@ class EducationTab extends StatelessWidget {
     required this.onAddEducation,
     this.onEditEducation,
     this.onDeleteEducation,
+    this.onUseStarterEducation,
     this.language = 'vi',
   });
 
@@ -18,6 +19,7 @@ class EducationTab extends StatelessWidget {
   final VoidCallback onAddEducation;
   final ValueChanged<EducationModel>? onEditEducation;
   final ValueChanged<String>? onDeleteEducation;
+  final VoidCallback? onUseStarterEducation;
   final String language;
 
   bool get _isEn => language == 'en';
@@ -64,6 +66,15 @@ class EducationTab extends StatelessWidget {
                 icon: const Icon(Icons.add_rounded),
                 label: Text(_isEn ? 'Add Education' : 'Thêm mục mới'),
               ),
+              if (onUseStarterEducation != null) ...[
+                const SizedBox(height: 12),
+                FilledButton.tonalIcon(
+                  key: const Key('use-starter-education-btn'),
+                  onPressed: onUseStarterEducation,
+                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  label: Text(_isEn ? 'Use Starter Sample ("Fill-in")' : 'Dùng mẫu học vấn ("Điền mẫu nhanh")'),
+                ),
+              ],
             ],
           ),
         ),

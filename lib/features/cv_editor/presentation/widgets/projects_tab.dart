@@ -10,6 +10,7 @@ class ProjectsTab extends StatelessWidget {
     required this.onAdd,
     required this.onEdit,
     required this.onDelete,
+    this.onUseStarterProjects,
     this.language = 'vi',
   });
 
@@ -17,6 +18,7 @@ class ProjectsTab extends StatelessWidget {
   final VoidCallback onAdd;
   final ValueChanged<ProjectModel> onEdit;
   final ValueChanged<String> onDelete;
+  final VoidCallback? onUseStarterProjects;
   final String language;
 
   @override
@@ -63,6 +65,15 @@ class ProjectsTab extends StatelessWidget {
                 icon: const Icon(Icons.add_rounded),
                 label: Text(isEn ? 'Add Project' : 'Thêm dự án'),
               ),
+              if (onUseStarterProjects != null) ...[
+                const SizedBox(height: 12),
+                FilledButton.tonalIcon(
+                  key: const Key('use-starter-projects-btn'),
+                  onPressed: onUseStarterProjects,
+                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  label: Text(isEn ? 'Use Starter Project ("Fill-in")' : 'Dùng mẫu dự án ("Điền mẫu nhanh")'),
+                ),
+              ],
             ],
           ),
         ),

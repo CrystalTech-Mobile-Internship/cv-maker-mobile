@@ -11,6 +11,7 @@ class SkillsTab extends StatelessWidget {
     required this.onAddSkill,
     this.onEditSkill,
     this.onDeleteSkill,
+    this.onUseStarterSkills,
     this.language = 'vi',
   });
 
@@ -18,6 +19,7 @@ class SkillsTab extends StatelessWidget {
   final VoidCallback onAddSkill;
   final ValueChanged<SkillModel>? onEditSkill;
   final ValueChanged<String>? onDeleteSkill;
+  final VoidCallback? onUseStarterSkills;
   final String language;
 
   bool get _isEn => language == 'en';
@@ -64,6 +66,15 @@ class SkillsTab extends StatelessWidget {
                 icon: const Icon(Icons.add_rounded),
                 label: Text(_isEn ? 'Add Skill' : 'Thêm mục mới'),
               ),
+              if (onUseStarterSkills != null) ...[
+                const SizedBox(height: 12),
+                FilledButton.tonalIcon(
+                  key: const Key('use-starter-skills-btn'),
+                  onPressed: onUseStarterSkills,
+                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  label: Text(_isEn ? 'Use Starter Skills ("Fill-in")' : 'Dùng bộ kỹ năng mẫu ("Điền mẫu nhanh")'),
+                ),
+              ],
             ],
           ),
         ),

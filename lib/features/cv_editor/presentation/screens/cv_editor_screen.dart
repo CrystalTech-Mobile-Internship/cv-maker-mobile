@@ -15,6 +15,7 @@ import '../../../cv_preview/presentation/widgets/a4_pdf_preview.dart';
 import '../../data/repositories/cv_repository_provider.dart';
 import '../../data/services/profile_image_service_impl.dart';
 import '../../domain/models/models.dart';
+import '../../domain/services/cv_starter_template_service.dart';
 import '../widgets/education_tab.dart';
 import '../widgets/certifications_tab.dart';
 import '../widgets/adaptive_editor_tab.dart';
@@ -1487,6 +1488,19 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onAddEducation: () => _showAddEducationDialog(),
                       onEditEducation: _showAddEducationDialog,
                       onDeleteEducation: _deleteEducation,
+                      onUseStarterEducation: () {
+                        final starters = CvStarterTemplateService.getStarterEducation(_selectedLanguage);
+                        setState(() => _educations.addAll(starters));
+                        _onFieldChanged();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _isEn ? 'Added starter education sample.' : 'Đã thêm mẫu học vấn.',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                     ),
 
                     // Tab 3: Experience
@@ -1496,6 +1510,19 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onAddExperience: () => _showAddExperienceDialog(),
                       onEditExperience: _showAddExperienceDialog,
                       onDeleteExperience: _deleteExperience,
+                      onUseStarterExperience: () {
+                        final starters = CvStarterTemplateService.getStarterExperiences(_selectedLanguage);
+                        setState(() => _experiences.addAll(starters));
+                        _onFieldChanged();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _isEn ? 'Added starter experience sample.' : 'Đã thêm mẫu kinh nghiệm.',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                     ),
 
                     // Tab 4: Skills
@@ -1505,6 +1532,19 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onAddSkill: _showAddSkillDialog,
                       onEditSkill: _showAddSkillDialog,
                       onDeleteSkill: _deleteSkill,
+                      onUseStarterSkills: () {
+                        final starters = CvStarterTemplateService.getStarterSkills(_selectedLanguage);
+                        setState(() => _skills.addAll(starters));
+                        _onFieldChanged();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _isEn ? 'Added starter skills sample.' : 'Đã thêm bộ kỹ năng mẫu.',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                     ),
                     ProjectsTab(
                       language: _selectedLanguage,
@@ -1512,6 +1552,19 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onAdd: () => _showProjectDialog(),
                       onEdit: _showProjectDialog,
                       onDelete: _deleteProject,
+                      onUseStarterProjects: () {
+                        final starters = CvStarterTemplateService.getStarterProjects(_selectedLanguage);
+                        setState(() => _projects.addAll(starters));
+                        _onFieldChanged();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _isEn ? 'Added starter project sample.' : 'Đã thêm mẫu dự án.',
+                            ),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                     ),
                     CertificationsTab(
                       language: _selectedLanguage,

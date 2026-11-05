@@ -217,6 +217,62 @@ class PersonalInfoTab extends StatelessWidget {
                       : 'Viết 2-3 câu ngắn gọn mô tả năng lực cốt lõi, thành tựu nổi bật và định hướng nghề nghiệp...',
                 ),
               ),
+              const SizedBox(height: 10),
+              Text(
+                _isEn ? 'Quick Starter Suggestions ("Fill-in"):' : 'Gợi ý mẫu nhanh ("Điền vào mẫu"):',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                children: [
+                  ActionChip(
+                    avatar: const Icon(Icons.flash_on_rounded, size: 14, color: AppTheme.brandIndigo),
+                    label: Text(_isEn ? 'Mobile / Flutter' : 'Mobile / Flutter Dev'),
+                    onPressed: () {
+                      summaryController.text = _isEn
+                          ? 'Proactive Flutter Software Engineer with strong experience in Clean Architecture, Riverpod, and offline-first mobile applications. Committed to high performance and maintainable code.'
+                          : 'Kỹ sư phần mềm Flutter với tư duy lập trình vững chắc, thành thạo Clean Architecture, Riverpod và cơ chế Offline-First. Đam mê tối ưu hiệu năng và trải nghiệm người dùng mượt mà.';
+                      onFieldChanged?.call(summaryController.text);
+                    },
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.school_outlined, size: 14, color: AppTheme.accentTeal),
+                    label: Text(_isEn ? 'Fresher IT' : 'Sinh viên IT / Fresher'),
+                    onPressed: () {
+                      summaryController.text = _isEn
+                          ? 'Recent Computer Science graduate with hands-on project experience in mobile/web development. Quick learner with solid fundamentals in data structures, algorithms, and teamwork.'
+                          : 'Cử nhân Công nghệ Thông tin mới tốt nghiệp với nền tảng thuật toán, kiến trúc phần mềm và kỹ năng làm việc nhóm tốt. Mong muốn đóng góp giá trị và học hỏi nhanh trong môi trường chuyên nghiệp.';
+                      onFieldChanged?.call(summaryController.text);
+                    },
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.cloud_queue_rounded, size: 14, color: Colors.blue),
+                    label: Text(_isEn ? 'Backend Dev' : 'Lập trình Backend'),
+                    onPressed: () {
+                      summaryController.text = _isEn
+                          ? 'Backend Developer specializing in scalable REST APIs, PostgreSQL, authentication workflows, and cloud databases with a strong emphasis on system reliability.'
+                          : 'Lập trình viên Backend tập trung vào thiết kế REST API, cơ sở dữ liệu PostgreSQL/Supabase, bảo mật phân quyền RLS và kiến trúc hệ thống ổn định.';
+                      onFieldChanged?.call(summaryController.text);
+                    },
+                  ),
+                  ActionChip(
+                    avatar: const Icon(Icons.trending_up_rounded, size: 14, color: Colors.orange),
+                    label: Text(_isEn ? 'Business / Sales' : 'Kinh doanh & Marketing'),
+                    onPressed: () {
+                      summaryController.text = _isEn
+                          ? 'Results-oriented business and marketing specialist with strong data analytics, client management, and multi-channel campaign execution skills.'
+                          : 'Chuyên viên Marketing & Phát triển kinh doanh hướng đến hiệu quả số liệu, thành thạo phân tích thị trường, quan hệ đối tác và quản lý chiến dịch đa kênh.';
+                      onFieldChanged?.call(summaryController.text);
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 32),
             ],
           ),
