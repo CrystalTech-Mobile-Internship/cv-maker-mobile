@@ -11,6 +11,8 @@ class EditorTypographyToolbar extends StatelessWidget {
     this.textController,
     this.onOpenStarterSamples,
     this.onOpenSectionReorder,
+    this.currentColor,
+    this.onColorChanged,
   });
 
   final double currentScale;
@@ -19,6 +21,8 @@ class EditorTypographyToolbar extends StatelessWidget {
   final TextEditingController? textController;
   final VoidCallback? onOpenStarterSamples;
   final VoidCallback? onOpenSectionReorder;
+  final String? currentColor;
+  final ValueChanged<String>? onColorChanged;
 
   bool get _isEn => language == 'en';
 
@@ -63,6 +67,120 @@ class EditorTypographyToolbar extends StatelessWidget {
     controller.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(offset: insertPos + prefix.length),
+    );
+  }
+
+
+  static const List<Map<String, String>> colorPresets = [
+    {'nameVi': 'Xanh Navy (Harvard)', 'nameEn': 'Navy Blue (Classic)', 'hex': '#1E293B'},
+    {'nameVi': 'Tím Hoàng Gia (Modern)', 'nameEn': 'Royal Indigo (Modern)', 'hex': '#4338CA'},
+    {'nameVi': 'Xanh Ngọc (Teal)', 'nameEn': 'Emerald Teal', 'hex': '#0F766E'},
+    {'nameVi': 'Đỏ Rượu (Executive)', 'nameEn': 'Crimson Burgundy', 'hex': '#991B1B'},
+    {'nameVi': 'Hổ Phách (Creative)', 'nameEn': 'Warm Amber', 'hex': '#D97706'},
+    {'nameVi': 'Xám Đậm (Minimalist)', 'nameEn': 'Slate Charcoal', 'hex': '#334155'},
+    {'nameVi': 'Xanh Rừng (Forest)', 'nameEn': 'Forest Green', 'hex': '#166534'},
+    {'nameVi': 'Xanh Biển Sâu (Midnight)', 'nameEn': 'Midnight Blue', 'hex': '#1E3A8A'},
+  ];
+
+  Color _parseHex(String? hex) {
+    if (hex == null || hex.isEmpty) return const Color(0xFF1E293B);
+    final clean = hex.replaceAll('#', '');
+    if (clean.length == 6) {
+      return Color(int.parse('FF$clean', radix: 16));
+    }
+    return const Color(0xFF1E293B);
+  }
+
+  void _showColorPaletteDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppTheme.brandIndigo.withAlpha(25),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.palette_outlined, color: AppTheme.brandIndigo, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                _isEn ? 'CV Color Theme' : 'Bảng màu chủ đạo CV',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: colorPresets.map((preset) {
+                final hex = preset['hex']!;
+                final color = _parseHex(hex);
+                final isSelected = currentColor?.toUpperCase() == hex.toUpperCase();
+                final name = _isEn ? preset['nameEn']! : preset['nameVi']!;
+
+                return InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    onColorChanged?.call(hex);
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Container(
+                    width: 130,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: isSelected ? color.withAlpha(25) : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected ? color : Colors.grey.shade300,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black.withAlpha(30), blurRadius: 3),
+                            ],
+                          ),
+                          child: isSelected
+                              ? const Icon(Icons.check, size: 14, color: Colors.white)
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected ? color : Colors.grey.shade800,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -282,6 +400,31 @@ class EditorTypographyToolbar extends StatelessWidget {
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
               ),
               onPressed: () => _showFontSizeDialog(context),
+              backgroundColor: Colors.grey.shade100,
+              side: BorderSide(color: Colors.grey.shade300),
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+            const SizedBox(width: 6),
+            // Color Palette ActionChip
+            ActionChip(
+              avatar: Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: _parseHex(currentColor),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withAlpha(40), blurRadius: 2),
+                  ],
+                ),
+              ),
+              label: Text(
+                _isEn ? 'Theme' : 'Màu CV',
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              onPressed: () => _showColorPaletteDialog(context),
               backgroundColor: Colors.grey.shade100,
               side: BorderSide(color: Colors.grey.shade300),
               visualDensity: VisualDensity.compact,

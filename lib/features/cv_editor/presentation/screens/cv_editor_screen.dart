@@ -26,6 +26,8 @@ import '../widgets/skills_tab.dart';
 import '../widgets/section_reorder_sheet.dart';
 import '../widgets/starter_sample_picker_sheet.dart';
 import '../widgets/editor_typography_toolbar.dart';
+import '../../domain/services/cv_completion_service.dart';
+import '../../../cv_management/presentation/widgets/cv_completion_sheet.dart';
 
 class CvEditorScreen extends ConsumerStatefulWidget {
   const CvEditorScreen({super.key, this.initialCv});
@@ -63,6 +65,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   List<CertificationModel> _certifications = [];
   List<String> _sectionOrder = List.of(CvModel.defaultSectionOrder);
   double _fontSizeScale = 1.0;
+  String _primaryColor = '#1E293B';
 
   bool _isSaving = false;
   Timer? _debounceTimer;
@@ -106,6 +109,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       _certifications = List.of(cv.certifications);
       _sectionOrder = List.of(cv.effectiveSectionOrder);
       _fontSizeScale = cv.fontSizeScale;
+      _primaryColor = cv.primaryColor.isNotEmpty ? cv.primaryColor : '#1E293B';
     }
   }
 
@@ -292,7 +296,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       title: title.isEmpty ? (_isEn ? 'My Resume' : 'CV của tôi') : title,
       templateId: existing?.templateId ?? 'harvard_ats',
       language: _selectedLanguage,
-      primaryColor: existing?.primaryColor ?? '#1E293B',
+      primaryColor: _primaryColor,
       fontSizeScale: _fontSizeScale,
       sectionOrder: _sectionOrder,
       summary: _summaryController.text.trim(),
@@ -1254,6 +1258,54 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     context.push('/preview', extra: _buildCvModel());
   }
 
+    Widget _buildCompletenessBadge(bool isEn) {
+    final cv = _buildCvModel();
+    final report = CvCompletionService.evaluate(cv);
+    final pct = report.percentage;
+    final color = pct >= 80
+        ? const Color(0xFF15803D)
+        : (pct >= 50 ? Colors.amber.shade800 : AppTheme.brandIndigo);
+    final bgColor = pct >= 80
+        ? const Color(0xFFF0FDF4)
+        : (pct >= 50 ? Colors.amber.shade50 : AppTheme.indigoSurface);
+
+    return InkWell(
+      key: const Key('cv-completeness-badge'),
+      borderRadius: BorderRadius.circular(16),
+      onTap: () {
+        showCvCompletionSheet(
+          context,
+          cv,
+          onContinueEditing: () => Navigator.of(context).pop(),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withAlpha(80)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.verified_rounded, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              '$pct%',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final summaryPolishState = ref.watch(summaryPolishControllerProvider);
@@ -1281,6 +1333,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
           ],
         ),
         actions: [
+          _buildCompletenessBadge(isEn),
           IconButton(
             tooltip: isEn ? 'Starter Samples' : 'Mẫu gợi ý',
             icon: const Icon(Icons.lightbulb_outline_rounded),
@@ -1434,6 +1487,11 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                 child: EditorTypographyToolbar(
                   currentScale: _fontSizeScale,
                   language: _selectedLanguage,
+                  currentColor: _primaryColor,
+                  onColorChanged: (newColor) {
+                    setState(() => _primaryColor = newColor);
+                    _onFieldChanged();
+                  },
                   onScaleChanged: (scale) {
                     setState(() => _fontSizeScale = scale);
                     _onFieldChanged();
