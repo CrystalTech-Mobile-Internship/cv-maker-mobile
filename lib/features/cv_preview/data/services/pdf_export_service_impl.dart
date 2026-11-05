@@ -19,7 +19,7 @@ class PdfExportServiceImpl implements PdfExportService {
   }) async {
     final isEn = language == 'en';
     final scale = (cv.fontSizeScale > 0) ? cv.fontSizeScale : 1.0;
-    final templateStyle = _TemplateStyle.fromId(templateId);
+    final templateStyle = _TemplateStyle.fromId(templateId, customPrimaryHex: cv.primaryColor);
 
     final doc = pw.Document(
       title: cv.title.isNotEmpty ? cv.title : 'Curriculum Vitae',
@@ -992,7 +992,45 @@ final class _TemplateStyle {
   final bool showPhoto;
   final PdfColor? headerFill;
 
-  factory _TemplateStyle.fromId(String templateId) {
+  _TemplateStyle copyWith({
+    PdfColor? primary,
+    PdfColor? accent,
+    pw.EdgeInsets? pageMargin,
+    bool? centerHeader,
+    double? nameSize,
+    double? letterSpacing,
+    double? dividerThickness,
+    bool? showPhoto,
+    PdfColor? headerFill,
+  }) {
+    return _TemplateStyle(
+      primary: primary ?? this.primary,
+      accent: accent ?? this.accent,
+      pageMargin: pageMargin ?? this.pageMargin,
+      centerHeader: centerHeader ?? this.centerHeader,
+      nameSize: nameSize ?? this.nameSize,
+      letterSpacing: letterSpacing ?? this.letterSpacing,
+      dividerThickness: dividerThickness ?? this.dividerThickness,
+      showPhoto: showPhoto ?? this.showPhoto,
+      headerFill: headerFill ?? this.headerFill,
+    );
+  }
+
+  factory _TemplateStyle.fromId(String templateId, {String? customPrimaryHex}) {
+    final base = _resolveBaseStyle(templateId);
+    if (customPrimaryHex != null && customPrimaryHex.trim().isNotEmpty) {
+      try {
+        final clean = customPrimaryHex.replaceAll('#', '');
+        if (clean.length == 6) {
+          final customColor = PdfColor.fromHex('#$clean');
+          return base.copyWith(primary: customColor);
+        }
+      } catch (_) {}
+    }
+    return base;
+  }
+
+  static _TemplateStyle _resolveBaseStyle(String templateId) {
     switch (templateId) {
       case 'modern_minimalist':
         return _TemplateStyle(
@@ -1199,3 +1237,4 @@ class _PdfFontSet {
   final pw.Font regular;
   final pw.Font bold;
 }
+
