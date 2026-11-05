@@ -26,6 +26,9 @@ Dự án đã hoàn thành toàn bộ các mốc tính năng cốt lõi và mở
   - Bộ sưu tập đổi mẫu CV 1-chạm (`TemplateGallerySheet`) và bảng chọn 8 màu sắc chủ đạo (`CvPreviewColorSheet`) ngay tại màn hình xem trước.
   - Huy hiệu điểm ATS và checklist 8 tiêu chí chuẩn tuyển dụng quốc tế.
   - Tối ưu bố cục & Căn chỉnh 1 trang A4 (`CvPageFitSheet`): Preset 85% Auto-fit 1 trang tránh rớt dòng lẻ loi, kèm lời khuyên chuyên môn từ HR.
+  - Bật / tắt ẩn hiện mục CV linh hoạt: Nút mắt ẩn/hiện trực tiếp trên thẻ mục, xuất PDF và Word tự động loại bỏ mục ẩn qua `visibleSectionOrder`.
+  - Đối chiếu từ khóa JD tuyển dụng (`CvJdMatcherSheet`): Đánh giá độ tương thích % ATS với tin tuyển dụng, phân tích từ khóa đã có và gợi ý thêm từ khóa còn thiếu.
+  - Giả lập in ấn đen-trắng (B&W Grayscale Simulation): Kiểm tra độ sắc nét và tương phản của tài liệu khi HR in ra máy in laser văn phòng.
 
 ### 2. Đầu ra tài liệu đa định dạng (PDF Vector & Microsoft Word DOCX)
 - **Xuất PDF Vector A4 sắc nét**: Hỗ trợ hiển thị chuẩn kích thước A4 (595.28 × 841.89 pt), ngắt trang thông minh, nhúng ảnh đại diện và font tiếng Việt Unicode đầy đủ.

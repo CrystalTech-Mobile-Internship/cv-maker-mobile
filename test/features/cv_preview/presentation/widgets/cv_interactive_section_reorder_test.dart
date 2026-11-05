@@ -137,4 +137,31 @@ void main() {
     expect(find.text('No work experience yet.'), findsOneWidget);
     expect(find.text('No projects added.'), findsOneWidget);
   });
+
+  testWidgets('CvInteractiveSectionReorder toggles section visibility', (tester) async {
+    final cv = _buildTestCv();
+    String? toggledSection;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Scaffold(
+          body: CvInteractiveSectionReorder(
+            cv: cv,
+            language: 'vi',
+            onOrderChanged: (_) {},
+            onToggleVisibility: (sec) => toggledSection = sec,
+          ),
+        ),
+      ),
+    );
+
+    final toggleSummaryBtn = find.byKey(const Key('toggle-visibility-summary'));
+    expect(toggleSummaryBtn, findsOneWidget);
+
+    await tester.tap(toggleSummaryBtn);
+    await tester.pumpAndSettle();
+
+    expect(toggledSection, equals('summary'));
+  });
 }

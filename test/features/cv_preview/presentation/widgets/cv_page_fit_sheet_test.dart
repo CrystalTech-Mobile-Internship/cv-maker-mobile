@@ -27,3 +27,4 @@ void main() {
     expect(updatedScale, 0.85);
   });
 }
+

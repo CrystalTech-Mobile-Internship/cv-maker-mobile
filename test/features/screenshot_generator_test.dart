@@ -21,6 +21,7 @@ import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/cv_prev
 import 'package:cv_maker_mobile/features/cv_editor/presentation/widgets/skill_bank_sheet.dart';
 import 'package:cv_maker_mobile/features/cv_editor/presentation/widgets/ats_action_verbs_sheet.dart';
 import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/cv_page_fit_sheet.dart';
+import 'package:cv_maker_mobile/features/cv_preview/presentation/widgets/cv_jd_matcher_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -1063,5 +1064,66 @@ void main() {
 
     await tester.pump();
     await saveScreenshot(tester, key, 'screenshot_15_preview_page_fit_sheet.png');
+  });
+
+  testWidgets('16 Capture Preview Section Visibility & Reorder', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1100);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+    final cv = getSampleCv().copyWith(
+      hiddenSections: ['certifications'],
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: key,
+            child: CvInteractiveSectionReorder(
+              cv: cv,
+              language: 'vi',
+              onOrderChanged: (_) {},
+              onToggleVisibility: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_16_preview_section_visibility.png');
+  });
+
+  testWidgets('17 Capture ATS Job Description Matcher Sheet', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1150);
+    tester.view.devicePixelRatio = 2.0;
+
+    final key = GlobalKey();
+    final cv = getSampleCv();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: testTheme,
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: key,
+            child: Container(
+              color: Colors.black54,
+              alignment: Alignment.bottomCenter,
+              child: CvJdMatcherSheet(
+                cv: cv,
+                isEnglish: false,
+                onAddMissingSkill: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await saveScreenshot(tester, key, 'screenshot_17_preview_jd_matcher_sheet.png');
   });
 }

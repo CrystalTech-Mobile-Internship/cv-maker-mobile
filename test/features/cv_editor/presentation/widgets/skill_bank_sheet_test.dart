@@ -39,3 +39,4 @@ void main() {
     expect(addedSkill!.name, 'Clean Architecture');
   });
 }
+
