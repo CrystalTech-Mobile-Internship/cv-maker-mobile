@@ -17,6 +17,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
     this.onEditSection,
     this.onResetToDefault,
     this.onSwitchToPdfView,
+    this.onToggleVisibility,
   });
 
   final CvModel cv;
@@ -25,6 +26,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
   final ValueChanged<String>? onEditSection;
   final VoidCallback? onResetToDefault;
   final VoidCallback? onSwitchToPdfView;
+  final ValueChanged<String>? onToggleVisibility;
 
   bool get _isEn => language == 'en';
 
@@ -218,6 +220,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                   );
               final isFirst = index == 0;
               final isLast = index == sections.length - 1;
+              final isVisible = cv.isSectionVisible(key);
 
               return Card(
                 key: ValueKey('preview-section-$key'),
@@ -227,7 +230,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   side: BorderSide(color: Colors.grey.shade200),
                 ),
-                color: Colors.white,
+                color: isVisible ? Colors.white : const Color(0xFFF8FAFC),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(
@@ -269,18 +272,59 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              def.title(_isEn ? "en" : "vi"),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primarySlate,
-                              ),
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    def.title(_isEn ? "en" : "vi"),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: isVisible ? AppTheme.primarySlate : Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                if (!isVisible) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      _isEn ? 'Hidden' : 'Đã ẩn',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                             const SizedBox(height: 3),
                             _buildSnippet(key),
                           ],
                         ),
+                      ),
+
+                      // Toggle Visibility Button
+                      IconButton(
+                        key: Key('toggle-visibility-$key'),
+                        tooltip: isVisible
+                            ? (_isEn ? 'Hide from export' : 'Ẩn khỏi bản in')
+                            : (_isEn ? 'Show in export' : 'Hiện trên bản in'),
+                        icon: Icon(
+                          isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          size: 19,
+                          color: isVisible ? AppTheme.brandIndigo : Colors.grey,
+                        ),
+                        onPressed: onToggleVisibility == null ? null : () => onToggleVisibility!(key),
+                        visualDensity: VisualDensity.compact,
                       ),
 
                       // Step Up/Down & Drag Handle

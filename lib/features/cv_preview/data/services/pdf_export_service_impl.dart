@@ -383,7 +383,7 @@ class PdfExportServiceImpl implements PdfExportService {
               pw.SizedBox(height: 8 * scale),
             ];
 
-            for (final sectionKey in cv.effectiveSectionOrder) {
+            for (final sectionKey in cv.visibleSectionOrder) {
               final widgets = sectionMap[sectionKey];
               if (widgets != null && widgets.isNotEmpty) {
                 orderedSections.addAll(widgets);

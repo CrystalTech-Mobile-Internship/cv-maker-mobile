@@ -58,7 +58,7 @@ class DocxExportServiceImpl implements DocumentExportRepository {
     }
 
     // Dynamic sections based on user-ordered sequence
-    for (final sectionId in cv.effectiveSectionOrder) {
+    for (final sectionId in cv.visibleSectionOrder) {
       switch (sectionId) {
         case 'summary':
           if (cv.summary.trim().isNotEmpty) {

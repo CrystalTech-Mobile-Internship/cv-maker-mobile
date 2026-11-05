@@ -28,12 +28,14 @@ class CvModel {
     List<ProjectModel> projects = const [],
     List<CertificationModel> certifications = const [],
     List<String> sectionOrder = defaultSectionOrder,
+    List<String> hiddenSections = const [],
   }) : educations = List.unmodifiable(educations),
        experiences = List.unmodifiable(experiences),
        skills = List.unmodifiable(skills),
        projects = List.unmodifiable(projects),
        certifications = List.unmodifiable(certifications),
-       sectionOrder = List.unmodifiable(sectionOrder);
+       sectionOrder = List.unmodifiable(sectionOrder),
+       hiddenSections = List.unmodifiable(hiddenSections);
 
   static const List<String> defaultSectionOrder = [
     'summary',
@@ -59,6 +61,7 @@ class CvModel {
   final List<ProjectModel> projects;
   final List<CertificationModel> certifications;
   final List<String> sectionOrder;
+  final List<String> hiddenSections;
   final bool isSynced;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -72,6 +75,14 @@ class CvModel {
     }
     return current;
   }
+
+  List<String> get visibleSectionOrder {
+    return effectiveSectionOrder
+        .where((section) => !hiddenSections.contains(section))
+        .toList();
+  }
+
+  bool isSectionVisible(String section) => !hiddenSections.contains(section);
 
   factory CvModel.empty({
     required String id,
@@ -95,6 +106,7 @@ class CvModel {
       createdAt: timestamp,
       updatedAt: timestamp,
       sectionOrder: defaultSectionOrder,
+      hiddenSections: const [],
     );
   }
 
@@ -130,6 +142,10 @@ class CvModel {
               ?.map((item) => item.toString())
               .toList() ??
           defaultSectionOrder,
+      hiddenSections: (json['hiddenSections'] as List<dynamic>?)
+              ?.map((item) => item.toString())
+              .toList() ??
+          const [],
       isSynced: json['isSynced'] as bool? ?? false,
       createdAt: json['createdAt'] == null
           ? updatedAt
@@ -155,6 +171,7 @@ class CvModel {
       'projects': projects.map((item) => item.toJson()).toList(),
       'certifications': certifications.map((item) => item.toJson()).toList(),
       'sectionOrder': sectionOrder,
+      'hiddenSections': hiddenSections,
       'isSynced': isSynced,
       'createdAt': createdAt.toUtc().toIso8601String(),
       'updatedAt': updatedAt.toUtc().toIso8601String(),
@@ -177,6 +194,7 @@ class CvModel {
     List<ProjectModel>? projects,
     List<CertificationModel>? certifications,
     List<String>? sectionOrder,
+    List<String>? hiddenSections,
     bool? isSynced,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -199,6 +217,7 @@ class CvModel {
       projects: projects ?? this.projects,
       certifications: certifications ?? this.certifications,
       sectionOrder: sectionOrder ?? this.sectionOrder,
+      hiddenSections: hiddenSections ?? this.hiddenSections,
       isSynced: isSynced ?? this.isSynced,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

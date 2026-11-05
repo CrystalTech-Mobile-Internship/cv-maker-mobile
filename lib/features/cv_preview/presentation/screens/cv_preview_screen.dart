@@ -20,6 +20,8 @@ import '../widgets/cv_interactive_section_reorder.dart';
 import '../widgets/template_gallery_sheet.dart';
 import '../widgets/cv_preview_color_sheet.dart';
 import '../widgets/cv_page_fit_sheet.dart';
+import '../widgets/cv_jd_matcher_sheet.dart';
+import '../../../cv_editor/domain/models/skill_model.dart';
 
 enum _PreviewMode {
   pdfA4,
@@ -41,6 +43,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
   bool _isExporting = false;
   late bool _showSampleContent;
   _PreviewMode _mode = _PreviewMode.pdfA4;
+  bool _isGrayscaleSimulation = false;
 
   bool get _isEnglish => _workingCv.language == 'en';
   bool get _isEphemeralPreview =>
@@ -80,6 +83,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
     double? fontSizeScale,
     String? primaryColor,
     List<String>? sectionOrder,
+    List<String>? hiddenSections,
   }) async {
     final updated = _workingCv.copyWith(
       language: language,
@@ -87,6 +91,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       fontSizeScale: fontSizeScale,
       primaryColor: primaryColor,
       sectionOrder: sectionOrder,
+      hiddenSections: hiddenSections,
       isSynced: false,
       updatedAt: DateTime.now().toUtc(),
     );
@@ -120,6 +125,21 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       _showSampleContent = value;
       _pdfBytes = _generatePdf(_previewCv);
     });
+  }
+
+  void _toggleSectionVisibility(String sectionKey) {
+    final currentHidden = List<String>.from(_workingCv.hiddenSections);
+    if (currentHidden.contains(sectionKey)) {
+      currentHidden.remove(sectionKey);
+    } else {
+      currentHidden.add(sectionKey);
+    }
+    _updateDocumentSettings(hiddenSections: currentHidden);
+    _showMessage(
+      currentHidden.contains(sectionKey)
+          ? (_isEnglish ? 'Section hidden from PDF/Word export.' : 'Đã ẩn mục khỏi bản in PDF/Word.')
+          : (_isEnglish ? 'Section restored to PDF/Word export.' : 'Đã hiện lại mục trên bản in.'),
+    );
   }
 
   Future<void> _handleExportPdf() async {
@@ -268,6 +288,40 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         title: Text(_isEnglish ? 'Resume Preview' : 'Xem trước CV'),
         actions: [
           _buildAtsBadge(),
+          // ATS Job Description Matcher
+          IconButton(
+            key: const Key('preview-jd-matcher-btn'),
+            tooltip: _isEnglish ? 'Match with Job Description' : 'So khớp JD tuyển dụng',
+            icon: const Icon(Icons.document_scanner_outlined),
+            onPressed: () {
+              CvJdMatcherSheet.show(
+                context: context,
+                cv: _previewCv,
+                isEnglish: _isEnglish,
+                onAddMissingSkill: (newSkill) {
+                  final updatedSkills = List<SkillModel>.from(_workingCv.skills)..add(newSkill);
+                  final updated = _workingCv.copyWith(skills: updatedSkills);
+                  setState(() {
+                    _workingCv = updated;
+                    _pdfBytes = _generatePdf(_previewCv);
+                  });
+                  _updateDocumentSettings();
+                },
+              );
+            },
+          ),
+          // B&W Grayscale Simulation Button
+          IconButton(
+            key: const Key('preview-bw-filter-btn'),
+            tooltip: _isEnglish
+                ? (_isGrayscaleSimulation ? 'Disable B&W filter' : 'Simulate B&W printing')
+                : (_isGrayscaleSimulation ? 'Tắt bộ lọc đen trắng' : 'Giả lập in ấn đen-trắng'),
+            icon: Icon(
+              _isGrayscaleSimulation ? Icons.filter_b_and_w_rounded : Icons.filter_b_and_w_outlined,
+              color: _isGrayscaleSimulation ? AppTheme.brandIndigo : null,
+            ),
+            onPressed: () => setState(() => _isGrayscaleSimulation = !_isGrayscaleSimulation),
+          ),
           // Page Fit & Layout Optimizer (1-Page Auto-fit)
           IconButton(
             key: const Key('preview-page-fit-btn'),
@@ -402,17 +456,32 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
               ),
             ),
             Expanded(
-              child: A4PdfPreview(
-                pdfBytes: _pdfBytes,
-                isEnglish: _isEnglish,
-                onRetry: _retryPreview,
-              ),
+              child: _isGrayscaleSimulation
+                  ? ColorFiltered(
+                      colorFilter: const ColorFilter.matrix(<double>[
+                        0.2126, 0.7152, 0.0722, 0, 0,
+                        0.2126, 0.7152, 0.0722, 0, 0,
+                        0.2126, 0.7152, 0.0722, 0, 0,
+                        0,      0,      0,      1, 0,
+                      ]),
+                      child: A4PdfPreview(
+                        pdfBytes: _pdfBytes,
+                        isEnglish: _isEnglish,
+                        onRetry: _retryPreview,
+                      ),
+                    )
+                  : A4PdfPreview(
+                      pdfBytes: _pdfBytes,
+                      isEnglish: _isEnglish,
+                      onRetry: _retryPreview,
+                    ),
             ),
           ] else ...[
             Expanded(
               child: CvInteractiveSectionReorder(
                 cv: _previewCv,
                 language: _workingCv.language,
+                onToggleVisibility: _toggleSectionVisibility,
                 onOrderChanged: (newOrder) {
                   _updateDocumentSettings(sectionOrder: newOrder);
                   _showMessage(
