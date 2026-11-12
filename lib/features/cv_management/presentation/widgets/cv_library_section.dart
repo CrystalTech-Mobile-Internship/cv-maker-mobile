@@ -76,67 +76,135 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
     return result;
   }
 
+  bool get _isCustomized =>
+      _filter != CvLibraryFilter.all || _sort != CvLibrarySort.recentlyUpdated;
+
+  static const _filterLabels = {
+    CvLibraryFilter.all: 'Tất cả',
+    CvLibraryFilter.cloud: 'Đã sao lưu',
+    CvLibraryFilter.local: 'Trên máy',
+    CvLibraryFilter.incomplete: 'Cần hoàn thiện',
+  };
+
+  static const _sortLabels = {
+    CvLibrarySort.recentlyUpdated: 'Mới cập nhật',
+    CvLibrarySort.oldestUpdated: 'Cũ nhất',
+    CvLibrarySort.title: 'Tên A–Z',
+    CvLibrarySort.completion: 'Hoàn thiện nhất',
+  };
+
+  Future<void> _openOptions() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          Widget chips<T>(
+            Map<T, String> labels,
+            T selected,
+            ValueChanged<T> onPick,
+          ) {
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final entry in labels.entries)
+                  ChoiceChip(
+                    label: Text(entry.value),
+                    selected: entry.key == selected,
+                    showCheckmark: false,
+                    onSelected: (_) {
+                      onPick(entry.key);
+                      setSheetState(() {});
+                    },
+                  ),
+              ],
+            );
+          }
+
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                key: const Key('cv-library-options-sheet'),
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Lọc',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 8),
+                  chips(
+                    _filterLabels,
+                    _filter,
+                    (value) => setState(() => _filter = value),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Sắp xếp',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  const SizedBox(height: 8),
+                  chips(
+                    _sortLabels,
+                    _sort,
+                    (value) => setState(() => _sort = value),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final items = _visibleItems;
+    // Search and filters only help once the library grows.
+    final showTools = widget.items.length > 3;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
-          key: const Key('cv-library-search'),
-          controller: _searchController,
-          onChanged: (value) => setState(() => _query = value),
-          textInputAction: TextInputAction.search,
-          decoration: InputDecoration(
-            hintText: 'Tìm theo tên CV hoặc vị trí ứng tuyển',
-            prefixIcon: const Icon(Icons.search_rounded),
-            suffixIcon: _query.isEmpty
-                ? null
-                : IconButton(
-                    tooltip: 'Xoá tìm kiếm',
-                    onPressed: () {
-                      _searchController.clear();
-                      setState(() => _query = '');
-                    },
-                    icon: const Icon(Icons.close_rounded),
+        if (showTools) ...[
+          TextField(
+            key: const Key('cv-library-search'),
+            controller: _searchController,
+            onChanged: (value) => setState(() => _query = value),
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: 'Tìm CV',
+              prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_query.isNotEmpty)
+                    IconButton(
+                      tooltip: 'Xoá',
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _query = '');
+                      },
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  IconButton(
+                    key: const Key('cv-library-options'),
+                    tooltip: 'Lọc và sắp xếp',
+                    onPressed: _openOptions,
+                    icon: Icon(
+                      Icons.tune_rounded,
+                      color: _isCustomized ? AppTheme.brandIndigo : null,
+                    ),
                   ),
+                ],
+              ),
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: _CompactDropdown<CvLibraryFilter>(
-                key: const Key('cv-library-filter'),
-                value: _filter,
-                icon: Icons.filter_alt_outlined,
-                items: const {
-                  CvLibraryFilter.all: 'Tất cả',
-                  CvLibraryFilter.cloud: 'Đã sao lưu',
-                  CvLibraryFilter.local: 'Trên máy',
-                  CvLibraryFilter.incomplete: 'Cần hoàn thiện',
-                },
-                onChanged: (value) => setState(() => _filter = value),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _CompactDropdown<CvLibrarySort>(
-                key: const Key('cv-library-sort'),
-                value: _sort,
-                icon: Icons.sort_rounded,
-                items: const {
-                  CvLibrarySort.recentlyUpdated: 'Mới cập nhật',
-                  CvLibrarySort.oldestUpdated: 'Cũ cập nhật',
-                  CvLibrarySort.title: 'Tên A–Z',
-                  CvLibrarySort.completion: 'Hoàn thiện nhất',
-                },
-                onChanged: (value) => setState(() => _sort = value),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
+          const SizedBox(height: 12),
+        ],
         if (items.isEmpty)
           _NoLibraryResult(onReset: _reset)
         else if (!widget.isDesktop)
@@ -175,49 +243,6 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
       _filter = CvLibraryFilter.all;
       _sort = CvLibrarySort.recentlyUpdated;
     });
-  }
-}
-
-class _CompactDropdown<T> extends StatelessWidget {
-  const _CompactDropdown({
-    super.key,
-    required this.value,
-    required this.icon,
-    required this.items,
-    required this.onChanged,
-  });
-
-  final T value;
-  final IconData icon;
-  final Map<T, String> items;
-  final ValueChanged<T> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<T>(
-      initialValue: value,
-      isExpanded: true,
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, size: 19),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-      ),
-      items: items.entries
-          .map(
-            (entry) => DropdownMenuItem<T>(
-              value: entry.key,
-              child: Text(
-                entry.value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12.5),
-              ),
-            ),
-          )
-          .toList(growable: false),
-      onChanged: (value) {
-        if (value != null) onChanged(value);
-      },
-    );
   }
 }
 

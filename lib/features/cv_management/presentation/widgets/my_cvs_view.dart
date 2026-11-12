@@ -10,7 +10,6 @@ import '../../../cv_editor/domain/services/cv_completion_service.dart';
 import 'cloud_sync_card.dart';
 import 'cv_completion_sheet.dart';
 import 'cv_library_section.dart';
-import 'dashboard_header.dart';
 import 'ai_assistant_card.dart';
 import 'local_data_tools_card.dart';
 import 'template_thumbnail.dart';
@@ -94,10 +93,6 @@ class MyCvsView extends StatelessWidget {
         104,
       ),
       children: [
-        DashboardHeader(isSignedIn: isSignedIn, displayName: displayName),
-        const SizedBox(height: 20),
-        _sectionHeader(context, cvs.length),
-        const SizedBox(height: 14),
         cvsAsync.when(
           loading: () => const Padding(
             padding: EdgeInsets.all(48),
@@ -164,48 +159,6 @@ class MyCvsView extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         UpcomingToolsRow(onOpenAts: onOpenAts, onOpenPro: onOpenPro),
-      ],
-    );
-  }
-
-  Widget _sectionHeader(BuildContext context, int count) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            'CV của tôi',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: AppTheme.primaryNavy,
-            ),
-          ),
-        ),
-        IconButton.filledTonal(
-          key: const Key('create-cv-header'),
-          tooltip: 'Tạo CV mới',
-          onPressed: onCreate,
-          icon: const Icon(Icons.add_rounded),
-          style: const ButtonStyle(
-            backgroundColor: WidgetStatePropertyAll(AppTheme.brandIndigo),
-            foregroundColor: WidgetStatePropertyAll(Colors.white),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEEF2FF),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            '$count hồ sơ',
-            style: const TextStyle(
-              color: AppTheme.brandIndigo,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-            ),
-          ),
-        ),
       ],
     );
   }

@@ -370,6 +370,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
+        actions: [
+          if (_selectedIndex == 0)
+            IconButton(
+              key: const Key('home-create-cv'),
+              tooltip: 'Tạo CV',
+              onPressed: _createCv,
+              icon: const Icon(Icons.add_rounded),
+            ),
+          const SizedBox(width: 4),
+        ],
       ),
       body: SafeArea(
         child: switch (_selectedIndex) {

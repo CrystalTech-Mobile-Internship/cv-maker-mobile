@@ -92,17 +92,10 @@ void main() {
 
     // Verify empty state is rendered
     expect(find.text('Chưa có hồ sơ CV nào'), findsOneWidget);
-    expect(find.byKey(const Key('create-cv-header')), findsOneWidget);
-    final createButton = tester.widget<IconButton>(
-      find.byKey(const Key('create-cv-header')),
-    );
-    expect(
-      createButton.style?.foregroundColor?.resolve(<WidgetState>{}),
-      Colors.white,
-    );
+    expect(find.byKey(const Key('home-create-cv')), findsOneWidget);
 
-    // Tap the create action in the CV library header.
-    await tester.tap(find.byKey(const Key('create-cv-header')));
+    // Tap the create action in the app bar.
+    await tester.tap(find.byKey(const Key('home-create-cv')));
     await tester.pumpAndSettle();
 
     // Verify create dialog appears
@@ -219,6 +212,16 @@ void main() {
         updatedAt: now,
       ),
     );
+    // Search and filters appear once the library has more than three CVs.
+    for (final title in ['Archive One', 'Archive Two']) {
+      await fakeRepo.save(
+        CvModel.empty(
+          id: title,
+          now: now.subtract(const Duration(days: 30)),
+        ).copyWith(title: title),
+        markAsLocalChange: false,
+      );
+    }
 
     await tester.pumpWidget(
       ProviderScope(
@@ -238,21 +241,21 @@ void main() {
 
     await tester.enterText(find.byKey(const Key('cv-library-search')), '');
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('cv-library-filter')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Đã sao lưu').last);
-    await tester.pumpAndSettle();
+    Future<void> pickOption(String label) async {
+      await tester.tap(find.byKey(const Key('cv-library-options')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(label).last);
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+    }
+
+    await pickOption('Đã sao lưu');
     expect(find.text('Flutter Developer'), findsOneWidget);
     expect(find.text('Backend Engineer'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('cv-library-filter')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Tất cả').last);
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('cv-library-sort')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Tên A–Z').last);
-    await tester.pumpAndSettle();
+    await pickOption('Tất cả');
+    await pickOption('Tên A–Z');
     expect(
       tester.getTopLeft(find.text('Backend Engineer')).dy,
       lessThan(tester.getTopLeft(find.text('Flutter Developer')).dy),

@@ -25,7 +25,7 @@ class AiAssistantCard extends StatelessWidget {
         border: Border.all(color: AppTheme.softBorder),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
@@ -69,23 +69,15 @@ class AiAssistantCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton(
-                  key: const ValueKey('open-ai-interview'),
-                  onPressed: onChat,
-                  child: const Text('Trò chuyện tạo CV'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onImport,
-                  child: const Text('Tải CV PDF/Word'),
-                ),
-              ),
-            ],
+          FilledButton(
+            key: const ValueKey('open-ai-interview'),
+            onPressed: onChat,
+            child: const Text('Trò chuyện tạo CV'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: onImport,
+            child: const Text('Tải CV PDF/Word'),
           ),
           if (onPractice != null)
             Align(
