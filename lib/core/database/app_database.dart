@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
+import 'connection/connection.dart';
 
 part 'app_database.g.dart';
 
@@ -41,16 +41,7 @@ class PendingCvDeletions extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
-  AppDatabase.defaults()
-    : super(
-        driftDatabase(
-          name: 'smart_cv_maker',
-          web: DriftWebOptions(
-            sqlite3Wasm: Uri.parse('sqlite3.wasm'),
-            driftWorker: Uri.parse('drift_worker.js'),
-          ),
-        ),
-      );
+  AppDatabase.defaults() : super(openAppDatabase('smart_cv_maker'));
 
   @override
   int get schemaVersion => 2;

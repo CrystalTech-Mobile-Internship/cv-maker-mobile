@@ -41,6 +41,32 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    // Some embedded and in-app browsers block network access inside shared
+    // workers. The app checks this once to pick a compatible local storage.
+    window.cvCanUseDatabaseWorker = function () {
+      return new Promise(function (resolve) {
+        try {
+          if (typeof SharedWorker === 'undefined') { resolve(false); return; }
+          var target = new URL('sqlite3.wasm', document.baseURI).href;
+          var code = "onconnect=function(e){var p=e.ports[0];" +
+            "fetch(" + JSON.stringify(target) + ",{method:'HEAD'})" +
+            ".then(function(r){p.postMessage(r.ok)})" +
+            ".catch(function(){p.postMessage(false)});};";
+          var url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+          var worker = new SharedWorker(url);
+          var timer = setTimeout(function () { resolve(false); }, 3000);
+          worker.port.onmessage = function (event) {
+            clearTimeout(timer);
+            resolve(event.data === true);
+          };
+          worker.port.start();
+        } catch (error) {
+          resolve(false);
+        }
+      });
+    };
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
