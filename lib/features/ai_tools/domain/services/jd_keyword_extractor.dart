@@ -71,18 +71,18 @@ abstract final class JdKeywordExtractor {
     // Business
     'Digital Marketing': ['digital marketing', 'seo', 'sem', 'facebook ads'],
     'Content Marketing': ['content', 'copywriting'],
-    'Sales': ['sales', 'bán hàng', 'kinh doanh'],
+    'Bán hàng': ['sales', 'bán hàng', 'kinh doanh'],
     'CRM': ['crm', 'salesforce', 'hubspot'],
-    'Accounting': ['kế toán', 'accounting', 'misa'],
+    'Kế toán': ['kế toán', 'accounting', 'misa'],
     // Soft skills & languages
-    'English': ['english', 'tiếng anh', 'toeic', 'ielts'],
-    'Japanese': ['japanese', 'tiếng nhật', 'jlpt'],
-    'Teamwork': ['teamwork', 'làm việc nhóm', 'team player'],
-    'Communication': ['communication', 'giao tiếp'],
-    'Problem Solving': ['problem solving', 'giải quyết vấn đề'],
-    'Self-learning': ['self-learning', 'tự học', 'ham học hỏi'],
-    'Leadership': ['leadership', 'lãnh đạo', 'team lead'],
-    'Time Management': ['time management', 'quản lý thời gian'],
+    'Tiếng Anh': ['english', 'tiếng anh', 'toeic', 'ielts'],
+    'Tiếng Nhật': ['japanese', 'tiếng nhật', 'jlpt'],
+    'Làm việc nhóm': ['teamwork', 'làm việc nhóm', 'team player'],
+    'Giao tiếp': ['communication', 'giao tiếp'],
+    'Giải quyết vấn đề': ['problem solving', 'giải quyết vấn đề'],
+    'Tự học': ['self-learning', 'tự học', 'ham học hỏi'],
+    'Lãnh đạo': ['leadership', 'lãnh đạo', 'team lead'],
+    'Quản lý thời gian': ['time management', 'quản lý thời gian'],
   };
 
   /// Returns canonical keywords mentioned in [jobDescription], in vocabulary
