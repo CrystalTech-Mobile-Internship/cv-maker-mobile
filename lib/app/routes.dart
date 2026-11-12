@@ -10,6 +10,8 @@ import '../features/auth/presentation/auth_redirect.dart';
 import '../features/ai_tools/presentation/screens/ai_interview_screen.dart';
 import '../features/ai_tools/presentation/screens/ats_scorer_screen.dart';
 import '../features/billing/presentation/screens/pro_upgrade_screen.dart';
+import '../features/community/domain/models/community_models.dart';
+import '../features/community/presentation/screens/community_post_screen.dart';
 import '../features/cv_management/presentation/screens/home_screen.dart';
 import '../features/cv_editor/presentation/screens/cv_editor_screen.dart';
 import '../features/cv_editor/domain/models/cv_model.dart';
@@ -88,6 +90,14 @@ GoRouter createAppRouter({
       path: '/ai-interview',
       name: 'ai-interview',
       builder: (context, state) => const AiInterviewScreen(),
+    ),
+    GoRoute(
+      path: '/community/post',
+      name: 'community-post',
+      redirect: (context, state) =>
+          state.extra is CommunityPost ? null : '/home',
+      builder: (context, state) =>
+          CommunityPostScreen(post: state.extra! as CommunityPost),
     ),
     GoRoute(
       path: '/upgrade-pro',
