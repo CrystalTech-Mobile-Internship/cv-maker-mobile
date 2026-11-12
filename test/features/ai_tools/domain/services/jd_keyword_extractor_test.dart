@@ -22,8 +22,8 @@ và kỹ năng làm việc nhóm.
         'Git',
         'REST API',
         'SQL',
-        'English',
-        'Teamwork',
+        'Tiếng Anh',
+        'Làm việc nhóm',
       ]),
     );
   });
