@@ -18,6 +18,8 @@ Future<void> showCvQualitySheet(
   BuildContext context, {
   required CvQualityReport report,
   VoidCallback? onEdit,
+  List<String> autoFixChanges = const [],
+  VoidCallback? onAutoFix,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -80,6 +82,43 @@ Future<void> showCvQualitySheet(
               ),
             ],
           ),
+          if (onAutoFix != null && autoFixChanges.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.indigoSurface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Có thể sửa nhanh',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.primaryNavy,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  for (final change in autoFixChanges)
+                    Text(
+                      '• $change',
+                      style: const TextStyle(fontSize: 12.5, height: 1.4),
+                    ),
+                  const SizedBox(height: 8),
+                  FilledButton(
+                    key: const ValueKey('cv-quality-autofix'),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onAutoFix();
+                    },
+                    child: const Text('Sửa nhanh 1 chạm'),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           for (final issue in report.issues)
             Container(
