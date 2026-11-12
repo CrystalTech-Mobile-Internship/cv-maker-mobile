@@ -135,7 +135,9 @@ class _SectionReorderSheetState extends State<SectionReorderSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _isEn ? 'Reorder CV Sections' : 'Sắp xếp bố cục mục CV',
+                          _isEn
+                              ? 'Reorder CV Sections'
+                              : 'Sắp xếp bố cục mục CV',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -167,7 +169,10 @@ class _SectionReorderSheetState extends State<SectionReorderSheet> {
             // Reorderable List
             Flexible(
               child: ReorderableListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 shrinkWrap: true,
                 itemCount: _sections.length,
                 onReorder: _onReorder,
@@ -225,7 +230,10 @@ class _SectionReorderSheetState extends State<SectionReorderSheet> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_upward_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.arrow_upward_rounded,
+                              size: 18,
+                            ),
                             color: index > 0
                                 ? AppTheme.brandIndigo
                                 : Colors.grey.shade300,
@@ -234,7 +242,10 @@ class _SectionReorderSheetState extends State<SectionReorderSheet> {
                             visualDensity: VisualDensity.compact,
                           ),
                           IconButton(
-                            icon: const Icon(Icons.arrow_downward_rounded, size: 18),
+                            icon: const Icon(
+                              Icons.arrow_downward_rounded,
+                              size: 18,
+                            ),
                             color: index < _sections.length - 1
                                 ? AppTheme.brandIndigo
                                 : Colors.grey.shade300,

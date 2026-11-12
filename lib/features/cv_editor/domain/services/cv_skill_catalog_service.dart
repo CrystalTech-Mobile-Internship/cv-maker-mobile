@@ -110,23 +110,41 @@ abstract final class CvSkillCatalogService {
       titleEn: 'Soft Skills & Workplace',
       iconName: 'people',
       skills: [
-        SkillRecommendation(name: 'Làm việc nhóm & Phối hợp (Teamwork)', category: SkillCategory.soft),
-        SkillRecommendation(name: 'Quản lý thời gian & Tiến độ', category: SkillCategory.soft),
-        SkillRecommendation(name: 'Tư duy giải quyết vấn đề (Problem Solving)', category: SkillCategory.soft),
-        SkillRecommendation(name: 'Giao tiếp & Thuyết trình chuyên nghiệp', category: SkillCategory.soft),
-        SkillRecommendation(name: 'Tư duy phản biện & Độc lập', category: SkillCategory.soft),
-        SkillRecommendation(name: 'Thích ứng linh hoạt & Học hỏi nhanh', category: SkillCategory.soft),
-        SkillRecommendation(name: 'Tiếng Anh giao tiếp & Đọc hiểu kỹ thuật', category: SkillCategory.soft),
+        SkillRecommendation(
+          name: 'Làm việc nhóm & Phối hợp (Teamwork)',
+          category: SkillCategory.soft,
+        ),
+        SkillRecommendation(
+          name: 'Quản lý thời gian & Tiến độ',
+          category: SkillCategory.soft,
+        ),
+        SkillRecommendation(
+          name: 'Tư duy giải quyết vấn đề (Problem Solving)',
+          category: SkillCategory.soft,
+        ),
+        SkillRecommendation(
+          name: 'Giao tiếp & Thuyết trình chuyên nghiệp',
+          category: SkillCategory.soft,
+        ),
+        SkillRecommendation(
+          name: 'Tư duy phản biện & Độc lập',
+          category: SkillCategory.soft,
+        ),
+        SkillRecommendation(
+          name: 'Thích ứng linh hoạt & Học hỏi nhanh',
+          category: SkillCategory.soft,
+        ),
+        SkillRecommendation(
+          name: 'Tiếng Anh giao tiếp & Đọc hiểu kỹ thuật',
+          category: SkillCategory.soft,
+        ),
       ],
     ),
   ];
 
   static List<SkillRecommendation> findSuggestionsByDomain(String domainId) {
     return groups
-        .firstWhere(
-          (g) => g.id == domainId,
-          orElse: () => groups.first,
-        )
+        .firstWhere((g) => g.id == domainId, orElse: () => groups.first)
         .skills;
   }
 }

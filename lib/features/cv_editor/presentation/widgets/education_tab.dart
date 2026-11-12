@@ -72,7 +72,11 @@ class EducationTab extends StatelessWidget {
                   key: const Key('use-starter-education-btn'),
                   onPressed: onUseStarterEducation,
                   icon: const Icon(Icons.auto_awesome, size: 18),
-                  label: Text(_isEn ? 'Use Starter Sample ("Fill-in")' : 'Dùng mẫu học vấn ("Điền mẫu nhanh")'),
+                  label: Text(
+                    _isEn
+                        ? 'Use Starter Sample ("Fill-in")'
+                        : 'Dùng mẫu học vấn ("Điền mẫu nhanh")',
+                  ),
                 ),
               ],
             ],

@@ -63,7 +63,8 @@ class CvSectionDefinition {
     titleEn: 'Skills',
     icon: Icons.auto_awesome_outlined,
     hintVi: 'Ngôn ngữ lập trình, framework, công cụ và kỹ năng mềm',
-    hintEn: 'Programming languages, frameworks, developer tools, and soft skills',
+    hintEn:
+        'Programming languages, frameworks, developer tools, and soft skills',
   );
 
   static const certifications = CvSectionDefinition(

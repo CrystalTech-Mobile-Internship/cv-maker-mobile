@@ -1,3 +1,4 @@
+import '../../../ai_tools/domain/services/jd_keyword_extractor.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 
 class JdMatchReport {
@@ -115,25 +116,7 @@ abstract final class CvJdMatcherService {
       );
     }
 
-    final cvCorpusBuffer = StringBuffer();
-    cvCorpusBuffer.writeln(cv.title);
-    cvCorpusBuffer.writeln(cv.personalInfo.targetRole);
-    cvCorpusBuffer.writeln(cv.summary);
-
-    for (final s in cv.skills) {
-      cvCorpusBuffer.writeln(s.name);
-    }
-    for (final exp in cv.experiences) {
-      cvCorpusBuffer.writeln('${exp.jobTitle} ${exp.company} ${exp.bulletPoints.join(' ')}');
-    }
-    for (final proj in cv.projects) {
-      cvCorpusBuffer.writeln('${proj.name} ${proj.role} ${proj.description} ${proj.technologies.join(' ')}');
-    }
-    for (final edu in cv.educations) {
-      cvCorpusBuffer.writeln('${edu.institution} ${edu.degree} ${edu.fieldOfStudy}');
-    }
-
-    final corpus = cvCorpusBuffer.toString().toLowerCase();
+    final corpus = buildCorpus(cv);
 
     final matched = <String>[];
     final missing = <String>[];
@@ -142,7 +125,8 @@ abstract final class CvJdMatcherService {
       final cleanKw = kw.trim().toLowerCase();
       if (cleanKw.isEmpty) continue;
 
-      if (corpus.contains(cleanKw)) {
+      if (corpus.contains(cleanKw) ||
+          JdKeywordExtractor.corpusMentions(corpus, kw)) {
         matched.add(kw);
       } else {
         missing.add(kw);
@@ -158,5 +142,49 @@ abstract final class CvJdMatcherService {
       missingKeywords: List.unmodifiable(missing),
       totalKeywords: total,
     );
+  }
+
+  /// Scores [cv] against a free-text job description by extracting known
+  /// keywords offline first.
+  static JdMatchReport evaluateJobDescription({
+    required CvModel cv,
+    required String jobDescription,
+  }) {
+    return evaluate(
+      cv: cv,
+      targetKeywords: JdKeywordExtractor.extract(jobDescription),
+    );
+  }
+
+  /// Lowercase text of every CV field that an ATS would index.
+  static String buildCorpus(CvModel cv) {
+    final buffer = StringBuffer()
+      ..writeln(cv.title)
+      ..writeln(cv.personalInfo.targetRole)
+      ..writeln(cv.summary);
+    for (final skill in cv.skills) {
+      buffer.writeln(skill.name);
+    }
+    for (final exp in cv.experiences) {
+      buffer.writeln(
+        '${exp.jobTitle} ${exp.company} ${exp.bulletPoints.join(' ')}',
+      );
+    }
+    for (final project in cv.projects) {
+      buffer.writeln(
+        '${project.name} ${project.role} ${project.description} '
+        '${project.technologies.join(' ')}',
+      );
+    }
+    for (final edu in cv.educations) {
+      buffer.writeln(
+        '${edu.institution} ${edu.degree} ${edu.fieldOfStudy} '
+        '${edu.achievements.join(' ')}',
+      );
+    }
+    for (final cert in cv.certifications) {
+      buffer.writeln('${cert.name} ${cert.issuer} ${cert.score ?? ''}');
+    }
+    return buffer.toString().toLowerCase();
   }
 }

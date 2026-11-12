@@ -219,7 +219,9 @@ class PersonalInfoTab extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                _isEn ? 'Quick Starter Suggestions ("Fill-in"):' : 'Gợi ý mẫu nhanh ("Điền vào mẫu"):',
+                _isEn
+                    ? 'Quick Starter Suggestions ("Fill-in"):'
+                    : 'Gợi ý mẫu nhanh ("Điền vào mẫu"):',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -232,8 +234,14 @@ class PersonalInfoTab extends StatelessWidget {
                 runSpacing: 6,
                 children: [
                   ActionChip(
-                    avatar: const Icon(Icons.flash_on_rounded, size: 14, color: AppTheme.brandIndigo),
-                    label: Text(_isEn ? 'Mobile / Flutter' : 'Mobile / Flutter Dev'),
+                    avatar: const Icon(
+                      Icons.flash_on_rounded,
+                      size: 14,
+                      color: AppTheme.brandIndigo,
+                    ),
+                    label: Text(
+                      _isEn ? 'Mobile / Flutter' : 'Mobile / Flutter Dev',
+                    ),
                     onPressed: () {
                       summaryController.text = _isEn
                           ? 'Proactive Flutter Software Engineer with strong experience in Clean Architecture, Riverpod, and offline-first mobile applications. Committed to high performance and maintainable code.'
@@ -242,8 +250,14 @@ class PersonalInfoTab extends StatelessWidget {
                     },
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.school_outlined, size: 14, color: AppTheme.accentTeal),
-                    label: Text(_isEn ? 'Fresher IT' : 'Sinh viên IT / Fresher'),
+                    avatar: const Icon(
+                      Icons.school_outlined,
+                      size: 14,
+                      color: AppTheme.accentTeal,
+                    ),
+                    label: Text(
+                      _isEn ? 'Fresher IT' : 'Sinh viên IT / Fresher',
+                    ),
                     onPressed: () {
                       summaryController.text = _isEn
                           ? 'Recent Computer Science graduate with hands-on project experience in mobile/web development. Quick learner with solid fundamentals in data structures, algorithms, and teamwork.'
@@ -252,7 +266,11 @@ class PersonalInfoTab extends StatelessWidget {
                     },
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.cloud_queue_rounded, size: 14, color: Colors.blue),
+                    avatar: const Icon(
+                      Icons.cloud_queue_rounded,
+                      size: 14,
+                      color: Colors.blue,
+                    ),
                     label: Text(_isEn ? 'Backend Dev' : 'Lập trình Backend'),
                     onPressed: () {
                       summaryController.text = _isEn
@@ -262,8 +280,14 @@ class PersonalInfoTab extends StatelessWidget {
                     },
                   ),
                   ActionChip(
-                    avatar: const Icon(Icons.trending_up_rounded, size: 14, color: Colors.orange),
-                    label: Text(_isEn ? 'Business / Sales' : 'Kinh doanh & Marketing'),
+                    avatar: const Icon(
+                      Icons.trending_up_rounded,
+                      size: 14,
+                      color: Colors.orange,
+                    ),
+                    label: Text(
+                      _isEn ? 'Business / Sales' : 'Kinh doanh & Marketing',
+                    ),
                     onPressed: () {
                       summaryController.text = _isEn
                           ? 'Results-oriented business and marketing specialist with strong data analytics, client management, and multi-channel campaign execution skills.'

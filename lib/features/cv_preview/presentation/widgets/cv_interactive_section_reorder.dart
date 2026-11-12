@@ -60,14 +60,22 @@ class CvInteractiveSectionReorder extends StatelessWidget {
               )
             : Text(
                 _isEn ? 'No summary added yet.' : 'Chưa nhập tóm tắt.',
-                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.mutedText),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                  color: AppTheme.mutedText,
+                ),
               );
 
       case 'experience':
         if (cv.experiences.isEmpty) {
           return Text(
             _isEn ? 'No work experience yet.' : 'Chưa có kinh nghiệm.',
-            style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.mutedText),
+            style: const TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: AppTheme.mutedText,
+            ),
           );
         }
         final first = cv.experiences.first;
@@ -75,14 +83,22 @@ class CvInteractiveSectionReorder extends StatelessWidget {
           '${first.jobTitle} • ${first.company} (${cv.experiences.length} ${_isEn ? 'items' : 'mục'})',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.mutedText),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.mutedText,
+          ),
         );
 
       case 'projects':
         if (cv.projects.isEmpty) {
           return Text(
             _isEn ? 'No projects added.' : 'Chưa có dự án.',
-            style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.mutedText),
+            style: const TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: AppTheme.mutedText,
+            ),
           );
         }
         final p = cv.projects.first;
@@ -90,14 +106,22 @@ class CvInteractiveSectionReorder extends StatelessWidget {
           '${p.name} • ${p.role.isNotEmpty ? p.role : (_isEn ? 'Project' : 'Dự án')} (${cv.projects.length} ${_isEn ? 'projects' : 'dự án'})',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.mutedText),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.mutedText,
+          ),
         );
 
       case 'skills':
         if (cv.skills.isEmpty) {
           return Text(
             _isEn ? 'No skills listed.' : 'Chưa liệt kê kỹ năng.',
-            style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.mutedText),
+            style: const TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: AppTheme.mutedText,
+            ),
           );
         }
         final names = cv.skills.take(4).map((s) => s.name).join(', ');
@@ -112,7 +136,11 @@ class CvInteractiveSectionReorder extends StatelessWidget {
         if (cv.educations.isEmpty) {
           return Text(
             _isEn ? 'No education added.' : 'Chưa nhập học vấn.',
-            style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.mutedText),
+            style: const TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: AppTheme.mutedText,
+            ),
           );
         }
         final e = cv.educations.first;
@@ -120,14 +148,22 @@ class CvInteractiveSectionReorder extends StatelessWidget {
           '${e.degree.isNotEmpty ? '${e.degree} • ' : ''}${e.institution}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.mutedText),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.mutedText,
+          ),
         );
 
       case 'certifications':
         if (cv.certifications.isEmpty) {
           return Text(
             _isEn ? 'No certifications.' : 'Chưa có chứng chỉ.',
-            style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: AppTheme.mutedText),
+            style: const TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: AppTheme.mutedText,
+            ),
           );
         }
         final c = cv.certifications.first;
@@ -135,7 +171,11 @@ class CvInteractiveSectionReorder extends StatelessWidget {
           '${c.name} (${c.issuer})',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.mutedText),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.mutedText,
+          ),
         );
 
       default:
@@ -161,7 +201,11 @@ class CvInteractiveSectionReorder extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    const Icon(Icons.drag_indicator_rounded, size: 20, color: AppTheme.brandIndigo),
+                    const Icon(
+                      Icons.drag_indicator_rounded,
+                      size: 20,
+                      color: AppTheme.brandIndigo,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -182,7 +226,10 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onResetToDefault,
                   icon: const Icon(Icons.restart_alt_rounded, size: 16),
-                  label: Text(_isEn ? 'Default' : 'Mặc định', style: const TextStyle(fontSize: 12)),
+                  label: Text(
+                    _isEn ? 'Default' : 'Mặc định',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     foregroundColor: AppTheme.mutedText,
@@ -209,7 +256,8 @@ class CvInteractiveSectionReorder extends StatelessWidget {
             },
             itemBuilder: (context, index) {
               final key = sections[index];
-              final def = CvSectionDefinition.findById(key) ??
+              final def =
+                  CvSectionDefinition.findById(key) ??
                   const CvSectionDefinition(
                     id: '',
                     titleVi: '',
@@ -263,7 +311,11 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                           color: Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: Icon(def.icon, size: 20, color: AppTheme.primarySlate),
+                        child: Icon(
+                          def.icon,
+                          size: 20,
+                          color: AppTheme.primarySlate,
+                        ),
                       ),
                       const SizedBox(width: 12),
 
@@ -282,14 +334,19 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                      color: isVisible ? AppTheme.primarySlate : Colors.grey,
+                                      color: isVisible
+                                          ? AppTheme.primarySlate
+                                          : Colors.grey,
                                     ),
                                   ),
                                 ),
                                 if (!isVisible) ...[
                                   const SizedBox(width: 6),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.grey.shade200,
                                       borderRadius: BorderRadius.circular(4),
@@ -319,11 +376,15 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                             ? (_isEn ? 'Hide from export' : 'Ẩn khỏi bản in')
                             : (_isEn ? 'Show in export' : 'Hiện trên bản in'),
                         icon: Icon(
-                          isVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          isVisible
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           size: 19,
                           color: isVisible ? AppTheme.brandIndigo : Colors.grey,
                         ),
-                        onPressed: onToggleVisibility == null ? null : () => onToggleVisibility!(key),
+                        onPressed: onToggleVisibility == null
+                            ? null
+                            : () => onToggleVisibility!(key),
                         visualDensity: VisualDensity.compact,
                       ),
 
@@ -337,7 +398,10 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                       ),
                       IconButton(
                         tooltip: _isEn ? 'Move down' : 'Di chuyển xuống',
-                        icon: const Icon(Icons.arrow_downward_rounded, size: 18),
+                        icon: const Icon(
+                          Icons.arrow_downward_rounded,
+                          size: 18,
+                        ),
                         onPressed: isLast ? null : () => _stepItem(index, 1),
                         visualDensity: VisualDensity.compact,
                         color: AppTheme.mutedText,

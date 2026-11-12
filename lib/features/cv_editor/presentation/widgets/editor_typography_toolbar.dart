@@ -72,16 +72,39 @@ class EditorTypographyToolbar extends StatelessWidget {
     );
   }
 
-
   static const List<Map<String, String>> colorPresets = [
-    {'nameVi': 'Xanh Navy (Harvard)', 'nameEn': 'Navy Blue (Classic)', 'hex': '#1E293B'},
-    {'nameVi': 'Tím Hoàng Gia (Modern)', 'nameEn': 'Royal Indigo (Modern)', 'hex': '#4338CA'},
+    {
+      'nameVi': 'Xanh Navy (Harvard)',
+      'nameEn': 'Navy Blue (Classic)',
+      'hex': '#1E293B',
+    },
+    {
+      'nameVi': 'Tím Hoàng Gia (Modern)',
+      'nameEn': 'Royal Indigo (Modern)',
+      'hex': '#4338CA',
+    },
     {'nameVi': 'Xanh Ngọc (Teal)', 'nameEn': 'Emerald Teal', 'hex': '#0F766E'},
-    {'nameVi': 'Đỏ Rượu (Executive)', 'nameEn': 'Crimson Burgundy', 'hex': '#991B1B'},
+    {
+      'nameVi': 'Đỏ Rượu (Executive)',
+      'nameEn': 'Crimson Burgundy',
+      'hex': '#991B1B',
+    },
     {'nameVi': 'Hổ Phách (Creative)', 'nameEn': 'Warm Amber', 'hex': '#D97706'},
-    {'nameVi': 'Xám Đậm (Minimalist)', 'nameEn': 'Slate Charcoal', 'hex': '#334155'},
-    {'nameVi': 'Xanh Rừng (Forest)', 'nameEn': 'Forest Green', 'hex': '#166534'},
-    {'nameVi': 'Xanh Biển Sâu (Midnight)', 'nameEn': 'Midnight Blue', 'hex': '#1E3A8A'},
+    {
+      'nameVi': 'Xám Đậm (Minimalist)',
+      'nameEn': 'Slate Charcoal',
+      'hex': '#334155',
+    },
+    {
+      'nameVi': 'Xanh Rừng (Forest)',
+      'nameEn': 'Forest Green',
+      'hex': '#166534',
+    },
+    {
+      'nameVi': 'Xanh Biển Sâu (Midnight)',
+      'nameEn': 'Midnight Blue',
+      'hex': '#1E3A8A',
+    },
   ];
 
   Color _parseHex(String? hex) {
@@ -98,7 +121,9 @@ class EditorTypographyToolbar extends StatelessWidget {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Row(
             children: [
               Container(
@@ -107,12 +132,19 @@ class EditorTypographyToolbar extends StatelessWidget {
                   color: AppTheme.brandIndigo.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.palette_outlined, color: AppTheme.brandIndigo, size: 20),
+                child: const Icon(
+                  Icons.palette_outlined,
+                  color: AppTheme.brandIndigo,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 10),
               Text(
                 _isEn ? 'CV Color Theme' : 'Bảng màu chủ đạo CV',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
             ],
           ),
@@ -124,7 +156,8 @@ class EditorTypographyToolbar extends StatelessWidget {
               children: colorPresets.map((preset) {
                 final hex = preset['hex']!;
                 final color = _parseHex(hex);
-                final isSelected = currentColor?.toUpperCase() == hex.toUpperCase();
+                final isSelected =
+                    currentColor?.toUpperCase() == hex.toUpperCase();
                 final name = _isEn ? preset['nameEn']! : preset['nameVi']!;
 
                 return InkWell(
@@ -135,9 +168,14 @@ class EditorTypographyToolbar extends StatelessWidget {
                   },
                   child: Container(
                     width: 130,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: isSelected ? color.withAlpha(25) : Colors.grey.shade50,
+                      color: isSelected
+                          ? color.withAlpha(25)
+                          : Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected ? color : Colors.grey.shade300,
@@ -154,11 +192,18 @@ class EditorTypographyToolbar extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 2),
                             boxShadow: [
-                              BoxShadow(color: Colors.black.withAlpha(30), blurRadius: 3),
+                              BoxShadow(
+                                color: Colors.black.withAlpha(30),
+                                blurRadius: 3,
+                              ),
                             ],
                           ),
                           child: isSelected
-                              ? const Icon(Icons.check, size: 14, color: Colors.white)
+                              ? const Icon(
+                                  Icons.check,
+                                  size: 14,
+                                  color: Colors.white,
+                                )
                               : null,
                         ),
                         const SizedBox(width: 8),
@@ -167,7 +212,9 @@ class EditorTypographyToolbar extends StatelessWidget {
                             name,
                             style: TextStyle(
                               fontSize: 11,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
                               color: isSelected ? color : Colors.grey.shade800,
                             ),
                             maxLines: 2,
@@ -216,7 +263,10 @@ class EditorTypographyToolbar extends StatelessWidget {
                   const SizedBox(width: 10),
                   Text(
                     _isEn ? 'Adjust Text Scale' : 'Chỉnh cỡ chữ CV',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -227,7 +277,10 @@ class EditorTypographyToolbar extends StatelessWidget {
                     _isEn
                         ? 'Scale fonts up or down to fill or fit your A4 resume sheet cleanly.'
                         : 'Phóng to hoặc thu nhỏ chữ để CV vừa vặn trang giấy A4 mà không bị trống.',
-                    style: TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -237,7 +290,10 @@ class EditorTypographyToolbar extends StatelessWidget {
                         onPressed: tempScale > 0.75
                             ? () {
                                 setDialogState(() {
-                                  tempScale = (tempScale - 0.05).clamp(0.75, 1.40);
+                                  tempScale = (tempScale - 0.05).clamp(
+                                    0.75,
+                                    1.40,
+                                  );
                                 });
                               }
                             : null,
@@ -245,7 +301,10 @@ class EditorTypographyToolbar extends StatelessWidget {
                         color: AppTheme.brandIndigo,
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.brandIndigo.withAlpha(20),
                           borderRadius: BorderRadius.circular(12),
@@ -263,7 +322,10 @@ class EditorTypographyToolbar extends StatelessWidget {
                         onPressed: tempScale < 1.40
                             ? () {
                                 setDialogState(() {
-                                  tempScale = (tempScale + 0.05).clamp(0.75, 1.40);
+                                  tempScale = (tempScale + 0.05).clamp(
+                                    0.75,
+                                    1.40,
+                                  );
                                 });
                               }
                             : null,
@@ -286,10 +348,38 @@ class EditorTypographyToolbar extends StatelessWidget {
                   Wrap(
                     spacing: 6,
                     children: [
-                      _presetChip(context, setDialogState, 0.85, _isEn ? '85% Compact' : '85% Gọn', tempScale, (s) => tempScale = s),
-                      _presetChip(context, setDialogState, 1.0, _isEn ? '100% Standard' : '100% Chuẩn', tempScale, (s) => tempScale = s),
-                      _presetChip(context, setDialogState, 1.15, _isEn ? '115% Roomy' : '115% Thoáng', tempScale, (s) => tempScale = s),
-                      _presetChip(context, setDialogState, 1.30, _isEn ? '130% Large' : '130% Lớn', tempScale, (s) => tempScale = s),
+                      _presetChip(
+                        context,
+                        setDialogState,
+                        0.85,
+                        _isEn ? '85% Compact' : '85% Gọn',
+                        tempScale,
+                        (s) => tempScale = s,
+                      ),
+                      _presetChip(
+                        context,
+                        setDialogState,
+                        1.0,
+                        _isEn ? '100% Standard' : '100% Chuẩn',
+                        tempScale,
+                        (s) => tempScale = s,
+                      ),
+                      _presetChip(
+                        context,
+                        setDialogState,
+                        1.15,
+                        _isEn ? '115% Roomy' : '115% Thoáng',
+                        tempScale,
+                        (s) => tempScale = s,
+                      ),
+                      _presetChip(
+                        context,
+                        setDialogState,
+                        1.30,
+                        _isEn ? '130% Large' : '130% Lớn',
+                        tempScale,
+                        (s) => tempScale = s,
+                      ),
                     ],
                   ),
                 ],
@@ -367,10 +457,17 @@ class EditorTypographyToolbar extends StatelessWidget {
             // Reorder sections button
             if (onOpenSectionReorder != null)
               ActionChip(
-                avatar: const Icon(Icons.swap_vert_rounded, size: 16, color: AppTheme.brandIndigo),
+                avatar: const Icon(
+                  Icons.swap_vert_rounded,
+                  size: 16,
+                  color: AppTheme.brandIndigo,
+                ),
                 label: Text(
                   _isEn ? 'Reorder' : 'Sắp xếp mục',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 onPressed: onOpenSectionReorder,
                 backgroundColor: AppTheme.brandIndigo.withAlpha(15),
@@ -382,10 +479,17 @@ class EditorTypographyToolbar extends StatelessWidget {
             // Starter samples button
             if (onOpenStarterSamples != null)
               ActionChip(
-                avatar: const Icon(Icons.lightbulb_rounded, size: 16, color: Colors.amber),
+                avatar: const Icon(
+                  Icons.lightbulb_rounded,
+                  size: 16,
+                  color: Colors.amber,
+                ),
                 label: Text(
                   _isEn ? 'Starter Samples' : 'Mẫu gợi ý',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 onPressed: onOpenStarterSamples,
                 backgroundColor: Colors.amber.shade50,
@@ -398,10 +502,17 @@ class EditorTypographyToolbar extends StatelessWidget {
             if (onOpenActionVerbs != null) ...[
               ActionChip(
                 key: const Key('toolbar-action-verbs-chip'),
-                avatar: const Icon(Icons.bolt_rounded, size: 16, color: Colors.deepOrange),
+                avatar: const Icon(
+                  Icons.bolt_rounded,
+                  size: 16,
+                  color: Colors.deepOrange,
+                ),
                 label: Text(
                   _isEn ? 'Action Verbs' : 'Từ khóa ATS',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 onPressed: onOpenActionVerbs,
                 backgroundColor: Colors.deepOrange.withAlpha(15),
@@ -413,10 +524,17 @@ class EditorTypographyToolbar extends StatelessWidget {
             ],
             // Font Scale pill button
             ActionChip(
-              avatar: const Icon(Icons.format_size_rounded, size: 16, color: AppTheme.brandIndigo),
+              avatar: const Icon(
+                Icons.format_size_rounded,
+                size: 16,
+                color: AppTheme.brandIndigo,
+              ),
               label: Text(
                 '$percent%',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               onPressed: () => _showFontSizeDialog(context),
               backgroundColor: Colors.grey.shade100,
@@ -441,7 +559,10 @@ class EditorTypographyToolbar extends StatelessWidget {
               ),
               label: Text(
                 _isEn ? 'Theme' : 'Màu CV',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               onPressed: () => _showColorPaletteDialog(context),
               backgroundColor: Colors.grey.shade100,
@@ -471,7 +592,9 @@ class EditorTypographyToolbar extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.link_rounded, size: 18),
-                tooltip: _isEn ? 'Link ([text](url))' : 'Chèn link ([Tên](link))',
+                tooltip: _isEn
+                    ? 'Link ([text](url))'
+                    : 'Chèn link ([Tên](link))',
                 onPressed: () => _insertFormatting('[', '](https://...)'),
                 visualDensity: VisualDensity.compact,
               ),

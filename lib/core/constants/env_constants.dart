@@ -78,5 +78,4 @@ class EnvConstants {
   static bool get isSupabaseConfigured {
     return activeSupabaseEnvironment?.isConfigured ?? false;
   }
-
 }

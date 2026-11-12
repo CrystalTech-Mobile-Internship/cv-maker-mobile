@@ -248,7 +248,9 @@ class CvSyncRepository {
       final remoteCvs = await _remote.fetchUserCvs();
       final remoteById = {for (final cv in remoteCvs) cv.id: cv};
       final localCvs = await _localRepository.getAll();
-      final pendingDeletions = await _localRepository.getPendingDeletions(userId);
+      final pendingDeletions = await _localRepository.getPendingDeletions(
+        userId,
+      );
       final pendingLocal = await _localRepository.getPendingSync(userId);
 
       var uploadCount = 0;
@@ -287,7 +289,8 @@ class CvSyncRepository {
       final pendingDeletionIds = pendingDeletions.map((d) => d.cvId).toSet();
 
       for (final remoteCv in remoteCvs) {
-        if (pendingLocalIds.contains(remoteCv.id) || pendingDeletionIds.contains(remoteCv.id)) {
+        if (pendingLocalIds.contains(remoteCv.id) ||
+            pendingDeletionIds.contains(remoteCv.id)) {
           continue;
         }
         final localCv = await _localRepository.getById(remoteCv.id);
@@ -332,5 +335,4 @@ class CvSyncRepository {
       );
     }
   }
-
 }

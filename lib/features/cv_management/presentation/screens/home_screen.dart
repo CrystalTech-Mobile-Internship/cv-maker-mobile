@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+export '../controllers/cv_list_provider.dart' show cvListStreamProvider;
+
 import '../../../../app/theme.dart';
 import '../../../auth/data/guest_session_service.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -14,25 +16,13 @@ import '../../../cv_editor/domain/models/models.dart';
 import '../../../resume_import/data/repositories/resume_import_provider.dart';
 import '../../../resume_import/domain/repositories/resume_import_repository.dart';
 import '../../../resume_import/presentation/widgets/resume_import_review_dialog.dart';
+import '../controllers/cv_list_provider.dart';
 import '../controllers/dashboard_sync_controller.dart';
 import '../widgets/cloud_sync_preview_sheet.dart';
 import '../widgets/create_cv_dialog.dart';
 import '../widgets/home_dialogs.dart';
 import '../widgets/my_cvs_view.dart';
 import '../widgets/template_catalog_view.dart';
-
-final cvListStreamProvider = StreamProvider.autoDispose<List<CvModel>>((ref) {
-  final repository = ref.watch(cvRepositoryProvider);
-  final user = ref.watch(currentAuthUserProvider);
-  return repository.watchAll().map((cvs) {
-    if (user == null) {
-      return cvs.where((cv) => cv.userId == null).toList(growable: false);
-    }
-    return cvs
-        .where((cv) => cv.userId == null || cv.userId == user.id)
-        .toList(growable: false);
-  });
-});
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -248,11 +238,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (user == null) return _openLogin();
 
     final backendLabel = ref.read(authRepositoryProvider).backendLabel;
-    final preview = await ref.read(cvSyncRepositoryProvider).inspectSyncPreview(
-      userId: user.id,
-      userEmail: user.email,
-      backendLabel: backendLabel,
-    );
+    final preview = await ref
+        .read(cvSyncRepositoryProvider)
+        .inspectSyncPreview(
+          userId: user.id,
+          userEmail: user.email,
+          backendLabel: backendLabel,
+        );
 
     if (!mounted) return;
 

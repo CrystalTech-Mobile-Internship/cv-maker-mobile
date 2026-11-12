@@ -73,7 +73,9 @@ class CvStarterTemplateService {
       ExperienceModel(
         id: 'starter-exp-1',
         company: isEn ? 'Tech Innovations Corp' : 'Công ty Công nghệ Alpha',
-        jobTitle: isEn ? 'Mobile Developer Intern' : 'Thực tập sinh Lập trình Di động',
+        jobTitle: isEn
+            ? 'Mobile Developer Intern'
+            : 'Thực tập sinh Lập trình Di động',
         location: isEn ? 'Ho Chi Minh City' : 'TP. Hồ Chí Minh',
         startDate: DateTime.utc(now.year - 1, 6, 1),
         endDate: DateTime.utc(now.year, 2, 1),
@@ -138,7 +140,9 @@ class CvStarterTemplateService {
       ),
       SkillModel(
         id: 'starter-skill-4',
-        name: isEn ? 'Problem Solving & Teamwork' : 'Giải quyết vấn đề & Làm việc nhóm',
+        name: isEn
+            ? 'Problem Solving & Teamwork'
+            : 'Giải quyết vấn đề & Làm việc nhóm',
         category: SkillCategory.soft,
         proficiency: 85,
       ),

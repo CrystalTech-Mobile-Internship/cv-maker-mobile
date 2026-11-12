@@ -72,7 +72,11 @@ class ExperienceTab extends StatelessWidget {
                   key: const Key('use-starter-experience-btn'),
                   onPressed: onUseStarterExperience,
                   icon: const Icon(Icons.auto_awesome, size: 18),
-                  label: Text(_isEn ? 'Use Starter Sample ("Fill-in")' : 'Dùng mẫu kinh nghiệm ("Điền mẫu nhanh")'),
+                  label: Text(
+                    _isEn
+                        ? 'Use Starter Sample ("Fill-in")'
+                        : 'Dùng mẫu kinh nghiệm ("Điền mẫu nhanh")',
+                  ),
                 ),
               ],
             ],

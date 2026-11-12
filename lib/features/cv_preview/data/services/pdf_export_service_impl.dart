@@ -19,7 +19,10 @@ class PdfExportServiceImpl implements PdfExportService {
   }) async {
     final isEn = language == 'en';
     final scale = (cv.fontSizeScale > 0) ? cv.fontSizeScale : 1.0;
-    final templateStyle = _TemplateStyle.fromId(templateId, customPrimaryHex: cv.primaryColor);
+    final templateStyle = _TemplateStyle.fromId(
+      templateId,
+      customPrimaryHex: cv.primaryColor,
+    );
 
     final doc = pw.Document(
       title: cv.title.isNotEmpty ? cv.title : 'Curriculum Vitae',
@@ -76,319 +79,319 @@ class PdfExportServiceImpl implements PdfExportService {
         theme: theme,
         build: (pw.Context context) {
           final summaryWidgets = <pw.Widget>[
-              if (cv.summary.trim().isNotEmpty) ...[
-                _buildPdfSectionHeader(
-                  isEn ? 'PROFESSIONAL SUMMARY' : 'TÓM TẮT MỤC TIÊU NGHỀ NGHIỆP',
-                  scale,
-                  templateStyle,
+            if (cv.summary.trim().isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'PROFESSIONAL SUMMARY' : 'TÓM TẮT MỤC TIÊU NGHỀ NGHIỆP',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
+              pw.Text(
+                cv.summary,
+                style: pw.TextStyle(
+                  fontSize: 10 * scale,
+                  lineSpacing: 2 * scale,
+                  color: PdfColors.grey900,
                 ),
-                pw.SizedBox(height: 4 * scale),
-                pw.Text(
-                  cv.summary,
-                  style: pw.TextStyle(
-                    fontSize: 10 * scale,
-                    lineSpacing: 2 * scale,
-                    color: PdfColors.grey900,
+              ),
+              pw.SizedBox(height: 14 * scale),
+            ],
+          ];
+
+          final educationWidgets = <pw.Widget>[
+            if (cv.educations.isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'EDUCATION' : 'HỌC VẤN',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
+              ...cv.educations.map((edu) {
+                final startYear = edu.startDate.year;
+                final endYear = edu.isCurrent
+                    ? (isEn ? 'Present' : 'Hiện tại')
+                    : (edu.endDate?.year.toString() ?? '');
+                final period = '$startYear - $endYear';
+
+                return pw.Padding(
+                  padding: pw.EdgeInsets.only(bottom: 6 * scale),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    children: [
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Expanded(
+                            child: pw.Text(
+                              edu.institution.toUpperCase(),
+                              style: pw.TextStyle(
+                                fontSize: 10.5 * scale,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          pw.Text(
+                            period,
+                            style: pw.TextStyle(
+                              fontSize: 9.5 * scale,
+                              fontStyle: pw.FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.Text(
+                        '${edu.degree} — ${edu.fieldOfStudy}${edu.gpa != null ? " (GPA: ${edu.gpa})" : ""}',
+                        style: pw.TextStyle(
+                          fontSize: 9.5 * scale,
+                          color: PdfColors.grey800,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                pw.SizedBox(height: 14 * scale),
-              ],
-            ];
+                );
+              }),
+              pw.SizedBox(height: 14 * scale),
+            ],
+          ];
 
-            final educationWidgets = <pw.Widget>[
-              if (cv.educations.isNotEmpty) ...[
-                _buildPdfSectionHeader(
-                  isEn ? 'EDUCATION' : 'HỌC VẤN',
-                  scale,
-                  templateStyle,
-                ),
-                pw.SizedBox(height: 4 * scale),
-                ...cv.educations.map((edu) {
-                  final startYear = edu.startDate.year;
-                  final endYear = edu.isCurrent
-                      ? (isEn ? 'Present' : 'Hiện tại')
-                      : (edu.endDate?.year.toString() ?? '');
-                  final period = '$startYear - $endYear';
+          final experienceWidgets = <pw.Widget>[
+            if (cv.experiences.isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'WORK EXPERIENCE' : 'KINH NGHIỆM LÀM VIỆC',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
+              ...cv.experiences.map((exp) {
+                final startStr =
+                    '${exp.startDate.month.toString().padLeft(2, '0')}/${exp.startDate.year}';
+                final endStr = exp.isCurrent
+                    ? (isEn ? 'Present' : 'Hiện tại')
+                    : (exp.endDate != null
+                          ? '${exp.endDate!.month.toString().padLeft(2, '0')}/${exp.endDate!.year}'
+                          : '');
+                final period = '$startStr - $endStr';
 
-                  return pw.Padding(
-                    padding: pw.EdgeInsets.only(bottom: 6 * scale),
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                      children: [
-                        pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                          children: [
-                            pw.Expanded(
-                              child: pw.Text(
-                                edu.institution.toUpperCase(),
+                return pw.Padding(
+                  padding: pw.EdgeInsets.only(bottom: 8 * scale),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    children: [
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Expanded(
+                            child: pw.Text(
+                              exp.company.toUpperCase(),
+                              style: pw.TextStyle(
+                                fontSize: 10.5 * scale,
+                                fontWeight: pw.FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          pw.Text(
+                            period,
+                            style: pw.TextStyle(
+                              fontSize: 9.5 * scale,
+                              fontStyle: pw.FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                      pw.Text(
+                        exp.location.isNotEmpty
+                            ? '${exp.jobTitle} • ${exp.location}'
+                            : exp.jobTitle,
+                        style: pw.TextStyle(
+                          fontSize: 9.5 * scale,
+                          fontStyle: pw.FontStyle.italic,
+                          color: PdfColor.fromHex('#334155'),
+                        ),
+                      ),
+                      pw.SizedBox(height: 2 * scale),
+                      ...exp.bulletPoints.map(
+                        (b) => pw.Padding(
+                          padding: pw.EdgeInsets.only(bottom: 2 * scale),
+                          child: pw.Row(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                '• ',
                                 style: pw.TextStyle(
-                                  fontSize: 10.5 * scale,
+                                  fontSize: 9.5 * scale,
                                   fontWeight: pw.FontWeight.bold,
                                 ),
                               ),
-                            ),
-                            pw.Text(
-                              period,
-                              style: pw.TextStyle(
-                                fontSize: 9.5 * scale,
-                                fontStyle: pw.FontStyle.italic,
+                              pw.Expanded(
+                                child: pw.Text(
+                                  b,
+                                  style: pw.TextStyle(
+                                    fontSize: 9.5 * scale,
+                                    lineSpacing: 1.5 * scale,
+                                    color: PdfColors.grey900,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        pw.Text(
-                          '${edu.degree} — ${edu.fieldOfStudy}${edu.gpa != null ? " (GPA: ${edu.gpa})" : ""}',
-                          style: pw.TextStyle(
-                            fontSize: 9.5 * scale,
-                            color: PdfColors.grey800,
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                }),
-                pw.SizedBox(height: 14 * scale),
-              ],
-            ];
+                      ),
+                    ],
+                  ),
+                );
+              }),
+              pw.SizedBox(height: 14 * scale),
+            ],
+          ];
 
-            final experienceWidgets = <pw.Widget>[
-              if (cv.experiences.isNotEmpty) ...[
-                _buildPdfSectionHeader(
-                  isEn ? 'WORK EXPERIENCE' : 'KINH NGHIỆM LÀM VIỆC',
-                  scale,
-                  templateStyle,
-                ),
-                pw.SizedBox(height: 4 * scale),
-                ...cv.experiences.map((exp) {
-                  final startStr =
-                      '${exp.startDate.month.toString().padLeft(2, '0')}/${exp.startDate.year}';
-                  final endStr = exp.isCurrent
-                      ? (isEn ? 'Present' : 'Hiện tại')
-                      : (exp.endDate != null
-                            ? '${exp.endDate!.month.toString().padLeft(2, '0')}/${exp.endDate!.year}'
-                            : '');
-                  final period = '$startStr - $endStr';
-
-                  return pw.Padding(
-                    padding: pw.EdgeInsets.only(bottom: 8 * scale),
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                      children: [
-                        pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                          children: [
-                            pw.Expanded(
-                              child: pw.Text(
-                                exp.company.toUpperCase(),
-                                style: pw.TextStyle(
-                                  fontSize: 10.5 * scale,
-                                  fontWeight: pw.FontWeight.bold,
-                                ),
+          final projectsWidgets = <pw.Widget>[
+            if (cv.projects.isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'KEY PROJECTS' : 'DỰ ÁN NỔI BẬT',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
+              ...cv.projects.map((proj) {
+                final dateStr = (proj.startDate != null)
+                    ? '${proj.startDate!.month.toString().padLeft(2, '0')}/${proj.startDate!.year} - '
+                          '${proj.endDate != null ? "${proj.endDate!.month.toString().padLeft(2, '0')}/${proj.endDate!.year}" : (isEn ? "Present" : "Hiện tại")}'
+                    : '';
+                return pw.Padding(
+                  padding: pw.EdgeInsets.only(bottom: 8 * scale),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    children: [
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Expanded(
+                            child: pw.Text(
+                              proj.name,
+                              style: pw.TextStyle(
+                                fontSize: 10.5 * scale,
+                                fontWeight: pw.FontWeight.bold,
                               ),
                             ),
+                          ),
+                          if (dateStr.isNotEmpty)
                             pw.Text(
-                              period,
+                              dateStr,
                               style: pw.TextStyle(
                                 fontSize: 9.5 * scale,
                                 fontStyle: pw.FontStyle.italic,
                               ),
                             ),
-                          ],
-                        ),
+                        ],
+                      ),
+                      if (proj.role.isNotEmpty || proj.technologies.isNotEmpty)
                         pw.Text(
-                          exp.location.isNotEmpty
-                              ? '${exp.jobTitle} • ${exp.location}'
-                              : exp.jobTitle,
+                          [
+                            if (proj.role.isNotEmpty) proj.role,
+                            if (proj.teamSize != null)
+                              isEn
+                                  ? 'Team of ${proj.teamSize}'
+                                  : 'Nhóm ${proj.teamSize} người',
+                            if (proj.technologies.isNotEmpty)
+                              proj.technologies.join(', '),
+                          ].join(' | '),
                           style: pw.TextStyle(
                             fontSize: 9.5 * scale,
                             fontStyle: pw.FontStyle.italic,
                             color: PdfColor.fromHex('#334155'),
                           ),
                         ),
+                      if (proj.sourceUrl != null && proj.sourceUrl!.isNotEmpty)
+                        pw.Text(
+                          proj.sourceUrl!,
+                          style: pw.TextStyle(
+                            fontSize: 9 * scale,
+                            color: PdfColor.fromHex('#2563EB'),
+                          ),
+                        ),
+                      if (proj.demoUrl != null && proj.demoUrl!.isNotEmpty)
+                        pw.Text(
+                          proj.demoUrl!,
+                          style: pw.TextStyle(
+                            fontSize: 9 * scale,
+                            color: PdfColor.fromHex('#2563EB'),
+                          ),
+                        ),
+                      if (proj.description.isNotEmpty) ...[
                         pw.SizedBox(height: 2 * scale),
-                        ...exp.bulletPoints.map(
-                          (b) => pw.Padding(
-                            padding: pw.EdgeInsets.only(bottom: 2 * scale),
-                            child: pw.Row(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
-                                pw.Text(
-                                  '• ',
-                                  style: pw.TextStyle(
-                                    fontSize: 9.5 * scale,
-                                    fontWeight: pw.FontWeight.bold,
-                                  ),
-                                ),
-                                pw.Expanded(
-                                  child: pw.Text(
-                                    b,
-                                    style: pw.TextStyle(
-                                      fontSize: 9.5 * scale,
-                                      lineSpacing: 1.5 * scale,
-                                      color: PdfColors.grey900,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        ...proj.description
+                            .split('\n')
+                            .map((line) => line.trim())
+                            .where((line) => line.isNotEmpty)
+                            .map((line) => _buildPdfBulletPoint(line, scale)),
                       ],
-                    ),
-                  );
-                }),
-                pw.SizedBox(height: 14 * scale),
-              ],
-            ];
-
-            final projectsWidgets = <pw.Widget>[
-              if (cv.projects.isNotEmpty) ...[
-                _buildPdfSectionHeader(
-                  isEn ? 'KEY PROJECTS' : 'DỰ ÁN NỔI BẬT',
-                  scale,
-                  templateStyle,
-                ),
-                pw.SizedBox(height: 4 * scale),
-                ...cv.projects.map((proj) {
-                  final dateStr = (proj.startDate != null)
-                      ? '${proj.startDate!.month.toString().padLeft(2, '0')}/${proj.startDate!.year} - '
-                            '${proj.endDate != null ? "${proj.endDate!.month.toString().padLeft(2, '0')}/${proj.endDate!.year}" : (isEn ? "Present" : "Hiện tại")}'
-                      : '';
-                  return pw.Padding(
-                    padding: pw.EdgeInsets.only(bottom: 8 * scale),
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                      children: [
-                        pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                          children: [
-                            pw.Expanded(
-                              child: pw.Text(
-                                proj.name,
-                                style: pw.TextStyle(
-                                  fontSize: 10.5 * scale,
-                                  fontWeight: pw.FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            if (dateStr.isNotEmpty)
-                              pw.Text(
-                                dateStr,
-                                style: pw.TextStyle(
-                                  fontSize: 9.5 * scale,
-                                  fontStyle: pw.FontStyle.italic,
-                                ),
-                              ),
-                          ],
-                        ),
-                        if (proj.role.isNotEmpty || proj.technologies.isNotEmpty)
-                          pw.Text(
-                            [
-                              if (proj.role.isNotEmpty) proj.role,
-                              if (proj.teamSize != null)
-                                isEn
-                                    ? 'Team of ${proj.teamSize}'
-                                    : 'Nhóm ${proj.teamSize} người',
-                              if (proj.technologies.isNotEmpty)
-                                proj.technologies.join(', '),
-                            ].join(' | '),
-                            style: pw.TextStyle(
-                              fontSize: 9.5 * scale,
-                              fontStyle: pw.FontStyle.italic,
-                              color: PdfColor.fromHex('#334155'),
-                            ),
-                          ),
-                        if (proj.sourceUrl != null && proj.sourceUrl!.isNotEmpty)
-                          pw.Text(
-                            proj.sourceUrl!,
-                            style: pw.TextStyle(
-                              fontSize: 9 * scale,
-                              color: PdfColor.fromHex('#2563EB'),
-                            ),
-                          ),
-                        if (proj.demoUrl != null && proj.demoUrl!.isNotEmpty)
-                          pw.Text(
-                            proj.demoUrl!,
-                            style: pw.TextStyle(
-                              fontSize: 9 * scale,
-                              color: PdfColor.fromHex('#2563EB'),
-                            ),
-                          ),
-                        if (proj.description.isNotEmpty) ...[
-                          pw.SizedBox(height: 2 * scale),
-                          ...proj.description
-                              .split('\n')
-                              .map((line) => line.trim())
-                              .where((line) => line.isNotEmpty)
-                              .map((line) => _buildPdfBulletPoint(line, scale)),
-                        ],
-                      ],
-                    ),
-                  );
-                }),
-                pw.SizedBox(height: 14 * scale),
-              ],
-            ];
-
-            final skillsWidgets = <pw.Widget>[
-              if (cv.skills.isNotEmpty) ...[
-                _buildPdfSectionHeader(
-                  isEn ? 'TECHNICAL & SOFT SKILLS' : 'KỸ NĂNG CHUYÊN MÔN & MỀM',
-                  scale,
-                  templateStyle,
-                ),
-                pw.SizedBox(height: 4 * scale),
-                _buildSkillsSection(cv.skills, isEn, scale),
-                pw.SizedBox(height: 14 * scale),
-              ],
-            ];
-
-            final certificationsWidgets = <pw.Widget>[
-              if (cv.certifications.isNotEmpty) ...[
-                _buildPdfSectionHeader(
-                  isEn ? 'CERTIFICATIONS' : 'CHỨNG CHỈ',
-                  scale,
-                  templateStyle,
-                ),
-                pw.SizedBox(height: 4 * scale),
-                ...cv.certifications.map(
-                  (cert) => pw.Text(
-                    '• ${cert.name}${cert.score?.isNotEmpty == true ? " — ${cert.score}" : ""}${cert.issuer.isNotEmpty ? " • ${cert.issuer}" : ""}',
-                    style: pw.TextStyle(fontSize: 9.5 * scale),
+                    ],
                   ),
-                ),
-                pw.SizedBox(height: 14 * scale),
-              ],
-            ];
+                );
+              }),
+              pw.SizedBox(height: 14 * scale),
+            ],
+          ];
 
-            final sectionMap = <String, List<pw.Widget>>{
-              'summary': summaryWidgets,
-              'experience': experienceWidgets,
-              'projects': projectsWidgets,
-              'education': educationWidgets,
-              'skills': skillsWidgets,
-              'certifications': certificationsWidgets,
-            };
-
-            final orderedSections = <pw.Widget>[
-              _buildPdfHeader(
-                fullName: fullName,
-                targetRole: targetRole,
-                contact: contact,
-                scale: scale,
-                style: templateStyle,
-                avatarImage: avatarImage,
-                avatarPosition: cv.personalInfo.avatarPosition,
+          final skillsWidgets = <pw.Widget>[
+            if (cv.skills.isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'TECHNICAL & SOFT SKILLS' : 'KỸ NĂNG CHUYÊN MÔN & MỀM',
+                scale,
+                templateStyle,
               ),
-              pw.SizedBox(height: 8 * scale),
-            ];
+              pw.SizedBox(height: 4 * scale),
+              _buildSkillsSection(cv.skills, isEn, scale),
+              pw.SizedBox(height: 14 * scale),
+            ],
+          ];
 
-            for (final sectionKey in cv.visibleSectionOrder) {
-              final widgets = sectionMap[sectionKey];
-              if (widgets != null && widgets.isNotEmpty) {
-                orderedSections.addAll(widgets);
-              }
+          final certificationsWidgets = <pw.Widget>[
+            if (cv.certifications.isNotEmpty) ...[
+              _buildPdfSectionHeader(
+                isEn ? 'CERTIFICATIONS' : 'CHỨNG CHỈ',
+                scale,
+                templateStyle,
+              ),
+              pw.SizedBox(height: 4 * scale),
+              ...cv.certifications.map(
+                (cert) => pw.Text(
+                  '• ${cert.name}${cert.score?.isNotEmpty == true ? " — ${cert.score}" : ""}${cert.issuer.isNotEmpty ? " • ${cert.issuer}" : ""}',
+                  style: pw.TextStyle(fontSize: 9.5 * scale),
+                ),
+              ),
+              pw.SizedBox(height: 14 * scale),
+            ],
+          ];
+
+          final sectionMap = <String, List<pw.Widget>>{
+            'summary': summaryWidgets,
+            'experience': experienceWidgets,
+            'projects': projectsWidgets,
+            'education': educationWidgets,
+            'skills': skillsWidgets,
+            'certifications': certificationsWidgets,
+          };
+
+          final orderedSections = <pw.Widget>[
+            _buildPdfHeader(
+              fullName: fullName,
+              targetRole: targetRole,
+              contact: contact,
+              scale: scale,
+              style: templateStyle,
+              avatarImage: avatarImage,
+              avatarPosition: cv.personalInfo.avatarPosition,
+            ),
+            pw.SizedBox(height: 8 * scale),
+          ];
+
+          for (final sectionKey in cv.visibleSectionOrder) {
+            final widgets = sectionMap[sectionKey];
+            if (widgets != null && widgets.isNotEmpty) {
+              orderedSections.addAll(widgets);
             }
+          }
 
           return orderedSections;
         },
@@ -1237,4 +1240,3 @@ class _PdfFontSet {
   final pw.Font regular;
   final pw.Font bold;
 }
-
