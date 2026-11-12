@@ -34,6 +34,8 @@ Read `AGENTS.md`, `docs/requirements.md`, and `docs/mvp-flow.md`. Inspect the re
 
 ## CV-building UX conventions
 
+- Follow `smart-cv-ui` for colours, spacing, icons and component patterns.
+
 - Every new CV-assist tool must be usable offline unless it is an AI feature; AI features must degrade with a clear message, never a crash.
 - Labels are bilingual: follow `cv.language` for content shown on the CV and Vietnamese for app chrome.
 - Drag-and-drop and reorder interactions persist immediately through the repository and must update the PDF preview and both exporters.
