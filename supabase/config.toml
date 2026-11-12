@@ -1,4 +1,4 @@
 project_id = "cv-maker-mobile"
 
-[functions.polish-summary]
+[functions.cv-assistant]
 verify_jwt = true

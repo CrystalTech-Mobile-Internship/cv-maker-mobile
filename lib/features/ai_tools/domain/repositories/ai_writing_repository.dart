@@ -5,6 +5,7 @@ enum AiWritingFailureCode {
   notAuthenticated,
   invalidInput,
   rateLimited,
+  quotaExceeded,
   unavailable,
   unknown,
 }

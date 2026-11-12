@@ -10,6 +10,7 @@ import 'cloud_sync_card.dart';
 import 'cv_completion_sheet.dart';
 import 'cv_library_section.dart';
 import 'dashboard_header.dart';
+import 'ai_assistant_card.dart';
 import 'local_data_tools_card.dart';
 import 'template_thumbnail.dart';
 import 'upcoming_tools_row.dart';
@@ -30,6 +31,7 @@ class MyCvsView extends StatelessWidget {
     required this.onExportAll,
     required this.onRestoreBackup,
     required this.onOpenAts,
+    required this.onOpenAiInterview,
     required this.onOpenPro,
     required this.onRetry,
     required this.onEdit,
@@ -53,6 +55,7 @@ class MyCvsView extends StatelessWidget {
   final VoidCallback onExportAll;
   final VoidCallback onRestoreBackup;
   final VoidCallback onOpenAts;
+  final VoidCallback onOpenAiInterview;
   final VoidCallback onOpenPro;
   final VoidCallback onRetry;
   final ValueChanged<CvModel> onEdit;
@@ -121,6 +124,8 @@ class MyCvsView extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         _ImportResumeCard(onImport: onImport),
+        const SizedBox(height: 12),
+        AiAssistantCard(onChat: onOpenAiInterview, onImport: onImport),
         const SizedBox(height: 12),
         LocalDataToolsCard(onExport: onExportAll, onRestore: onRestoreBackup),
         const SizedBox(height: 12),

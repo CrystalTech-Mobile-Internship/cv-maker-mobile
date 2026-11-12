@@ -3,16 +3,27 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/summary_polish_request.dart';
 
+/// Name of the single Edge Function that fronts every AI capability. The AI
+/// provider key lives only in that function's secrets.
+const cvAssistantFunctionName = 'cv-assistant';
+
 class AiWritingRemoteException implements Exception {
   const AiWritingRemoteException(
     this.message, {
     required this.statusCode,
+    this.code,
+    this.quota,
     this.cause,
   });
 
   final String message;
   final int statusCode;
+  final String? code;
+  final Map<String, dynamic>? quota;
   final Object? cause;
+
+  @override
+  String toString() => 'AiWritingRemoteException($statusCode, $code)';
 }
 
 class AiWritingRemoteDataSource {
@@ -24,28 +35,38 @@ class AiWritingRemoteDataSource {
   SupabaseClient get _client =>
       _providedClient ?? SupabaseService.requiredClient;
 
-  Future<Map<String, dynamic>> polishSummary(
-    SummaryPolishRequest request,
+  /// Calls one `cv-assistant` action and returns `{result, quota, model}`.
+  Future<Map<String, dynamic>> invoke(
+    String action,
+    Map<String, dynamic> input,
   ) async {
-    if (_client.auth.currentSession == null) {
+    final SupabaseClient client;
+    try {
+      client = _client;
+    } on StateError {
+      throw const AiWritingRemoteException(
+        'Máy chủ AI chưa được cấu hình cho bản cài đặt này.',
+        statusCode: 503,
+        code: 'not_configured',
+      );
+    }
+    if (client.auth.currentSession == null) {
       throw const AiWritingRemoteException(
         'Bạn cần đăng nhập để sử dụng trợ lý AI.',
         statusCode: 401,
+        code: 'unauthenticated',
       );
     }
 
     try {
-      final response = await _client.functions.invoke(
-        'polish-summary',
-        body: request.toJson(),
+      final response = await client.functions.invoke(
+        cvAssistantFunctionName,
+        body: {'action': action, 'input': input},
       );
-      if (response.status < 200 || response.status >= 300) {
-        throw AiWritingRemoteException(
-          _messageFrom(response.data),
-          statusCode: response.status,
-        );
-      }
       final data = response.data;
+      if (response.status < 200 || response.status >= 300) {
+        throw _fromBody(data, response.status);
+      }
       if (data is! Map) {
         throw const AiWritingRemoteException(
           'Dịch vụ AI trả về dữ liệu không hợp lệ.',
@@ -56,11 +77,7 @@ class AiWritingRemoteDataSource {
     } on AiWritingRemoteException {
       rethrow;
     } on FunctionException catch (error) {
-      throw AiWritingRemoteException(
-        _messageFrom(error.details),
-        statusCode: error.status,
-        cause: error,
-      );
+      throw _fromBody(error.details, error.status, cause: error);
     } catch (error) {
       throw AiWritingRemoteException(
         'Không thể kết nối trợ lý AI. Hãy kiểm tra mạng và thử lại.',
@@ -70,10 +87,37 @@ class AiWritingRemoteDataSource {
     }
   }
 
-  static String _messageFrom(Object? value) {
-    if (value is Map && value['message'] is String) {
-      return value['message'] as String;
-    }
-    return 'Dịch vụ AI tạm thời không khả dụng.';
+  Future<Map<String, dynamic>> polishSummary(
+    SummaryPolishRequest request,
+  ) async {
+    final data = await invoke('polish_summary', request.toJson());
+    final result = data['result'];
+    return {
+      'suggestedSummary': result is Map ? result['suggestedSummary'] : null,
+      'provider': data['model'] ?? 'ai',
+      'quota': data['quota'],
+    };
+  }
+
+  static AiWritingRemoteException _fromBody(
+    Object? value,
+    int status, {
+    Object? cause,
+  }) {
+    final body = value is Map ? value : const {};
+    final message = body['message'] is String
+        ? body['message'] as String
+        : status == 404
+        ? 'Trợ lý AI chưa được kích hoạt trên máy chủ.'
+        : 'Dịch vụ AI tạm thời không khả dụng.';
+    return AiWritingRemoteException(
+      message,
+      statusCode: status,
+      code: body['code'] as String?,
+      quota: body['quota'] is Map
+          ? Map<String, dynamic>.from(body['quota'] as Map)
+          : null,
+      cause: cause,
+    );
   }
 }

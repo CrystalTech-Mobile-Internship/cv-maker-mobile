@@ -20,6 +20,16 @@ final class LocalResumeImportRepository implements ResumeImportRepository {
 
   @override
   Future<ResumeImportDraft?> pickAndParse() async {
+    final source = await pickAndExtractText();
+    return source == null ? null : parseText(source);
+  }
+
+  @override
+  ResumeImportDraft parseText(ResumeTextSource source) =>
+      _parser.parse(sourceName: source.fileName, text: source.text);
+
+  @override
+  Future<ResumeTextSource?> pickAndExtractText() async {
     final file = await FilePicker.pickFile(
       dialogTitle: 'Chọn CV Word hoặc PDF',
       type: FileType.custom,
@@ -31,11 +41,23 @@ final class LocalResumeImportRepository implements ResumeImportRepository {
     if (length > _maxFileBytes) {
       throw const ResumeImportException('Tệp CV phải nhỏ hơn 8 MB.');
     }
-    return parseBytes(fileName: file.name, bytes: await file.readAsBytes());
+    final text = await extractText(
+      fileName: file.name,
+      bytes: await file.readAsBytes(),
+    );
+    return ResumeTextSource(fileName: file.name, text: text);
   }
 
   @override
   Future<ResumeImportDraft> parseBytes({
+    required String fileName,
+    required Uint8List bytes,
+  }) async {
+    final text = await extractText(fileName: fileName, bytes: bytes);
+    return _parser.parse(sourceName: fileName, text: text);
+  }
+
+  Future<String> extractText({
     required String fileName,
     required Uint8List bytes,
   }) async {
@@ -53,7 +75,7 @@ final class LocalResumeImportRepository implements ResumeImportRepository {
         'Không tìm thấy lớp chữ. CV scan/ảnh cần OCR và chưa được hỗ trợ.',
       );
     }
-    return _parser.parse(sourceName: fileName, text: text);
+    return text;
   }
 
   String _extractDocx(Uint8List bytes) {

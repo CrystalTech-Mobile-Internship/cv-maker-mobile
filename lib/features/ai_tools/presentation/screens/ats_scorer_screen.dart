@@ -8,7 +8,13 @@ import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../../cv_management/presentation/controllers/cv_list_provider.dart';
 import '../../../cv_preview/domain/services/cv_jd_matcher_service.dart';
+import '../../domain/models/ai_assistant_models.dart';
+import '../../domain/repositories/ai_assistant_repository.dart';
+import '../../domain/services/cv_plain_text.dart';
 import '../../domain/services/jd_keyword_extractor.dart';
+import '../controllers/ai_assistant_providers.dart';
+import '../widgets/ai_access_guard.dart';
+import '../widgets/cover_letter_sheet.dart';
 
 /// Scores a saved CV against a pasted job description. Runs fully offline:
 /// keywords are extracted from the JD with [JdKeywordExtractor] and matched
@@ -91,6 +97,36 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     _analyze(saved);
   }
 
+  Future<void> _writeCoverLetter(CvModel cv) async {
+    final jd = _jdController.text.trim();
+    if (jd.length < 40) {
+      _toast('Hãy dán JD đầy đủ hơn (ít nhất 40 ký tự) để AI viết thư.');
+      return;
+    }
+    if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
+      return;
+    }
+    if (!mounted) return;
+    try {
+      final letter = await runWithAiProgress(
+        context,
+        'AI đang viết thư xin việc...',
+        () => ref
+            .read(aiAssistantRepositoryProvider)
+            .coverLetter(
+              cvText: cvPlainText(cv),
+              jobDescription: jd,
+              company: '',
+              language: cv.language,
+            ),
+      );
+      if (!mounted) return;
+      await showCoverLetterSheet(context, letter);
+    } on AiWritingFailure catch (failure) {
+      if (mounted) _toast(describeAiFailure(failure));
+    }
+  }
+
   void _toast(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
@@ -106,7 +142,10 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
-      appBar: AppBar(title: const Text('Chấm điểm ATS')),
+      appBar: AppBar(
+        title: const Text('Chấm điểm ATS'),
+        actions: const [AiQuotaChip(), SizedBox(width: 8)],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
@@ -170,6 +209,15 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                 onAddMissing: () =>
                     _addMissingSkills(cv, report.missingKeywords),
                 onOpenEditor: () => context.push('/editor', extra: cv),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                key: const ValueKey('ats-cover-letter'),
+                onPressed: () => _writeCoverLetter(cv),
+                icon: const Icon(Icons.mail_outline_rounded),
+                label: Text(
+                  'AI viết thư xin việc theo JD (${AiCreditCost.coverLetter} lượt)',
+                ),
               ),
             ],
           ],
@@ -243,7 +291,7 @@ class _ScoreCard extends StatelessWidget {
         ? AppTheme.createAction
         : score >= 50
         ? AppTheme.warningAmber
-        : Colors.redAccent;
+        : AppTheme.dangerRose;
     final verdict = report.totalKeywords == 0
         ? 'Không đủ dữ liệu để chấm.'
         : score >= 75

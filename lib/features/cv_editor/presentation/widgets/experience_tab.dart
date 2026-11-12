@@ -12,6 +12,7 @@ class ExperienceTab extends StatelessWidget {
     this.onEditExperience,
     this.onDeleteExperience,
     this.onUseStarterExperience,
+    this.onImproveWithAi,
     this.language = 'vi',
   });
 
@@ -20,6 +21,9 @@ class ExperienceTab extends StatelessWidget {
   final ValueChanged<ExperienceModel>? onEditExperience;
   final ValueChanged<String>? onDeleteExperience;
   final VoidCallback? onUseStarterExperience;
+
+  /// Asks the AI assistant to rewrite this entry's bullet points.
+  final ValueChanged<ExperienceModel>? onImproveWithAi;
   final String language;
 
   bool get _isEn => language == 'en';
@@ -211,6 +215,23 @@ class ExperienceTab extends StatelessWidget {
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (onImproveWithAi != null &&
+                      item.bulletPoints.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        key: ValueKey('improve-bullets-${item.id}'),
+                        onPressed: () => onImproveWithAi!(item),
+                        icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+                        label: Text(
+                          _isEn
+                              ? 'Rewrite bullets with AI'
+                              : 'AI viết lại gạch đầu dòng',
                         ),
                       ),
                     ),

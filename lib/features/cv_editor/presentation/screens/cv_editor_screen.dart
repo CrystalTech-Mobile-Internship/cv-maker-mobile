@@ -7,7 +7,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../ai_tools/domain/repositories/ai_assistant_repository.dart';
+import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
 import '../../../ai_tools/presentation/controllers/summary_polish_controller.dart';
+import '../../../ai_tools/presentation/widgets/ai_access_guard.dart';
+import '../../../ai_tools/presentation/widgets/ai_bullet_suggestion_sheet.dart';
 import '../../../ai_tools/presentation/controllers/summary_polish_flow_coordinator.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../cv_preview/presentation/providers/pdf_export_provider.dart';
@@ -872,6 +876,50 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     }
   }
 
+  Future<void> _improveExperienceWithAi(ExperienceModel item) async {
+    if (!await ensureAiAccess(context, ref, redirectPath: '/home')) return;
+    if (!mounted) return;
+    try {
+      final suggestion = await runWithAiProgress(
+        context,
+        _selectedLanguage == 'en'
+            ? 'AI is rewriting your bullet points...'
+            : 'AI đang viết lại gạch đầu dòng...',
+        () => ref
+            .read(aiAssistantRepositoryProvider)
+            .improveBullets(
+              jobTitle: item.jobTitle,
+              company: item.company,
+              bullets: item.bulletPoints,
+              targetRole: _roleController.text.trim(),
+              language: _selectedLanguage,
+            ),
+      );
+      if (!mounted) return;
+      final chosen = await showAiBulletSuggestionSheet(
+        context,
+        original: item.bulletPoints,
+        suggestion: suggestion,
+      );
+      if (chosen == null || chosen.isEmpty || !mounted) return;
+      setState(() {
+        final index = _experiences.indexWhere((e) => e.id == item.id);
+        if (index >= 0) {
+          _experiences[index] = item.copyWith(bulletPoints: chosen);
+        }
+      });
+      _onFieldChanged();
+    } on AiWritingFailure catch (failure) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(describeAiFailure(failure)),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   void _deleteExperience(String id) {
     setState(() {
       _experiences.removeWhere((e) => e.id == id);
@@ -1619,6 +1667,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onAddExperience: () => _showAddExperienceDialog(),
                       onEditExperience: _showAddExperienceDialog,
                       onDeleteExperience: _deleteExperience,
+                      onImproveWithAi: _improveExperienceWithAi,
                       onUseStarterExperience: () {
                         final starters =
                             CvStarterTemplateService.getStarterExperiences(
