@@ -62,6 +62,12 @@ class _NavigationAuthRepository implements AuthRepository {
   bool get isConfigured => true;
 
   @override
+  Future<AuthUser> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) => throw UnimplementedError();
+
+  @override
   Future<void> requestPasswordReset(String email) => throw UnimplementedError();
 
   @override

@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../core/constants/auth_callback_constants.dart';
+import '../core/constants/auth_callback_parser.dart';
 import '../features/auth/presentation/screens/account_screen.dart';
 import '../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
@@ -19,11 +20,40 @@ import '../features/cv_editor/domain/models/cv_model.dart';
 import '../features/cv_preview/presentation/screens/cv_preview_screen.dart';
 
 String? redirectForAppUri(Uri uri) {
+  final callback = parseAuthCallback(uri);
+  final isAppRoute = _appRoutes.contains(uri.path);
+  if (!isAppRoute || AuthCallbackConstants.isMobileCallback(uri)) {
+    if (callback.hasError) {
+      return Uri(
+        path: '/forgot-password',
+        queryParameters: {'link_error': callback.errorCode ?? 'invalid'},
+      ).toString();
+    }
+    if (callback.isRecovery) return '/reset-password';
+  }
   if (AuthCallbackConstants.isMobileCallback(uri) || uri.path == '/') {
     return '/home';
   }
+  // Unknown paths such as `/access_token=...` produced by hash routing.
+  if (!isAppRoute && callback.isCallback) return '/home';
   return null;
 }
+
+const _appRoutes = {
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/account',
+  '/home',
+  '/editor',
+  '/preview',
+  '/ats-scorer',
+  '/ai-interview',
+  '/interview-practice',
+  '/community/post',
+  '/upgrade-pro',
+};
 
 /// Application Declarative Routing Configuration
 GoRouter createAppRouter({
@@ -51,7 +81,9 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/forgot-password',
       name: 'forgot-password',
-      builder: (context, state) => const ForgotPasswordScreen(),
+      builder: (context, state) => ForgotPasswordScreen(
+        linkError: state.uri.queryParameters['link_error'],
+      ),
     ),
     GoRoute(
       path: '/reset-password',

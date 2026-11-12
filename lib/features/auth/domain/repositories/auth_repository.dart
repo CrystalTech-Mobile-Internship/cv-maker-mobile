@@ -41,6 +41,12 @@ abstract interface class AuthRepository {
 
   Future<void> requestPasswordReset(String email);
 
+  /// Starts a recovery session from the code in the reset email.
+  Future<AuthUser> verifyRecoveryCode({
+    required String email,
+    required String code,
+  });
+
   Future<AuthUser> updatePassword(String password);
 
   Future<AuthUser> updateDisplayName(String displayName);

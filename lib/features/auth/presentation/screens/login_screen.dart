@@ -185,7 +185,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             OutlinedButton.icon(
                               onPressed: isLoading ? null : _continueAsGuest,
                               icon: const Icon(Icons.offline_bolt_outlined),
-                              label: const Text('Trải nghiệm Offline (Khách)'),
+                              label: const Text('Dùng thử không cần tài khoản'),
                             ),
                           ],
                         ),
@@ -286,8 +286,8 @@ class _CloudStatus extends StatelessWidget {
         Flexible(
           child: Text(
             isConfigured
-                ? 'Supabase Cloud: $backendLabel'
-                : 'Supabase Cloud: Chưa cấu hình — vẫn dùng được Offline',
+                ? 'Máy chủ: $backendLabel'
+                : 'Chưa kết nối máy chủ — vẫn dùng được khi không có mạng',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall,
           ),
