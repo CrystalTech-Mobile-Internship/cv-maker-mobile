@@ -2,6 +2,7 @@ import '../../../cv_editor/domain/models/cv_section_definition.dart';
 import '../../../cv_editor/domain/services/cv_item_order_service.dart';
 import '../../../cv_editor/domain/services/cv_quality_auto_fixer.dart';
 import '../../../cv_editor/domain/services/cv_quality_checker.dart';
+import '../../../billing/data/supabase_billing_repository.dart';
 import '../widgets/cv_item_reorder_sheet.dart';
 import '../widgets/cv_quality_sheet.dart';
 import 'package:flutter/foundation.dart';
@@ -416,6 +417,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                 context: context,
                 selectedTemplateId: _workingCv.templateId,
                 isEnglish: _isEnglish,
+                isPro: ref.read(isProProvider),
                 onSelectTemplate: (newId) {
                   _updateDocumentSettings(templateId: newId);
                 },

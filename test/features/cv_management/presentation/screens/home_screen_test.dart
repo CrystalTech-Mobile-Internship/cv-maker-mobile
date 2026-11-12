@@ -102,7 +102,8 @@ void main() {
     expect(find.text('Tạo hồ sơ CV mới'), findsOneWidget);
     expect(find.text('Harvard ATS'), findsOneWidget);
     expect(find.text('Minimalist Clean'), findsOneWidget);
-    expect(find.text('Creative Tech'), findsOneWidget);
+    // Pro designs are not offered to Free accounts.
+    expect(find.text('Creative Tech'), findsNothing);
     expect(find.text('Tiếng Việt'), findsOneWidget);
     expect(find.text('Điền hồ sơ mẫu sinh viên CNTT'), findsNothing);
     expect(find.text('VD: CV Flutter Software Engineer'), findsOneWidget);

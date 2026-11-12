@@ -2,21 +2,38 @@ import 'package:cv_maker_mobile/features/cv_editor/domain/models/cv_template.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('catalog offers varied free templates with stable unique ids', () {
+  test('catalog keeps six free templates and the rest for Pro', () {
     final free = CvTemplateCatalog.freeTemplates;
+    final all = CvTemplateCatalog.allTemplates;
 
-    expect(free.length, greaterThanOrEqualTo(14));
-    expect(free.map((item) => item.id).toSet().length, free.length);
+    expect(free, hasLength(6));
+    expect(free.every((item) => !item.isPremium), isTrue);
+    expect(
+      CvTemplateCatalog.premiumTemplates.every((t) => t.isPremium),
+      isTrue,
+    );
+    expect(all.map((item) => item.id).toSet().length, all.length);
     expect(free.where((item) => item.hasPhoto), isNotEmpty);
     expect(free.where((item) => !item.hasPhoto), isNotEmpty);
     expect(
-      free.map((item) => item.layout).toSet(),
+      all.map((item) => item.layout).toSet(),
       containsAll([
         CvTemplateLayout.classic,
         CvTemplateLayout.modern,
         CvTemplateLayout.sidebar,
         CvTemplateLayout.executive,
       ]),
+    );
+  });
+
+  test('only Pro accounts can pick every template', () {
+    expect(
+      CvTemplateCatalog.available(isPro: false),
+      CvTemplateCatalog.freeTemplates,
+    );
+    expect(
+      CvTemplateCatalog.available(isPro: true),
+      CvTemplateCatalog.allTemplates,
     );
   });
 }

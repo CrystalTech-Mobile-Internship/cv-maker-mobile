@@ -53,6 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       context,
       initialTemplate: initialTemplate,
       existingCvs: existingCvs,
+      isPro: ref.read(isProProvider),
     );
     if (request == null) return;
 
@@ -409,9 +410,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onDelete: _deleteCv,
           ),
           1 => TemplateCatalogView(
-            isPro:
-                user != null &&
-                (ref.watch(billingStatusProvider).valueOrNull?.isPro ?? false),
+            isPro: ref.watch(isProProvider),
             onUseTemplate: (template) =>
                 _createCv(initialTemplate: template.id),
             onPreviewTemplate: (template) {

@@ -10,8 +10,10 @@ class TemplateGallerySheet extends StatelessWidget {
     required this.selectedTemplateId,
     required this.isEnglish,
     required this.onSelectTemplate,
+    this.isPro = false,
   });
 
+  final bool isPro;
   final String selectedTemplateId;
   final bool isEnglish;
   final ValueChanged<String> onSelectTemplate;
@@ -21,6 +23,7 @@ class TemplateGallerySheet extends StatelessWidget {
     required String selectedTemplateId,
     required bool isEnglish,
     required ValueChanged<String> onSelectTemplate,
+    bool isPro = false,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -29,6 +32,7 @@ class TemplateGallerySheet extends StatelessWidget {
       builder: (ctx) => TemplateGallerySheet(
         selectedTemplateId: selectedTemplateId,
         isEnglish: isEnglish,
+        isPro: isPro,
         onSelectTemplate: (id) {
           onSelectTemplate(id);
           Navigator.of(ctx).pop();
@@ -44,7 +48,7 @@ class TemplateGallerySheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final templates = CvTemplateCatalog.freeTemplates;
+    final templates = CvTemplateCatalog.available(isPro: isPro);
 
     return Container(
       constraints: BoxConstraints(
