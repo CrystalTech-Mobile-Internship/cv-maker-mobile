@@ -17,6 +17,7 @@ import '../widgets/ai_tailor_review_sheet.dart';
 import '../widgets/cover_letter_sheet.dart';
 import '../widgets/job_posting_input.dart';
 import 'interview_practice_screen.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 /// Scores a saved CV against a pasted job description. Runs fully offline:
 /// keywords are extracted from the JD with [JdKeywordExtractor] and matched
@@ -192,6 +193,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
+        leading: homeFallbackLeading(context),
         title: const Text('Chấm điểm CV'),
         actions: const [AiQuotaChip(), SizedBox(width: 8)],
       ),

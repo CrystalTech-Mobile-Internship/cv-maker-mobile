@@ -28,6 +28,7 @@ import '../widgets/cv_preview_color_sheet.dart';
 import '../widgets/cv_page_fit_sheet.dart';
 import '../widgets/cv_jd_matcher_sheet.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 enum _PreviewMode { pdfA4, interactiveReorder }
 
@@ -382,10 +383,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.verified_rounded, size: 13, color: color),
-            const SizedBox(width: 4),
             Text(
-              'CV $pct%',
+              '$pct%',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -404,7 +403,14 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEnglish ? 'Preview' : 'Xem trước'),
+        leading: homeFallbackLeading(context),
+        titleSpacing: 0,
+        title: Text(
+          _isEnglish ? 'Preview' : 'Xem trước',
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.fade,
+        ),
         actions: [
           _buildAtsBadge(),
           // Template Gallery Picker
@@ -673,7 +679,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                         ? (_isEnglish ? 'Exporting...' : 'Đang xuất tệp...')
                         : (_isEnglish
                               ? 'Download (PDF / Word)'
-                              : 'Tải tệp (PDF / Word)'),
+                              : 'Tải PDF/Word'),
                   ),
                 ),
               ),

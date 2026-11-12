@@ -137,7 +137,7 @@ class _TemplateFilterBar extends StatelessWidget {
       (TemplateFilter.all, 'Tất cả'),
       (TemplateFilter.photo, 'Có ảnh'),
       (TemplateFilter.noPhoto, 'Không ảnh'),
-      (TemplateFilter.premium, 'Premium'),
+      (TemplateFilter.premium, 'Pro'),
     ];
     return Container(
       key: const Key('template-filter-row'),
@@ -229,12 +229,7 @@ class _TemplateCard extends StatelessWidget {
                         child: TemplateThumbnail(template: template),
                       ),
                     ),
-                    Positioned(
-                      top: 16,
-                      left: 16,
-                      child: _StatusBadge(template: template),
-                    ),
-                    if (template.isPremium)
+                    if (locked)
                       Positioned.fill(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
@@ -253,6 +248,8 @@ class _TemplateCard extends StatelessWidget {
                           ),
                         ),
                       ),
+                    if (template.isPremium)
+                      const Positioned(top: 16, left: 16, child: _ProBadge()),
                   ],
                 ),
               ),
@@ -272,13 +269,17 @@ class _TemplateCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      template.audience,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF64748B),
+                    SizedBox(
+                      height: 32,
+                      child: Text(
+                        template.audience,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                          height: 1.3,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 9),
@@ -289,12 +290,7 @@ class _TemplateCard extends StatelessWidget {
                           ? OutlinedButton(
                               onPressed: onTap,
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF9A3412),
-                                backgroundColor: const Color(0xFFFFF7ED),
-                                side: const BorderSide(
-                                  color: Color(0xFFEA580C),
-                                  width: 1.4,
-                                ),
+                                foregroundColor: AppTheme.brandIndigo,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 4,
                                 ),
@@ -365,42 +361,24 @@ class _TemplateCard extends StatelessWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.template});
-
-  final CvTemplate template;
+class _ProBadge extends StatelessWidget {
+  const _ProBadge();
 
   @override
   Widget build(BuildContext context) {
-    final label = template.isPremium
-        ? 'PREMIUM'
-        : template.isNew
-        ? 'MỚI'
-        : 'FREE';
-    final background = template.isPremium
-        ? const Color(0xFFFFF7D6)
-        : template.isNew
-        ? const Color(0xFFDCFCE7)
-        : const Color(0xFFEEF2FF);
-    final foreground = template.isPremium
-        ? const Color(0xFF92400E)
-        : template.isNew
-        ? const Color(0xFF166534)
-        : AppTheme.brandIndigo;
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: background,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: const [BoxShadow(color: Color(0x1A0F172A), blurRadius: 4)],
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
-      child: Text(
-        label,
+      child: const Text(
+        'Pro',
         style: TextStyle(
           fontSize: 10,
-          fontWeight: FontWeight.w900,
-          color: foreground,
+          fontWeight: FontWeight.w800,
+          color: AppTheme.primaryNavy,
         ),
       ),
     );

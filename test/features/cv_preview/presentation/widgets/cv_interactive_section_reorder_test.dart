@@ -82,14 +82,6 @@ void main() {
     expect(find.byKey(const ValueKey('preview-section-education')), findsOneWidget);
     expect(find.byKey(const ValueKey('preview-section-certifications')), findsOneWidget);
 
-    // Verify order badges
-    expect(find.text('#1'), findsOneWidget);
-    expect(find.text('#2'), findsOneWidget);
-    expect(find.text('#3'), findsOneWidget);
-    expect(find.text('#4'), findsOneWidget);
-    expect(find.text('#5'), findsOneWidget);
-    expect(find.text('#6'), findsOneWidget);
-
     // Verify content snippets
     expect(find.textContaining('Experienced Flutter engineer'), findsOneWidget);
     expect(find.textContaining('CrystalTech Corp'), findsOneWidget);

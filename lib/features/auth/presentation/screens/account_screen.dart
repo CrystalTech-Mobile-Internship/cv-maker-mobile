@@ -6,6 +6,7 @@ import '../../../../app/theme.dart';
 import '../../../cv_management/presentation/controllers/reusable_profile_provider.dart';
 import '../../../legal/presentation/legal_document_screen.dart';
 import '../providers/auth_providers.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key, this.embedded = false});
@@ -91,7 +92,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       );
       if (widget.embedded) return guestContent;
       return Scaffold(
-        appBar: AppBar(title: const Text('Tài khoản')),
+        appBar: AppBar(
+          leading: homeFallbackLeading(context),
+          title: const Text('Tài khoản'),
+        ),
         body: guestContent,
       );
     }
@@ -316,7 +320,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     }
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
-      appBar: AppBar(title: const Text('Tài khoản')),
+      appBar: AppBar(
+        leading: homeFallbackLeading(context),
+        title: const Text('Tài khoản'),
+      ),
       body: content,
     );
   }

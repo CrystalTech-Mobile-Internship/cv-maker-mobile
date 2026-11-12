@@ -33,6 +33,7 @@ import '../widgets/ats_action_verbs_sheet.dart';
 import '../widgets/editor_typography_toolbar.dart';
 import '../../domain/services/cv_completion_service.dart';
 import '../../../cv_management/presentation/widgets/cv_completion_sheet.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 class CvEditorScreen extends ConsumerStatefulWidget {
   const CvEditorScreen({super.key, this.initialCv});
@@ -1357,13 +1358,17 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
 
     return Scaffold(
       appBar: AppBar(
+        leading: homeFallbackLeading(context),
+        titleSpacing: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               widget.initialCv == null
-                  ? (isEn ? 'Create New Resume' : 'Tạo CV mới')
-                  : (isEn ? 'Edit Resume' : 'Chỉnh sửa CV'),
+                  ? (isEn ? 'New CV' : 'Tạo CV')
+                  : (isEn ? 'Edit' : 'Chỉnh sửa'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             Text(
               _syncStatusText,

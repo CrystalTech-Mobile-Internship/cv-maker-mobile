@@ -9,6 +9,7 @@ import '../../domain/models/ai_assistant_models.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 import '../controllers/interview_practice_controller.dart';
 import '../widgets/ai_access_guard.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 /// Arguments when opened from a screen that already knows the CV/JD.
 class InterviewPracticeArgs {
@@ -85,6 +86,7 @@ class _InterviewPracticeScreenState
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
+        leading: homeFallbackLeading(context),
         title: const Text('Luyện phỏng vấn'),
         actions: const [AiQuotaChip(), SizedBox(width: 8)],
       ),

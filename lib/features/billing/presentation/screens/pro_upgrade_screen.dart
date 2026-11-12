@@ -11,6 +11,7 @@ import '../../domain/billing_models.dart';
 import '../widgets/bank_transfer_box.dart';
 import '../widgets/billing_status_card.dart';
 import '../../../../core/constants/env_constants.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 class ProUpgradeScreen extends ConsumerStatefulWidget {
   const ProUpgradeScreen({super.key});
@@ -63,7 +64,10 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
     final authUser = ref.watch(currentAuthUserProvider);
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
-      appBar: AppBar(title: const Text('Nâng cấp Pro')),
+      appBar: AppBar(
+        leading: homeFallbackLeading(context),
+        title: const Text('Nâng cấp Pro'),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),

@@ -460,7 +460,7 @@ class EditorTypographyToolbar extends StatelessWidget {
                 avatar: const Icon(
                   Icons.swap_vert_rounded,
                   size: 16,
-                  color: AppTheme.brandIndigo,
+                  color: AppTheme.primarySlate,
                 ),
                 label: Text(
                   _isEn ? 'Reorder' : 'Sắp xếp mục',
@@ -470,8 +470,8 @@ class EditorTypographyToolbar extends StatelessWidget {
                   ),
                 ),
                 onPressed: onOpenSectionReorder,
-                backgroundColor: AppTheme.brandIndigo.withAlpha(15),
-                side: BorderSide(color: AppTheme.brandIndigo.withAlpha(50)),
+                backgroundColor: Colors.grey.shade100,
+                side: BorderSide(color: Colors.grey.shade300),
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
               ),
@@ -480,9 +480,9 @@ class EditorTypographyToolbar extends StatelessWidget {
             if (onOpenStarterSamples != null)
               ActionChip(
                 avatar: const Icon(
-                  Icons.lightbulb_rounded,
+                  Icons.lightbulb_outline_rounded,
                   size: 16,
-                  color: Colors.amber,
+                  color: AppTheme.primarySlate,
                 ),
                 label: Text(
                   _isEn ? 'Starter Samples' : 'Mẫu gợi ý',
@@ -492,8 +492,8 @@ class EditorTypographyToolbar extends StatelessWidget {
                   ),
                 ),
                 onPressed: onOpenStarterSamples,
-                backgroundColor: Colors.amber.shade50,
-                side: BorderSide(color: Colors.amber.shade200),
+                backgroundColor: Colors.grey.shade100,
+                side: BorderSide(color: Colors.grey.shade300),
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
               ),
@@ -505,7 +505,7 @@ class EditorTypographyToolbar extends StatelessWidget {
                 avatar: const Icon(
                   Icons.bolt_rounded,
                   size: 16,
-                  color: Colors.deepOrange,
+                  color: AppTheme.primarySlate,
                 ),
                 label: Text(
                   _isEn ? 'Action Verbs' : 'Động từ mạnh',
@@ -515,8 +515,8 @@ class EditorTypographyToolbar extends StatelessWidget {
                   ),
                 ),
                 onPressed: onOpenActionVerbs,
-                backgroundColor: Colors.deepOrange.withAlpha(15),
-                side: BorderSide(color: Colors.deepOrange.withAlpha(50)),
+                backgroundColor: Colors.grey.shade100,
+                side: BorderSide(color: Colors.grey.shade300),
                 visualDensity: VisualDensity.compact,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
               ),
@@ -527,7 +527,7 @@ class EditorTypographyToolbar extends StatelessWidget {
               avatar: const Icon(
                 Icons.format_size_rounded,
                 size: 16,
-                color: AppTheme.brandIndigo,
+                color: AppTheme.primarySlate,
               ),
               label: Text(
                 '$percent%',

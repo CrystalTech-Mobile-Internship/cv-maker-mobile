@@ -230,7 +230,7 @@ class _BrandHeader extends StatelessWidget {
           child: const Icon(
             Icons.description_rounded,
             size: 40,
-            color: AppTheme.primarySlate,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 20),

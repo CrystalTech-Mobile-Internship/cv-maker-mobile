@@ -85,28 +85,29 @@ class CvTemplatePicker extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? colorScheme.onPrimary.withValues(alpha: 0.16)
-                              : colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          isSelected ? 'ĐÃ CHỌN' : 'FREE',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
+                      if (isSelected || template.isPremium)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
                             color: isSelected
-                                ? colorScheme.onPrimary
-                                : colorScheme.onPrimaryContainer,
+                                ? colorScheme.onPrimary.withValues(alpha: 0.16)
+                                : colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            isSelected ? 'ĐÃ CHỌN' : 'Pro',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: isSelected
+                                  ? colorScheme.onPrimary
+                                  : colorScheme.onPrimaryContainer,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
