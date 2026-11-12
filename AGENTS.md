@@ -29,7 +29,7 @@ If code and documentation disagree, report the mismatch before expanding the imp
 - Use Riverpod for state management and GoRouter for navigation.
 - Pass CV identity explicitly; editor and preview flows must operate on a `cvId`.
 - Treat Supabase RLS as mandatory for every user-owned table.
-- Never place secret, service-role, database, or private AI keys in the mobile application or Git.
+- Never place secret, service-role, database, or private AI keys in the mobile application or Git. The root `.env` is bundled as a Flutter asset; server secrets belong in Supabase function secrets (see `.agents/skills/smart-cv-ai/SKILL.md`).
 - Preserve user data on network, authentication, synchronization, and PDF failures.
 - Do not represent placeholders or mocked behavior as completed functionality.
 - Adhere to detailed architectural rules in `.agents/rules/05_flutter_clean_architecture_and_layers.md`.
@@ -61,7 +61,9 @@ A change is complete only when:
 ## Git conventions
 
 - Work from `develop`; use `feature/<short-name>` for changes that span multiple files or days.
-- Keep commits focused and use Conventional Commits: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`.
+- Keep commits focused and use English Conventional Commits: `feat`, `fix`, `docs`, `test`, `refactor`, `chore`.
+- Commit with the repository's configured Git identity; do not add tool attribution, `Co-Authored-By` trailers, or schedule references (week/day numbers) to commit messages.
+- Merge feature branches into `develop` with `--no-ff`.
 - Never commit `.env`, generated build output, credentials, or production user data.
 - Do not overwrite or discard unrelated working-tree changes.
 

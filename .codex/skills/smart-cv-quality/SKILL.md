@@ -6,4 +6,3 @@ description: Reviews and validates Smart CV Maker changes for correctness, data 
 # Codex compatibility entrypoint
 
 Read and follow `../../../.agents/skills/smart-cv-quality/SKILL.md`. That file is the canonical skill; do not duplicate or override its instructions here.
-
