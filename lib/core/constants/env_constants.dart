@@ -98,6 +98,19 @@ class EnvConstants {
   static bool get recoveryCodeInEmail =>
       _value('AUTH_RECOVERY_CODE_IN_EMAIL').toLowerCase() == 'true';
 
+  /// Public bank account that receives Pro payments (not a secret).
+  static PaymentAccount? get paymentAccount {
+    final bankId = _value('PAYMENT_BANK_ID');
+    final number = _value('PAYMENT_ACCOUNT_NUMBER');
+    final name = _value('PAYMENT_ACCOUNT_NAME');
+    if (bankId.isEmpty || number.isEmpty || name.isEmpty) return null;
+    return PaymentAccount(
+      bankId: bankId,
+      accountNumber: number,
+      accountName: name,
+    );
+  }
+
   static String get supabaseUrl => activeSupabaseEnvironment?.url ?? '';
 
   static String get supabaseAnonKey => activeSupabaseEnvironment?.anonKey ?? '';
@@ -109,4 +122,17 @@ class EnvConstants {
   static bool get isSupabaseConfigured {
     return activeSupabaseEnvironment?.isConfigured ?? false;
   }
+}
+
+class PaymentAccount {
+  const PaymentAccount({
+    required this.bankId,
+    required this.accountNumber,
+    required this.accountName,
+  });
+
+  /// VietQR bank code, e.g. `VCB`, `MB`, `TCB`.
+  final String bankId;
+  final String accountNumber;
+  final String accountName;
 }
