@@ -56,6 +56,7 @@ create table if not exists public.cvs (
     check (font_size_scale between 0.5 and 2.0),
   summary text,
   personal_info jsonb not null default '{}'::jsonb,
+  layout_settings jsonb not null default '{}'::jsonb,
   is_public boolean not null default false,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
