@@ -2,6 +2,11 @@
 // credit cost for every AI capability exposed to the app.
 
 import type { ChatMessage, CompletionOptions } from "./openrouter.ts";
+import {
+  answerFeedback,
+  interviewQuestions,
+  tailorCv,
+} from "./career_actions.ts";
 
 export type Language = "vi" | "en";
 
@@ -486,4 +491,7 @@ export const actions: Record<string, ActionDefinition<any>> = {
   polish_summary: polishSummary,
   improve_bullets: improveBullets,
   cover_letter: coverLetter,
+  tailor_cv: tailorCv,
+  interview_questions: interviewQuestions,
+  answer_feedback: answerFeedback,
 };
