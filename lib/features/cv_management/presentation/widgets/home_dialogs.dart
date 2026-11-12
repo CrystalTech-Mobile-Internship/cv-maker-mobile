@@ -92,8 +92,7 @@ Future<void> showPremiumTemplateInfo(
             ),
             const SizedBox(height: 6),
             Text(
-              '${template.description}\nMẫu Premium và trợ lý AI sẽ được mở '
-              'ở giai đoạn thanh toán sau.',
+              '${template.description}\nMẫu này dành cho tài khoản Pro.',
               textAlign: TextAlign.center,
               style: const TextStyle(color: Color(0xFF64748B)),
             ),
