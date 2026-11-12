@@ -570,6 +570,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                 language: _workingCv.language,
                 onToggleVisibility: _toggleSectionVisibility,
                 onReorderItems: _reorderSectionItems,
+                contentCv: _workingCv,
                 onCheckQuality: _showQualityCheck,
                 onOrderChanged: (newOrder) {
                   _updateDocumentSettings(sectionOrder: newOrder);
