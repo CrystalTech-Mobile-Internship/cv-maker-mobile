@@ -81,7 +81,7 @@ npx supabase secrets set --env-file supabase/functions/.env
 npx supabase functions deploy cv-assistant
 ```
 
-Hoặc chạy `scripts/deploy_supabase.ps1 -ProjectRef <ref>` cho từng project (primary và secondary).
+Hoặc chạy một lệnh (sau `npx supabase login`): `./scripts/deploy_supabase.ps1 -Target secondary` — tự áp dụng migration qua Management API, đặt secret, deploy và kiểm tra.
 
 ## Kiểm thử
 
