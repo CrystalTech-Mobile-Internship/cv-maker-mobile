@@ -71,4 +71,47 @@ void main() {
     expect(restored.experiences.single.jobTitle, 'Flutter Developer');
     expect(restored.experiences.single.bulletPoints, ['Built mobile features']);
   });
+
+  test('preserves language, section order and hidden sections', () {
+    final now = DateTime.utc(2026, 11, 12);
+    final cv = CvModel.empty(id: 'cv-layout', now: now).copyWith(
+      language: 'en',
+      sectionOrder: const [
+        'skills',
+        'summary',
+        'experience',
+        'projects',
+        'education',
+        'certifications',
+      ],
+      hiddenSections: const ['certifications'],
+    );
+
+    final row = CvSupabaseMapper.toCvRow(cv, userId: 'user-1');
+    final restored = CvSupabaseMapper.fromCvRow({
+      ...row,
+      'id': '00000000-0000-4000-8000-000000000002',
+      'created_at': now.toIso8601String(),
+      'updated_at': now.toIso8601String(),
+    });
+
+    expect(restored.language, 'en');
+    expect(restored.sectionOrder.first, 'skills');
+    expect(restored.hiddenSections, ['certifications']);
+  });
+
+  test('falls back to defaults for rows without layout settings', () {
+    final restored = CvSupabaseMapper.fromCvRow({
+      'id': '00000000-0000-4000-8000-000000000003',
+      'updated_at': '2026-11-12T00:00:00Z',
+      'layout_settings': {
+        'section_order': ['unknown_section'],
+        'hidden_sections': ['bogus'],
+      },
+    });
+
+    expect(restored.language, 'vi');
+    expect(restored.sectionOrder, CvModel.defaultSectionOrder);
+    expect(restored.hiddenSections, isEmpty);
+  });
 }

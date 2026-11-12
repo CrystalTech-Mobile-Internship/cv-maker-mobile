@@ -1,4 +1,3 @@
-import 'package:cv_maker_mobile/features/cv_editor/domain/models/cv_section_definition.dart';
 import 'package:cv_maker_mobile/features/cv_editor/presentation/widgets/section_reorder_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -28,11 +28,16 @@ final class CvSupabaseMapper {
       grouped[sectionType] = items;
     }
 
+    final layout = _layoutFromMap(_map(row['layout_settings']));
+
     return CvModel(
       id: _string(row['id']) ?? 'remote-cv',
       userId: _string(row['user_id']),
       title: _string(row['title']) ?? 'CV chưa đặt tên',
       templateId: _string(row['template_id']) ?? 'harvard_ats',
+      language: layout.language,
+      sectionOrder: layout.sectionOrder,
+      hiddenSections: layout.hiddenSections,
       primaryColor: _string(row['primary_color']) ?? '#1E293B',
       fontSizeScale: _number(row['font_size_scale']) ?? 1,
       personalInfo: _personalInfoFromMap(_map(row['personal_info'])),
@@ -67,6 +72,7 @@ final class CvSupabaseMapper {
       'font_size_scale': cv.fontSizeScale,
       'summary': cv.summary,
       'personal_info': _personalInfoToMap(cv.personalInfo),
+      'layout_settings': layoutSettingsToMap(cv),
     };
 
     // Local drafts may use IDs such as "cv-student-001", which are not valid
@@ -105,6 +111,33 @@ final class CvSupabaseMapper {
             .toList(growable: false),
       ),
     ];
+  }
+
+  /// Presentation choices that are not part of a section payload. Without
+  /// them a cloud round trip would reset language, section order and hidden
+  /// sections on every other device.
+  static Map<String, dynamic> layoutSettingsToMap(CvModel cv) => {
+    'language': cv.language,
+    'section_order': cv.sectionOrder,
+    'hidden_sections': cv.hiddenSections,
+  };
+
+  static _CvLayout _layoutFromMap(Map<String, dynamic>? map) {
+    final data = map ?? const <String, dynamic>{};
+    final language = _string(data['language']);
+    final order = _strings(data['section_order'] ?? data['sectionOrder'])
+        .where(CvModel.defaultSectionOrder.contains)
+        .toSet()
+        .toList(growable: false);
+    final hidden = _strings(data['hidden_sections'] ?? data['hiddenSections'])
+        .where(CvModel.defaultSectionOrder.contains)
+        .toSet()
+        .toList(growable: false);
+    return _CvLayout(
+      language: language == 'en' ? 'en' : 'vi',
+      sectionOrder: order.isEmpty ? CvModel.defaultSectionOrder : order,
+      hiddenSections: hidden,
+    );
   }
 
   static PersonalInfoModel _personalInfoFromMap(Map<String, dynamic>? map) {
@@ -281,6 +314,18 @@ final class CvSupabaseMapper {
   }
 
   static final _epoch = DateTime.utc(1970);
+}
+
+final class _CvLayout {
+  const _CvLayout({
+    required this.language,
+    required this.sectionOrder,
+    required this.hiddenSections,
+  });
+
+  final String language;
+  final List<String> sectionOrder;
+  final List<String> hiddenSections;
 }
 
 final class CvSectionPayload {

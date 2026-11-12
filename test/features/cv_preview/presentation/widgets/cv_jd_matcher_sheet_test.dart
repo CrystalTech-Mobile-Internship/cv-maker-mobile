@@ -42,3 +42,4 @@ void main() {
     expect(addedSkill!.name, 'Firebase');
   });
 }
+
