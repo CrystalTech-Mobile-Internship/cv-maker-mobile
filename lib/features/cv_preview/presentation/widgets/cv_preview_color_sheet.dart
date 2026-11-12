@@ -78,7 +78,11 @@ class CvPreviewColorSheet extends StatelessWidget {
                   color: AppTheme.brandIndigo.withAlpha(20),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.palette_outlined, color: AppTheme.brandIndigo, size: 22),
+                child: const Icon(
+                  Icons.palette_outlined,
+                  color: AppTheme.brandIndigo,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -87,13 +91,19 @@ class CvPreviewColorSheet extends StatelessWidget {
                   children: [
                     Text(
                       isEnglish ? 'CV Color Theme' : 'Bảng màu chủ đạo CV',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       isEnglish
                           ? 'Select accent color for headers, dates, and bullets'
                           : 'Đổi màu tiêu đề, đường kẻ và điểm nhấn trên bản A4',
-                      style: const TextStyle(fontSize: 12, color: AppTheme.mutedText),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.mutedText,
+                      ),
                     ),
                   ],
                 ),
@@ -109,7 +119,8 @@ class CvPreviewColorSheet extends StatelessWidget {
             children: presets.map((preset) {
               final hex = preset['hex']!;
               final color = _parseHex(hex);
-              final isSelected = currentColor.toUpperCase() == hex.toUpperCase();
+              final isSelected =
+                  currentColor.toUpperCase() == hex.toUpperCase();
               final name = isEnglish ? preset['nameEn']! : preset['nameVi']!;
 
               return InkWell(
@@ -118,9 +129,14 @@ class CvPreviewColorSheet extends StatelessWidget {
                 onTap: () => onColorSelected(hex),
                 child: Container(
                   width: (MediaQuery.of(context).size.width - 64) / 2,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? color.withAlpha(20) : Colors.grey.shade50,
+                    color: isSelected
+                        ? color.withAlpha(20)
+                        : Colors.grey.shade50,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected ? color : Colors.grey.shade300,
@@ -137,10 +153,19 @@ class CvPreviewColorSheet extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withAlpha(30), blurRadius: 3),
+                            BoxShadow(
+                              color: Colors.black.withAlpha(30),
+                              blurRadius: 3,
+                            ),
                           ],
                         ),
-                        child: isSelected ? const Icon(Icons.check, size: 14, color: Colors.white) : null,
+                        child: isSelected
+                            ? const Icon(
+                                Icons.check,
+                                size: 14,
+                                color: Colors.white,
+                              )
+                            : null,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -148,7 +173,9 @@ class CvPreviewColorSheet extends StatelessWidget {
                           name,
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
                             color: isSelected ? color : AppTheme.primarySlate,
                           ),
                           maxLines: 1,
@@ -166,4 +193,3 @@ class CvPreviewColorSheet extends StatelessWidget {
     );
   }
 }
-

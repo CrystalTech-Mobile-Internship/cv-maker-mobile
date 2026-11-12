@@ -71,7 +71,11 @@ class ProjectsTab extends StatelessWidget {
                   key: const Key('use-starter-projects-btn'),
                   onPressed: onUseStarterProjects,
                   icon: const Icon(Icons.auto_awesome, size: 18),
-                  label: Text(isEn ? 'Use Starter Project ("Fill-in")' : 'Dùng mẫu dự án ("Điền mẫu nhanh")'),
+                  label: Text(
+                    isEn
+                        ? 'Use Starter Project ("Fill-in")'
+                        : 'Dùng mẫu dự án ("Điền mẫu nhanh")',
+                  ),
                 ),
               ],
             ],

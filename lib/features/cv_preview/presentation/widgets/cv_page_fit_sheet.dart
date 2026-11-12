@@ -141,7 +141,9 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                 children: [
                   // Fast Presets
                   Text(
-                    widget.isEnglish ? 'Recommended Presets' : 'Tùy chọn nhanh đề xuất',
+                    widget.isEnglish
+                        ? 'Recommended Presets'
+                        : 'Tùy chọn nhanh đề xuất',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -154,7 +156,9 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                   _buildPresetCard(
                     icon: Icons.electric_bolt_rounded,
                     iconColor: Colors.amber.shade800,
-                    title: widget.isEnglish ? 'Auto-Fit 1 Page A4 (85%)' : '⚡ Tự động căn 1 trang A4 (85%)',
+                    title: widget.isEnglish
+                        ? 'Auto-Fit 1 Page A4 (85%)'
+                        : '⚡ Tự động căn 1 trang A4 (85%)',
                     subtitle: widget.isEnglish
                         ? 'Best for freshers and candidates under 5 years experience'
                         : 'Lý tưởng cho Fresher và ứng viên dưới 5 năm kinh nghiệm',
@@ -167,7 +171,9 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                   _buildPresetCard(
                     icon: Icons.check_circle_outline_rounded,
                     iconColor: AppTheme.brandIndigo,
-                    title: widget.isEnglish ? 'Standard Format (100%)' : '📄 Định dạng tiêu chuẩn (100%)',
+                    title: widget.isEnglish
+                        ? 'Standard Format (100%)'
+                        : '📄 Định dạng tiêu chuẩn (100%)',
                     subtitle: widget.isEnglish
                         ? 'Standard font hierarchy for balanced A4 documents'
                         : 'Cỡ chữ chuẩn theo quy cách quốc tế cân đối trang',
@@ -180,7 +186,9 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                   _buildPresetCard(
                     icon: Icons.zoom_in_rounded,
                     iconColor: Colors.teal,
-                    title: widget.isEnglish ? 'Spacious / Large (115%)' : '🔍 Thoáng đãng / Dễ đọc (115%)',
+                    title: widget.isEnglish
+                        ? 'Spacious / Large (115%)'
+                        : '🔍 Thoáng đãng / Dễ đọc (115%)',
                     subtitle: widget.isEnglish
                         ? 'Ideal if you have concise content and want to fill white space'
                         : 'Phù hợp khi nội dung ngắn gọn muốn lấp đầy trang đẹp',
@@ -192,7 +200,9 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
 
                   // Manual Slider
                   Text(
-                    widget.isEnglish ? 'Manual Fine-Tuning' : 'Tinh chỉnh tỷ lệ thủ công',
+                    widget.isEnglish
+                        ? 'Manual Fine-Tuning'
+                        : 'Tinh chỉnh tỷ lệ thủ công',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -202,7 +212,10 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                   const SizedBox(height: 8),
 
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(14),
@@ -214,11 +227,18 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              widget.isEnglish ? 'Font Scale:' : 'Tỷ lệ cỡ chữ:',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              widget.isEnglish
+                                  ? 'Font Scale:'
+                                  : 'Tỷ lệ cỡ chữ:',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppTheme.brandIndigo.withAlpha(20),
                                 borderRadius: BorderRadius.circular(8),
@@ -356,4 +376,3 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
     );
   }
 }
-

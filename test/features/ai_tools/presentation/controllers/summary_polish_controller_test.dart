@@ -20,14 +20,13 @@ class _FakeAiWritingRepository implements AiWritingRepository {
     return result!;
   }
 }
+
 class _DeferredAiWritingRepository implements AiWritingRepository {
   final completer = Completer<SummaryPolishResult>();
   int calls = 0;
 
   @override
-  Future<SummaryPolishResult> polishSummary(
-    SummaryPolishRequest request,
-  ) {
+  Future<SummaryPolishResult> polishSummary(SummaryPolishRequest request) {
     calls++;
     return completer.future;
   }
@@ -100,7 +99,8 @@ void main() {
 
     repository.completer.complete(
       const SummaryPolishResult(
-        suggestedSummary: 'Một kết quả duy nhất được chia sẻ cho cả hai lời gọi.',
+        suggestedSummary:
+            'Một kết quả duy nhất được chia sẻ cho cả hai lời gọi.',
         provider: 'Gemini',
       ),
     );

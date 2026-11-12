@@ -98,7 +98,11 @@ class SkillsTab extends StatelessWidget {
                   key: const Key('use-starter-skills-btn'),
                   onPressed: onUseStarterSkills,
                   icon: const Icon(Icons.playlist_add_check_rounded, size: 18),
-                  label: Text(_isEn ? 'Use Starter Skills ("Fill-in")' : 'Dùng bộ kỹ năng mẫu ("Điền mẫu nhanh")'),
+                  label: Text(
+                    _isEn
+                        ? 'Use Starter Skills ("Fill-in")'
+                        : 'Dùng bộ kỹ năng mẫu ("Điền mẫu nhanh")',
+                  ),
                 ),
               ],
             ],
@@ -128,7 +132,11 @@ class SkillsTab extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.tips_and_updates_outlined, size: 20, color: AppTheme.brandIndigo),
+              const Icon(
+                Icons.tips_and_updates_outlined,
+                size: 20,
+                color: AppTheme.brandIndigo,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(

@@ -1259,7 +1259,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     context.push('/preview', extra: _buildCvModel());
   }
 
-    Widget _buildCompletenessBadge(bool isEn) {
+  Widget _buildCompletenessBadge(bool isEn) {
     final cv = _buildCvModel();
     final report = CvCompletionService.evaluate(cv);
     final pct = report.percentage;
@@ -1504,22 +1504,37 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       context: context,
                       language: _selectedLanguage,
                       onInsertVerb: (verb) {
-                        final controller = _tabController.index == 0 ? _summaryController : null;
+                        final controller = _tabController.index == 0
+                            ? _summaryController
+                            : null;
                         if (controller != null) {
                           final curText = controller.text;
                           final sel = controller.selection;
                           final pos = sel.isValid ? sel.start : curText.length;
-                          final prefix = (pos > 0 && !curText.endsWith('\n') && !curText.endsWith(' ')) ? ' ' : '';
+                          final prefix =
+                              (pos > 0 &&
+                                  !curText.endsWith('\n') &&
+                                  !curText.endsWith(' '))
+                              ? ' '
+                              : '';
                           controller.value = TextEditingValue(
-                            text: curText.replaceRange(pos, pos, '$prefix$verb '),
-                            selection: TextSelection.collapsed(offset: pos + prefix.length + verb.length + 1),
+                            text: curText.replaceRange(
+                              pos,
+                              pos,
+                              '$prefix$verb ',
+                            ),
+                            selection: TextSelection.collapsed(
+                              offset: pos + prefix.length + verb.length + 1,
+                            ),
                           );
                           _onFieldChanged();
                         }
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              _isEn ? 'Inserted action verb "$verb".' : 'Đã chèn từ khóa hành động "$verb".',
+                              _isEn
+                                  ? 'Inserted action verb "$verb".'
+                                  : 'Đã chèn từ khóa hành động "$verb".',
                             ),
                             behavior: SnackBarBehavior.floating,
                           ),
@@ -1527,7 +1542,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       },
                     );
                   },
-                  textController: _tabController.index == 0 ? _summaryController : null,
+                  textController: _tabController.index == 0
+                      ? _summaryController
+                      : null,
                 ),
               ),
 
@@ -1576,13 +1593,18 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onEditEducation: _showAddEducationDialog,
                       onDeleteEducation: _deleteEducation,
                       onUseStarterEducation: () {
-                        final starters = CvStarterTemplateService.getStarterEducation(_selectedLanguage);
+                        final starters =
+                            CvStarterTemplateService.getStarterEducation(
+                              _selectedLanguage,
+                            );
                         setState(() => _educations.addAll(starters));
                         _onFieldChanged();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              _isEn ? 'Added starter education sample.' : 'Đã thêm mẫu học vấn.',
+                              _isEn
+                                  ? 'Added starter education sample.'
+                                  : 'Đã thêm mẫu học vấn.',
                             ),
                             behavior: SnackBarBehavior.floating,
                           ),
@@ -1598,13 +1620,18 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onEditExperience: _showAddExperienceDialog,
                       onDeleteExperience: _deleteExperience,
                       onUseStarterExperience: () {
-                        final starters = CvStarterTemplateService.getStarterExperiences(_selectedLanguage);
+                        final starters =
+                            CvStarterTemplateService.getStarterExperiences(
+                              _selectedLanguage,
+                            );
                         setState(() => _experiences.addAll(starters));
                         _onFieldChanged();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              _isEn ? 'Added starter experience sample.' : 'Đã thêm mẫu kinh nghiệm.',
+                              _isEn
+                                  ? 'Added starter experience sample.'
+                                  : 'Đã thêm mẫu kinh nghiệm.',
                             ),
                             behavior: SnackBarBehavior.floating,
                           ),
@@ -1634,13 +1661,18 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onEditSkill: _showAddSkillDialog,
                       onDeleteSkill: _deleteSkill,
                       onUseStarterSkills: () {
-                        final starters = CvStarterTemplateService.getStarterSkills(_selectedLanguage);
+                        final starters =
+                            CvStarterTemplateService.getStarterSkills(
+                              _selectedLanguage,
+                            );
                         setState(() => _skills.addAll(starters));
                         _onFieldChanged();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              _isEn ? 'Added starter skills sample.' : 'Đã thêm bộ kỹ năng mẫu.',
+                              _isEn
+                                  ? 'Added starter skills sample.'
+                                  : 'Đã thêm bộ kỹ năng mẫu.',
                             ),
                             behavior: SnackBarBehavior.floating,
                           ),
@@ -1654,13 +1686,18 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       onEdit: _showProjectDialog,
                       onDelete: _deleteProject,
                       onUseStarterProjects: () {
-                        final starters = CvStarterTemplateService.getStarterProjects(_selectedLanguage);
+                        final starters =
+                            CvStarterTemplateService.getStarterProjects(
+                              _selectedLanguage,
+                            );
                         setState(() => _projects.addAll(starters));
                         _onFieldChanged();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              _isEn ? 'Added starter project sample.' : 'Đã thêm mẫu dự án.',
+                              _isEn
+                                  ? 'Added starter project sample.'
+                                  : 'Đã thêm mẫu dự án.',
                             ),
                             behavior: SnackBarBehavior.floating,
                           ),

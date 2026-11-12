@@ -79,7 +79,9 @@ class _SkillBankSheetState extends State<SkillBankSheet> {
     if (_selectedDomainId == 'all') {
       displayedSkills = allGroups.expand((g) => g.skills).toList();
     } else {
-      displayedSkills = CvSkillCatalogService.findSuggestionsByDomain(_selectedDomainId);
+      displayedSkills = CvSkillCatalogService.findSuggestionsByDomain(
+        _selectedDomainId,
+      );
     }
 
     final filteredSkills = displayedSkills.where((item) {
@@ -134,7 +136,9 @@ class _SkillBankSheetState extends State<SkillBankSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _isEn ? 'Skill Bank & Suggestions' : 'Thư viện kỹ năng gợi ý',
+                        _isEn
+                            ? 'Skill Bank & Suggestions'
+                            : 'Thư viện kỹ năng gợi ý',
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -169,7 +173,10 @@ class _SkillBankSheetState extends State<SkillBankSheet> {
                 prefixIcon: const Icon(Icons.search, size: 20),
                 filled: true,
                 fillColor: const Color(0xFFF8FAFC),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -231,8 +238,12 @@ class _SkillBankSheetState extends State<SkillBankSheet> {
                             item.name,
                             style: TextStyle(
                               fontSize: 13,
-                              fontWeight: added ? FontWeight.bold : FontWeight.w500,
-                              color: added ? AppTheme.brandIndigo : Colors.black87,
+                              fontWeight: added
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              color: added
+                                  ? AppTheme.brandIndigo
+                                  : Colors.black87,
                             ),
                           ),
                           avatar: added

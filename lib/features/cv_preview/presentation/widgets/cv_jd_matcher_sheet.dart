@@ -60,7 +60,8 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
       proficiency: 80,
     );
 
-    final updatedSkills = List<SkillModel>.from(_currentCv.skills)..add(newSkill);
+    final updatedSkills = List<SkillModel>.from(_currentCv.skills)
+      ..add(newSkill);
     setState(() {
       _currentCv = _currentCv.copyWith(skills: updatedSkills);
     });
@@ -190,7 +191,9 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                       preset.title(widget.isEnglish ? 'en' : 'vi'),
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
                         color: isSelected ? Colors.white : Colors.black87,
                       ),
                     ),
@@ -198,7 +201,8 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                     selectedColor: AppTheme.brandIndigo,
                     backgroundColor: Colors.grey.shade100,
                     side: BorderSide.none,
-                    onSelected: (_) => setState(() => _selectedPresetId = preset.id),
+                    onSelected: (_) =>
+                        setState(() => _selectedPresetId = preset.id),
                   ),
                 );
               }).toList(),
@@ -249,10 +253,16 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                             children: [
                               Text(
                                 score >= 80
-                                    ? (widget.isEnglish ? 'Excellent Match!' : 'Độ tương thích xuất sắc!')
+                                    ? (widget.isEnglish
+                                          ? 'Excellent Match!'
+                                          : 'Độ tương thích xuất sắc!')
                                     : (score >= 50
-                                        ? (widget.isEnglish ? 'Good Match' : 'Độ tương thích khá tốt')
-                                        : (widget.isEnglish ? 'Needs Keywords' : 'Cần bổ sung thêm từ khóa')),
+                                          ? (widget.isEnglish
+                                                ? 'Good Match'
+                                                : 'Độ tương thích khá tốt')
+                                          : (widget.isEnglish
+                                                ? 'Needs Keywords'
+                                                : 'Cần bổ sung thêm từ khóa')),
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -282,7 +292,11 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                   if (report.missingKeywords.isNotEmpty) ...[
                     Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded, size: 18, color: Colors.amber),
+                        const Icon(
+                          Icons.warning_amber_rounded,
+                          size: 18,
+                          color: Colors.amber,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           widget.isEnglish
@@ -301,7 +315,10 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                       widget.isEnglish
                           ? 'Tap "+ Add" to include a missing keyword into your skills:'
                           : 'Chạm "+ Thêm" để đưa ngay từ khóa còn thiếu vào mục Kỹ năng:',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Wrap(
@@ -324,7 +341,9 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                             ),
                           ),
                           backgroundColor: Colors.deepOrange.withAlpha(12),
-                          side: BorderSide(color: Colors.deepOrange.withAlpha(40)),
+                          side: BorderSide(
+                            color: Colors.deepOrange.withAlpha(40),
+                          ),
                           onPressed: () => _handleAddMissingKeyword(kw),
                         );
                       }).toList(),
@@ -336,7 +355,11 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                   if (report.matchedKeywords.isNotEmpty) ...[
                     Row(
                       children: [
-                        const Icon(Icons.check_circle_rounded, size: 18, color: Color(0xFF15803D)),
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          size: 18,
+                          color: Color(0xFF15803D),
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           widget.isEnglish

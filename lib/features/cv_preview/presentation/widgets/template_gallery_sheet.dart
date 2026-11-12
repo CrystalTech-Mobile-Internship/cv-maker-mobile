@@ -80,7 +80,11 @@ class TemplateGallerySheet extends StatelessWidget {
                     color: AppTheme.brandIndigo.withAlpha(20),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.style_outlined, color: AppTheme.brandIndigo, size: 22),
+                  child: const Icon(
+                    Icons.style_outlined,
+                    color: AppTheme.brandIndigo,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -88,14 +92,22 @@ class TemplateGallerySheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isEnglish ? 'Choose CV Template' : 'Chọn mẫu giao diện CV',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        isEnglish
+                            ? 'Choose CV Template'
+                            : 'Chọn mẫu giao diện CV',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         isEnglish
                             ? '${templates.length} professional ATS-compatible styles'
                             : '${templates.length} mẫu chuẩn định dạng quốc tế',
-                        style: const TextStyle(fontSize: 12, color: AppTheme.mutedText),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.mutedText,
+                        ),
                       ),
                     ],
                   ),
@@ -127,7 +139,9 @@ class TemplateGallerySheet extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isSelected ? accentColor.withAlpha(15) : Colors.grey.shade50,
+                      color: isSelected
+                          ? accentColor.withAlpha(15)
+                          : Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected ? accentColor : Colors.grey.shade300,
@@ -159,18 +173,30 @@ class TemplateGallerySheet extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
-                                      color: isSelected ? accentColor : AppTheme.primarySlate,
+                                      color: isSelected
+                                          ? accentColor
+                                          : AppTheme.primarySlate,
                                     ),
                                   ),
                                   if (t.hasPhoto) ...[
                                     const SizedBox(width: 8),
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: Colors.blue.shade50,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: const Text('Ảnh', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
+                                      child: const Text(
+                                        'Ảnh',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ],
@@ -178,12 +204,19 @@ class TemplateGallerySheet extends StatelessWidget {
                               const SizedBox(height: 3),
                               Text(
                                 t.audience,
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.mutedText),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.mutedText,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 t.description,
-                                style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                                style: TextStyle(
+                                  fontSize: 11.5,
+                                  color: Colors.grey.shade600,
+                                ),
                               ),
                             ],
                           ),
@@ -197,7 +230,11 @@ class TemplateGallerySheet extends StatelessWidget {
                               color: accentColor,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.check, size: 16, color: Colors.white),
+                            child: const Icon(
+                              Icons.check,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                           ),
                       ],
                     ),

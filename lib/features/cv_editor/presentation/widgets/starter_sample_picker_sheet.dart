@@ -90,7 +90,10 @@ class StarterSamplePickerSheet extends StatelessWidget {
               ),
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 6,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -291,11 +294,17 @@ class StarterSamplePickerSheet extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
+                          const Text(
+                            '• ',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           Expanded(
                             child: Text(
                               bullet,
-                              style: TextStyle(fontSize: 12.5, color: Colors.grey.shade800),
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                color: Colors.grey.shade800,
+                              ),
                             ),
                           ),
                         ],
@@ -369,17 +378,24 @@ class StarterSamplePickerSheet extends StatelessWidget {
                     children: [
                       for (final tech in proj.technologies)
                         Chip(
-                          label: Text(tech, style: const TextStyle(fontSize: 11)),
+                          label: Text(
+                            tech,
+                            style: const TextStyle(fontSize: 11),
+                          ),
                           visualDensity: VisualDensity.compact,
                           padding: EdgeInsets.zero,
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                         ),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Text(
                     proj.description,
-                    style: TextStyle(fontSize: 12.5, color: Colors.grey.shade800),
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.grey.shade800,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Align(
@@ -454,16 +470,16 @@ class StarterSamplePickerSheet extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    _isEn
-                        ? 'Added starter skills!'
-                        : 'Đã thêm bộ kỹ năng mẫu!',
+                    _isEn ? 'Added starter skills!' : 'Đã thêm bộ kỹ năng mẫu!',
                   ),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
             },
             icon: const Icon(Icons.add_rounded),
-            label: Text(_isEn ? 'Insert All Skills' : 'Chèn tất cả kỹ năng mẫu'),
+            label: Text(
+              _isEn ? 'Insert All Skills' : 'Chèn tất cả kỹ năng mẫu',
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.brandIndigo,
               foregroundColor: Colors.white,
@@ -480,7 +496,9 @@ class StarterSamplePickerSheet extends StatelessWidget {
 
   Widget _buildEducationTab(BuildContext context) {
     final eduSamples = CvStarterTemplateService.getStarterEducation(language);
-    final certSamples = CvStarterTemplateService.getStarterCertifications(language);
+    final certSamples = CvStarterTemplateService.getStarterCertifications(
+      language,
+    );
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -508,7 +526,10 @@ class StarterSamplePickerSheet extends StatelessWidget {
                   ),
                   Text(
                     '${edu.degree} • GPA ${edu.gpa}',
-                    style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700),
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.grey.shade700,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Align(
@@ -564,7 +585,10 @@ class StarterSamplePickerSheet extends StatelessWidget {
                   ),
                   Text(
                     'Điểm: ${cert.score}',
-                    style: TextStyle(fontSize: 12.5, color: Colors.grey.shade700),
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.grey.shade700,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Align(

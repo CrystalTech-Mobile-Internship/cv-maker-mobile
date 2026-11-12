@@ -138,11 +138,13 @@ class CvModel {
         json['certifications'],
         CertificationModel.fromJson,
       ),
-      sectionOrder: (json['sectionOrder'] as List<dynamic>?)
+      sectionOrder:
+          (json['sectionOrder'] as List<dynamic>?)
               ?.map((item) => item.toString())
               .toList() ??
           defaultSectionOrder,
-      hiddenSections: (json['hiddenSections'] as List<dynamic>?)
+      hiddenSections:
+          (json['hiddenSections'] as List<dynamic>?)
               ?.map((item) => item.toString())
               .toList() ??
           const [],

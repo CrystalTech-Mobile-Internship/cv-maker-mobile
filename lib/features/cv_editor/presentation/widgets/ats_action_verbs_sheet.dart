@@ -25,10 +25,8 @@ class AtsActionVerbsSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => AtsActionVerbsSheet(
-        language: language,
-        onInsertVerb: onInsertVerb,
-      ),
+      builder: (ctx) =>
+          AtsActionVerbsSheet(language: language, onInsertVerb: onInsertVerb),
     );
   }
 
@@ -46,7 +44,11 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_isEn ? 'Copied $label to clipboard' : 'Đã sao chép $label vào bộ nhớ tạm'),
+        content: Text(
+          _isEn
+              ? 'Copied $label to clipboard'
+              : 'Đã sao chép $label vào bộ nhớ tạm',
+        ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
@@ -111,7 +113,9 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _isEn ? 'ATS Action Verbs & Formulas' : 'Ngân hàng từ khóa hành động ATS',
+                        _isEn
+                            ? 'ATS Action Verbs & Formulas'
+                            : 'Ngân hàng từ khóa hành động ATS',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -142,11 +146,16 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: TextField(
               decoration: InputDecoration(
-                hintText: _isEn ? 'Search action verbs...' : 'Tìm từ khóa hành động...',
+                hintText: _isEn
+                    ? 'Search action verbs...'
+                    : 'Tìm từ khóa hành động...',
                 prefixIcon: const Icon(Icons.search, size: 20),
                 filled: true,
                 fillColor: const Color(0xFFF8FAFC),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -168,13 +177,25 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
               children: [
                 _buildCategoryChip('all', _isEn ? 'All Verbs' : 'Tất cả'),
                 const SizedBox(width: 6),
-                _buildCategoryChip('engineering', _isEn ? 'Engineering' : 'Kỹ thuật / Code'),
+                _buildCategoryChip(
+                  'engineering',
+                  _isEn ? 'Engineering' : 'Kỹ thuật / Code',
+                ),
                 const SizedBox(width: 6),
-                _buildCategoryChip('optimization', _isEn ? 'Optimization' : 'Tối ưu / Hiệu năng'),
+                _buildCategoryChip(
+                  'optimization',
+                  _isEn ? 'Optimization' : 'Tối ưu / Hiệu năng',
+                ),
                 const SizedBox(width: 6),
-                _buildCategoryChip('leadership', _isEn ? 'Leadership' : 'Lãnh đạo / Điều phối'),
+                _buildCategoryChip(
+                  'leadership',
+                  _isEn ? 'Leadership' : 'Lãnh đạo / Điều phối',
+                ),
                 const SizedBox(width: 6),
-                _buildCategoryChip('analysis', _isEn ? 'Analysis' : 'Phân tích / Đánh giá'),
+                _buildCategoryChip(
+                  'analysis',
+                  _isEn ? 'Analysis' : 'Phân tích / Đánh giá',
+                ),
               ],
             ),
           ),
@@ -186,12 +207,17 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
             child: filtered.isEmpty
                 ? Center(
                     child: Text(
-                      _isEn ? 'No verbs match your search' : 'Không có từ khóa phù hợp',
+                      _isEn
+                          ? 'No verbs match your search'
+                          : 'Không có từ khóa phù hợp',
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     itemCount: filtered.length,
                     itemBuilder: (ctx, i) {
                       final item = filtered[i];
@@ -246,7 +272,9 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                                       key: Key('insert-verb-${item.verbVi}'),
                                       style: FilledButton.styleFrom(
                                         visualDensity: VisualDensity.compact,
-                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                        ),
                                       ),
                                       onPressed: () {
                                         widget.onInsertVerb!(verbText);
@@ -264,7 +292,9 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF8FAFC),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  border: Border.all(
+                                    color: const Color(0xFFE2E8F0),
+                                  ),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,7 +308,9 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          _isEn ? 'Example (Formula XYZ):' : 'Ví dụ chuẩn công thức XYZ:',
+                                          _isEn
+                                              ? 'Example (Formula XYZ):'
+                                              : 'Ví dụ chuẩn công thức XYZ:',
                                           style: const TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,
@@ -287,14 +319,26 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                                         ),
                                         const Spacer(),
                                         InkWell(
-                                          onTap: () => _copyToClipboard(exampleText, _isEn ? 'Example' : 'Ví dụ'),
-                                          borderRadius: BorderRadius.circular(4),
+                                          onTap: () => _copyToClipboard(
+                                            exampleText,
+                                            _isEn ? 'Example' : 'Ví dụ',
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                           child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 4,
+                                              vertical: 2,
+                                            ),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                const Icon(Icons.copy_rounded, size: 12, color: Colors.grey),
+                                                const Icon(
+                                                  Icons.copy_rounded,
+                                                  size: 12,
+                                                  color: Colors.grey,
+                                                ),
                                                 const SizedBox(width: 3),
                                                 Text(
                                                   _isEn ? 'Copy' : 'Sao chép',
@@ -352,4 +396,3 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
     );
   }
 }
-

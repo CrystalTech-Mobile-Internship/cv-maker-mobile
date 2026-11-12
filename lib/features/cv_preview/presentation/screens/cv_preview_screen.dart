@@ -23,10 +23,7 @@ import '../widgets/cv_page_fit_sheet.dart';
 import '../widgets/cv_jd_matcher_sheet.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 
-enum _PreviewMode {
-  pdfA4,
-  interactiveReorder,
-}
+enum _PreviewMode { pdfA4, interactiveReorder }
 
 class CvPreviewScreen extends ConsumerStatefulWidget {
   const CvPreviewScreen({super.key, this.cv});
@@ -137,8 +134,12 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
     _updateDocumentSettings(hiddenSections: currentHidden);
     _showMessage(
       currentHidden.contains(sectionKey)
-          ? (_isEnglish ? 'Section hidden from PDF/Word export.' : 'Đã ẩn mục khỏi bản in PDF/Word.')
-          : (_isEnglish ? 'Section restored to PDF/Word export.' : 'Đã hiện lại mục trên bản in.'),
+          ? (_isEnglish
+                ? 'Section hidden from PDF/Word export.'
+                : 'Đã ẩn mục khỏi bản in PDF/Word.')
+          : (_isEnglish
+                ? 'Section restored to PDF/Word export.'
+                : 'Đã hiện lại mục trên bản in.'),
     );
   }
 
@@ -291,7 +292,9 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
           // ATS Job Description Matcher
           IconButton(
             key: const Key('preview-jd-matcher-btn'),
-            tooltip: _isEnglish ? 'Match with Job Description' : 'So khớp JD tuyển dụng',
+            tooltip: _isEnglish
+                ? 'Match with Job Description'
+                : 'So khớp JD tuyển dụng',
             icon: const Icon(Icons.document_scanner_outlined),
             onPressed: () {
               CvJdMatcherSheet.show(
@@ -299,7 +302,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                 cv: _previewCv,
                 isEnglish: _isEnglish,
                 onAddMissingSkill: (newSkill) {
-                  final updatedSkills = List<SkillModel>.from(_workingCv.skills)..add(newSkill);
+                  final updatedSkills = List<SkillModel>.from(_workingCv.skills)
+                    ..add(newSkill);
                   final updated = _workingCv.copyWith(skills: updatedSkills);
                   setState(() {
                     _workingCv = updated;
@@ -314,13 +318,21 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
           IconButton(
             key: const Key('preview-bw-filter-btn'),
             tooltip: _isEnglish
-                ? (_isGrayscaleSimulation ? 'Disable B&W filter' : 'Simulate B&W printing')
-                : (_isGrayscaleSimulation ? 'Tắt bộ lọc đen trắng' : 'Giả lập in ấn đen-trắng'),
+                ? (_isGrayscaleSimulation
+                      ? 'Disable B&W filter'
+                      : 'Simulate B&W printing')
+                : (_isGrayscaleSimulation
+                      ? 'Tắt bộ lọc đen trắng'
+                      : 'Giả lập in ấn đen-trắng'),
             icon: Icon(
-              _isGrayscaleSimulation ? Icons.filter_b_and_w_rounded : Icons.filter_b_and_w_outlined,
+              _isGrayscaleSimulation
+                  ? Icons.filter_b_and_w_rounded
+                  : Icons.filter_b_and_w_outlined,
               color: _isGrayscaleSimulation ? AppTheme.brandIndigo : null,
             ),
-            onPressed: () => setState(() => _isGrayscaleSimulation = !_isGrayscaleSimulation),
+            onPressed: () => setState(
+              () => _isGrayscaleSimulation = !_isGrayscaleSimulation,
+            ),
           ),
           // Page Fit & Layout Optimizer (1-Page Auto-fit)
           IconButton(
@@ -415,12 +427,16 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                   ButtonSegment(
                     value: _PreviewMode.pdfA4,
                     icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
-                    label: Text(_isEnglish ? 'A4 Paper (PDF)' : 'Trang A4 (PDF)'),
+                    label: Text(
+                      _isEnglish ? 'A4 Paper (PDF)' : 'Trang A4 (PDF)',
+                    ),
                   ),
                   ButtonSegment(
                     value: _PreviewMode.interactiveReorder,
                     icon: const Icon(Icons.drag_indicator_rounded, size: 16),
-                    label: Text(_isEnglish ? 'Drag & Drop Layout' : 'Bố cục kéo thả'),
+                    label: Text(
+                      _isEnglish ? 'Drag & Drop Layout' : 'Bố cục kéo thả',
+                    ),
                   ),
                 ],
                 selected: {_mode},
@@ -459,10 +475,26 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
               child: _isGrayscaleSimulation
                   ? ColorFiltered(
                       colorFilter: const ColorFilter.matrix(<double>[
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0.2126, 0.7152, 0.0722, 0, 0,
-                        0,      0,      0,      1, 0,
+                        0.2126,
+                        0.7152,
+                        0.0722,
+                        0,
+                        0,
+                        0.2126,
+                        0.7152,
+                        0.0722,
+                        0,
+                        0,
+                        0.2126,
+                        0.7152,
+                        0.0722,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
                       ]),
                       child: A4PdfPreview(
                         pdfBytes: _pdfBytes,
@@ -500,7 +532,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                         : 'Đã khôi phục bố cục chuẩn ATS mặc định.',
                   );
                 },
-                onSwitchToPdfView: () => setState(() => _mode = _PreviewMode.pdfA4),
+                onSwitchToPdfView: () =>
+                    setState(() => _mode = _PreviewMode.pdfA4),
                 onEditSection: (sectionKey) {
                   context.push('/editor', extra: _workingCv);
                 },
