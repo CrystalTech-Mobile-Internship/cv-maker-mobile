@@ -19,6 +19,9 @@ Widget → Riverpod controller → AiAssistantRepository
 | `improve_bullets` | Tab Kinh nghiệm → "AI viết lại gạch đầu dòng" | 1 | Gạch đầu dòng mới + gợi ý |
 | `polish_summary` | Tab Thông tin → nút AI của Tóm tắt | 1 | Tóm tắt mới |
 | `cover_letter` | Chấm điểm ATS → "AI viết thư xin việc" | 2 | Thư xin việc |
+| `tailor_cv` | Chấm điểm ATS → "AI tối ưu CV theo JD" | 3 | Bản CV mới đã tối ưu (CV gốc giữ nguyên) |
+| `interview_questions` | Luyện phỏng vấn (`/interview-practice`) | 1 | 6 câu hỏi dựa trên CV/JD |
+| `answer_feedback` | Luyện phỏng vấn → "Nhận xét" | 1 | Điểm, điểm mạnh, cần cải thiện, câu trả lời mẫu |
 | `quota` | — | 0 | Hạn mức hiện tại |
 
 Kết quả AI luôn là **gợi ý**: người dùng xem lại/chỉnh sửa trước khi lưu. Khi AI lỗi, lượt đã trừ được hoàn lại; nhập CV tự động chuyển sang bộ bóc tách trên máy.
@@ -28,7 +31,18 @@ Kết quả AI luôn là **gợi ý**: người dùng xem lại/chỉnh sửa tr
 - Khách (chưa đăng nhập): không dùng được AI.
 - Free: **15 lượt/ngày** (UTC). Pro: **200 lượt/ngày**.
 - Giới hạn nằm trong `public.ai_daily_credit_limit()` (migration `20261112000200_ai_credits_and_entitlements.sql`). Client chỉ hiển thị, không tự quyết định.
-- Gói Pro đọc từ `public.user_entitlements` — người dùng chỉ được đọc, không được ghi. Kích hoạt Pro bằng service role / SQL editor:
+- Gói Pro đọc từ `public.user_entitlements` — người dùng chỉ được đọc, không được ghi.
+- Người dùng gửi yêu cầu Pro trong màn **Nâng cấp Pro** với mã chuyển khoản riêng (`CVPRO-<GÓI>-<8 ký tự đầu user id>`). Quản trị viên đối soát sao kê rồi duyệt trong SQL Editor:
+
+```sql
+select id, user_id, plan, transfer_code, created_at
+from public.pro_upgrade_requests where status = 'pending' order by created_at;
+
+select public.approve_pro_request('<request-id>');            -- monthly: +30 ngày, lifetime: vĩnh viễn
+select public.reject_pro_request('<request-id>', 'Chưa nhận được chuyển khoản');
+```
+
+- Kích hoạt Pro thủ công (không qua yêu cầu):
 
 ```sql
 insert into public.user_entitlements (user_id, plan, pro_until)
