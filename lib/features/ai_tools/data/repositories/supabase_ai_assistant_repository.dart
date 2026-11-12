@@ -38,6 +38,14 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
   }
 
   @override
+  Future<String> fetchJobPosting(String url) async {
+    final result = await _result('fetch_job', {'url': url});
+    final text = (result['text'] as String? ?? '').trim();
+    if (text.isEmpty) throw _emptyResult();
+    return text;
+  }
+
+  @override
   Future<AiInterviewReply> interview({
     required List<AiChatMessage> messages,
     required String language,

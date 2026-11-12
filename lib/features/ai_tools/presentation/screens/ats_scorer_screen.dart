@@ -15,6 +15,7 @@ import '../controllers/ai_assistant_providers.dart';
 import '../widgets/ai_access_guard.dart';
 import '../widgets/ai_tailor_review_sheet.dart';
 import '../widgets/cover_letter_sheet.dart';
+import '../widgets/job_posting_input.dart';
 import 'interview_practice_screen.dart';
 
 /// Scores a saved CV against a pasted job description. Runs fully offline:
@@ -47,17 +48,21 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     );
   }
 
-  void _analyze(CvModel? cv) {
+  Future<void> _analyze(CvModel? cv) async {
     FocusScope.of(context).unfocus();
     if (cv == null) {
-      _toast('Hãy tạo hoặc nhập một CV trước khi chấm điểm.');
+      _toast('Hãy tạo hoặc nhập một CV trước.');
       return;
     }
-    final jd = _jdController.text.trim();
-    if (jd.length < 20) {
-      _toast('Hãy dán mô tả công việc (ít nhất 20 ký tự).');
-      return;
-    }
+    final jd = await resolveJobPostingInput(
+      context,
+      ref,
+      _jdController.text,
+      redirectPath: '/ats-scorer',
+    );
+    if (jd == null || !mounted) return;
+    // Show the fetched posting so the user can check and edit it.
+    if (jd != _jdController.text.trim()) _jdController.text = jd;
     final report = CvJdMatcherService.evaluateJobDescription(
       cv: cv,
       jobDescription: jd,
@@ -223,10 +228,9 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
               maxLines: 12,
               maxLength: 8000,
               decoration: const InputDecoration(
-                labelText: 'Tin tuyển dụng',
+                labelText: 'Link hoặc nội dung tin tuyển dụng',
                 alignLabelWithHint: true,
-                hintText:
-                    'Dán tin tuyển dụng: yêu cầu kỹ năng, kinh nghiệm, công cụ...',
+                hintText: 'https://... hoặc dán nội dung tin',
               ),
             ),
             const SizedBox(height: 8),

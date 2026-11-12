@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme.dart';
+import '../../../ai_tools/presentation/widgets/job_posting_input.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../domain/services/cv_jd_matcher_service.dart';
 
-/// Modal bottom sheet that compares candidate's CV against Job Description (JD)
-/// keywords and provides instant gap-analysis with 1-tap skill addition.
-class CvJdMatcherSheet extends StatefulWidget {
+/// Compares the CV with a job posting pasted as a link or as text.
+class CvJdMatcherSheet extends ConsumerStatefulWidget {
   const CvJdMatcherSheet({
     super.key,
     required this.cv,
@@ -28,8 +29,8 @@ class CvJdMatcherSheet extends StatefulWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => CvJdMatcherSheet(
+      showDragHandle: true,
+      builder: (context) => CvJdMatcherSheet(
         cv: cv,
         onAddMissingSkill: onAddMissingSkill,
         isEnglish: isEnglish,
@@ -38,372 +39,196 @@ class CvJdMatcherSheet extends StatefulWidget {
   }
 
   @override
-  State<CvJdMatcherSheet> createState() => _CvJdMatcherSheetState();
+  ConsumerState<CvJdMatcherSheet> createState() => _CvJdMatcherSheetState();
 }
 
-class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
-  late String _selectedPresetId;
-  late CvModel _currentCv;
+class _CvJdMatcherSheetState extends ConsumerState<CvJdMatcherSheet> {
+  final _input = TextEditingController();
+  late CvModel _cv = widget.cv;
+  String? _jobText;
+
+  bool get _en => widget.isEnglish;
 
   @override
-  void initState() {
-    super.initState();
-    _currentCv = widget.cv;
-    _selectedPresetId = CvJdMatcherService.presets.first.id;
+  void dispose() {
+    _input.dispose();
+    super.dispose();
   }
 
-  void _handleAddMissingKeyword(String keyword) {
-    final newSkill = SkillModel(
+  Future<void> _match() async {
+    FocusScope.of(context).unfocus();
+    final text = await resolveJobPostingInput(
+      context,
+      ref,
+      _input.text,
+      redirectPath: '/home',
+    );
+    if (text == null || !mounted) return;
+    setState(() => _jobText = text);
+  }
+
+  void _addSkill(String keyword) {
+    final skill = SkillModel(
       id: 'skill-${DateTime.now().microsecondsSinceEpoch}',
       name: keyword,
       category: SkillCategory.hard,
-      proficiency: 80,
+      proficiency: 70,
     );
-
-    final updatedSkills = List<SkillModel>.from(_currentCv.skills)
-      ..add(newSkill);
-    setState(() {
-      _currentCv = _currentCv.copyWith(skills: updatedSkills);
-    });
-
-    widget.onAddMissingSkill(newSkill);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          widget.isEnglish
-              ? 'Added "$keyword" to your CV skills.'
-              : 'Đã thêm "$keyword" vào kỹ năng trong CV.',
-        ),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    setState(() => _cv = _cv.copyWith(skills: [..._cv.skills, skill]));
+    widget.onAddMissingSkill(skill);
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentPreset = CvJdMatcherService.presets.firstWhere(
-      (p) => p.id == _selectedPresetId,
-      orElse: () => CvJdMatcherService.presets.first,
-    );
-
-    final report = CvJdMatcherService.evaluate(
-      cv: _currentCv,
-      targetKeywords: currentPreset.keywords,
-    );
-
-    final score = report.score;
-    final scoreColor = score >= 80
-        ? const Color(0xFF15803D)
-        : (score >= 50 ? Colors.amber.shade800 : AppTheme.dangerRose);
-    final scoreBg = score >= 80
-        ? const Color(0xFFF0FDF4)
-        : (score >= 50 ? Colors.amber.shade50 : const Color(0xFFFFF1F2));
-
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+    final report = _jobText == null
+        ? null
+        : CvJdMatcherService.evaluateJobDescription(
+            cv: _cv,
+            jobDescription: _jobText!,
+          );
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                _en ? 'Match a job posting' : 'So khớp tin tuyển dụng',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 17,
+                  color: AppTheme.primaryNavy,
+                ),
               ),
-            ),
-          ),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.brandIndigo.withAlpha(20),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.document_scanner_rounded,
-                    color: AppTheme.brandIndigo,
-                    size: 20,
-                  ),
+              const SizedBox(height: 12),
+              TextField(
+                key: const Key('jd-matcher-input'),
+                controller: _input,
+                minLines: 2,
+                maxLines: 6,
+                decoration: InputDecoration(
+                  hintText: _en
+                      ? 'Paste a job link or the job description'
+                      : 'Dán link hoặc nội dung tin tuyển dụng',
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.isEnglish
-                            ? 'Match with a job posting'
-                            : 'So khớp với tin tuyển dụng',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        widget.isEnglish
-                            ? 'Compare your CV with job requirements to improve your chances'
-                            : 'Xem CV đã có đủ kỹ năng nhà tuyển dụng cần chưa',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
+              ),
+              const SizedBox(height: 10),
+              FilledButton(
+                key: const Key('jd-matcher-submit'),
+                onPressed: _match,
+                child: Text(_en ? 'Compare' : 'So khớp'),
+              ),
+              if (report != null) ...[
+                const SizedBox(height: 16),
+                _Result(report: report, isEnglish: _en, onAdd: _addSkill),
               ],
-            ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
 
-          // Preset Job Roles
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            child: Row(
-              children: CvJdMatcherService.presets.map((preset) {
-                final isSelected = preset.id == _selectedPresetId;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    key: Key('jd-preset-${preset.id}'),
-                    label: Text(
-                      preset.title(widget.isEnglish ? 'en' : 'vi'),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    selected: isSelected,
-                    selectedColor: AppTheme.brandIndigo,
-                    backgroundColor: Colors.grey.shade100,
-                    side: BorderSide.none,
-                    onSelected: (_) =>
-                        setState(() => _selectedPresetId = preset.id),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
+class _Result extends StatelessWidget {
+  const _Result({
+    required this.report,
+    required this.isEnglish,
+    required this.onAdd,
+  });
 
-          const Divider(height: 12),
+  final JdMatchReport report;
+  final bool isEnglish;
+  final ValueChanged<String> onAdd;
 
-          // Match Score Card & Content
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Score Card
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: scoreBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: scoreColor.withAlpha(60)),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 58,
-                          height: 58,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: scoreColor, width: 3),
-                          ),
-                          child: Text(
-                            '$score%',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: scoreColor,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                score >= 80
-                                    ? (widget.isEnglish
-                                          ? 'Excellent Match!'
-                                          : 'Rất phù hợp')
-                                    : (score >= 50
-                                          ? (widget.isEnglish
-                                                ? 'Good Match'
-                                                : 'Khá phù hợp')
-                                          : (widget.isEnglish
-                                                ? 'Needs Keywords'
-                                                : 'Cần bổ sung kỹ năng')),
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: scoreColor,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                widget.isEnglish
-                                    ? '${report.matchedKeywords.length}/${report.totalKeywords} core keywords found in your CV'
-                                    : 'CV có ${report.matchedKeywords.length}/${report.totalKeywords} kỹ năng được yêu cầu',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  // Missing Keywords Section (Actionable)
-                  if (report.missingKeywords.isNotEmpty) ...[
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.warning_amber_rounded,
-                          size: 18,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          widget.isEnglish
-                              ? 'Missing Keywords (${report.missingKeywords.length})'
-                              : 'Kỹ năng còn thiếu (${report.missingKeywords.length})',
-                          style: const TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primarySlate,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.isEnglish
-                          ? 'Tap "+ Add" to include a missing keyword into your skills:'
-                          : 'Chạm "+ Thêm" nếu bạn có kỹ năng đó:',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: report.missingKeywords.map((kw) {
-                        return ActionChip(
-                          key: Key('add-missing-$kw'),
-                          avatar: const Icon(
-                            Icons.add_rounded,
-                            size: 16,
-                            color: Colors.deepOrange,
-                          ),
-                          label: Text(
-                            kw,
-                            style: const TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.deepOrange,
-                            ),
-                          ),
-                          backgroundColor: Colors.deepOrange.withAlpha(12),
-                          side: BorderSide(
-                            color: Colors.deepOrange.withAlpha(40),
-                          ),
-                          onPressed: () => _handleAddMissingKeyword(kw),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-
-                  // Matched Keywords Section
-                  if (report.matchedKeywords.isNotEmpty) ...[
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.check_circle_rounded,
-                          size: 18,
-                          color: Color(0xFF15803D),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          widget.isEnglish
-                              ? 'Matched Keywords (${report.matchedKeywords.length})'
-                              : 'Kỹ năng đã có (${report.matchedKeywords.length})',
-                          style: const TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primarySlate,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: report.matchedKeywords.map((kw) {
-                        return Chip(
-                          avatar: const Icon(
-                            Icons.check_rounded,
-                            size: 16,
-                            color: Color(0xFF15803D),
-                          ),
-                          label: Text(
-                            kw,
-                            style: const TextStyle(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF166534),
-                            ),
-                          ),
-                          backgroundColor: const Color(0xFFF0FDF4),
-                          side: const BorderSide(color: Color(0xFFBBF7D0)),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ],
+  @override
+  Widget build(BuildContext context) {
+    if (report.totalKeywords == 0) {
+      return Text(
+        isEnglish
+            ? 'No skills found. Paste the requirements section.'
+            : 'Chưa nhận ra kỹ năng nào. Hãy dán phần "Yêu cầu" của tin.',
+        style: const TextStyle(color: AppTheme.mutedText),
+      );
+    }
+    final score = report.score;
+    final color = score >= 75
+        ? AppTheme.successGreen
+        : score >= 50
+        ? AppTheme.warningAmber
+        : AppTheme.dangerRose;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '$score%',
+              key: const Key('jd-matcher-score'),
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w900,
+                color: color,
               ),
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                isEnglish
+                    ? '${report.matchedKeywords.length}/${report.totalKeywords} required skills on your CV'
+                    : 'CV có ${report.matchedKeywords.length}/${report.totalKeywords} kỹ năng được yêu cầu',
+                style: const TextStyle(color: AppTheme.mutedText),
+              ),
+            ),
+          ],
+        ),
+        if (report.missingKeywords.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Text(
+            isEnglish ? 'Missing — tap to add' : 'Còn thiếu — chạm để thêm',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final keyword in report.missingKeywords)
+                ActionChip(
+                  avatar: const Icon(Icons.add_rounded, size: 16),
+                  label: Text(keyword),
+                  onPressed: () => onAdd(keyword),
+                ),
+            ],
           ),
         ],
-      ),
+        if (report.matchedKeywords.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          Text(
+            isEnglish ? 'Already on your CV' : 'Đã có',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final keyword in report.matchedKeywords)
+                Chip(
+                  label: Text(keyword),
+                  side: BorderSide.none,
+                  backgroundColor: AppTheme.tealSurface,
+                ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

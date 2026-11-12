@@ -479,19 +479,23 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                       : 'Chuyển CV sang tiếng Anh',
                 ),
               ),
-              CheckedPopupMenuItem(
+              PopupMenuItem(
                 value: _PreviewMenu.sample,
-                checked: _showSampleContent,
                 child: Text(
-                  _isEnglish ? 'Show sample text' : 'Hiện nội dung mẫu',
+                  _showSampleContent
+                      ? (_isEnglish ? 'Hide sample text' : 'Ẩn nội dung mẫu')
+                      : (_isEnglish ? 'Show sample text' : 'Hiện nội dung mẫu'),
                 ),
               ),
-              CheckedPopupMenuItem(
+              PopupMenuItem(
                 key: const Key('preview-bw-filter-btn'),
                 value: _PreviewMenu.grayscale,
-                checked: _isGrayscaleSimulation,
                 child: Text(
-                  _isEnglish ? 'Black & white print' : 'Xem bản in đen trắng',
+                  _isGrayscaleSimulation
+                      ? (_isEnglish ? 'Colour view' : 'Xem bản màu')
+                      : (_isEnglish
+                            ? 'Black & white print'
+                            : 'Xem bản in đen trắng'),
                 ),
               ),
               PopupMenuItem(
@@ -530,16 +534,12 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                   ButtonSegment(
                     value: _PreviewMode.pdfA4,
                     icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
-                    label: Text(
-                      _isEnglish ? 'Print view' : 'Bản in',
-                    ),
+                    label: Text(_isEnglish ? 'Print view' : 'Bản in'),
                   ),
                   ButtonSegment(
                     value: _PreviewMode.interactiveReorder,
                     icon: const Icon(Icons.drag_indicator_rounded, size: 16),
-                    label: Text(
-                      _isEnglish ? 'Arrange' : 'Sắp xếp',
-                    ),
+                    label: Text(_isEnglish ? 'Arrange' : 'Sắp xếp'),
                   ),
                 ],
                 selected: {_mode},

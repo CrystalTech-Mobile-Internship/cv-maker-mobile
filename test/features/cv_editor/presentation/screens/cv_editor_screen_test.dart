@@ -499,7 +499,7 @@ void main() {
     await tester.tap(find.byKey(const Key('preview-more-menu')));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Cỡ chữ, vừa trang'), findsOneWidget);
-    expect(find.text('Hiện nội dung mẫu'), findsOneWidget);
+    expect(find.text('Ẩn nội dung mẫu'), findsOneWidget);
     expect(find.text('Tải tệp (PDF / Word)'), findsOneWidget);
   });
 }
