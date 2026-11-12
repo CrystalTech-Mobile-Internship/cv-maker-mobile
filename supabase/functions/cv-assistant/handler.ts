@@ -2,6 +2,7 @@
 
 import { actions } from "./actions.ts";
 import { type CompleteFn, ProviderError } from "./openrouter.ts";
+import { fetchJobPostingText, JobFetchError } from "./job_fetch.ts";
 
 export type Quota = {
   allowed?: boolean;
@@ -21,6 +22,7 @@ export type Dependencies = {
   /** Returns a quota store bound to the caller, or null if unauthenticated. */
   authenticate: (req: Request) => Promise<QuotaStore | null>;
   complete: CompleteFn;
+  fetchJob?: (url: string) => Promise<string>;
   log?: (entry: Record<string, unknown>) => void;
 };
 
@@ -84,11 +86,36 @@ export function createHandler(deps: Dependencies) {
       return error(400, "invalid_input", "Dữ liệu gửi lên không hợp lệ.");
     }
 
+    if (body?.action === "fetch_job") {
+      const url = String((body.input as Record<string, unknown>)?.url ?? "");
+      try {
+        const text = await (deps.fetchJob ?? fetchJobPostingText)(url);
+        log({ action: "fetch_job", status: 200 });
+        return json({ result: { text } });
+      } catch (failure) {
+        const code = failure instanceof JobFetchError
+          ? failure.code
+          : "unreachable";
+        log({ action: "fetch_job", status: 422, reason: code });
+        return error(
+          422,
+          "invalid_input",
+          code === "invalid_url" || code === "blocked_redirect"
+            ? "Link không hợp lệ."
+            : "Không đọc được trang này. Hãy dán nội dung tin tuyển dụng.",
+        );
+      }
+    }
+
     if (body?.action === "quota") {
       try {
         return json({ quota: await quotaStore.current() });
       } catch (_) {
-        return error(503, "quota_unavailable", "Chưa xem được số lượt còn lại.");
+        return error(
+          503,
+          "quota_unavailable",
+          "Chưa xem được số lượt còn lại.",
+        );
       }
     }
 
@@ -110,7 +137,11 @@ export function createHandler(deps: Dependencies) {
     try {
       quota = await quotaStore.consume(action.cost);
     } catch (_) {
-      return error(503, "quota_unavailable", "Chưa kiểm tra được số lượt. Hãy thử lại.");
+      return error(
+        503,
+        "quota_unavailable",
+        "Chưa kiểm tra được số lượt. Hãy thử lại.",
+      );
     }
     if (quota.allowed === false) {
       return error(
