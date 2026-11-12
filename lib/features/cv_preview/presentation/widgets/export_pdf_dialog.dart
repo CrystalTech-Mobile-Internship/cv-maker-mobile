@@ -128,7 +128,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                       Text(
                         isEn
                             ? 'Sharp print quality • Text size: ${widget.fontSizeScale.toStringAsFixed(2)}x'
-                            : 'Bản in sắc nét • Cỡ chữ: ${widget.fontSizeScale.toStringAsFixed(2)}x',
+                            : 'Cỡ chữ ${(widget.fontSizeScale * 100).round()}%',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -238,7 +238,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                       kIsWeb
                           ? (isEn
                                 ? 'The CV is saved in this browser first. The PDF will be downloaded through the browser.'
-                                : 'CV được lưu trong trình duyệt trước. Tệp PDF sẽ được tải xuống qua trình duyệt.')
+                                : 'Tệp sẽ được tải về máy qua trình duyệt.')
                           : (isEn
                                 ? 'The CV and PDF are saved on this device first. Sharing to Drive, email, or messaging apps is optional and may require Internet.'
                                 : 'CV và PDF luôn được lưu trên thiết bị trước. Chia sẻ qua Drive, email hoặc ứng dụng nhắn tin là tùy chọn và có thể cần Internet.'),

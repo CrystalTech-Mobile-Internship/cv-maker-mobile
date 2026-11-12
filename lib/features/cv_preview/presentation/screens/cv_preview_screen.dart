@@ -113,7 +113,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       _showMessage(
         _isEnglish
             ? 'The preview changed, but the setting could not be saved locally.'
-            : 'Bản xem trước đã thay đổi nhưng chưa thể lưu thiết lập vào máy.',
+            : 'Chưa lưu được thay đổi. Hãy thử lại.',
         isError: true,
       );
     }
@@ -137,7 +137,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       _showMessage(
         _isEnglish
             ? 'The preview changed, but it could not be saved locally.'
-            : 'Bản xem trước đã thay đổi nhưng chưa thể lưu vào máy.',
+            : 'Chưa lưu được thay đổi. Hãy thử lại.',
         isError: true,
       );
     }
@@ -173,7 +173,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
               _showMessage(
                 _isEnglish
                     ? 'Applied ${autoFix.changes.length} formatting fixes.'
-                    : 'Đã sửa nhanh ${autoFix.changes.length} nhóm lỗi định dạng.',
+                    : 'Đã sửa nhanh ${autoFix.changes.length} lỗi trình bày.',
               );
             },
       onEdit: _isEphemeralPreview
@@ -264,7 +264,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         _showMessage(
           _isEnglish
               ? 'Saved on this device at ${result.localPath}. Sharing is currently unavailable.'
-              : 'Đã lưu trên máy tại ${result.localPath}. Hiện chưa thể mở chia sẻ.',
+              : 'Đã lưu tệp tại ${result.localPath}.',
         );
         return;
       }
@@ -392,7 +392,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                       : 'Simulate B&W printing')
                 : (_isGrayscaleSimulation
                       ? 'Tắt bộ lọc đen trắng'
-                      : 'Giả lập in ấn đen-trắng'),
+                      : 'Xem như khi in đen trắng'),
             icon: Icon(
               _isGrayscaleSimulation
                   ? Icons.filter_b_and_w_rounded
@@ -591,7 +591,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                   _showMessage(
                     _isEnglish
                         ? 'Updated section order for A4 export.'
-                        : 'Đã cập nhật thứ tự các mục trên bản in A4.',
+                        : 'Đã đổi thứ tự các mục.',
                   );
                 },
                 onResetToDefault: () {

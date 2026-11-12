@@ -102,7 +102,9 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _writeCoverLetter(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast('Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI viết thư.');
+      _toast(
+        'Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI viết thư.',
+      );
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -132,7 +134,9 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _tailorWithAi(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast('Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI chỉnh CV.');
+      _toast(
+        'Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI chỉnh CV.',
+      );
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {

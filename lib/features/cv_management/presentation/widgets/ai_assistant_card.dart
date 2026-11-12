@@ -56,7 +56,7 @@ class AiAssistantCard extends StatelessWidget {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Trò chuyện để AI soạn CV, hoặc tải CV cũ lên để bóc tách.',
+                      'Trò chuyện để AI soạn CV, hoặc tải CV cũ lên để AI đọc giúp.',
                       style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.mutedText,

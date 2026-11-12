@@ -96,7 +96,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Kiểm tra thay đổi trước khi ghi dữ liệu',
+                          'Những gì sẽ thay đổi',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade600,
@@ -321,7 +321,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                 icon: const Icon(Icons.sync_rounded),
                 label: Text(
                   preview.hasDeletionsOrOverwrites
-                      ? 'Xác nhận & Tiến hành đồng bộ'
+                      ? 'Đồng bộ ngay'
                       : 'Bắt đầu đồng bộ',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),

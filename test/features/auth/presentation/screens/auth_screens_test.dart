@@ -31,7 +31,10 @@ void main() {
     await tester.pump();
 
     expect(find.text('Quên mật khẩu?'), findsOneWidget);
-    expect(find.text('Máy chủ: Project kiểm thử'), findsOneWidget);
+    expect(
+      find.textContaining('Điều khoản sử dụng', findRichText: true),
+      findsOneWidget,
+    );
     expect(find.textContaining('Đã kết nối'), findsNothing);
   });
 
@@ -140,12 +143,12 @@ void main() {
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('Lưu hồ sơ tài khoản'),
+      find.text('Lưu thay đổi'),
       250,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Lưu hồ sơ tài khoản'), findsOneWidget);
+    expect(find.text('Lưu thay đổi'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Đăng xuất'),

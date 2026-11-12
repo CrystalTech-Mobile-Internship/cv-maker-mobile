@@ -211,7 +211,8 @@ class CvSyncRepository {
         uploadedCount: 0,
         downloadedCount: 0,
         failedCount: 1,
-        errorMessage: 'Không tải được dữ liệu từ tài khoản. CV trên máy vẫn an toàn.',
+        errorMessage:
+            'Không tải được dữ liệu từ tài khoản. CV trên máy vẫn an toàn.',
       );
     }
   }

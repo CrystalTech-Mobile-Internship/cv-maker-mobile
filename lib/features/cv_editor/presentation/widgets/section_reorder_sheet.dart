@@ -135,9 +135,7 @@ class _SectionReorderSheetState extends State<SectionReorderSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _isEn
-                              ? 'Reorder CV Sections'
-                              : 'Sắp xếp bố cục mục CV',
+                          _isEn ? 'Reorder CV Sections' : 'Sắp xếp các mục',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -279,9 +277,7 @@ class _SectionReorderSheetState extends State<SectionReorderSheet> {
               child: ElevatedButton.icon(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.check_rounded),
-                label: Text(
-                  _isEn ? 'Done & Update CV' : 'Xong & Áp dụng thay đổi',
-                ),
+                label: Text(_isEn ? 'Done & Update CV' : 'Áp dụng'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.brandIndigo,
                   foregroundColor: Colors.white,

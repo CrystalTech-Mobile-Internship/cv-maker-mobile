@@ -99,7 +99,7 @@ class _CvPreviewControlsState extends State<CvPreviewControls> {
   Widget build(BuildContext context) {
     final notice = _isEnglish
         ? 'The preview uses the real A4 PDF, including whitespace and page breaks.'
-        : 'Bản xem trước dùng PDF A4 thực tế, gồm cả khoảng trắng và ngắt trang.';
+        : 'Hiển thị đúng như khi in ra giấy A4.';
 
     return Material(
       color: const Color(0xFFF8FAFC),
@@ -171,7 +171,7 @@ class _CvPreviewControlsState extends State<CvPreviewControls> {
                         key: const Key('reset-font-size'),
                         tooltip: _isEnglish
                             ? 'Reset document formatting'
-                            : 'Đặt lại định dạng tài liệu',
+                            : 'Khôi phục mặc định',
                         onPressed: widget.onResetFormatting,
                         child: const Icon(Icons.restart_alt_rounded, size: 19),
                       ),
@@ -198,7 +198,7 @@ class _CvPreviewControlsState extends State<CvPreviewControls> {
                       child: Text(
                         _isEnglish
                             ? 'Keep headings and examples for empty sections'
-                            : 'Giữ đề mục và nội dung mẫu cho phần còn trống',
+                            : 'Hiện nội dung mẫu ở phần còn trống',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

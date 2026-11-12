@@ -231,7 +231,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                       child: Text(
                         _isEn
                             ? 'Drag cards to reorder your A4 layout in real-time'
-                            : 'Kéo thả thẻ để sắp xếp thứ tự trên bản A4',
+                            : 'Kéo thả để đổi thứ tự các mục',
                         style: const TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w600,

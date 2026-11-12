@@ -58,7 +58,7 @@ class ExperienceTab extends StatelessWidget {
               Text(
                 _isEn
                     ? 'Describe projects, roles, key achievements, and impact.'
-                    : 'Mô tả dự án, vị trí công tác và kết quả đo lường được.',
+                    : 'Thêm nơi làm việc, vị trí và kết quả nổi bật.',
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
@@ -79,7 +79,7 @@ class ExperienceTab extends StatelessWidget {
                   label: Text(
                     _isEn
                         ? 'Use Starter Sample ("Fill-in")'
-                        : 'Dùng mẫu kinh nghiệm ("Điền mẫu nhanh")',
+                        : 'Điền nhanh mẫu kinh nghiệm',
                   ),
                 ),
               ],

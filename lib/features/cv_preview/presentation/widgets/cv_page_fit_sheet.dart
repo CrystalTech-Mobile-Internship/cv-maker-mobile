@@ -105,7 +105,7 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                       Text(
                         widget.isEnglish
                             ? 'Page Fit & Layout Optimizer'
-                            : 'Tối ưu bố cục & Căn chỉnh 1 trang',
+                            : 'Vừa 1 trang A4',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -114,7 +114,7 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                       Text(
                         widget.isEnglish
                             ? 'Adjust font scale to fit your CV comfortably on A4'
-                            : 'Tùy chỉnh tỷ lệ chữ để vừa vặn trang A4 hoàn hảo',
+                            : 'Chỉnh cỡ chữ để CV vừa trang',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -141,9 +141,7 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                 children: [
                   // Fast Presets
                   Text(
-                    widget.isEnglish
-                        ? 'Recommended Presets'
-                        : 'Tùy chọn nhanh đề xuất',
+                    widget.isEnglish ? 'Recommended Presets' : 'Chọn nhanh',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -158,10 +156,10 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                     iconColor: Colors.amber.shade800,
                     title: widget.isEnglish
                         ? 'Auto-Fit 1 Page A4 (85%)'
-                        : '⚡ Tự động căn 1 trang A4 (85%)',
+                        : 'Gọn 1 trang (85%)',
                     subtitle: widget.isEnglish
                         ? 'Best for freshers and candidates under 5 years experience'
-                        : 'Lý tưởng cho Fresher và ứng viên dưới 5 năm kinh nghiệm',
+                        : 'Hợp với sinh viên và người dưới 5 năm kinh nghiệm',
                     scaleValue: 0.85,
                     isSelected: (percent == 85),
                   ),
@@ -173,10 +171,10 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                     iconColor: AppTheme.brandIndigo,
                     title: widget.isEnglish
                         ? 'Standard Format (100%)'
-                        : '📄 Định dạng tiêu chuẩn (100%)',
+                        : 'Tiêu chuẩn (100%)',
                     subtitle: widget.isEnglish
                         ? 'Standard font hierarchy for balanced A4 documents'
-                        : 'Cỡ chữ chuẩn theo quy cách quốc tế cân đối trang',
+                        : 'Cỡ chữ thông thường',
                     scaleValue: 1.0,
                     isSelected: (percent == 100),
                   ),
@@ -188,10 +186,10 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                     iconColor: Colors.teal,
                     title: widget.isEnglish
                         ? 'Spacious / Large (115%)'
-                        : '🔍 Thoáng đãng / Dễ đọc (115%)',
+                        : 'Thoáng, dễ đọc (115%)',
                     subtitle: widget.isEnglish
                         ? 'Ideal if you have concise content and want to fill white space'
-                        : 'Phù hợp khi nội dung ngắn gọn muốn lấp đầy trang đẹp',
+                        : 'Khi nội dung ngắn, giúp trang không bị trống',
                     scaleValue: 1.15,
                     isSelected: (percent == 115),
                   ),
@@ -200,9 +198,7 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
 
                   // Manual Slider
                   Text(
-                    widget.isEnglish
-                        ? 'Manual Fine-Tuning'
-                        : 'Tinh chỉnh tỷ lệ thủ công',
+                    widget.isEnglish ? 'Manual Fine-Tuning' : 'Tự chỉnh',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -287,8 +283,8 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                         Expanded(
                           child: Text(
                             widget.isEnglish
-                                ? 'Recruiter Tip: 80% of hiring managers prefer a crisp 1-page resume for juniors. Use 85% scale to prevent 1-2 orphan lines spilling onto page 2.'
-                                : 'Mẹo từ nhà tuyển dụng: 80% HR thích CV đúng 1 trang A4 cho sinh viên/Fresher. Hãy dùng mức 85%–90% để tránh rớt 1–2 dòng lẻ loi sang trang 2.',
+                                ? 'Tip: keep a student or junior CV to one page. 85–90% usually fits.'
+                                : 'Mẹo: CV của sinh viên nên gọn trong 1 trang. Mức 85–90% thường vừa đủ.',
                             style: const TextStyle(
                               fontSize: 12,
                               height: 1.4,

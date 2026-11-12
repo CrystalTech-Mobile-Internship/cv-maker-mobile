@@ -64,13 +64,13 @@ void main() {
     await tester.tap(find.text('Mở'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Kiểm tra dữ liệu CV đã đọc'), findsOneWidget);
+    expect(find.text('Kiểm tra thông tin đã đọc'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Mục có cấu trúc (4)'),
+      find.text('Học vấn, kinh nghiệm, dự án (4)'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Mục có cấu trúc (4)'), findsOneWidget);
+    expect(find.text('Học vấn, kinh nghiệm, dự án (4)'), findsOneWidget);
     for (final label in [
       'Học vấn: 1',
       'Kinh nghiệm: 1',

@@ -40,7 +40,9 @@ class DashboardHeader extends StatelessWidget {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                isSignedIn ? 'Đã kết nối tài khoản' : 'Đang dùng chế độ khách',
+                isSignedIn
+                    ? 'Đã kết nối tài khoản'
+                    : 'Đang dùng không cần tài khoản',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

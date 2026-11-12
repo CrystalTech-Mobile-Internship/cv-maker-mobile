@@ -37,7 +37,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify header and titles
-    expect(find.text('Sắp xếp bố cục mục CV'), findsOneWidget);
+    expect(find.text('Sắp xếp các mục'), findsOneWidget);
     expect(find.text('Mục tiêu nghề nghiệp'), findsOneWidget);
     expect(find.text('Kinh nghiệm làm việc'), findsOneWidget);
     expect(find.text('Dự án nổi bật'), findsOneWidget);
@@ -53,8 +53,8 @@ void main() {
     expect(changedOrder![1], 'summary');
 
     // Tap Done
-    await tester.tap(find.text('Xong & Áp dụng thay đổi'));
+    await tester.tap(find.text('Áp dụng'));
     await tester.pumpAndSettle();
-    expect(find.text('Sắp xếp bố cục mục CV'), findsNothing);
+    expect(find.text('Sắp xếp các mục'), findsNothing);
   });
 }
