@@ -15,7 +15,13 @@ import '../../../cv_editor/data/repositories/cv_sync_repository.dart';
 import '../../../cv_editor/domain/models/models.dart';
 import '../../../resume_import/data/repositories/resume_import_provider.dart';
 import '../../../resume_import/domain/repositories/resume_import_repository.dart';
-import '../../../resume_import/presentation/widgets/resume_import_review_dialog.dart';
+import '../../../resume_import/domain/models/resume_import_draft.dart';
+import '../../../resume_import/presentation/resume_draft_saver.dart';
+import '../../../resume_import/presentation/widgets/resume_import_mode_sheet.dart';
+import '../../../ai_tools/domain/models/ai_assistant_models.dart';
+import '../../../ai_tools/domain/repositories/ai_assistant_repository.dart';
+import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
+import '../../../ai_tools/presentation/widgets/ai_access_guard.dart';
 import '../controllers/cv_list_provider.dart';
 import '../controllers/dashboard_sync_controller.dart';
 import '../widgets/cloud_sync_preview_sheet.dart';
@@ -82,39 +88,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _importResume() async {
+    final importer = ref.read(resumeImportRepositoryProvider);
     try {
-      final draft = await ref
-          .read(resumeImportRepositoryProvider)
-          .pickAndParse();
-      if (draft == null || !mounted) return;
-      final review = await showResumeImportReviewDialog(context, draft);
-      if (review == null || !mounted) return;
-
-      final now = DateTime.now().toUtc();
-      final template = CvTemplateCatalog.byId(review.templateId);
-      final cv = draft.toCv(
-        id: 'import-${now.microsecondsSinceEpoch}',
-        userId: ref.read(currentAuthUserProvider)?.id,
-        title: review.title,
-        templateId: review.templateId,
-        primaryColor: template.accentHex,
-        language: review.language,
-        now: now,
-        correctedFullName: review.fullName,
-        correctedTargetRole: review.targetRole,
-        correctedEmail: review.email,
-        correctedPhone: review.phone,
-        correctedAddress: review.address,
-        correctedSummary: review.summary,
+      final source = await importer.pickAndExtractText();
+      if (source == null || !mounted) return;
+      final mode = await showResumeImportModeSheet(
+        context,
+        fileName: source.fileName,
+        characterCount: source.text.length,
+        isSignedIn: ref.read(currentAuthUserProvider) != null,
+        aiCost: AiCreditCost.parseResume,
       );
-      await ref.read(cvRepositoryProvider).save(cv);
+      if (mode == null || !mounted) return;
+
+      ResumeImportDraft? draft;
+      if (mode == ResumeImportMode.ai) {
+        draft = await _parseWithAi(source);
+        if (draft == null) return;
+      } else {
+        draft = importer.parseText(source);
+      }
       if (!mounted) return;
+      final cv = await reviewAndSaveResumeDraft(context, ref, draft);
+      if (cv == null || !mounted) return;
       _showMessage('Đã nhập CV và lưu an toàn trên thiết bị.');
       await _openEditor(cv);
     } on ResumeImportException catch (error) {
       if (mounted) _showMessage(error.message);
     } catch (_) {
       if (mounted) _showMessage('Không thể nhập CV. Hãy kiểm tra lại tệp.');
+    }
+  }
+
+  /// AI extraction with an automatic offline fallback so an AI outage never
+  /// blocks the import.
+  Future<ResumeImportDraft?> _parseWithAi(ResumeTextSource source) async {
+    if (!await ensureAiAccess(context, ref)) return null;
+    if (!mounted) return null;
+    try {
+      return await runWithAiProgress(
+        context,
+        'AI đang đọc và bóc tách CV của bạn...',
+        () => ref
+            .read(aiAssistantRepositoryProvider)
+            .parseResume(
+              sourceName: source.fileName,
+              text: source.text,
+              language: 'vi',
+            ),
+      );
+    } on AiWritingFailure catch (failure) {
+      if (!mounted) return null;
+      _showMessage(
+        '${describeAiFailure(failure)} Đã chuyển sang bóc tách trên máy.',
+      );
+      return ref.read(resumeImportRepositoryProvider).parseText(source);
     }
   }
 
@@ -332,6 +360,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onExportAll: _exportAllCvs,
             onRestoreBackup: _restoreCvBackup,
             onOpenAts: () => context.push('/ats-scorer'),
+            onOpenAiInterview: () => context.push('/ai-interview'),
             onOpenPro: () => context.push('/upgrade-pro'),
             onRetry: () => ref.invalidate(cvListStreamProvider),
             onEdit: _openEditor,
