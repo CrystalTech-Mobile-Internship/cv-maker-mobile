@@ -7,6 +7,7 @@ import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/reset_password_screen.dart';
 import '../features/auth/presentation/auth_redirect.dart';
+import '../features/ai_tools/presentation/screens/ai_interview_screen.dart';
 import '../features/ai_tools/presentation/screens/ats_scorer_screen.dart';
 import '../features/billing/presentation/screens/pro_upgrade_screen.dart';
 import '../features/cv_management/presentation/screens/home_screen.dart';
@@ -82,6 +83,11 @@ GoRouter createAppRouter({
       path: '/ats-scorer',
       name: 'ats-scorer',
       builder: (context, state) => const AtsScorerScreen(),
+    ),
+    GoRoute(
+      path: '/ai-interview',
+      name: 'ai-interview',
+      builder: (context, state) => const AiInterviewScreen(),
     ),
     GoRoute(
       path: '/upgrade-pro',

@@ -57,13 +57,17 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
     }
   }
 
-  AiWritingFailureCode _codeFor(int status) {
-    if (status == 401) return AiWritingFailureCode.notAuthenticated;
-    if (status == 400 || status == 422) {
-      return AiWritingFailureCode.invalidInput;
-    }
-    if (status == 429) return AiWritingFailureCode.rateLimited;
-    if (status >= 500) return AiWritingFailureCode.unavailable;
-    return AiWritingFailureCode.unknown;
+  AiWritingFailureCode _codeFor(int status) => aiFailureCodeForStatus(status);
+}
+
+AiWritingFailureCode aiFailureCodeForStatus(int status) {
+  if (status == 402) return AiWritingFailureCode.quotaExceeded;
+  if (status == 413) return AiWritingFailureCode.invalidInput;
+  if (status == 401) return AiWritingFailureCode.notAuthenticated;
+  if (status == 400 || status == 422) {
+    return AiWritingFailureCode.invalidInput;
   }
+  if (status == 429) return AiWritingFailureCode.rateLimited;
+  if (status >= 500) return AiWritingFailureCode.unavailable;
+  return AiWritingFailureCode.unknown;
 }
