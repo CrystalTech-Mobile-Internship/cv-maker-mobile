@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_client.dart';
+import '../../auth/presentation/providers/auth_providers.dart';
 import '../domain/billing_models.dart';
 
 class SupabaseBillingRepository implements BillingRepository {
@@ -105,6 +106,12 @@ class SupabaseBillingRepository implements BillingRepository {
 final billingRepositoryProvider = Provider<BillingRepository>(
   (ref) => SupabaseBillingRepository(),
 );
+
+/// Whether the signed-in account currently has Pro.
+final isProProvider = Provider<bool>((ref) {
+  if (ref.watch(currentAuthUserProvider) == null) return false;
+  return ref.watch(billingStatusProvider).valueOrNull?.isPro ?? false;
+});
 
 /// Billing status of the signed-in user; refresh with `ref.invalidate`.
 final billingStatusProvider = FutureProvider.autoDispose<BillingStatus>(

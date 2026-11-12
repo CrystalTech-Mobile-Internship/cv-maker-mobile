@@ -7,21 +7,20 @@ class CvTemplatePicker extends StatelessWidget {
     super.key,
     required this.selectedId,
     required this.onChanged,
+    this.isPro = false,
   });
 
+  final bool isPro;
   final String selectedId;
   final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final available = CvTemplateCatalog.available(isPro: isPro);
     final templates = [
-      ...CvTemplateCatalog.freeTemplates.where(
-        (template) => template.id == selectedId,
-      ),
-      ...CvTemplateCatalog.freeTemplates.where(
-        (template) => template.id != selectedId,
-      ),
+      ...available.where((template) => template.id == selectedId),
+      ...available.where((template) => template.id != selectedId),
     ];
     return Column(
       children: templates

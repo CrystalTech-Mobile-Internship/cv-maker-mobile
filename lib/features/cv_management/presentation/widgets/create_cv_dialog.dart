@@ -22,12 +22,14 @@ Future<CreateCvRequest?> showCreateCvDialog(
   BuildContext context, {
   String initialTemplate = 'harvard_ats',
   List<CvModel> existingCvs = const [],
+  bool isPro = false,
 }) {
   return showDialog<CreateCvRequest>(
     context: context,
     builder: (_) => _CreateCvDialog(
       initialTemplate: initialTemplate,
       existingCvs: existingCvs,
+      isPro: isPro,
     ),
   );
 }
@@ -36,7 +38,10 @@ class _CreateCvDialog extends StatefulWidget {
   const _CreateCvDialog({
     required this.initialTemplate,
     required this.existingCvs,
+    this.isPro = false,
   });
+
+  final bool isPro;
 
   final String initialTemplate;
   final List<CvModel> existingCvs;
@@ -119,6 +124,7 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
             const Text('Mẫu CV', style: TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 8),
             CvTemplatePicker(
+              isPro: widget.isPro,
               selectedId: _selectedTemplate,
               onChanged: (value) => setState(() => _selectedTemplate = value),
             ),
