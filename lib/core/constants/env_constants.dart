@@ -92,6 +92,12 @@ class EnvConstants {
     return null;
   }
 
+  /// Shows the "enter recovery code" option. Enable only when the reset
+  /// email template includes `{{ .Token }}` (requires custom SMTP on the
+  /// Supabase Free plan).
+  static bool get recoveryCodeInEmail =>
+      _value('AUTH_RECOVERY_CODE_IN_EMAIL').toLowerCase() == 'true';
+
   static String get supabaseUrl => activeSupabaseEnvironment?.url ?? '';
 
   static String get supabaseAnonKey => activeSupabaseEnvironment?.anonKey ?? '';
