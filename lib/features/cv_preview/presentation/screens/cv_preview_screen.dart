@@ -403,7 +403,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEnglish ? 'Resume Preview' : 'Xem trước CV'),
+        title: Text(_isEnglish ? 'Preview' : 'Xem trước'),
         actions: [
           _buildAtsBadge(),
           // Template Gallery Picker
@@ -531,14 +531,14 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                     value: _PreviewMode.pdfA4,
                     icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
                     label: Text(
-                      _isEnglish ? 'A4 Paper (PDF)' : 'Trang A4 (PDF)',
+                      _isEnglish ? 'Print view' : 'Bản in',
                     ),
                   ),
                   ButtonSegment(
                     value: _PreviewMode.interactiveReorder,
                     icon: const Icon(Icons.drag_indicator_rounded, size: 16),
                     label: Text(
-                      _isEnglish ? 'Drag & Drop Layout' : 'Bố cục kéo thả',
+                      _isEnglish ? 'Arrange' : 'Sắp xếp',
                     ),
                   ),
                 ],

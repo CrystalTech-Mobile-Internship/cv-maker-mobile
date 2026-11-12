@@ -494,7 +494,7 @@ void main() {
     // CV content is rasterized from the same PDF bytes used for export, so it
     // is intentionally not duplicated as Flutter Text widgets anymore.
     expect(find.byType(PdfPreview), findsOneWidget);
-    expect(find.text('Xem trước CV'), findsOneWidget);
+    expect(find.text('Xem trước'), findsOneWidget);
     expect(find.byKey(const Key('preview-more-menu')), findsOneWidget);
     await tester.tap(find.byKey(const Key('preview-more-menu')));
     await tester.pump(const Duration(milliseconds: 500));
