@@ -173,9 +173,7 @@ class PersonalInfoTab extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      _isEn
-                          ? 'Professional Summary'
-                          : 'Tóm tắt bản thân (Summary)',
+                      _isEn ? 'Professional Summary' : 'Giới thiệu bản thân',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -221,7 +219,7 @@ class PersonalInfoTab extends StatelessWidget {
               Text(
                 _isEn
                     ? 'Quick Starter Suggestions ("Fill-in"):'
-                    : 'Gợi ý mẫu nhanh ("Điền vào mẫu"):',
+                    : 'Câu mẫu gợi ý:',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -371,10 +369,10 @@ final class _ProfilePhotoPicker extends StatelessWidget {
                     supportsProfilePhoto
                         ? (isEn
                               ? 'Shown in Minimalist Clean and Creative Tech.'
-                              : 'Hiển thị trên Minimalist Clean và Creative Tech.')
+                              : 'Ảnh chỉ hiện trên các mẫu CV có chỗ cho ảnh.')
                         : (isEn
                               ? 'Choose a photo template in Preview to display it.'
-                              : 'Hỗ trợ Minimalist Clean, Creative Tech và Professional Sidebar.'),
+                              : 'Ảnh chỉ hiện trên các mẫu CV có chỗ cho ảnh.'),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),

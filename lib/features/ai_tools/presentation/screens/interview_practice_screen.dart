@@ -127,7 +127,8 @@ class _InterviewPracticeScreenState
                 maxLength: 6000,
                 decoration: const InputDecoration(
                   labelText: 'Tin tuyển dụng (không bắt buộc)',
-                  hintText: 'Dán tin tuyển dụng để câu hỏi sát với vị trí ứng tuyển hơn',
+                  hintText:
+                      'Dán tin tuyển dụng để câu hỏi sát với vị trí ứng tuyển hơn',
                   alignLabelWithHint: true,
                 ),
               ),

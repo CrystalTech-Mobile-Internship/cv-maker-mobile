@@ -18,7 +18,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Tối ưu bố cục & Căn chỉnh 1 trang'), findsOneWidget);
+    expect(find.text('Vừa 1 trang A4'), findsOneWidget);
     expect(find.byKey(const Key('preset-85')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('preset-85')));

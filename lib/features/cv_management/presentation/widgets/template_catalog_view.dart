@@ -12,8 +12,11 @@ class TemplateCatalogView extends StatefulWidget {
     required this.onUseTemplate,
     required this.onPreviewTemplate,
     required this.onPremiumTap,
+    this.isPro = false,
   });
 
+  /// Pro accounts can use premium templates like any other template.
+  final bool isPro;
   final ValueChanged<CvTemplate> onUseTemplate;
   final ValueChanged<CvTemplate> onPreviewTemplate;
   final ValueChanged<CvTemplate> onPremiumTap;
@@ -69,12 +72,14 @@ class _TemplateCatalogViewState extends State<TemplateCatalogView> {
             ),
             delegate: SliverChildBuilderDelegate((context, index) {
               final template = templates[index];
+              final locked = template.isPremium && !widget.isPro;
               return _TemplateCard(
                 template: template,
-                onPreview: template.isPremium
+                locked: locked,
+                onPreview: locked
                     ? null
                     : () => widget.onPreviewTemplate(template),
-                onTap: () => template.isPremium
+                onTap: () => locked
                     ? widget.onPremiumTap(template)
                     : widget.onUseTemplate(template),
               );
@@ -191,9 +196,11 @@ class _TemplateCard extends StatelessWidget {
     required this.template,
     required this.onTap,
     required this.onPreview,
+    this.locked = false,
   });
 
   final CvTemplate template;
+  final bool locked;
   final VoidCallback onTap;
   final VoidCallback? onPreview;
 
@@ -278,7 +285,7 @@ class _TemplateCard extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       height: 48,
-                      child: template.isPremium
+                      child: locked
                           ? OutlinedButton(
                               onPressed: onTap,
                               style: OutlinedButton.styleFrom(
@@ -299,7 +306,7 @@ class _TemplateCard extends StatelessWidget {
                               child: const FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  'Sắp ra mắt',
+                                  'Gói Pro',
                                   maxLines: 1,
                                   softWrap: false,
                                 ),

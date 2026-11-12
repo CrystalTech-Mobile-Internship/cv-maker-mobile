@@ -363,9 +363,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isEn
-                ? 'Saved safely on this device.'
-                : 'Đã lưu an toàn trên máy (Chế độ Ngoại tuyến).',
+            _isEn ? 'Saved safely on this device.' : 'Đã lưu trên máy.',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -398,7 +396,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         setState(
           () => _syncStatusText = _isEn
               ? 'Saving AI suggestion locally...'
-              : 'Đang lưu gợi ý AI trên máy...',
+              : 'Đang áp dụng gợi ý của AI...',
         );
       },
       persistSuggestion: (suggestion) async {
@@ -425,7 +423,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         _summaryController.text = result.suggestion!;
         _syncStatusText = _isEn
             ? 'AI suggestion saved on device'
-            : 'Đã lưu gợi ý AI trên máy';
+            : 'Đã áp dụng gợi ý của AI';
       });
       _scheduleDesktopPreview();
     }
@@ -772,7 +770,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                         : 'Mô tả & Thành tích (mỗi dòng 1 ý)',
                     hintText: _isEn
                         ? 'Engineered offline SQLite cache...\nAchieved 60fps UI performance...'
-                        : 'Thiết kế kiến trúc Clean Architecture...\nTối ưu hiệu năng ứng dụng di động...',
+                        : 'Ví dụ: Phát triển tính năng đặt hàng cho 5.000 khách hàng\nGiảm 30% thời gian xử lý đơn',
                   ),
                 ),
               ],
@@ -1582,7 +1580,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                             content: Text(
                               _isEn
                                   ? 'Inserted action verb "$verb".'
-                                  : 'Đã chèn từ khóa hành động "$verb".',
+                                  : 'Đã chèn "$verb".',
                             ),
                             behavior: SnackBarBehavior.floating,
                           ),
@@ -1855,7 +1853,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       : Text(
                           isEn
                               ? (isSignedIn ? 'Back up' : 'Save Locally')
-                              : (isSignedIn ? 'Lưu vào tài khoản' : 'Lưu vào máy'),
+                              : (isSignedIn
+                                    ? 'Lưu vào tài khoản'
+                                    : 'Lưu vào máy'),
                         ),
                 ),
               ),

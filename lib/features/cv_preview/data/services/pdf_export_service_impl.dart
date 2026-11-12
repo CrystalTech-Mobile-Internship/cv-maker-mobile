@@ -1033,7 +1033,15 @@ final class _TemplateStyle {
     return base;
   }
 
-  static _TemplateStyle _resolveBaseStyle(String templateId) {
+  /// Premium designs are built on an existing layout.
+  static const _premiumBases = {
+    'premium_elegant_photo': 'minimalist_clean',
+    'premium_creative_portfolio': 'creative_tech',
+    'premium_ai_focus': 'executive_navy',
+  };
+
+  static _TemplateStyle _resolveBaseStyle(String requestedId) {
+    final templateId = _premiumBases[requestedId] ?? requestedId;
     switch (templateId) {
       case 'modern_minimalist':
         return _TemplateStyle(

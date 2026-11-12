@@ -124,7 +124,7 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                       Text(
                         _isEn
                             ? 'Google XYZ Formula: Accomplished [X], measured by [Y], by doing [Z]'
-                            : 'Công thức Google XYZ: Đạt được [X], đo bằng [Y], thông qua [Z]',
+                            : 'Cách viết hay: Kết quả đạt được + con số chứng minh + cách bạn làm',
                         style: TextStyle(
                           fontSize: 11.5,
                           color: Colors.grey.shade600,
@@ -146,9 +146,7 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             child: TextField(
               decoration: InputDecoration(
-                hintText: _isEn
-                    ? 'Search action verbs...'
-                    : 'Tìm từ khóa hành động...',
+                hintText: _isEn ? 'Search action verbs...' : 'Tìm động từ...',
                 prefixIcon: const Icon(Icons.search, size: 20),
                 filled: true,
                 fillColor: const Color(0xFFF8FAFC),
@@ -209,7 +207,7 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                     child: Text(
                       _isEn
                           ? 'No verbs match your search'
-                          : 'Không có từ khóa phù hợp',
+                          : 'Không tìm thấy động từ phù hợp',
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   )
@@ -310,7 +308,7 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                                         Text(
                                           _isEn
                                               ? 'Example (Formula XYZ):'
-                                              : 'Ví dụ chuẩn công thức XYZ:',
+                                              : 'Câu mẫu:',
                                           style: const TextStyle(
                                             fontSize: 11,
                                             fontWeight: FontWeight.bold,

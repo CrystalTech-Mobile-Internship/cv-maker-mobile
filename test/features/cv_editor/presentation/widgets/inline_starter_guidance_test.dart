@@ -43,7 +43,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Gợi ý mẫu nhanh ("Điền vào mẫu"):'), findsOneWidget);
+    expect(find.text('Câu mẫu gợi ý:'), findsOneWidget);
     final chipFinder = find.text('Mobile / Flutter Dev');
     expect(chipFinder, findsOneWidget);
     await tester.ensureVisible(chipFinder);

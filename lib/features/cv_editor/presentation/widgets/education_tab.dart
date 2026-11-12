@@ -75,7 +75,7 @@ class EducationTab extends StatelessWidget {
                   label: Text(
                     _isEn
                         ? 'Use Starter Sample ("Fill-in")'
-                        : 'Dùng mẫu học vấn ("Điền mẫu nhanh")',
+                        : 'Điền nhanh mẫu học vấn',
                   ),
                 ),
               ],

@@ -6,6 +6,7 @@ import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../auth_redirect.dart';
 import '../providers/auth_providers.dart';
+import '../../../legal/presentation/legal_document_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key, this.redirectPath});
@@ -193,10 +194,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _CloudStatus(
-                    isConfigured: isConfigured,
-                    backendLabel: repository.backendLabel,
-                  ),
+                  if (!isConfigured) ...[
+                    Text(
+                      'Hiện chưa đăng nhập được. Bạn vẫn có thể dùng thử không cần tài khoản.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  const LegalLinksText(textAlign: TextAlign.center),
                 ],
               ),
             ),
@@ -262,37 +268,6 @@ class _OrDivider extends StatelessWidget {
           Expanded(child: Divider()),
         ],
       ),
-    );
-  }
-}
-
-class _CloudStatus extends StatelessWidget {
-  const _CloudStatus({required this.isConfigured, required this.backendLabel});
-
-  final bool isConfigured;
-  final String backendLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          isConfigured ? Icons.cloud_queue_rounded : Icons.cloud_off_rounded,
-          size: 16,
-          color: isConfigured ? AppTheme.successGreen : AppTheme.warningAmber,
-        ),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            isConfigured
-                ? 'Máy chủ: $backendLabel'
-                : 'Chưa kết nối máy chủ — vẫn dùng được khi không có mạng',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ),
-      ],
     );
   }
 }

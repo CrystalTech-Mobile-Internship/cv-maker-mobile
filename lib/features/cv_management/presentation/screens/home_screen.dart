@@ -23,6 +23,7 @@ import '../../../community/presentation/screens/community_view.dart';
 import '../../../ai_tools/domain/repositories/ai_assistant_repository.dart';
 import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
 import '../../../ai_tools/presentation/widgets/ai_access_guard.dart';
+import '../../../billing/data/supabase_billing_repository.dart';
 import '../controllers/cv_list_provider.dart';
 import '../controllers/dashboard_sync_controller.dart';
 import '../widgets/cloud_sync_preview_sheet.dart';
@@ -129,7 +130,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       return await runWithAiProgress(
         context,
-        'AI đang đọc và bóc tách CV của bạn...',
+        'AI đang đọc CV của bạn...',
         () => ref
             .read(aiAssistantRepositoryProvider)
             .parseResume(
@@ -141,7 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } on AiWritingFailure catch (failure) {
       if (!mounted) return null;
       _showMessage(
-        '${describeAiFailure(failure)} Đã chuyển sang bóc tách trên máy.',
+        '${describeAiFailure(failure)} Đã chuyển sang đọc trên máy.',
       );
       return ref.read(resumeImportRepositoryProvider).parseText(source);
     }
@@ -262,6 +263,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (mounted) context.go('/login');
   }
 
+  /// Moves CVs created without an account into the signed-in account
+  /// (after the user taps the button) and backs them up.
+  Future<void> _backupGuestCvs() async {
+    final user = ref.read(currentAuthUserProvider);
+    if (user == null) return _openLogin();
+    final cvs = ref.read(cvListStreamProvider).asData?.value ?? const [];
+    final guest = cvs.where((cv) => cv.userId == null).toList();
+    if (guest.isEmpty) return;
+    final repository = ref.read(cvRepositoryProvider);
+    for (final cv in guest) {
+      await repository.save(cv.copyWith(userId: user.id), now: cv.updatedAt);
+    }
+    final result = await ref
+        .read(dashboardSyncControllerProvider.notifier)
+        .synchronize(user.id);
+    if (!mounted) return;
+    _showMessage(
+      result.isSuccess
+          ? 'Đã sao lưu ${guest.length} CV vào tài khoản.'
+          : 'CV đã được gắn vào tài khoản; sẽ sao lưu lại khi có mạng.',
+    );
+  }
+
   Future<void> _syncAll() async {
     final user = ref.read(currentAuthUserProvider);
     if (user == null) return _openLogin();
@@ -297,7 +321,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     _showMessage(
       result.synchronizedCount == 0
-          ? 'Chưa có CV đã lưu để đồng bộ. Mẫu CV chỉ là thiết kế.'
+          ? 'Chưa có CV nào để đồng bộ.'
           : _syncSuccessMessage(result),
     );
   }
@@ -309,7 +333,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (result.deletedCount > 0) '${result.deletedCount} xoá trên tài khoản',
     ];
     final conflicts = result.conflictCount > 0
-        ? ' • ${result.conflictCount} xung đột đã xử lý'
+        ? ' • ${result.conflictCount} CV sửa ở hai nơi, đã giữ bản mới nhất'
         : '';
     return 'Đồng bộ xong: ${actions.join(', ')}$conflicts.';
   }
@@ -364,6 +388,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onRestoreBackup: _restoreCvBackup,
             onOpenAts: () => context.push('/ats-scorer'),
             onOpenAiInterview: () => context.push('/ai-interview'),
+            onBackupGuestCvs: _backupGuestCvs,
             onOpenPro: () => context.push('/upgrade-pro'),
             onRetry: () => ref.invalidate(cvListStreamProvider),
             onEdit: _openEditor,
@@ -374,6 +399,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onDelete: _deleteCv,
           ),
           1 => TemplateCatalogView(
+            isPro:
+                user != null &&
+                (ref.watch(billingStatusProvider).valueOrNull?.isPro ?? false),
             onUseTemplate: (template) =>
                 _createCv(initialTemplate: template.id),
             onPreviewTemplate: (template) {

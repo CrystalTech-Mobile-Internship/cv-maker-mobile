@@ -74,7 +74,7 @@ class ProjectsTab extends StatelessWidget {
                   label: Text(
                     isEn
                         ? 'Use Starter Project ("Fill-in")'
-                        : 'Dùng mẫu dự án ("Điền mẫu nhanh")',
+                        : 'Điền nhanh mẫu dự án',
                   ),
                 ),
               ],

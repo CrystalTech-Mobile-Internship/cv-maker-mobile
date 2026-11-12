@@ -74,7 +74,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          'Mật khẩu mới cần ít nhất 8 ký tự. Việc thay đổi mật khẩu không xóa CV trên thiết bị.',
+                          'Mật khẩu mới cần ít nhất 8 ký tự.',
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
@@ -159,7 +159,7 @@ class _MissingRecoverySession extends StatelessWidget {
                   const Icon(Icons.link_off_rounded, size: 44),
                   const SizedBox(height: 12),
                   const Text(
-                    'Phiên khôi phục không còn hiệu lực',
+                    'Liên kết không còn hiệu lực',
                     key: ValueKey('reset-missing-session'),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
@@ -167,13 +167,13 @@ class _MissingRecoverySession extends StatelessWidget {
                   const SizedBox(height: 8),
                   const Text(
                     'Liên kết có thể đã hết hạn hoặc được mở trên trình duyệt khác. '
-                    'Hãy gửi lại liên kết, hoặc nhập mã khôi phục trong email.',
+                    'Hãy gửi lại liên kết mới.',
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => context.go('/forgot-password'),
-                    child: const Text('Khôi phục lại'),
+                    child: const Text('Gửi lại liên kết'),
                   ),
                 ],
               ),

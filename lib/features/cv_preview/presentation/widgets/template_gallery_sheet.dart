@@ -103,7 +103,7 @@ class TemplateGallerySheet extends StatelessWidget {
                       Text(
                         isEnglish
                             ? '${templates.length} professional styles'
-                            : '${templates.length} mẫu chuẩn định dạng quốc tế',
+                            : '${templates.length} mẫu CV',
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppTheme.mutedText,

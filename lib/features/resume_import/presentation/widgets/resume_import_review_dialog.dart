@@ -98,7 +98,7 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
                   const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
-                      'Kiểm tra dữ liệu CV đã đọc',
+                      'Kiểm tra thông tin đã đọc',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -194,7 +194,7 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
                   if (widget.draft.skills.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     Text(
-                      'Kỹ năng nhận diện (${widget.draft.skills.length})',
+                      'Kỹ năng tìm thấy (${widget.draft.skills.length})',
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 8),
@@ -210,7 +210,7 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
                   if (_structuredItemCount > 0) ...[
                     const SizedBox(height: 16),
                     Text(
-                      'Mục có cấu trúc ($_structuredItemCount)',
+                      'Học vấn, kinh nghiệm, dự án ($_structuredItemCount)',
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 8),

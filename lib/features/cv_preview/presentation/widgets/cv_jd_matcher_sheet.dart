@@ -159,7 +159,7 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                       Text(
                         widget.isEnglish
                             ? 'Compare your CV with job requirements to improve your chances'
-                            : 'Đối chiếu từ khóa với yêu cầu tuyển dụng để tăng tỷ lệ duyệt',
+                            : 'Xem CV đã có đủ kỹ năng nhà tuyển dụng cần chưa',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -255,14 +255,14 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                                 score >= 80
                                     ? (widget.isEnglish
                                           ? 'Excellent Match!'
-                                          : 'Độ tương thích xuất sắc!')
+                                          : 'Rất phù hợp')
                                     : (score >= 50
                                           ? (widget.isEnglish
                                                 ? 'Good Match'
-                                                : 'Độ tương thích khá tốt')
+                                                : 'Khá phù hợp')
                                           : (widget.isEnglish
                                                 ? 'Needs Keywords'
-                                                : 'Cần bổ sung thêm từ khóa')),
+                                                : 'Cần bổ sung kỹ năng')),
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -273,7 +273,7 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                               Text(
                                 widget.isEnglish
                                     ? '${report.matchedKeywords.length}/${report.totalKeywords} core keywords found in your CV'
-                                    : 'Tìm thấy ${report.matchedKeywords.length}/${report.totalKeywords} từ khóa then chốt trong CV của bạn',
+                                    : 'CV có ${report.matchedKeywords.length}/${report.totalKeywords} kỹ năng được yêu cầu',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey.shade700,
@@ -301,7 +301,7 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                         Text(
                           widget.isEnglish
                               ? 'Missing Keywords (${report.missingKeywords.length})'
-                              : 'Từ khóa còn thiếu (${report.missingKeywords.length})',
+                              : 'Kỹ năng còn thiếu (${report.missingKeywords.length})',
                           style: const TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.bold,
@@ -314,7 +314,7 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                     Text(
                       widget.isEnglish
                           ? 'Tap "+ Add" to include a missing keyword into your skills:'
-                          : 'Chạm "+ Thêm" để đưa ngay từ khóa còn thiếu vào mục Kỹ năng:',
+                          : 'Chạm "+ Thêm" nếu bạn có kỹ năng đó:',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade600,
@@ -364,7 +364,7 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                         Text(
                           widget.isEnglish
                               ? 'Matched Keywords (${report.matchedKeywords.length})'
-                              : 'Từ khóa đã khớp (${report.matchedKeywords.length})',
+                              : 'Kỹ năng đã có (${report.matchedKeywords.length})',
                           style: const TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.bold,

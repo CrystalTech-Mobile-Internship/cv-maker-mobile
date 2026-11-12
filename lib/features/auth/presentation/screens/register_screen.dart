@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../auth_redirect.dart';
+import '../../../legal/presentation/legal_document_screen.dart';
 import '../providers/auth_providers.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -115,7 +116,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Đồng bộ CV và tiếp tục chỉnh sửa trên thiết bị của bạn.',
+                        'Lưu CV vào tài khoản và dùng trên mọi thiết bị.',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 16),
@@ -197,10 +198,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         contentPadding: EdgeInsets.zero,
                         controlAffinity: ListTileControlAffinity.leading,
                         dense: true,
-                        title: const Text(
-                          'Tôi đồng ý Điều khoản sử dụng và Chính sách bảo mật.',
-                          style: TextStyle(fontSize: 12),
-                        ),
+                        title: const LegalLinksText(prefix: 'Tôi đồng ý với '),
                       ),
                       const SizedBox(height: 8),
                       FilledButton.icon(
@@ -319,7 +317,7 @@ class _LocalDataNotice extends StatelessWidget {
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              'CV đang lưu trên máy vẫn được giữ nguyên và có thể đồng bộ sau khi đăng ký.',
+              'CV đang có trên máy vẫn được giữ nguyên.',
               style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
             ),
           ),

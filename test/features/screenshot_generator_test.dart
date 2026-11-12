@@ -286,7 +286,7 @@ void main() {
                     children: [
                       const Expanded(
                         child: Text(
-                          'Tóm tắt bản thân (Summary)',
+                          'Giới thiệu bản thân',
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                         ),
                       ),
@@ -312,7 +312,7 @@ void main() {
                       const Icon(Icons.lightbulb_rounded, size: 16, color: Colors.amber),
                       const SizedBox(width: 6),
                       Text(
-                        'Gợi ý mẫu nhanh ("Điền vào mẫu"):',
+                        'Câu mẫu gợi ý:',
                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.grey.shade800),
                       ),
                     ],

@@ -1,6 +1,11 @@
 /// Global application constants
 class AppConstants {
   static const String appName = 'Smart CV Maker';
+
+  /// Support address shown in the legal pages; leave empty until the
+  /// public support mailbox is ready.
+  static const String supportEmail = '';
+
   static const String appTagline =
       'Tạo CV chuyên nghiệp, nổi bật với nhà tuyển dụng';
 

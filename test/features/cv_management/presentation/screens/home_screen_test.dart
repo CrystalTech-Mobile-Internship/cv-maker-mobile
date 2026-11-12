@@ -287,7 +287,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await tester.scrollUntilVisible(
-      find.byKey(const Key('import-existing-resume')),
+      find.byKey(const ValueKey('open-ai-interview')),
       240,
       scrollable: find
           .descendant(
@@ -296,7 +296,7 @@ void main() {
           )
           .first,
     );
-    expect(find.text('Nhập CV Word hoặc PDF'), findsOneWidget);
+    expect(find.text('Tải CV PDF/Word'), findsOneWidget);
 
     await tester.tap(find.text('Mẫu CV'));
     await tester.pumpAndSettle();
@@ -309,7 +309,7 @@ void main() {
 
     await tester.tap(find.text('Premium'));
     await tester.pumpAndSettle();
-    expect(find.text('Sắp ra mắt'), findsWidgets);
+    expect(find.text('Gói Pro'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -330,7 +330,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('Đăng nhập để quản lý tài khoản và đồng bộ CV'),
+      find.text('Đăng nhập để sao lưu CV và dùng trên nhiều thiết bị'),
       findsOneWidget,
     );
     expect(find.byType(NavigationBar), findsOneWidget);
@@ -371,7 +371,7 @@ void main() {
     await tester.tap(premiumFilter);
     await tester.pumpAndSettle();
 
-    final label = find.text('Sắp ra mắt').first;
+    final label = find.text('Gói Pro').first;
     await tester.scrollUntilVisible(
       label,
       300,

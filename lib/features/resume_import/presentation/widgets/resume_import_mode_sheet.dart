@@ -34,16 +34,16 @@ Future<ResumeImportMode?> showResumeImportModeSheet(
             ),
             const SizedBox(height: 4),
             Text(
-              '$characterCount ký tự được trích xuất ngay trên máy. Chọn cách bóc tách:',
+              'Đã đọc xong tệp. Chọn cách lấy thông tin:',
               style: const TextStyle(color: AppTheme.mutedText),
             ),
             const SizedBox(height: 14),
             _ModeTile(
               key: const ValueKey('import-mode-ai'),
               icon: Icons.auto_awesome_outlined,
-              title: 'Bóc tách bằng AI (khuyên dùng)',
+              title: 'Dùng AI (chính xác hơn)',
               subtitle: isSignedIn
-                  ? 'Nhận diện chính xác mục, thời gian và gạch đầu dòng. Tốn $aiCost lượt AI.'
+                  ? 'Nhận ra đúng từng mục, thời gian và nội dung. Dùng $aiCost lượt AI.'
                   : 'Cần đăng nhập. Tài khoản Free có lượt AI miễn phí mỗi ngày.',
               onTap: () => Navigator.pop(context, ResumeImportMode.ai),
             ),
@@ -51,9 +51,9 @@ Future<ResumeImportMode?> showResumeImportModeSheet(
             _ModeTile(
               key: const ValueKey('import-mode-local'),
               icon: Icons.phone_android_outlined,
-              title: 'Bóc tách nhanh trên máy',
+              title: 'Đọc nhanh trên máy',
               subtitle:
-                  'Miễn phí, không cần mạng, dữ liệu không rời thiết bị. Phù hợp CV bố cục đơn giản.',
+                  'Miễn phí, không cần mạng. Hợp với CV trình bày đơn giản.',
               onTap: () => Navigator.pop(context, ResumeImportMode.onDevice),
             ),
           ],

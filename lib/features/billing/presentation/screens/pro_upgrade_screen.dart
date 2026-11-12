@@ -8,7 +8,9 @@ import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../data/supabase_billing_repository.dart';
 import '../../domain/billing_models.dart';
+import '../widgets/bank_transfer_box.dart';
 import '../widgets/billing_status_card.dart';
+import '../../../../core/constants/env_constants.dart';
 
 class ProUpgradeScreen extends ConsumerStatefulWidget {
   const ProUpgradeScreen({super.key});
@@ -39,7 +41,7 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
           .submitRequest(ProPlan.fromValue(_plan));
       ref.invalidate(billingStatusProvider);
       _toast(
-        'Đã gửi yêu cầu. Tài khoản được nâng cấp ngay khi xác nhận được chuyển khoản.',
+        'Đã gửi yêu cầu. Tài khoản sẽ được nâng cấp khi nhận được chuyển khoản.',
       );
     } on BillingFailure catch (failure) {
       _toast(failure.message);
@@ -85,7 +87,7 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Mở khóa mẫu Premium, chấm điểm CV không giới hạn, AI viết nội dung và PDF không có hình mờ.',
+                    'Mở khóa mẫu CV cao cấp và 200 lượt AI mỗi ngày.',
                     style: TextStyle(color: Color(0xFFDBEAFE), height: 1.4),
                   ),
                 ],
@@ -102,7 +104,7 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
               selected: _plan == 'monthly',
               title: 'Theo tháng',
               price: '49.000đ',
-              detail: 'Hủy bất cứ lúc nào',
+              detail: 'Dùng trong 30 ngày',
               onTap: () => setState(() => _plan = 'monthly'),
             ),
             const SizedBox(height: 10),
@@ -176,7 +178,7 @@ class _LoginRequiredCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Gói Pro cần được gắn với tài khoản để mở khóa an toàn và dùng lại trên các thiết bị.',
+            'Gói Pro gắn với tài khoản để dùng trên mọi thiết bị.',
             textAlign: TextAlign.center,
             style: TextStyle(color: AppTheme.mutedText, height: 1.35),
           ),
@@ -230,7 +232,7 @@ class _AuthenticatedPaymentSection extends StatelessWidget {
           child: Column(
             children: [
               const Text(
-                'Quét VietQR để nâng cấp',
+                'Quét mã để chuyển khoản',
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
               ),
               const SizedBox(height: 4),
@@ -241,33 +243,9 @@ class _AuthenticatedPaymentSection extends StatelessWidget {
                 style: const TextStyle(fontSize: 12, color: AppTheme.mutedText),
               ),
               const SizedBox(height: 12),
-              Container(
-                width: 180,
-                height: 180,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFCBD5E1)),
-                ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.qr_code_2_rounded,
-                      size: 84,
-                      color: AppTheme.primaryNavy,
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'QR minh họa',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.mutedText,
-                      ),
-                    ),
-                  ],
-                ),
+              BankTransferBox(
+                amount: isLifetime ? 99000 : 49000,
+                transferCode: transferCode,
               ),
               const SizedBox(height: 10),
               SelectableText(
@@ -286,7 +264,12 @@ class _AuthenticatedPaymentSection extends StatelessWidget {
         const SizedBox(height: 16),
         FilledButton.icon(
           key: const ValueKey('pro-confirm-transfer'),
-          onPressed: hasPendingRequest || isSubmitting ? null : onConfirm,
+          onPressed:
+              hasPendingRequest ||
+                  isSubmitting ||
+                  EnvConstants.paymentAccount == null
+              ? null
+              : onConfirm,
           style: AppTheme.createCvButton,
           icon: const Icon(Icons.verified_outlined),
           label: Text(
@@ -299,7 +282,7 @@ class _AuthenticatedPaymentSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Sau khi đối soát chuyển khoản, tài khoản được nâng lên Pro (200 lượt AI/ngày).',
+          'Tài khoản được nâng lên Pro ngay khi nhận được chuyển khoản.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 12,
@@ -318,12 +301,11 @@ class _ComparisonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const rows = [
-      ('Tạo CV trên máy', true, true),
-      ('Xuất PDF A4', true, true),
-      ('Tối đa 2 CV (Free)', true, false),
-      ('Mẫu Premium', false, true),
-      ('Chấm điểm CV & AI không giới hạn', false, true),
-      ('PDF không có hình mờ', false, true),
+      ('Tạo và xuất CV PDF, Word', true, true),
+      ('Chấm điểm CV theo tin tuyển dụng', true, true),
+      ('15 lượt AI mỗi ngày', true, true),
+      ('200 lượt AI mỗi ngày', false, true),
+      ('Mẫu CV cao cấp', false, true),
     ];
     return Container(
       padding: const EdgeInsets.all(16),

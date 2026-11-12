@@ -87,7 +87,10 @@ class _TailorSheetState extends State<_TailorSheet> {
         controller: scroll,
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         children: [
-          Text('Đề xuất chỉnh CV theo tin tuyển dụng', style: label().copyWith(fontSize: 17)),
+          Text(
+            'Đề xuất chỉnh CV theo tin tuyển dụng',
+            style: label().copyWith(fontSize: 17),
+          ),
           const SizedBox(height: 4),
           const Text(
             'Ứng dụng sẽ tạo một bản CV mới; CV gốc giữ nguyên.',
@@ -110,7 +113,10 @@ class _TailorSheetState extends State<_TailorSheet> {
             const SizedBox(height: 16),
           ],
           if (result.missingSkills.isNotEmpty) ...[
-            Text('Kỹ năng tin tuyển dụng yêu cầu mà CV chưa có', style: label()),
+            Text(
+              'Kỹ năng tin tuyển dụng yêu cầu mà CV chưa có',
+              style: label(),
+            ),
             const SizedBox(height: 2),
             const Text(
               'Chỉ chọn những kỹ năng bạn thật sự có.',

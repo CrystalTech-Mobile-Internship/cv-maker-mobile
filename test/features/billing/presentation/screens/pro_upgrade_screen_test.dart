@@ -25,7 +25,7 @@ void main() {
     expect(find.text('Tôi đã chuyển khoản'), findsNothing);
   });
 
-  testWidgets('authenticated user sees plans and VietQR placeholder', (
+  testWidgets('authenticated user sees plans and transfer details', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -65,7 +65,12 @@ void main() {
       find.byKey(const ValueKey('pro-transfer-code')),
     );
     expect(code.data, 'Nội dung CK: CVPRO-MONTHLY-USER1');
-    expect(find.text('Quét VietQR để nâng cấp'), findsOneWidget);
+    expect(find.text('Quét mã để chuyển khoản'), findsOneWidget);
+    // Without a configured receiving account the request button stays off.
+    expect(
+      find.byKey(const ValueKey('bank-transfer-unavailable')),
+      findsOneWidget,
+    );
     expect(find.text('owner@example.com'), findsOneWidget);
     expect(find.text('Tôi đã chuyển khoản'), findsOneWidget);
   });

@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../features/auth/domain/models/auth_user.dart';
 import '../features/auth/presentation/auth_redirect.dart';
 import '../features/auth/presentation/providers/auth_providers.dart';
 import '../features/cv_editor/data/services/linked_account_cv_adopter.dart';
+import '../features/cv_management/presentation/controllers/dashboard_sync_controller.dart';
 import 'routes.dart';
 import 'theme.dart';
 
@@ -39,7 +41,7 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
     ) {
       next.whenData((change) {
         unawaited(_persistAuthenticatedSession(change));
-        unawaited(_adoptLinkedAccountCvs(change));
+        unawaited(_adoptThenSync(change));
         _handleAuthChange(change);
       });
     });
@@ -49,6 +51,9 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: _router,
+      locale: const Locale('vi'),
+      supportedLocales: const [Locale('vi'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
     );
   }
 
@@ -64,6 +69,31 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
           stack: stackTrace,
           library: 'authentication',
           context: ErrorDescription('while persisting authenticated session'),
+        ),
+      );
+    }
+  }
+
+  /// Links CVs from the user's other account id, then backs everything up
+  /// silently. Sync keeps the newer copy and never deletes local data.
+  Future<void> _adoptThenSync(AuthSessionChange change) async {
+    await _adoptLinkedAccountCvs(change);
+    final user = change.user;
+    final relevant =
+        change.event == AuthSessionEvent.signedIn ||
+        change.event == AuthSessionEvent.initial;
+    if (!relevant || user == null) return;
+    try {
+      await ref
+          .read(dashboardSyncControllerProvider.notifier)
+          .synchronize(user.id);
+    } catch (error, stackTrace) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'sync',
+          context: ErrorDescription('while syncing after sign-in'),
         ),
       );
     }

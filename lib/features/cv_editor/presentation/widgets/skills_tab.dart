@@ -101,7 +101,7 @@ class SkillsTab extends StatelessWidget {
                   label: Text(
                     _isEn
                         ? 'Use Starter Skills ("Fill-in")'
-                        : 'Dùng bộ kỹ năng mẫu ("Điền mẫu nhanh")',
+                        : 'Điền nhanh bộ kỹ năng mẫu',
                   ),
                 ),
               ],
@@ -167,9 +167,7 @@ class SkillsTab extends StatelessWidget {
           _buildCategoryHeader(
             context,
             icon: Icons.code_rounded,
-            title: _isEn
-                ? 'Technical & Hard Skills'
-                : 'Kỹ năng chuyên môn (Hard Skills)',
+            title: _isEn ? 'Technical & Hard Skills' : 'Kỹ năng chuyên môn',
           ),
           const SizedBox(height: 10),
           Wrap(
@@ -183,9 +181,7 @@ class SkillsTab extends StatelessWidget {
           _buildCategoryHeader(
             context,
             icon: Icons.groups_rounded,
-            title: _isEn
-                ? 'Soft Skills & Methods'
-                : 'Kỹ năng mềm & Phương pháp',
+            title: _isEn ? 'Soft Skills & Methods' : 'Kỹ năng mềm',
           ),
           const SizedBox(height: 10),
           Wrap(

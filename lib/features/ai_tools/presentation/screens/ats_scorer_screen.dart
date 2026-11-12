@@ -102,7 +102,9 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _writeCoverLetter(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast('Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI viết thư.');
+      _toast(
+        'Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI viết thư.',
+      );
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -132,7 +134,9 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _tailorWithAi(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast('Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI chỉnh CV.');
+      _toast(
+        'Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI chỉnh CV.',
+      );
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -318,7 +322,7 @@ class _HeroCard extends StatelessWidget {
           ),
           SizedBox(height: 6),
           Text(
-            'So khớp từ khóa giữa CV và tin tuyển dụng, gợi ý kỹ năng còn thiếu trước khi nộp hồ sơ.',
+            'Xem CV đã có đủ kỹ năng nhà tuyển dụng cần chưa, trước khi nộp hồ sơ.',
             style: TextStyle(color: Color(0xFFC7D2FE), height: 1.4),
           ),
         ],
@@ -362,7 +366,7 @@ class _ScoreCard extends StatelessWidget {
     final verdict = report.totalKeywords == 0
         ? 'Không đủ dữ liệu để chấm.'
         : score >= 75
-        ? 'CV khớp tốt với tin tuyển dụng. Hãy đảm bảo từ khóa xuất hiện trong mô tả kinh nghiệm.'
+        ? 'CV khớp tốt với tin tuyển dụng. Hãy nêu các kỹ năng này trong phần kinh nghiệm.'
         : score >= 50
         ? 'Khá phù hợp. Bổ sung kỹ năng còn thiếu (nếu bạn thật sự có) để tăng điểm.'
         : 'Độ khớp thấp. Cân nhắc điều chỉnh tóm tắt, kỹ năng và dự án theo tin tuyển dụng.';
@@ -408,7 +412,7 @@ class _ScoreCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Khớp ${report.matchedKeywords.length}/${report.totalKeywords} từ khóa',
+                  'Có ${report.matchedKeywords.length}/${report.totalKeywords} kỹ năng được yêu cầu',
                   style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
@@ -456,7 +460,7 @@ class _KeywordCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Từ khóa đã khớp',
+            'Kỹ năng đã có',
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
@@ -470,7 +474,7 @@ class _KeywordCard extends StatelessWidget {
           _chips(
             report.missingKeywords,
             const Color(0xFFFFEDD5),
-            'Không thiếu từ khóa nào',
+            'Không thiếu kỹ năng nào',
           ),
           const SizedBox(height: 14),
           Wrap(

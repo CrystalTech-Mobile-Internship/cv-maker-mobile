@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../cv_management/presentation/controllers/reusable_profile_provider.dart';
+import '../../../legal/presentation/legal_document_screen.dart';
 import '../providers/auth_providers.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
@@ -73,7 +74,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Đăng nhập để quản lý tài khoản và đồng bộ CV',
+                'Đăng nhập để sao lưu CV và dùng trên nhiều thiết bị',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
@@ -82,6 +83,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 onPressed: () => context.go('/login'),
                 child: const Text('Đăng nhập'),
               ),
+              const SizedBox(height: 20),
+              const LegalLinksText(textAlign: TextAlign.center),
             ],
           ),
         ),
@@ -200,7 +203,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Thông tin này có thể được chọn lại khi tạo CV mới.',
+                        'Dùng lại khi tạo CV mới.',
                         style: TextStyle(fontSize: 12),
                       ),
                     ],
@@ -231,8 +234,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     ),
                     _AccountInfoTile(
                       icon: Icons.link_rounded,
-                      label: 'Phương thức đăng nhập',
-                      value: user.provider,
+                      label: 'Đăng nhập bằng',
+                      value: user.provider == 'google'
+                          ? 'Google'
+                          : 'Email và mật khẩu',
                     ),
                   ],
                 ),
@@ -265,7 +270,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   color: AppTheme.primarySlate,
                 ),
                 title: const Text('Nâng cấp Pro'),
-                subtitle: const Text('VietQR • Mẫu Premium'),
+                subtitle: const Text('Nhiều lượt AI hơn, mẫu CV cao cấp'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push('/upgrade-pro'),
               ),
@@ -273,7 +278,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
               FilledButton.icon(
                 onPressed: isLoading ? null : _saveProfile,
                 icon: const Icon(Icons.save_outlined),
-                label: const Text('Lưu hồ sơ tài khoản'),
+                label: const Text('Lưu thay đổi'),
               ),
               const SizedBox(height: 10),
               OutlinedButton.icon(
@@ -291,8 +296,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 label: const Text('Đăng xuất'),
               ),
               const SizedBox(height: 12),
+              const LegalLinksText(textAlign: TextAlign.center),
+              const SizedBox(height: 8),
               Text(
-                'CV trên thiết bị không bị xóa khi bạn cập nhật tài khoản hoặc đăng xuất.',
+                'Đăng xuất không xóa CV trên máy.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppTheme.mutedText,
