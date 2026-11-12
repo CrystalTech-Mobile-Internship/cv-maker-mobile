@@ -500,6 +500,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Cỡ chữ, vừa trang'), findsOneWidget);
     expect(find.text('Ẩn nội dung mẫu'), findsOneWidget);
-    expect(find.text('Tải tệp (PDF / Word)'), findsOneWidget);
+    expect(find.text('Tải PDF/Word'), findsOneWidget);
   });
 }

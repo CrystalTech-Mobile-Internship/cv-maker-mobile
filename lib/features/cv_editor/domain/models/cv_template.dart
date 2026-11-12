@@ -95,7 +95,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: 'premium_elegant_photo',
       name: 'Elegant Portrait',
-      audience: 'Premium • Có ảnh',
+      audience: 'Có ảnh',
       description: 'Phong cách thanh lịch dành cho hồ sơ cấp cao.',
       accentHex: '#B45309',
       layout: CvTemplateLayout.cleanPhoto,
@@ -105,7 +105,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: 'premium_creative_portfolio',
       name: 'Creative Portfolio',
-      audience: 'Premium • Thiết kế',
+      audience: 'Thiết kế',
       description: 'Bố cục giàu hình ảnh cho ngành sáng tạo.',
       accentHex: '#DB2777',
       layout: CvTemplateLayout.creative,
@@ -115,7 +115,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: 'premium_ai_focus',
       name: 'Modern Focus',
-      audience: 'Premium • Gọn, hiện đại',
+      audience: 'Gọn, hiện đại',
       description: 'Gợi ý nội dung và từ khóa theo vị trí ứng tuyển.',
       accentHex: '#4F46E5',
       layout: CvTemplateLayout.executive,
@@ -124,7 +124,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateCreativeTech,
       name: 'Creative Tech',
-      audience: 'Premium • Công nghệ',
+      audience: 'Công nghệ',
       description: 'Header nổi bật cho hồ sơ công nghệ sáng tạo.',
       accentHex: '#7C3AED',
       layout: CvTemplateLayout.creative,
@@ -134,7 +134,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateProfessionalSidebar,
       name: 'Professional Sidebar',
-      audience: 'Premium • Sinh viên',
+      audience: 'Sinh viên',
       description: 'Sidebar kỹ năng và nội dung chính cân đối.',
       accentHex: '#18A999',
       layout: CvTemplateLayout.sidebar,
@@ -144,7 +144,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateExecutiveNavy,
       name: 'Executive Navy',
-      audience: 'Premium • Quản lý',
+      audience: 'Quản lý',
       description: 'Phong cách doanh nghiệp, ưu tiên thành tích.',
       accentHex: '#1E3A8A',
       layout: CvTemplateLayout.executive,
@@ -153,7 +153,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateAcademicClassic,
       name: 'Academic Classic',
-      audience: 'Premium • Giáo dục',
+      audience: 'Giáo dục',
       description: 'Bố cục cổ điển cho học thuật và chứng chỉ.',
       accentHex: '#9A3412',
       layout: CvTemplateLayout.academic,
@@ -162,7 +162,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateFreshProfile,
       name: 'Fresh Profile',
-      audience: 'Premium • Marketing',
+      audience: 'Marketing',
       description: 'Ảnh nổi bật cùng mảng màu xanh tươi trẻ.',
       accentHex: '#047857',
       layout: CvTemplateLayout.freshPhoto,
@@ -172,7 +172,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateFinancePrecision,
       name: 'Finance Precision',
-      audience: 'Premium • Tài chính',
+      audience: 'Tài chính',
       description: 'Bố cục nghiêm túc, nhấn mạnh số liệu và thành tích.',
       accentHex: '#1E3A5F',
       layout: CvTemplateLayout.executive,
@@ -181,7 +181,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateHealthcareCalm,
       name: 'Healthcare Calm',
-      audience: 'Premium • Y tế',
+      audience: 'Y tế',
       description: 'Màu xanh dịu, khoảng trắng tốt và dễ kiểm tra.',
       accentHex: '#0F766E',
       layout: CvTemplateLayout.modern,
@@ -190,7 +190,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateSalesImpact,
       name: 'Sales Impact',
-      audience: 'Premium • Kinh doanh',
+      audience: 'Kinh doanh',
       description: 'Tiêu đề mạnh, tập trung KPI và kết quả đo lường.',
       accentHex: '#B45309',
       layout: CvTemplateLayout.executive,

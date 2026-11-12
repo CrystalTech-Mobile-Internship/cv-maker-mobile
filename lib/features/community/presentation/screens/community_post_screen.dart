@@ -10,6 +10,7 @@ import '../../domain/repositories/community_repository.dart';
 import '../controllers/community_feed_controller.dart';
 import '../widgets/community_actions.dart';
 import '../widgets/community_post_card.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 /// Post detail with comments.
 class CommunityPostScreen extends ConsumerStatefulWidget {
@@ -115,7 +116,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
-      appBar: AppBar(title: Text(post.kind.label)),
+      appBar: AppBar(
+        leading: homeFallbackLeading(context),
+        title: Text(post.kind.label),
+      ),
       body: SafeArea(
         child: Column(
           children: [

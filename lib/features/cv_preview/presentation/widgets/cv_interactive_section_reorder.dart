@@ -231,7 +231,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                       child: Text(
                         _isEn
                             ? 'Drag cards to reorder your A4 layout in real-time'
-                            : 'Kéo thả để đổi thứ tự các mục',
+                            : 'Kéo thả để đổi thứ tự',
                         style: const TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w600,
@@ -301,6 +301,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
               final isFirst = index == 0;
               final isLast = index == sections.length - 1;
               final isVisible = cv.isSectionVisible(key);
+              final showIcon = MediaQuery.sizeOf(context).width >= 440;
 
               return Card(
                 key: ValueKey('preview-section-$key'),
@@ -312,44 +313,25 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                 ),
                 color: isVisible ? Colors.white : const Color(0xFFF8FAFC),
                 child: Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
                   child: Row(
                     children: [
-                      // Order Badge
-                      Container(
-                        width: 28,
-                        height: 28,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppTheme.brandIndigo.withAlpha(20),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          '#${index + 1}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: AppTheme.brandIndigo,
+                      if (showIcon) ...[
+                        Container(
+                          width: 34,
+                          height: 34,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            def.icon,
+                            size: 18,
+                            color: AppTheme.primarySlate,
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-
-                      // Icon
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          def.icon,
-                          size: 20,
-                          color: AppTheme.primarySlate,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
+                        const SizedBox(width: 10),
+                      ],
 
                       // Section Title & Snippet Preview
                       Expanded(

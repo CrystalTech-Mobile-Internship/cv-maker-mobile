@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/auth_providers.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -51,7 +52,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     final hasRecoverySession = ref.watch(currentAuthUserProvider) != null;
     if (!hasRecoverySession) return const _MissingRecoverySession();
     return Scaffold(
-      appBar: AppBar(title: const Text('Đặt mật khẩu mới')),
+      appBar: AppBar(
+        leading: homeFallbackLeading(context, fallback: '/login'),
+        title: const Text('Đặt mật khẩu mới'),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -146,7 +150,10 @@ class _MissingRecoverySession extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Đặt mật khẩu mới')),
+      appBar: AppBar(
+        leading: homeFallbackLeading(context, fallback: '/login'),
+        title: const Text('Đặt mật khẩu mới'),
+      ),
       body: SafeArea(
         child: Center(
           child: Padding(

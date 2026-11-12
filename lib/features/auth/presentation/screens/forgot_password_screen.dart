@@ -8,6 +8,7 @@ import '../../../../app/theme.dart';
 import '../../../../core/constants/auth_callback_parser.dart';
 import '../../../../core/constants/env_constants.dart';
 import '../providers/auth_providers.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({
@@ -91,7 +92,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     final showCode =
         widget.showRecoveryCode ?? EnvConstants.recoveryCodeInEmail;
     return Scaffold(
-      appBar: AppBar(title: const Text('Quên mật khẩu')),
+      appBar: AppBar(
+        leading: homeFallbackLeading(context, fallback: '/login'),
+        title: const Text('Quên mật khẩu'),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

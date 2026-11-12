@@ -311,7 +311,7 @@ void main() {
     expect(find.text('Harvard ATS'), findsOneWidget);
     expect(find.text('Mẫu CV miễn phí'), findsNothing);
 
-    await tester.tap(find.text('Premium'));
+    await tester.tap(find.byKey(const ValueKey('template-filter-premium')));
     await tester.pumpAndSettle();
     expect(find.text('Gói Pro'), findsWidgets);
     expect(tester.takeException(), isNull);

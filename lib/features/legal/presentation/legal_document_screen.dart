@@ -16,7 +16,16 @@ class LegalDocumentScreen extends StatelessWidget {
     final document = LegalDocuments.of(type);
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
-      appBar: AppBar(title: Text(document.title)),
+      appBar: AppBar(
+        title: Text(document.title),
+        leading: context.canPop()
+            ? null
+            : IconButton(
+                tooltip: 'Về trang chính',
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => context.go('/home'),
+              ),
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

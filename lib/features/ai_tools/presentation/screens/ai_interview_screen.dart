@@ -8,6 +8,7 @@ import '../../domain/models/ai_assistant_models.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 import '../controllers/ai_interview_controller.dart';
 import '../widgets/ai_access_guard.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
 
 /// Conversational CV builder: the AI interviews the user, then turns the
 /// conversation into a CV draft that goes through the normal review dialog.
@@ -102,6 +103,7 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
+        leading: homeFallbackLeading(context),
         title: const Text('Tạo CV'),
         actions: [
           const AiQuotaChip(),
