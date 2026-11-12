@@ -62,7 +62,7 @@ class BillingStatusCard extends ConsumerWidget {
             if (quota != null) ...[
               const SizedBox(height: 4),
               Text(
-                'Lượt AI hôm nay: ${quota.used}/${quota.limit}',
+                'Đã dùng hôm nay: ${quota.used}/${quota.limit} lượt',
                 style: const TextStyle(color: AppTheme.mutedText),
               ),
             ],

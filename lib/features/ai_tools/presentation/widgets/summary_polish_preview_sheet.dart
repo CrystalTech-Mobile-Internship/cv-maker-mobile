@@ -27,7 +27,7 @@ Future<SummaryPolishPreviewAction> showSummaryPolishPreviewSheet({
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    isEnglish ? 'Review AI suggestion' : 'Xem trước gợi ý AI',
+                    isEnglish ? 'Review suggestion' : 'Gợi ý viết lại',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -45,7 +45,7 @@ Future<SummaryPolishPreviewAction> showSummaryPolishPreviewSheet({
                   ),
                   const SizedBox(height: 12),
                   _SummaryCard(
-                    title: isEnglish ? 'AI suggestion' : 'Nội dung đề xuất',
+                    title: isEnglish ? 'Suggestion' : 'Nội dung đề xuất',
                     content: suggested,
                   ),
                   const SizedBox(height: 18),

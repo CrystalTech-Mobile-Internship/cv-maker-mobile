@@ -34,17 +34,15 @@ Future<ResumeImportMode?> showResumeImportModeSheet(
             ),
             const SizedBox(height: 4),
             Text(
-              'Đã đọc xong tệp. Chọn cách lấy thông tin:',
+              'Chọn cách đọc CV:',
               style: const TextStyle(color: AppTheme.mutedText),
             ),
             const SizedBox(height: 14),
             _ModeTile(
               key: const ValueKey('import-mode-ai'),
               icon: Icons.auto_awesome_outlined,
-              title: 'Dùng AI (chính xác hơn)',
-              subtitle: isSignedIn
-                  ? 'Nhận ra đúng từng mục, thời gian và nội dung. Dùng $aiCost lượt AI.'
-                  : 'Cần đăng nhập. Tài khoản Free có lượt AI miễn phí mỗi ngày.',
+              title: 'Đọc chính xác',
+              subtitle: isSignedIn ? 'Dùng $aiCost lượt.' : 'Cần đăng nhập.',
               onTap: () => Navigator.pop(context, ResumeImportMode.ai),
             ),
             const SizedBox(height: 10),
@@ -52,8 +50,7 @@ Future<ResumeImportMode?> showResumeImportModeSheet(
               key: const ValueKey('import-mode-local'),
               icon: Icons.phone_android_outlined,
               title: 'Đọc nhanh trên máy',
-              subtitle:
-                  'Miễn phí, không cần mạng. Hợp với CV trình bày đơn giản.',
+              subtitle: 'Miễn phí, không cần mạng.',
               onTap: () => Navigator.pop(context, ResumeImportMode.onDevice),
             ),
           ],

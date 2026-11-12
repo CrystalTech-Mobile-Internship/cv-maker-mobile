@@ -102,7 +102,7 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
-        title: const Text('Tạo CV cùng AI'),
+        title: const Text('Tạo CV'),
         actions: [
           const AiQuotaChip(),
           PopupMenuButton<String>(
@@ -200,7 +200,7 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
                       : const Icon(Icons.description_outlined),
                   label: Text(
                     state.isGenerating
-                        ? 'AI đang soạn CV...'
+                        ? 'Đang soạn CV...'
                         : state.canGenerate
                         ? 'Tạo CV từ cuộc trò chuyện (${AiCreditCost.generateCv} lượt)'
                         : 'Trả lời thêm vài câu để tạo CV',
@@ -274,7 +274,7 @@ class _TypingBubble extends StatelessWidget {
             ),
             SizedBox(width: 10),
             Text(
-              'AI đang trả lời...',
+              'Đang trả lời...',
               style: TextStyle(color: AppTheme.mutedText),
             ),
           ],

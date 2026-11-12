@@ -228,11 +228,7 @@ class ExperienceTab extends StatelessWidget {
                         key: ValueKey('improve-bullets-${item.id}'),
                         onPressed: () => onImproveWithAi!(item),
                         icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                        label: Text(
-                          _isEn
-                              ? 'Rewrite bullets with AI'
-                              : 'AI viết lại gạch đầu dòng',
-                        ),
+                        label: Text(_isEn ? 'Rewrite' : 'Viết lại cho hay hơn'),
                       ),
                     ),
                   ],

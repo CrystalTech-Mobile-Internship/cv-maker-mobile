@@ -395,8 +395,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         _debounceTimer?.cancel();
         setState(
           () => _syncStatusText = _isEn
-              ? 'Saving AI suggestion locally...'
-              : 'Đang áp dụng gợi ý của AI...',
+              ? 'Applying suggestion...'
+              : 'Đang áp dụng...',
         );
       },
       persistSuggestion: (suggestion) async {
@@ -409,21 +409,19 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     if (result.status == SummaryPolishFlowStatus.failed) {
       setState(
         () => _syncStatusText = _isEn
-            ? 'AI suggestion was not applied'
-            : 'Chưa áp dụng gợi ý AI',
+            ? 'Suggestion was not applied'
+            : 'Chưa áp dụng',
       );
       _showInputValidationError(
         result.messageVi ?? 'Không thể tối ưu lúc này. Hãy thử lại.',
-        result.messageEn ?? 'AI is unavailable. Please try again.',
+        result.messageEn ?? 'Please try again.',
       );
       return;
     }
     if (result.status == SummaryPolishFlowStatus.applied) {
       setState(() {
         _summaryController.text = result.suggestion!;
-        _syncStatusText = _isEn
-            ? 'AI suggestion saved on device'
-            : 'Đã áp dụng gợi ý của AI';
+        _syncStatusText = _isEn ? 'Suggestion applied' : 'Đã áp dụng';
       });
       _scheduleDesktopPreview();
     }
@@ -880,9 +878,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     try {
       final suggestion = await runWithAiProgress(
         context,
-        _selectedLanguage == 'en'
-            ? 'AI is rewriting your bullet points...'
-            : 'AI đang viết lại gạch đầu dòng...',
+        _selectedLanguage == 'en' ? 'Rewriting...' : 'Đang viết lại...',
         () => ref
             .read(aiAssistantRepositoryProvider)
             .improveBullets(

@@ -45,14 +45,14 @@ class AiWritingRemoteDataSource {
       client = _client;
     } on StateError {
       throw const AiWritingRemoteException(
-        'Máy chủ AI chưa được cấu hình cho bản cài đặt này.',
+        'Chức năng này tạm thời chưa dùng được.',
         statusCode: 503,
         code: 'not_configured',
       );
     }
     if (client.auth.currentSession == null) {
       throw const AiWritingRemoteException(
-        'Bạn cần đăng nhập để sử dụng trợ lý AI.',
+        'Bạn cần đăng nhập để dùng chức năng này.',
         statusCode: 401,
         code: 'unauthenticated',
       );
@@ -69,7 +69,7 @@ class AiWritingRemoteDataSource {
       }
       if (data is! Map) {
         throw const AiWritingRemoteException(
-          'Dịch vụ AI trả về dữ liệu không hợp lệ.',
+          'Có lỗi xảy ra. Hãy thử lại.',
           statusCode: 502,
         );
       }
@@ -80,7 +80,7 @@ class AiWritingRemoteDataSource {
       throw _fromBody(error.details, error.status, cause: error);
     } catch (error) {
       throw AiWritingRemoteException(
-        'Không thể kết nối trợ lý AI. Hãy kiểm tra mạng và thử lại.',
+        'Không có kết nối. Hãy kiểm tra mạng.',
         statusCode: 503,
         cause: error,
       );
@@ -108,8 +108,8 @@ class AiWritingRemoteDataSource {
     final message = body['message'] is String
         ? body['message'] as String
         : status == 404
-        ? 'Trợ lý AI chưa được kích hoạt trên máy chủ.'
-        : 'Dịch vụ AI tạm thời không khả dụng.';
+        ? 'Chức năng này tạm thời chưa dùng được.'
+        : 'Hệ thống đang bận. Hãy thử lại sau.';
     return AiWritingRemoteException(
       message,
       statusCode: status,

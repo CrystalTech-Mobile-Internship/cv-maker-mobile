@@ -23,7 +23,7 @@ Future<void> showCoverLetterSheet(BuildContext context, String letter) {
         ),
         children: [
           const Text(
-            'Thư xin việc (bản nháp AI)',
+            'Thư xin việc',
             style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 18,

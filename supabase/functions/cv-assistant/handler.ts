@@ -69,7 +69,7 @@ export function createHandler(deps: Dependencies) {
       return error(
         401,
         "unauthenticated",
-        "Bạn cần đăng nhập để sử dụng trợ lý AI.",
+        "Bạn cần đăng nhập để dùng chức năng này.",
       );
     }
 
@@ -88,14 +88,14 @@ export function createHandler(deps: Dependencies) {
       try {
         return json({ quota: await quotaStore.current() });
       } catch (_) {
-        return error(503, "quota_unavailable", "Chưa đọc được hạn mức AI.");
+        return error(503, "quota_unavailable", "Chưa xem được số lượt còn lại.");
       }
     }
 
     const actionName = String(body?.action ?? "");
     const action = actions[actionName];
     if (!action) {
-      return error(400, "invalid_input", "Chức năng AI không tồn tại.");
+      return error(400, "invalid_input", "Chức năng không tồn tại.");
     }
     const input = action.validate(body.input);
     if (!input) {
@@ -110,15 +110,15 @@ export function createHandler(deps: Dependencies) {
     try {
       quota = await quotaStore.consume(action.cost);
     } catch (_) {
-      return error(503, "quota_unavailable", "Chưa kiểm tra được hạn mức AI.");
+      return error(503, "quota_unavailable", "Chưa kiểm tra được số lượt. Hãy thử lại.");
     }
     if (quota.allowed === false) {
       return error(
         402,
         "quota_exceeded",
         quota.plan === "pro"
-          ? "Bạn đã dùng hết lượt AI hôm nay. Hạn mức sẽ được làm mới vào ngày mai."
-          : "Tài khoản Free đã hết lượt AI hôm nay. Nâng cấp Pro để dùng nhiều hơn.",
+          ? "Bạn đã hết lượt hôm nay. Ngày mai sẽ có lượt mới."
+          : "Bạn đã hết lượt hôm nay. Nâng cấp Pro để có thêm lượt.",
         { quota },
       );
     }
@@ -150,7 +150,7 @@ export function createHandler(deps: Dependencies) {
       return error(
         503,
         "provider_unavailable",
-        "Dịch vụ AI đang bận. Lượt dùng đã được hoàn lại, hãy thử lại sau.",
+        "Hệ thống đang bận. Lượt dùng đã được hoàn lại, hãy thử lại sau.",
       );
     }
   };

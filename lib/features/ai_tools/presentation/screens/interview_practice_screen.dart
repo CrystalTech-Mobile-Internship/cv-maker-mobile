@@ -138,7 +138,7 @@ class _InterviewPracticeScreenState
                 onPressed: cv == null || state.isBusy ? null : () => _start(cv),
                 child: Text(
                   state.isLoadingQuestions
-                      ? 'AI đang soạn câu hỏi...'
+                      ? 'Đang soạn câu hỏi...'
                       : 'Bắt đầu (${AiCreditCost.interviewQuestions} lượt)',
                 ),
               ),
@@ -268,9 +268,7 @@ class _Intro extends StatelessWidget {
         border: Border.all(color: AppTheme.softBorder),
       ),
       child: const Text(
-        'AI đọc CV của bạn (và tin tuyển dụng nếu có) để đặt 6 câu hỏi phỏng vấn sát thực tế. '
-        'Trả lời từng câu, AI sẽ chấm điểm, chỉ ra điểm mạnh, điểm cần cải thiện '
-        'và gợi ý câu trả lời mẫu dựa trên chính kinh nghiệm của bạn.',
+        'Trả lời 6 câu hỏi dựa trên CV của bạn và nhận góp ý cho từng câu.',
         style: TextStyle(height: 1.45, color: AppTheme.primarySlate),
       ),
     );
@@ -417,7 +415,7 @@ class _FeedbackCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               const Text(
-                'Nhận xét của AI (thang 10)',
+                'Nhận xét (thang 10)',
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   color: AppTheme.primaryNavy,

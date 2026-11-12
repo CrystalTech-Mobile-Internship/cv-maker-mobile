@@ -10,9 +10,7 @@ abstract final class AiCvDraftMapper {
     required String rawText,
     DateTime? now,
   }) {
-    final warnings = <String>[
-      'Nội dung do AI đề xuất — hãy kiểm tra lại từng mục trước khi lưu.',
-    ];
+    final warnings = <String>['Hãy kiểm tra lại trước khi lưu.'];
     final fallbackStart = DateTime.utc((now ?? DateTime.now()).year);
     var missingDates = false;
 

@@ -25,7 +25,7 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
       final suggested = data['suggestedSummary']?.toString().trim() ?? '';
       if (suggested.isEmpty) {
         throw const AiWritingFailure(
-          'AI chưa tạo được nội dung phù hợp. Hãy thử lại.',
+          'Chưa tạo được nội dung. Hãy thử lại.',
           code: AiWritingFailureCode.unavailable,
         );
       }
@@ -38,7 +38,7 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
     } on AiWritingRemoteException catch (error) {
       if (error.statusCode == 404) {
         throw AiWritingFailure(
-          'Trợ lý AI chưa được kích hoạt trên máy chủ. Hãy thử lại sau.',
+          'Chức năng này tạm thời chưa dùng được.',
           code: AiWritingFailureCode.unavailable,
           cause: error,
         );
@@ -50,7 +50,7 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
       );
     } on TimeoutException catch (error) {
       throw AiWritingFailure(
-        'AI phản hồi quá lâu. Hãy thử lại sau.',
+        'Phản hồi quá lâu. Hãy thử lại.',
         code: AiWritingFailureCode.unavailable,
         cause: error,
       );
