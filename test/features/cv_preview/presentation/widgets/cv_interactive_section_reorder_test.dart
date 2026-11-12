@@ -136,6 +136,7 @@ void main() {
     expect(find.text('No summary added yet.'), findsOneWidget);
     expect(find.text('No work experience yet.'), findsOneWidget);
     expect(find.text('No projects added.'), findsOneWidget);
+    expect(updatedOrder, isNull);
   });
 
   testWidgets('CvInteractiveSectionReorder toggles section visibility', (tester) async {

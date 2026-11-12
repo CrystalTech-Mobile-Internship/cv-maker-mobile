@@ -52,7 +52,7 @@ Future<void> loadFonts() async {
       await iconLoader.load();
     }
   } catch (e) {
-    print('Font loading notice: $e');
+    debugPrint('Font loading notice: $e');
   }
 }
 
@@ -67,7 +67,7 @@ Future<void> saveScreenshot(WidgetTester tester, GlobalKey key, String filename)
     final dir = Directory(screenshotDir);
     if (!dir.existsSync()) dir.createSync(recursive: true);
     File('${dir.path}/$filename').writeAsBytesSync(bytes);
-    print('CAPTURED: $filename (${bytes.length} bytes)');
+    debugPrint('CAPTURED: $filename (${bytes.length} bytes)');
   });
 }
 
