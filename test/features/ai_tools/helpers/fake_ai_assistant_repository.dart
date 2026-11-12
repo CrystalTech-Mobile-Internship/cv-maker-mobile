@@ -1,5 +1,6 @@
 import 'package:cv_maker_mobile/features/ai_tools/domain/models/ai_assistant_models.dart';
 import 'package:cv_maker_mobile/features/ai_tools/domain/repositories/ai_assistant_repository.dart';
+import 'package:cv_maker_mobile/features/cv_editor/domain/models/cv_model.dart';
 import 'package:cv_maker_mobile/features/resume_import/domain/models/resume_import_draft.dart';
 
 class FakeAiAssistantRepository implements AiAssistantRepository {
@@ -87,5 +88,50 @@ class FakeAiAssistantRepository implements AiAssistantRepository {
   }) async {
     _maybeFail();
     return 'Kính gửi nhà tuyển dụng';
+  }
+
+  @override
+  Future<AiTailorResult> tailorCv({
+    required CvModel cv,
+    required String jobDescription,
+  }) async {
+    _maybeFail();
+    return AiTailorResult(
+      summary: 'Tóm tắt đã tối ưu',
+      skillsOrder: [for (final s in cv.skills.reversed) s.name],
+      missingSkills: const ['Docker'],
+      experienceBullets: {
+        for (final e in cv.experiences) e.id: ['Đã tối ưu ${e.jobTitle}'],
+      },
+    );
+  }
+
+  @override
+  Future<List<AiInterviewQuestion>> interviewQuestions({
+    required String cvText,
+    required String jobDescription,
+    required String language,
+  }) async {
+    _maybeFail();
+    return const [
+      AiInterviewQuestion(question: 'Giới thiệu về dự án gần nhất?'),
+      AiInterviewQuestion(question: 'Vì sao bạn chọn Flutter?'),
+    ];
+  }
+
+  @override
+  Future<AiAnswerFeedback> answerFeedback({
+    required String question,
+    required String answer,
+    required String cvText,
+    required String language,
+  }) async {
+    _maybeFail();
+    return const AiAnswerFeedback(
+      score: 7,
+      sampleAnswer: 'Câu trả lời mẫu',
+      strengths: ['Rõ ràng'],
+      improvements: ['Thêm số liệu'],
+    );
   }
 }

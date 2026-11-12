@@ -1,3 +1,4 @@
+import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../resume_import/domain/models/resume_import_draft.dart';
 import '../models/ai_assistant_models.dart';
 
@@ -39,6 +40,24 @@ abstract interface class AiAssistantRepository {
     required String cvText,
     required String jobDescription,
     required String company,
+    required String language,
+  });
+
+  Future<AiTailorResult> tailorCv({
+    required CvModel cv,
+    required String jobDescription,
+  });
+
+  Future<List<AiInterviewQuestion>> interviewQuestions({
+    required String cvText,
+    required String jobDescription,
+    required String language,
+  });
+
+  Future<AiAnswerFeedback> answerFeedback({
+    required String question,
+    required String answer,
+    required String cvText,
     required String language,
   });
 }

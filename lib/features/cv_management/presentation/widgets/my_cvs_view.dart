@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
@@ -125,7 +126,11 @@ class MyCvsView extends StatelessWidget {
         const SizedBox(height: 18),
         _ImportResumeCard(onImport: onImport),
         const SizedBox(height: 12),
-        AiAssistantCard(onChat: onOpenAiInterview, onImport: onImport),
+        AiAssistantCard(
+          onChat: onOpenAiInterview,
+          onImport: onImport,
+          onPractice: () => context.push('/interview-practice'),
+        ),
         const SizedBox(height: 12),
         LocalDataToolsCard(onExport: onExportAll, onRestore: onRestoreBackup),
         const SizedBox(height: 12),

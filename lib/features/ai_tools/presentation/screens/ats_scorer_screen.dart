@@ -14,7 +14,9 @@ import '../../domain/services/cv_plain_text.dart';
 import '../../domain/services/jd_keyword_extractor.dart';
 import '../controllers/ai_assistant_providers.dart';
 import '../widgets/ai_access_guard.dart';
+import '../widgets/ai_tailor_review_sheet.dart';
 import '../widgets/cover_letter_sheet.dart';
+import 'interview_practice_screen.dart';
 
 /// Scores a saved CV against a pasted job description. Runs fully offline:
 /// keywords are extracted from the JD with [JdKeywordExtractor] and matched
@@ -127,6 +129,49 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     }
   }
 
+  Future<void> _tailorWithAi(CvModel cv) async {
+    final jd = _jdController.text.trim();
+    if (jd.length < 40) {
+      _toast('Hãy dán JD đầy đủ hơn (ít nhất 40 ký tự) để AI tối ưu CV.');
+      return;
+    }
+    if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
+      return;
+    }
+    if (!mounted) return;
+    try {
+      final result = await runWithAiProgress(
+        context,
+        'AI đang tối ưu CV theo JD...',
+        () => ref
+            .read(aiAssistantRepositoryProvider)
+            .tailorCv(cv: cv, jobDescription: jd),
+      );
+      if (!mounted) return;
+      final confirmed = await showAiTailorReviewSheet(
+        context,
+        cv: cv,
+        result: result,
+      );
+      if (confirmed == null || !mounted) return;
+      final now = DateTime.now().toUtc();
+      final copy = applyTailoring(
+        cv,
+        result,
+        newId: 'tailored-${now.microsecondsSinceEpoch}',
+        title: '${cv.title} (tối ưu theo JD)',
+        confirmedSkills: confirmed,
+        now: now,
+      );
+      final saved = await ref.read(cvRepositoryProvider).save(copy, now: now);
+      if (!mounted) return;
+      _toast('Đã tạo bản CV tối ưu. CV gốc được giữ nguyên.');
+      context.push('/editor', extra: saved);
+    } on AiWritingFailure catch (failure) {
+      if (mounted) _toast(describeAiFailure(failure));
+    }
+  }
+
   void _toast(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
@@ -211,6 +256,28 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                 onOpenEditor: () => context.push('/editor', extra: cv),
               ),
               const SizedBox(height: 12),
+              FilledButton.icon(
+                key: const ValueKey('ats-tailor'),
+                onPressed: () => _tailorWithAi(cv),
+                icon: const Icon(Icons.auto_awesome_outlined),
+                label: Text(
+                  'AI tối ưu CV theo JD (${AiCreditCost.tailorCv} lượt)',
+                ),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                key: const ValueKey('ats-interview'),
+                onPressed: () => context.push(
+                  '/interview-practice',
+                  extra: InterviewPracticeArgs(
+                    cvId: cv.id,
+                    jobDescription: _jdController.text.trim(),
+                  ),
+                ),
+                icon: const Icon(Icons.record_voice_over_outlined),
+                label: const Text('Luyện phỏng vấn cho vị trí này'),
+              ),
+              const SizedBox(height: 8),
               OutlinedButton.icon(
                 key: const ValueKey('ats-cover-letter'),
                 onPressed: () => _writeCoverLetter(cv),

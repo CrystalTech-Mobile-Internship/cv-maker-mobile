@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../resume_import/domain/models/resume_import_draft.dart';
 import '../../domain/models/ai_assistant_models.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
@@ -119,6 +120,95 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
     final text = (result['text'] as String? ?? '').trim();
     if (text.isEmpty) throw _emptyResult();
     return text;
+  }
+
+  @override
+  Future<AiTailorResult> tailorCv({
+    required CvModel cv,
+    required String jobDescription,
+  }) async {
+    final result = await _result('tailor_cv', {
+      'language': cv.language,
+      'targetRole': cv.personalInfo.targetRole,
+      'summary': cv.summary,
+      'skills': [for (final s in cv.skills) s.name],
+      'experiences': [
+        for (final e in cv.experiences.take(8))
+          {
+            'id': e.id,
+            'title': '${e.jobTitle} - ${e.company}',
+            'bullets': e.bulletPoints,
+          },
+      ],
+      'jobDescription': jobDescription,
+    });
+    final bullets = <String, List<String>>{};
+    final experiences = result['experiences'];
+    if (experiences is List) {
+      for (final item in experiences.whereType<Map>()) {
+        final id = item['id']?.toString() ?? '';
+        final lines = _strings(item['bullets']);
+        if (id.isNotEmpty && lines.isNotEmpty) bullets[id] = lines;
+      }
+    }
+    final summary = (result['summary'] as String? ?? '').trim();
+    if (summary.isEmpty && bullets.isEmpty) throw _emptyResult();
+    return AiTailorResult(
+      summary: summary,
+      skillsOrder: _strings(result['skillsOrder']),
+      missingSkills: _strings(result['missingSkills']),
+      experienceBullets: bullets,
+      notes: _strings(result['notes']),
+    );
+  }
+
+  @override
+  Future<List<AiInterviewQuestion>> interviewQuestions({
+    required String cvText,
+    required String jobDescription,
+    required String language,
+  }) async {
+    final result = await _result('interview_questions', {
+      'cv': cvText,
+      'jobDescription': jobDescription,
+      'language': language,
+    });
+    final raw = result['questions'];
+    final questions = <AiInterviewQuestion>[
+      if (raw is List)
+        for (final item in raw.whereType<Map>())
+          if ((item['question'] as String? ?? '').trim().isNotEmpty)
+            AiInterviewQuestion(
+              question: (item['question'] as String).trim(),
+              focus: (item['focus'] as String? ?? '').trim(),
+              tip: (item['tip'] as String? ?? '').trim(),
+            ),
+    ];
+    if (questions.isEmpty) throw _emptyResult();
+    return questions;
+  }
+
+  @override
+  Future<AiAnswerFeedback> answerFeedback({
+    required String question,
+    required String answer,
+    required String cvText,
+    required String language,
+  }) async {
+    final result = await _result('answer_feedback', {
+      'question': question,
+      'answer': answer,
+      'cv': cvText,
+      'language': language,
+    });
+    final sample = (result['sampleAnswer'] as String? ?? '').trim();
+    if (sample.isEmpty) throw _emptyResult();
+    return AiAnswerFeedback(
+      score: (result['score'] as num? ?? 1).toInt().clamp(1, 10),
+      sampleAnswer: sample,
+      strengths: _strings(result['strengths']),
+      improvements: _strings(result['improvements']),
+    );
   }
 
   // ------------------------------------------------------------- internals
