@@ -2,3 +2,6 @@ project_id = "cv-maker-mobile"
 
 [functions.cv-assistant]
 verify_jwt = true
+
+[functions.mirror-sync]
+verify_jwt = false

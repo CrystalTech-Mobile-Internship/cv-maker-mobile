@@ -57,7 +57,10 @@ const interviewBody = {
   action: "interview",
   input: {
     language: "vi",
-    messages: [{ role: "user", content: "Tôi muốn ứng tuyển Flutter Developer" }],
+    messages: [{
+      role: "user",
+      content: "Tôi muốn ứng tuyển Flutter Developer",
+    }],
   },
 };
 
@@ -142,7 +145,12 @@ Deno.test("sanitizes AI CV drafts", () => {
     fullName: "  Nguyễn Văn A ",
     skills: ["Flutter", "", 42],
     experiences: [
-      { jobTitle: "Intern", company: "ABC", startDate: "2024/3", isCurrent: "true" },
+      {
+        jobTitle: "Intern",
+        company: "ABC",
+        startDate: "2024/3",
+        isCurrent: "true",
+      },
       { foo: "bar" },
     ],
     educations: [{ institution: "", degree: "x" }],
@@ -191,5 +199,8 @@ import { partialJsonString } from "./actions.ts";
 
 Deno.test("recovers reply from truncated JSON", () => {
   const text = '{"reply": "Chào bạn!\nBạn học \\"ngành\\" gì? Và';
-  assertEquals(partialJsonString(text, "reply"), 'Chào bạn!\nBạn học "ngành" gì? Và');
+  assertEquals(
+    partialJsonString(text, "reply"),
+    'Chào bạn!\nBạn học "ngành" gì? Và',
+  );
 });
