@@ -28,6 +28,10 @@ final authSessionChangesProvider = StreamProvider<AuthSessionChange>(
 );
 
 final currentAuthUserProvider = Provider<AuthUser?>((ref) {
-  ref.watch(authSessionChangesProvider);
-  return ref.watch(authRepositoryProvider).currentUser;
+  final change = ref.watch(authSessionChangesProvider).valueOrNull;
+  final repositoryUser = ref.watch(authRepositoryProvider).currentUser;
+  if (change?.event == AuthSessionEvent.signedOut) return repositoryUser;
+  // The latest auth event carries the user before the client cache updates
+  // (e.g. right after a password recovery link is opened).
+  return change?.user ?? repositoryUser;
 });

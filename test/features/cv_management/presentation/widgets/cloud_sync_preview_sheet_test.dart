@@ -31,16 +31,16 @@ void main() {
       ),
     );
 
-    expect(find.text('Xem trước đồng bộ Cloud'), findsOneWidget);
+    expect(find.text('Xem trước khi đồng bộ'), findsOneWidget);
     expect(find.text('tuananh@example.com'), findsOneWidget);
     expect(find.text('Supabase Primary'), findsOneWidget);
-    expect(find.text('Tải lên Cloud'), findsOneWidget);
+    expect(find.text('Tải lên tài khoản'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     expect(find.text('Tải về máy'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
 
     // Tap backup button
-    await tester.tap(find.text('Sao lưu JSON ra máy tính trước'));
+    await tester.tap(find.text('Lưu một bản sao ra máy trước'));
     await tester.pump();
     expect(backupRequested, isTrue);
 

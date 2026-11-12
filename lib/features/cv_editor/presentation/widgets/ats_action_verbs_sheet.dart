@@ -114,8 +114,8 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                     children: [
                       Text(
                         _isEn
-                            ? 'ATS Action Verbs & Formulas'
-                            : 'Ngân hàng từ khóa hành động ATS',
+                            ? 'Strong action verbs'
+                            : 'Gợi ý động từ mạnh cho CV',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

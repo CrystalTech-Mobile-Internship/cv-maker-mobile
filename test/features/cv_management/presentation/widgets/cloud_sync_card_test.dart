@@ -18,7 +18,7 @@ void main() {
             isSignedIn: true,
             localCount: 5,
             pendingCount: 2,
-            backendLabel: 'Project phụ',
+            backendLabel: 'Máy chủ phụ',
             isSyncing: false,
             onSync: () {},
             onLogin: () {},
@@ -27,7 +27,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Đích đồng bộ: Project phụ'), findsOneWidget);
+    expect(find.text('Sao lưu vào: Máy chủ phụ'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

@@ -126,8 +126,8 @@ class _InterviewPracticeScreenState
                 maxLines: 6,
                 maxLength: 6000,
                 decoration: const InputDecoration(
-                  labelText: 'Mô tả công việc (không bắt buộc)',
-                  hintText: 'Dán JD để câu hỏi sát với vị trí ứng tuyển hơn',
+                  labelText: 'Tin tuyển dụng (không bắt buộc)',
+                  hintText: 'Dán tin tuyển dụng để câu hỏi sát với vị trí ứng tuyển hơn',
                   alignLabelWithHint: true,
                 ),
               ),
@@ -161,7 +161,7 @@ class _InterviewPracticeScreenState
                 decoration: const InputDecoration(
                   labelText: 'Câu trả lời của bạn',
                   hintText:
-                      'Gợi ý: trả lời theo STAR — Tình huống, Nhiệm vụ, Hành động, Kết quả',
+                      'Gợi ý: kể theo trình tự Tình huống → Việc cần làm → Hành động → Kết quả',
                   alignLabelWithHint: true,
                 ),
               ),
@@ -267,7 +267,7 @@ class _Intro extends StatelessWidget {
         border: Border.all(color: AppTheme.softBorder),
       ),
       child: const Text(
-        'AI đọc CV của bạn (và JD nếu có) để đặt 6 câu hỏi phỏng vấn sát thực tế. '
+        'AI đọc CV của bạn (và tin tuyển dụng nếu có) để đặt 6 câu hỏi phỏng vấn sát thực tế. '
         'Trả lời từng câu, AI sẽ chấm điểm, chỉ ra điểm mạnh, điểm cần cải thiện '
         'và gợi ý câu trả lời mẫu dựa trên chính kinh nghiệm của bạn.',
         style: TextStyle(height: 1.45, color: AppTheme.primarySlate),

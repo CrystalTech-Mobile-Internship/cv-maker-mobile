@@ -28,8 +28,8 @@ void main() {
       find.byKey(const ValueKey('ats-jd-input')),
       'Yêu cầu Flutter, Dart, Firebase và Docker cho dự án mobile.',
     );
-    await tester.ensureVisible(find.text('Chấm điểm CV theo JD'));
-    await tester.tap(find.text('Chấm điểm CV theo JD'));
+    await tester.ensureVisible(find.text('Chấm điểm CV theo tin tuyển dụng'));
+    await tester.tap(find.text('Chấm điểm CV theo tin tuyển dụng'));
     await tester.pumpAndSettle();
 
     expect(find.text('75%'), findsOneWidget);

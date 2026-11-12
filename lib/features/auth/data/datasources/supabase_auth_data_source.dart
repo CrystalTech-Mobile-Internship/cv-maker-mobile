@@ -17,10 +17,7 @@ class SupabaseAuthDataSource {
   SupabaseClient get requiredClient {
     final client = optionalClient;
     if (client == null) {
-      throw StateError(
-        'Supabase chưa được cấu hình. Hãy kiểm tra SUPABASE_URL và '
-        'SUPABASE_ANON_KEY.',
-      );
+      throw StateError('Chưa kết nối được máy chủ tài khoản. Hãy thử lại sau.');
     }
     return client;
   }
@@ -74,6 +71,19 @@ class SupabaseAuthDataSource {
       // recovery session. Returning to the origin avoids requiring a server
       // rewrite rule for a nested Flutter Web route.
       redirectTo: kIsWeb ? Uri.base.origin : callbackUri,
+    );
+  }
+
+  /// Signs in with the recovery code from the email. Works on any device,
+  /// unlike the link, which must be opened where the request was made.
+  Future<AuthResponse> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) {
+    return requiredClient.auth.verifyOTP(
+      type: OtpType.recovery,
+      email: email,
+      token: code,
     );
   }
 

@@ -31,7 +31,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Quên mật khẩu?'), findsOneWidget);
-    expect(find.text('Supabase Cloud: Project kiểm thử'), findsOneWidget);
+    expect(find.text('Máy chủ: Project kiểm thử'), findsOneWidget);
     expect(find.textContaining('Đã kết nối'), findsNothing);
   });
 
@@ -46,7 +46,10 @@ void main() {
       ),
     );
 
-    await tester.enterText(find.byType(TextField), 'invalid');
+    await tester.enterText(
+      find.byKey(const ValueKey('reset-email')),
+      'invalid',
+    );
     await tester.tap(find.text('Gửi liên kết'));
     await tester.pump();
 
@@ -121,12 +124,12 @@ void main() {
     expect(find.text('Đã xác nhận'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('Chấm điểm ATS'),
+      find.text('Chấm điểm CV'),
       250,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Chấm điểm ATS'), findsOneWidget);
+    expect(find.text('Chấm điểm CV'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Nâng cấp Pro'),
@@ -200,6 +203,12 @@ class _ScreenAuthRepository implements AuthRepository {
 
   @override
   bool get isConfigured => true;
+
+  @override
+  Future<AuthUser> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) => throw UnimplementedError();
 
   @override
   Future<void> requestPasswordReset(String email) async {

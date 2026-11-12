@@ -394,7 +394,7 @@ class _SyncBadge extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          isSynced ? 'Cloud' : 'Trên máy',
+          isSynced ? 'Đã sao lưu' : 'Trên máy',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,

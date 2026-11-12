@@ -342,8 +342,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         SnackBar(
           content: Text(
             _isEn
-                ? 'Saved locally. Cloud sync pending: ${result.errorMessage}'
-                : 'Đã lưu trên máy. Chưa đồng bộ cloud: ${result.errorMessage}',
+                ? 'Saved on this device. Not yet backed up: ${result.errorMessage}'
+                : 'Đã lưu trên máy. Chưa sao lưu vào tài khoản: ${result.errorMessage}',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -353,8 +353,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         SnackBar(
           content: Text(
             _isEn
-                ? 'Saved and synchronized to Supabase Cloud.'
-                : 'Đã lưu và đồng bộ lên Supabase Cloud Singapore.',
+                ? 'Saved and backed up to your account.'
+                : 'Đã lưu và sao lưu vào tài khoản.',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -364,7 +364,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         SnackBar(
           content: Text(
             _isEn
-                ? 'Saved safely on device (Offline Mode).'
+                ? 'Saved safely on this device.'
                 : 'Đã lưu an toàn trên máy (Chế độ Ngoại tuyến).',
           ),
           behavior: SnackBarBehavior.floating,
@@ -1394,7 +1394,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
             onPressed: _openSectionReorderSheet,
           ),
           IconButton(
-            tooltip: isEn ? 'Preview Vector PDF' : 'Xem trước PDF',
+            tooltip: isEn ? 'Preview PDF' : 'Xem trước PDF',
             icon: const Icon(Icons.picture_as_pdf_outlined),
             onPressed: _openPreview,
           ),
@@ -1854,8 +1854,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                         )
                       : Text(
                           isEn
-                              ? (isSignedIn ? 'Sync Cloud' : 'Save Locally')
-                              : (isSignedIn ? 'Lưu lên Cloud' : 'Lưu vào máy'),
+                              ? (isSignedIn ? 'Back up' : 'Save Locally')
+                              : (isSignedIn ? 'Lưu vào tài khoản' : 'Lưu vào máy'),
                         ),
                 ),
               ),

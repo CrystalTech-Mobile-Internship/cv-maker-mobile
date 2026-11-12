@@ -164,6 +164,12 @@ class _FakeAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AuthUser> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) => throw UnimplementedError();
+
+  @override
   Future<void> requestPasswordReset(String email) async {
     passwordResetRequests.add(email);
   }

@@ -88,7 +88,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Xem trước đồng bộ Cloud',
+                          'Xem trước khi đồng bộ',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: AppTheme.primaryNavy,
@@ -211,7 +211,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       icon: Icons.upload_rounded,
                       color: Colors.blue.shade700,
                       bgColor: Colors.blue.shade50,
-                      label: 'Tải lên Cloud',
+                      label: 'Tải lên tài khoản',
                       count: preview.pendingUploadCount,
                       hint: 'Bản sửa trên máy',
                     ),
@@ -224,7 +224,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       bgColor: Colors.teal.shade50,
                       label: 'Tải về máy',
                       count: preview.pendingDownloadCount,
-                      hint: 'Bản cloud mới hơn',
+                      hint: 'Bản trên tài khoản mới hơn',
                     ),
                   ),
                 ],
@@ -243,7 +243,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                           : Colors.grey.shade100,
                       label: 'Xung đột',
                       count: preview.conflictCount,
-                      hint: 'Sửa cả 2 nơi (LWW)',
+                      hint: 'Sửa ở cả hai nơi — giữ bản mới hơn',
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -256,7 +256,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       bgColor: preview.pendingDeletionCount > 0
                           ? Colors.red.shade50
                           : Colors.grey.shade100,
-                      label: 'Xóa trên cloud',
+                      label: 'Xóa trên tài khoản',
                       count: preview.pendingDeletionCount,
                       hint: 'Theo lệnh đã xóa',
                     ),
@@ -286,7 +286,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Local-First: Toàn bộ CV trên thiết bị được bảo vệ an toàn trong SQLite nội bộ.',
+                        'CV trên máy luôn được giữ an toàn, kể cả khi đồng bộ gặp lỗi.',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -303,7 +303,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onExportBackup,
                 icon: const Icon(Icons.backup_outlined, size: 18),
-                label: const Text('Sao lưu JSON ra máy tính trước'),
+                label: const Text('Lưu một bản sao ra máy trước'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.brandIndigo,
                   side: const BorderSide(color: AppTheme.brandIndigo),

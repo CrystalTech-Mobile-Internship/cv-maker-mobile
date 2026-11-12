@@ -4,13 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 const _primary = SupabaseEnvironment(
   name: 'primary',
-  label: 'Project chính',
+  label: 'Máy chủ chính',
   url: 'https://primary.supabase.co',
   anonKey: 'sb_publishable_primary',
 );
 const _secondary = SupabaseEnvironment(
   name: 'secondary',
-  label: 'Project phụ',
+  label: 'Máy chủ phụ',
   url: 'https://secondary.supabase.co',
   anonKey: 'sb_publishable_secondary',
 );

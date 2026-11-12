@@ -41,7 +41,7 @@ class LocalDataToolsCard extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           const Text(
-            'Xuất hoặc khôi phục toàn bộ CV bằng tệp JSON. Dữ liệu không tự tải lên Internet.',
+            'Xuất hoặc khôi phục toàn bộ CV bằng một tệp sao lưu. Dữ liệu không tự tải lên mạng.',
             style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
           ),
           const SizedBox(height: 12),

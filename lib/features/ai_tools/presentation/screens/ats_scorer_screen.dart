@@ -65,7 +65,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     );
     if (report.totalKeywords == 0) {
       _toast(
-        'Chưa nhận diện được kỹ năng nào trong JD. Hãy dán phần "Yêu cầu".',
+        'Chưa nhận ra kỹ năng nào trong tin tuyển dụng. Hãy dán phần "Yêu cầu".',
       );
     }
     setState(() {
@@ -102,7 +102,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _writeCoverLetter(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast('Hãy dán JD đầy đủ hơn (ít nhất 40 ký tự) để AI viết thư.');
+      _toast('Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI viết thư.');
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -132,7 +132,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _tailorWithAi(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast('Hãy dán JD đầy đủ hơn (ít nhất 40 ký tự) để AI tối ưu CV.');
+      _toast('Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI chỉnh CV.');
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -142,7 +142,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     try {
       final result = await runWithAiProgress(
         context,
-        'AI đang tối ưu CV theo JD...',
+        'AI đang chỉnh CV theo tin tuyển dụng...',
         () => ref
             .read(aiAssistantRepositoryProvider)
             .tailorCv(cv: cv, jobDescription: jd),
@@ -159,7 +159,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
         cv,
         result,
         newId: 'tailored-${now.microsecondsSinceEpoch}',
-        title: '${cv.title} (tối ưu theo JD)',
+        title: '${cv.title} (theo tin tuyển dụng)',
         confirmedSkills: confirmed,
         now: now,
       );
@@ -188,7 +188,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
-        title: const Text('Chấm điểm ATS'),
+        title: const Text('Chấm điểm CV'),
         actions: const [AiQuotaChip(), SizedBox(width: 8)],
       ),
       body: SafeArea(
@@ -224,21 +224,21 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
               maxLines: 12,
               maxLength: 8000,
               decoration: const InputDecoration(
-                labelText: 'Mô tả công việc (Job Description)',
+                labelText: 'Tin tuyển dụng',
                 alignLabelWithHint: true,
                 hintText:
-                    'Dán JD từ nhà tuyển dụng: yêu cầu kỹ năng, kinh nghiệm, công cụ...',
+                    'Dán tin tuyển dụng: yêu cầu kỹ năng, kinh nghiệm, công cụ...',
               ),
             ),
             const SizedBox(height: 8),
             FilledButton.icon(
               onPressed: () => _analyze(cv),
               icon: const Icon(Icons.analytics_outlined),
-              label: const Text('Chấm điểm CV theo JD'),
+              label: const Text('Chấm điểm CV theo tin tuyển dụng'),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Phân tích chạy ngay trên máy, không gửi CV hay JD ra ngoài.',
+              'Phân tích chạy ngay trên máy, không gửi CV hay tin tuyển dụng ra ngoài.',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -261,7 +261,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                 onPressed: () => _tailorWithAi(cv),
                 icon: const Icon(Icons.auto_awesome_outlined),
                 label: Text(
-                  'AI tối ưu CV theo JD (${AiCreditCost.tailorCv} lượt)',
+                  'AI chỉnh CV theo tin tuyển dụng (${AiCreditCost.tailorCv} lượt)',
                 ),
               ),
               const SizedBox(height: 8),
@@ -283,7 +283,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                 onPressed: () => _writeCoverLetter(cv),
                 icon: const Icon(Icons.mail_outline_rounded),
                 label: Text(
-                  'AI viết thư xin việc theo JD (${AiCreditCost.coverLetter} lượt)',
+                  'AI viết thư xin việc (${AiCreditCost.coverLetter} lượt)',
                 ),
               ),
             ],
@@ -309,7 +309,7 @@ class _HeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'ATS Scorer & JD Matcher',
+            'Đối chiếu CV với tin tuyển dụng',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w800,
@@ -362,10 +362,10 @@ class _ScoreCard extends StatelessWidget {
     final verdict = report.totalKeywords == 0
         ? 'Không đủ dữ liệu để chấm.'
         : score >= 75
-        ? 'CV khớp tốt với JD. Hãy đảm bảo từ khóa xuất hiện trong mô tả kinh nghiệm.'
+        ? 'CV khớp tốt với tin tuyển dụng. Hãy đảm bảo từ khóa xuất hiện trong mô tả kinh nghiệm.'
         : score >= 50
         ? 'Khá phù hợp. Bổ sung kỹ năng còn thiếu (nếu bạn thật sự có) để tăng điểm.'
-        : 'Độ khớp thấp. Cân nhắc điều chỉnh tóm tắt, kỹ năng và dự án theo JD.';
+        : 'Độ khớp thấp. Cân nhắc điều chỉnh tóm tắt, kỹ năng và dự án theo tin tuyển dụng.';
 
     return Container(
       padding: const EdgeInsets.all(18),

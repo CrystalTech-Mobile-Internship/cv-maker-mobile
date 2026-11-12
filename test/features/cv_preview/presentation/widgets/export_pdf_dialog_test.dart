@@ -26,11 +26,11 @@ void main() {
       expect(find.text('Xuất tệp PDF A4'), findsOneWidget);
       expect(find.text('CV_Nguyen_Tuan_Anh'), findsOneWidget);
       expect(find.text('.pdf'), findsOneWidget);
-      expect(find.text('Lưu Offline'), findsOneWidget);
+      expect(find.text('Lưu vào máy'), findsOneWidget);
 
       // Enter a new custom name
       await tester.enterText(find.byType(TextField), 'My_Custom_Resume');
-      await tester.tap(find.text('Lưu Offline'));
+      await tester.tap(find.text('Lưu vào máy'));
       await tester.pumpAndSettle();
 
       expect(exportedName, 'My_Custom_Resume.pdf');
@@ -58,7 +58,7 @@ void main() {
 
     // Clear the text
     await tester.enterText(find.byType(TextField), '');
-    await tester.tap(find.text('Save Offline'));
+    await tester.tap(find.text('Save to device'));
     await tester.pumpAndSettle();
 
     expect(find.text('File name cannot be empty'), findsOneWidget);
@@ -85,7 +85,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('.docx'), findsOneWidget);
-    await tester.tap(find.text('Lưu Offline'));
+    await tester.tap(find.text('Lưu vào máy'));
     await tester.pumpAndSettle();
 
     expect(exportedName, 'CV_Nguyen_Tuan_Anh.docx');

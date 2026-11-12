@@ -508,7 +508,7 @@ class EditorTypographyToolbar extends StatelessWidget {
                   color: Colors.deepOrange,
                 ),
                 label: Text(
-                  _isEn ? 'Action Verbs' : 'Từ khóa ATS',
+                  _isEn ? 'Action Verbs' : 'Động từ mạnh',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

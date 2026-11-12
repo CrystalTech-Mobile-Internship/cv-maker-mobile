@@ -48,6 +48,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider).isLoading;
+    final hasRecoverySession = ref.watch(currentAuthUserProvider) != null;
+    if (!hasRecoverySession) return const _MissingRecoverySession();
     return Scaffold(
       appBar: AppBar(title: const Text('Đặt mật khẩu mới')),
       body: SafeArea(
@@ -127,6 +129,53 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown when the screen is opened without a recovery session, e.g. the
+/// email link expired or was opened in a different browser.
+class _MissingRecoverySession extends StatelessWidget {
+  const _MissingRecoverySession();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Đặt mật khẩu mới')),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.link_off_rounded, size: 44),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Phiên khôi phục không còn hiệu lực',
+                    key: ValueKey('reset-missing-session'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Liên kết có thể đã hết hạn hoặc được mở trên trình duyệt khác. '
+                    'Hãy gửi lại liên kết, hoặc nhập mã khôi phục trong email.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () => context.go('/forgot-password'),
+                    child: const Text('Khôi phục lại'),
+                  ),
+                ],
               ),
             ),
           ),

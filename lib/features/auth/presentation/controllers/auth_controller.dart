@@ -135,7 +135,8 @@ class AuthController extends StateNotifier<AuthActionState> {
     return _run(() async {
       await _guestSessionService.setGuestMode(true);
       return AuthActionResult.success(
-        message: 'Đang sử dụng workspace offline trên thiết bị.',
+        message:
+            'Bạn đang dùng ứng dụng không cần tài khoản; dữ liệu lưu trên máy.',
       );
     });
   }
@@ -149,6 +150,30 @@ class AuthController extends StateNotifier<AuthActionState> {
       await _repository.requestPasswordReset(normalizedEmail);
       return AuthActionResult.success(
         message: 'Đã gửi liên kết đặt lại mật khẩu. Hãy kiểm tra email.',
+      );
+    });
+  }
+
+  Future<AuthActionResult> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) {
+    return _run(() async {
+      final normalizedEmail = email.trim();
+      final normalizedCode = code.replaceAll(RegExp(r'\s'), '');
+      if (!_isValidEmail(normalizedEmail)) {
+        throw const AuthFailure('Vui lòng nhập địa chỉ email hợp lệ.');
+      }
+      if (!RegExp(r'^\d{6,10}$').hasMatch(normalizedCode)) {
+        throw const AuthFailure('Mã khôi phục gồm 6–10 chữ số trong email.');
+      }
+      final user = await _repository.verifyRecoveryCode(
+        email: normalizedEmail,
+        code: normalizedCode,
+      );
+      return AuthActionResult.success(
+        message: 'Mã hợp lệ. Hãy đặt mật khẩu mới.',
+        user: user,
       );
     });
   }

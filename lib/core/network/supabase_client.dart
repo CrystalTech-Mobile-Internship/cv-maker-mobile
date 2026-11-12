@@ -71,9 +71,7 @@ class SupabaseService {
   static SupabaseClient get requiredClient {
     final value = client;
     if (value == null) {
-      throw StateError(
-        'Supabase chưa được cấu hình. Kiểm tra profile và URL/key trong .env.',
-      );
+      throw StateError('Chưa kết nối được máy chủ. Hãy thử lại sau.');
     }
     return value;
   }

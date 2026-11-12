@@ -240,7 +240,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('cv-library-filter')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Đã lên Cloud').last);
+    await tester.tap(find.text('Đã sao lưu').last);
     await tester.pumpAndSettle();
     expect(find.text('Flutter Developer'), findsOneWidget);
     expect(find.text('Backend Engineer'), findsNothing);

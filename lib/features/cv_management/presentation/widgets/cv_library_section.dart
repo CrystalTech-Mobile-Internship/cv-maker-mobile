@@ -112,7 +112,7 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
                 icon: Icons.filter_alt_outlined,
                 items: const {
                   CvLibraryFilter.all: 'Tất cả',
-                  CvLibraryFilter.cloud: 'Đã lên Cloud',
+                  CvLibraryFilter.cloud: 'Đã sao lưu',
                   CvLibraryFilter.local: 'Trên máy',
                   CvLibraryFilter.incomplete: 'Cần hoàn thiện',
                 },

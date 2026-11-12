@@ -18,7 +18,7 @@ SUPABASE_SECONDARY_ANON_KEY=secondary-key
 
     expect(EnvConstants.supabaseUrl, 'https://secondary.supabase.co');
     expect(EnvConstants.supabaseAnonKey, 'secondary-key');
-    expect(EnvConstants.supabaseProfileLabel, 'Project phụ');
+    expect(EnvConstants.supabaseProfileLabel, 'Máy chủ phụ');
     expect(EnvConstants.isSupabaseConfigured, isTrue);
   });
 
@@ -31,7 +31,7 @@ SUPABASE_ANON_KEY=legacy-key
     );
 
     expect(EnvConstants.supabaseUrl, 'https://legacy.supabase.co');
-    expect(EnvConstants.supabaseProfileLabel, 'Project mặc định');
+    expect(EnvConstants.supabaseProfileLabel, 'Máy chủ');
     expect(EnvConstants.isSupabaseConfigured, isTrue);
   });
 
@@ -46,7 +46,7 @@ SUPABASE_SECONDARY_ANON_KEY=secondary-key
 ''',
     );
 
-    expect(EnvConstants.supabaseProfileLabel, 'Project chính');
+    expect(EnvConstants.supabaseProfileLabel, 'Máy chủ chính');
     expect(EnvConstants.isSupabaseConfigured, isFalse);
   });
 }

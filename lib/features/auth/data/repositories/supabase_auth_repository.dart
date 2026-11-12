@@ -91,6 +91,37 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<AuthUser> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await _dataSource.verifyRecoveryCode(
+        email: email,
+        code: code,
+      );
+      final user = _mapUser(response.user);
+      if (user == null) {
+        throw const AuthFailure('Mã khôi phục không đúng hoặc đã hết hạn.');
+      }
+      return user;
+    } on AuthException catch (error) {
+      final message = error.message.toLowerCase();
+      if (message.contains('expired') ||
+          message.contains('invalid') ||
+          message.contains('token')) {
+        throw AuthFailure(
+          'Mã khôi phục không đúng hoặc đã hết hạn.',
+          cause: error,
+        );
+      }
+      throw _mapFailure(error);
+    } catch (error) {
+      throw _mapFailure(error);
+    }
+  }
+
+  @override
   Future<AuthUser> updatePassword(String password) async {
     try {
       final response = await _dataSource.updatePassword(password);

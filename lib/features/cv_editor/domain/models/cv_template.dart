@@ -40,7 +40,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateHarvardAts,
       name: 'Harvard ATS',
-      audience: 'Mọi ngành • Ưu tiên ATS',
+      audience: 'Mọi ngành • Bố cục chuẩn tuyển dụng',
       description: 'Một cột rõ ràng, tối ưu hệ thống tuyển dụng.',
       accentHex: '#111827',
       layout: CvTemplateLayout.classic,
@@ -156,7 +156,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: AppConstants.templateInternationalCompact,
       name: 'International Compact',
-      audience: 'Ứng tuyển quốc tế • ATS • Không ảnh',
+      audience: 'Ứng tuyển quốc tế • Không ảnh',
       description: 'Một cột gọn, ít màu và tối ưu khả năng quét nhanh.',
       accentHex: '#111827',
       layout: CvTemplateLayout.academic,
@@ -188,7 +188,7 @@ abstract final class CvTemplateCatalog {
     CvTemplate(
       id: 'premium_ai_focus',
       name: 'AI Optimized',
-      audience: 'Premium • ATS + AI',
+      audience: 'Premium • Tối ưu bằng AI',
       description: 'Gợi ý nội dung và từ khóa theo vị trí ứng tuyển.',
       accentHex: '#4F46E5',
       layout: CvTemplateLayout.executive,

@@ -18,8 +18,8 @@ class UpcomingToolsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _ToolTile(
-            title: 'Chấm điểm ATS',
-            subtitle: 'So khớp JD',
+            title: 'Chấm điểm CV',
+            subtitle: 'Theo tin tuyển dụng',
             icon: Icons.analytics_outlined,
             iconColor: AppTheme.brandIndigo,
             iconBackground: AppTheme.indigoSurface,

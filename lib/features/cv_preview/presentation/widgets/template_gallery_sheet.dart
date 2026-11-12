@@ -102,7 +102,7 @@ class TemplateGallerySheet extends StatelessWidget {
                       ),
                       Text(
                         isEnglish
-                            ? '${templates.length} professional ATS-compatible styles'
+                            ? '${templates.length} professional styles'
                             : '${templates.length} mẫu chuẩn định dạng quốc tế',
                         style: const TextStyle(
                           fontSize: 12,

@@ -197,7 +197,7 @@ class CvSyncRepository {
         failedCount: failed,
         errorMessage: failed == 0
             ? null
-            : '$failed thao tác chưa thể đồng bộ. Dữ liệu local vẫn an toàn.',
+            : '$failed thao tác chưa thể đồng bộ. Dữ liệu trên máy vẫn an toàn.',
       );
     } on CvRemoteDataSourceException catch (error) {
       return CvSyncResult(
@@ -211,7 +211,7 @@ class CvSyncRepository {
         uploadedCount: 0,
         downloadedCount: 0,
         failedCount: 1,
-        errorMessage: 'Không thể tải dữ liệu cloud. CV local vẫn an toàn.',
+        errorMessage: 'Không tải được dữ liệu từ tài khoản. CV trên máy vẫn an toàn.',
       );
     }
   }

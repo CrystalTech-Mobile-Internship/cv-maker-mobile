@@ -99,6 +99,12 @@ class _FakeAuthRepository implements AuthRepository {
   Stream<AuthSessionChange> watchSession() => const Stream.empty();
 
   @override
+  Future<AuthUser> verifyRecoveryCode({
+    required String email,
+    required String code,
+  }) => throw UnimplementedError();
+
+  @override
   Future<void> requestPasswordReset(String email) => throw UnimplementedError();
 
   @override
