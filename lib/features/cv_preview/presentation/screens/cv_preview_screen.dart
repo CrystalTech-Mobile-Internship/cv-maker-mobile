@@ -303,7 +303,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
   }
 
   Widget _buildAtsBadge() {
-    final report = CvCompletionService.evaluate(_previewCv);
+    // Score the user's real content, never the sample filler.
+    final report = CvCompletionService.evaluate(_workingCv);
     final pct = report.percentage;
     final color = pct >= 80
         ? const Color(0xFF15803D)
@@ -318,7 +319,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       onTap: () {
         showCvCompletionSheet(
           context,
-          _previewCv,
+          _workingCv,
           onContinueEditing: () => Navigator.of(context).pop(),
         );
       },
@@ -368,7 +369,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
             onPressed: () {
               CvJdMatcherSheet.show(
                 context: context,
-                cv: _previewCv,
+                cv: _workingCv,
                 isEnglish: _isEnglish,
                 onAddMissingSkill: (newSkill) {
                   final updatedSkills = List<SkillModel>.from(_workingCv.skills)

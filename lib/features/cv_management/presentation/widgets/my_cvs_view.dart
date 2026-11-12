@@ -263,7 +263,7 @@ class MyCvsView extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              'Hoàn thiện $completion%',
+                              '$completion%',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
