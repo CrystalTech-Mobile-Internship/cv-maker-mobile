@@ -263,8 +263,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         if (!mounted) return;
         _showMessage(
           _isEnglish
-              ? 'Saved offline at ${result.localPath}. Sharing is currently unavailable.'
-              : 'Đã lưu offline tại ${result.localPath}. Hiện chưa thể mở chia sẻ.',
+              ? 'Saved on this device at ${result.localPath}. Sharing is currently unavailable.'
+              : 'Đã lưu trên máy tại ${result.localPath}. Hiện chưa thể mở chia sẻ.',
         );
         return;
       }
@@ -276,8 +276,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                   ? 'The browser is downloading "$chosenFileName".'
                   : 'Trình duyệt đang tải "$chosenFileName".')
             : (_isEnglish
-                  ? 'Saved offline and opened sharing for "$chosenFileName".'
-                  : 'Đã lưu offline và mở chia sẻ "$chosenFileName".'),
+                  ? 'Saved on this device and opened sharing for "$chosenFileName".'
+                  : 'Đã lưu trên máy và mở chia sẻ "$chosenFileName".'),
       );
     } catch (error) {
       if (!mounted) return;
@@ -336,7 +336,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
             Icon(Icons.verified_rounded, size: 13, color: color),
             const SizedBox(width: 4),
             Text(
-              '$pct% ${_isEnglish ? 'ATS' : 'ATS'}',
+              'CV $pct%',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -363,7 +363,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
             key: const Key('preview-jd-matcher-btn'),
             tooltip: _isEnglish
                 ? 'Match with Job Description'
-                : 'So khớp JD tuyển dụng',
+                : 'So khớp với tin tuyển dụng',
             icon: const Icon(Icons.document_scanner_outlined),
             onPressed: () {
               CvJdMatcherSheet.show(
@@ -600,8 +600,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                   );
                   _showMessage(
                     _isEnglish
-                        ? 'Reset layout to default ATS order.'
-                        : 'Đã khôi phục bố cục chuẩn ATS mặc định.',
+                        ? 'Reset to the recommended layout.'
+                        : 'Đã khôi phục bố cục khuyến nghị.',
                   );
                 },
                 onSwitchToPdfView: () =>

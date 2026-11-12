@@ -50,7 +50,7 @@ class CvRemoteDataSource {
       );
     } catch (error) {
       throw CvRemoteDataSourceException(
-        'Không thể kết nối Supabase. Hãy kiểm tra mạng và cấu hình .env.',
+        'Không kết nối được máy chủ. Hãy kiểm tra mạng.',
         cause: error,
       );
     }

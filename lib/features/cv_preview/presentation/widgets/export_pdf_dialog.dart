@@ -127,8 +127,8 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                       const SizedBox(height: 2),
                       Text(
                         isEn
-                            ? 'Vector ATS Standard • Scale: ${widget.fontSizeScale.toStringAsFixed(2)}x'
-                            : 'Chuẩn Vector ATS • Cỡ chữ: ${widget.fontSizeScale.toStringAsFixed(2)}x',
+                            ? 'Sharp print quality • Text size: ${widget.fontSizeScale.toStringAsFixed(2)}x'
+                            : 'Bản in sắc nét • Cỡ chữ: ${widget.fontSizeScale.toStringAsFixed(2)}x',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
@@ -147,7 +147,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                 ButtonSegment(
                   value: 'pdf',
                   icon: const Icon(Icons.picture_as_pdf_rounded),
-                  label: Text(isEn ? 'PDF (Vector A4)' : 'PDF (Chuẩn A4)'),
+                  label: Text(isEn ? 'PDF (A4)' : 'PDF (Chuẩn A4)'),
                 ),
                 ButtonSegment(
                   value: 'docx',
@@ -293,7 +293,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                     label: Text(
                       kIsWeb
                           ? (isEn ? 'Download PDF' : 'Tải PDF')
-                          : (isEn ? 'Save Offline' : 'Lưu Offline'),
+                          : (isEn ? 'Save to device' : 'Lưu vào máy'),
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),

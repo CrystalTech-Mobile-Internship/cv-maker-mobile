@@ -85,7 +85,7 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Mở khóa mẫu Premium, ATS không giới hạn, AI viết nội dung và PDF không watermark.',
+                    'Mở khóa mẫu Premium, chấm điểm CV không giới hạn, AI viết nội dung và PDF không có hình mờ.',
                     style: TextStyle(color: Color(0xFFDBEAFE), height: 1.4),
                   ),
                 ],
@@ -322,8 +322,8 @@ class _ComparisonCard extends StatelessWidget {
       ('Xuất PDF A4', true, true),
       ('Tối đa 2 CV (Free)', true, false),
       ('Mẫu Premium', false, true),
-      ('ATS & AI không giới hạn', false, true),
-      ('PDF không watermark', false, true),
+      ('Chấm điểm CV & AI không giới hạn', false, true),
+      ('PDF không có hình mờ', false, true),
     ];
     return Container(
       padding: const EdgeInsets.all(16),

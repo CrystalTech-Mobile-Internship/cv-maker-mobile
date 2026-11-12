@@ -58,7 +58,7 @@ class CloudSyncCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isSignedIn ? 'Đồng bộ CV' : 'Sao lưu lên Cloud',
+                      isSignedIn ? 'Đồng bộ CV' : 'Sao lưu vào tài khoản',
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         color: AppTheme.primaryNavy,
@@ -78,7 +78,7 @@ class CloudSyncCard extends StatelessWidget {
                     if (isSignedIn) ...[
                       const SizedBox(height: 3),
                       Text(
-                        'Đích đồng bộ: $backendLabel',
+                        'Sao lưu vào: $backendLabel',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

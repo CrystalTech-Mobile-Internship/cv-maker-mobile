@@ -149,8 +149,8 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                     children: [
                       Text(
                         widget.isEnglish
-                            ? 'ATS Job Description Matcher'
-                            : 'So khớp từ khóa JD tuyển dụng',
+                            ? 'Match with a job posting'
+                            : 'So khớp với tin tuyển dụng',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -158,7 +158,7 @@ class _CvJdMatcherSheetState extends State<CvJdMatcherSheet> {
                       ),
                       Text(
                         widget.isEnglish
-                            ? 'Compare your CV with job requirements to boost ATS pass-rate'
+                            ? 'Compare your CV with job requirements to improve your chances'
                             : 'Đối chiếu từ khóa với yêu cầu tuyển dụng để tăng tỷ lệ duyệt',
                         style: TextStyle(
                           fontSize: 12,

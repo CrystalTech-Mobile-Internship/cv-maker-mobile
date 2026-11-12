@@ -28,7 +28,7 @@ void main() {
       ),
     );
 
-    expect(find.text('So khớp từ khóa JD tuyển dụng'), findsOneWidget);
+    expect(find.text('So khớp với tin tuyển dụng'), findsOneWidget);
     expect(find.byKey(const Key('jd-preset-flutter_mobile')), findsOneWidget);
 
     // Missing keyword chip e.g. Firebase or Clean Architecture

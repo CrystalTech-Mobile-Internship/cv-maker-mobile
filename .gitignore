@@ -50,3 +50,6 @@ app.*.map.json
 supabase/functions/.env
 
 artifacts/
+
+# Supabase CLI local state
+supabase/.temp/

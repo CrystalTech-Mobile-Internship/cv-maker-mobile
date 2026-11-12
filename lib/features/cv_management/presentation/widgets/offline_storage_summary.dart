@@ -29,7 +29,7 @@ class OfflineStorageSummary extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '$localCount hồ sơ dùng được khi offline • '
+              '$localCount hồ sơ dùng được khi không có mạng • '
               '$pendingSyncCount thay đổi đang lưu trên máy',
               style: const TextStyle(
                 color: Color(0xFF92400E),

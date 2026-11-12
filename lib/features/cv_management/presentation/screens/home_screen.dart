@@ -306,7 +306,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final actions = <String>[
       if (result.uploadedCount > 0) '${result.uploadedCount} tải lên',
       if (result.downloadedCount > 0) '${result.downloadedCount} tải về',
-      if (result.deletedCount > 0) '${result.deletedCount} xoá trên cloud',
+      if (result.deletedCount > 0) '${result.deletedCount} xoá trên tài khoản',
     ];
     final conflicts = result.conflictCount > 0
         ? ' • ${result.conflictCount} xung đột đã xử lý'

@@ -31,21 +31,21 @@ class EnvConstants {
 
   static SupabaseEnvironment get _primarySupabase => SupabaseEnvironment(
     name: 'primary',
-    label: 'Project chính',
+    label: 'Máy chủ chính',
     url: _value('SUPABASE_PRIMARY_URL'),
     anonKey: _value('SUPABASE_PRIMARY_ANON_KEY'),
   );
 
   static SupabaseEnvironment get _secondarySupabase => SupabaseEnvironment(
     name: 'secondary',
-    label: 'Project phụ',
+    label: 'Máy chủ phụ',
     url: _value('SUPABASE_SECONDARY_URL'),
     anonKey: _value('SUPABASE_SECONDARY_ANON_KEY'),
   );
 
   static SupabaseEnvironment get _legacySupabase => SupabaseEnvironment(
     name: 'legacy',
-    label: 'Project mặc định',
+    label: 'Máy chủ',
     url: _value('SUPABASE_URL'),
     anonKey: _value('SUPABASE_ANON_KEY'),
   );
@@ -97,7 +97,7 @@ class EnvConstants {
   static String get supabaseAnonKey => activeSupabaseEnvironment?.anonKey ?? '';
 
   static String get supabaseProfileLabel =>
-      activeSupabaseEnvironment?.label ?? 'Chưa cấu hình';
+      activeSupabaseEnvironment?.label ?? 'Chưa kết nối';
 
   /// Checks if Supabase credentials are valid (not empty and not sample placeholders)
   static bool get isSupabaseConfigured {

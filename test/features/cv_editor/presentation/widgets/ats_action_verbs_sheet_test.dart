@@ -17,7 +17,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Ngân hàng từ khóa hành động ATS'), findsOneWidget);
+    expect(find.text('Gợi ý động từ mạnh cho CV'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
 
     final insertBtn = find.byKey(const Key('insert-verb-Phát triển'));
