@@ -19,6 +19,7 @@ import '../../../resume_import/domain/models/resume_import_draft.dart';
 import '../../../resume_import/presentation/resume_draft_saver.dart';
 import '../../../resume_import/presentation/widgets/resume_import_mode_sheet.dart';
 import '../../../ai_tools/domain/models/ai_assistant_models.dart';
+import '../../../community/presentation/screens/community_view.dart';
 import '../../../ai_tools/domain/repositories/ai_assistant_repository.dart';
 import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
 import '../../../ai_tools/presentation/widgets/ai_access_guard.dart';
@@ -322,11 +323,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final title = switch (_selectedIndex) {
       0 => 'CV của tôi',
       1 => 'Mẫu CV',
+      2 => 'Cộng đồng',
       _ => 'Tài khoản',
     };
     final titleIcon = switch (_selectedIndex) {
       0 => Icons.description_rounded,
       1 => Icons.palette_rounded,
+      2 => Icons.forum_outlined,
       _ => Icons.account_circle_outlined,
     };
 
@@ -388,6 +391,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onViewProPlans: () => context.push('/upgrade-pro'),
             ),
           ),
+          2 => const CommunityView(),
           _ => const AccountScreen(embedded: true),
         },
       ),
@@ -406,6 +410,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icon(Icons.palette_outlined),
             selectedIcon: Icon(Icons.palette_rounded),
             label: 'Mẫu CV',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.forum_outlined),
+            selectedIcon: Icon(Icons.forum_rounded),
+            label: 'Cộng đồng',
           ),
           NavigationDestination(
             icon: Icon(Icons.account_circle_outlined),
