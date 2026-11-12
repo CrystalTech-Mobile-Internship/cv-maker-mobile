@@ -1,3 +1,4 @@
+import '../../../cv_editor/domain/services/cv_item_order_service.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
@@ -18,6 +19,8 @@ class CvInteractiveSectionReorder extends StatelessWidget {
     this.onResetToDefault,
     this.onSwitchToPdfView,
     this.onToggleVisibility,
+    this.onReorderItems,
+    this.onCheckQuality,
   });
 
   final CvModel cv;
@@ -27,6 +30,10 @@ class CvInteractiveSectionReorder extends StatelessWidget {
   final VoidCallback? onResetToDefault;
   final VoidCallback? onSwitchToPdfView;
   final ValueChanged<String>? onToggleVisibility;
+
+  /// Opens item-level ordering for a section (experience, projects...).
+  final ValueChanged<String>? onReorderItems;
+  final VoidCallback? onCheckQuality;
 
   bool get _isEn => language == 'en';
 
@@ -183,6 +190,14 @@ class CvInteractiveSectionReorder extends StatelessWidget {
     }
   }
 
+  int _itemCount(String section) =>
+      CvItemOrderService.itemsFor(cv, section).length;
+
+  bool _canReorderItems(String section) =>
+      onReorderItems != null &&
+      CvItemOrderService.reorderableSections.contains(section) &&
+      _itemCount(section) >= 2;
+
   @override
   Widget build(BuildContext context) {
     final sections = cv.effectiveSectionOrder;
@@ -222,6 +237,18 @@ class CvInteractiveSectionReorder extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onCheckQuality != null)
+                TextButton(
+                  key: const Key('preview-quality-check-btn'),
+                  onPressed: onCheckQuality,
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: Text(
+                    _isEn ? 'Check' : 'Kiểm tra',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
               if (onResetToDefault != null)
                 TextButton.icon(
                   onPressed: onResetToDefault,
@@ -321,51 +348,71 @@ class CvInteractiveSectionReorder extends StatelessWidget {
 
                       // Section Title & Snippet Preview
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    def.title(_isEn ? "en" : "vi"),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: isVisible
-                                          ? AppTheme.primarySlate
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                                if (!isVisible) ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 2,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
+                        child: InkWell(
+                          key: Key('reorder-items-$key'),
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: _canReorderItems(key)
+                              ? () => onReorderItems!(key)
+                              : null,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Flexible(
                                     child: Text(
-                                      _isEn ? 'Hidden' : 'Đã ẩn',
+                                      def.title(_isEn ? "en" : "vi"),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontSize: 10,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.grey.shade700,
+                                        color: isVisible
+                                            ? AppTheme.primarySlate
+                                            : Colors.grey,
                                       ),
                                     ),
                                   ),
+                                  if (!isVisible) ...[
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade200,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        _isEn ? 'Hidden' : 'Đã ẩn',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ],
+                              ),
+                              const SizedBox(height: 3),
+                              _buildSnippet(key),
+                              if (_canReorderItems(key)) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  _isEn
+                                      ? '${_itemCount(key)} entries · tap to reorder'
+                                      : '${_itemCount(key)} mục · chạm để sắp xếp',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.brandIndigo,
+                                  ),
+                                ),
                               ],
-                            ),
-                            const SizedBox(height: 3),
-                            _buildSnippet(key),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
 
