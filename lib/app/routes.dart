@@ -12,6 +12,8 @@ import '../features/ai_tools/presentation/screens/ai_interview_screen.dart';
 import '../features/ai_tools/presentation/screens/ats_scorer_screen.dart';
 import '../features/ai_tools/presentation/screens/interview_practice_screen.dart';
 import '../features/billing/presentation/screens/pro_upgrade_screen.dart';
+import '../features/legal/domain/legal_documents.dart';
+import '../features/legal/presentation/legal_document_screen.dart';
 import '../features/community/domain/models/community_models.dart';
 import '../features/community/presentation/screens/community_post_screen.dart';
 import '../features/cv_management/presentation/screens/home_screen.dart';
@@ -53,6 +55,8 @@ const _appRoutes = {
   '/interview-practice',
   '/community/post',
   '/upgrade-pro',
+  '/terms',
+  '/privacy',
 };
 
 /// Application Declarative Routing Configuration
@@ -140,6 +144,18 @@ GoRouter createAppRouter({
             ? state.extra as InterviewPracticeArgs
             : null,
       ),
+    ),
+    GoRoute(
+      path: '/terms',
+      name: 'terms',
+      builder: (context, state) =>
+          const LegalDocumentScreen(type: LegalDocumentType.terms),
+    ),
+    GoRoute(
+      path: '/privacy',
+      name: 'privacy',
+      builder: (context, state) =>
+          const LegalDocumentScreen(type: LegalDocumentType.privacy),
     ),
     GoRoute(
       path: '/upgrade-pro',
