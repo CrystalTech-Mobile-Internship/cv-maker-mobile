@@ -130,7 +130,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       return await runWithAiProgress(
         context,
-        'AI đang đọc CV của bạn...',
+        'Đang đọc CV...',
         () => ref
             .read(aiAssistantRepositoryProvider)
             .parseResume(

@@ -30,7 +30,7 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
     final quota = _lastQuota;
     if (quota == null) {
       throw const AiWritingFailure(
-        'Chưa đọc được hạn mức AI.',
+        'Chưa xem được số lượt còn lại.',
         code: AiWritingFailureCode.unavailable,
       );
     }
@@ -64,7 +64,7 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
       'language': language,
       'messages': _trim(messages),
     });
-    return _draft(result, sourceName: 'Trò chuyện với AI', rawText: '');
+    return _draft(result, sourceName: 'Trò chuyện', rawText: '');
   }
 
   @override
@@ -260,7 +260,7 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
       );
     } on TimeoutException catch (error) {
       throw AiWritingFailure(
-        'AI phản hồi quá lâu. Hãy thử lại sau.',
+        'Phản hồi quá lâu. Hãy thử lại.',
         code: AiWritingFailureCode.unavailable,
         cause: error,
       );
@@ -283,7 +283,7 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
       : const [];
 
   static AiWritingFailure _emptyResult() => const AiWritingFailure(
-    'AI chưa tạo được nội dung phù hợp. Hãy thử lại.',
+    'Chưa tạo được nội dung. Hãy thử lại.',
     code: AiWritingFailureCode.unavailable,
   );
 }

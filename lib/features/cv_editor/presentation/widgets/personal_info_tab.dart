@@ -191,7 +191,7 @@ class PersonalInfoTab extends StatelessWidget {
                     label: Text(
                       isAiLoading
                           ? (_isEn ? 'Optimizing...' : 'Đang tối ưu...')
-                          : (_isEn ? 'AI Optimize' : 'Tối ưu AI'),
+                          : (_isEn ? 'Rewrite' : 'Viết lại'),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,

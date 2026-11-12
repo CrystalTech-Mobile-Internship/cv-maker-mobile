@@ -8,7 +8,6 @@ import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../../cv_management/presentation/controllers/cv_list_provider.dart';
 import '../../../cv_preview/domain/services/cv_jd_matcher_service.dart';
-import '../../domain/models/ai_assistant_models.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 import '../../domain/services/cv_plain_text.dart';
 import '../../domain/services/jd_keyword_extractor.dart';
@@ -102,9 +101,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _writeCoverLetter(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast(
-        'Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI viết thư.',
-      );
+      _toast('Hãy dán tin tuyển dụng đầy đủ hơn.');
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -114,7 +111,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     try {
       final letter = await runWithAiProgress(
         context,
-        'AI đang viết thư xin việc...',
+        'Đang viết thư...',
         () => ref
             .read(aiAssistantRepositoryProvider)
             .coverLetter(
@@ -134,9 +131,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _tailorWithAi(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast(
-        'Hãy dán tin tuyển dụng đầy đủ hơn (ít nhất 40 ký tự) để AI chỉnh CV.',
-      );
+      _toast('Hãy dán tin tuyển dụng đầy đủ hơn.');
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -146,7 +141,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     try {
       final result = await runWithAiProgress(
         context,
-        'AI đang chỉnh CV theo tin tuyển dụng...',
+        'Đang chỉnh CV...',
         () => ref
             .read(aiAssistantRepositoryProvider)
             .tailorCv(cv: cv, jobDescription: jd),
@@ -240,15 +235,6 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
               icon: const Icon(Icons.analytics_outlined),
               label: const Text('Chấm điểm CV theo tin tuyển dụng'),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Phân tích chạy ngay trên máy, không gửi CV hay tin tuyển dụng ra ngoài.',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.mutedText,
-              ),
-            ),
             if (report != null && cv != null) ...[
               const SizedBox(height: 18),
               _ScoreCard(report: report),
@@ -264,9 +250,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                 key: const ValueKey('ats-tailor'),
                 onPressed: () => _tailorWithAi(cv),
                 icon: const Icon(Icons.auto_awesome_outlined),
-                label: Text(
-                  'AI chỉnh CV theo tin tuyển dụng (${AiCreditCost.tailorCv} lượt)',
-                ),
+                label: Text('Chỉnh CV theo tin này'),
               ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
@@ -286,9 +270,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                 key: const ValueKey('ats-cover-letter'),
                 onPressed: () => _writeCoverLetter(cv),
                 icon: const Icon(Icons.mail_outline_rounded),
-                label: Text(
-                  'AI viết thư xin việc (${AiCreditCost.coverLetter} lượt)',
-                ),
+                label: Text('Viết thư xin việc'),
               ),
             ],
           ],
@@ -322,7 +304,7 @@ class _HeroCard extends StatelessWidget {
           ),
           SizedBox(height: 6),
           Text(
-            'Xem CV đã có đủ kỹ năng nhà tuyển dụng cần chưa, trước khi nộp hồ sơ.',
+            'Xem CV đã đủ kỹ năng nhà tuyển dụng cần chưa.',
             style: TextStyle(color: Color(0xFFC7D2FE), height: 1.4),
           ),
         ],

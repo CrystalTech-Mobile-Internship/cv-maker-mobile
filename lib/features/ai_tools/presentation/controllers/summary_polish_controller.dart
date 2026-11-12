@@ -64,7 +64,7 @@ class SummaryPolishController extends StateNotifier<SummaryPolishState> {
     } catch (_) {
       const nextState = SummaryPolishState(
         status: SummaryPolishStatus.failure,
-        errorMessage: 'Không thể sử dụng AI lúc này. Hãy thử lại sau.',
+        errorMessage: 'Chưa viết lại được. Hãy thử lại sau.',
       );
       if (mounted) state = nextState;
       return nextState;

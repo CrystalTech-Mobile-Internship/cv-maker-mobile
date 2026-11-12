@@ -47,7 +47,7 @@ class AiAssistantCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Trợ lý AI tạo CV',
+                      'Tạo CV nhanh',
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
@@ -56,7 +56,7 @@ class AiAssistantCard extends StatelessWidget {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Trò chuyện để AI soạn CV, hoặc tải CV cũ lên để AI đọc giúp.',
+                      'Trả lời vài câu hỏi hoặc tải CV cũ lên.',
                       style: TextStyle(
                         fontSize: 12,
                         color: AppTheme.mutedText,
@@ -93,7 +93,7 @@ class AiAssistantCard extends StatelessWidget {
               child: TextButton(
                 key: const ValueKey('open-interview-practice'),
                 onPressed: onPractice,
-                child: const Text('Luyện phỏng vấn với AI theo CV của bạn'),
+                child: const Text('Luyện phỏng vấn'),
               ),
             ),
         ],

@@ -20,11 +20,8 @@ Future<bool> ensureAiAccess(
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.lock_person_rounded),
-        title: const Text('Đăng nhập để dùng AI'),
-        content: const Text(
-          'Trợ lý AI cần tài khoản để bảo vệ dữ liệu và giới hạn lượt dùng. '
-          'Tài khoản Free được tặng lượt AI miễn phí mỗi ngày.',
-        ),
+        title: const Text('Cần đăng nhập'),
+        content: const Text('Tài khoản miễn phí có 15 lượt dùng mỗi ngày.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -50,13 +47,10 @@ Future<bool> ensureAiAccess(
     context: context,
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.privacy_tip_outlined),
-      title: const Text('Quyền riêng tư khi dùng AI'),
+      title: const Text('Quyền riêng tư'),
       content: const Text(
-        '• Chỉ phần nội dung cần thiết (văn bản CV, câu trả lời của bạn) được '
-        'gửi qua máy chủ bảo mật của ứng dụng tới mô hình AI.\n'
-        '• Ứng dụng không lưu nội dung đó trên máy chủ và không ghi log.\n'
-        '• Kết quả AI chỉ là gợi ý — bạn luôn xem lại trước khi lưu.\n'
-        '• Không nhập mật khẩu, số CCCD hay thông tin tài chính vào trò chuyện.',
+        'Nội dung bạn nhập được gửi đi để xử lý và không được lưu lại. '
+        'Đừng nhập mật khẩu hay số giấy tờ tùy thân.',
         style: TextStyle(height: 1.45),
       ),
       actions: [
@@ -117,7 +111,7 @@ Future<T> runWithAiProgress<T>(
 /// the Free budget is exhausted.
 String describeAiFailure(AiWritingFailure failure) {
   if (failure.code == AiWritingFailureCode.quotaExceeded) {
-    return '${failure.message} (Lượt AI được làm mới mỗi ngày.)';
+    return failure.message;
   }
   return failure.message;
 }
@@ -137,7 +131,7 @@ class AiQuotaChip extends ConsumerWidget {
       child: Chip(
         key: const ValueKey('ai-quota-chip'),
         label: Text(
-          'AI ${quota.remaining}/${quota.limit}',
+          '${quota.remaining}/${quota.limit} lượt',
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,

@@ -87,7 +87,7 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                   ),
                   SizedBox(height: 6),
                   Text(
-                    'Mở khóa mẫu CV cao cấp và 200 lượt AI mỗi ngày.',
+                    'Mẫu CV cao cấp và 200 lượt dùng mỗi ngày.',
                     style: TextStyle(color: Color(0xFFDBEAFE), height: 1.4),
                   ),
                 ],
@@ -303,8 +303,8 @@ class _ComparisonCard extends StatelessWidget {
     const rows = [
       ('Tạo và xuất CV PDF, Word', true, true),
       ('Chấm điểm CV theo tin tuyển dụng', true, true),
-      ('15 lượt AI mỗi ngày', true, true),
-      ('200 lượt AI mỗi ngày', false, true),
+      ('15 lượt dùng mỗi ngày', true, true),
+      ('200 lượt dùng mỗi ngày', false, true),
       ('Mẫu CV cao cấp', false, true),
     ];
     return Container(

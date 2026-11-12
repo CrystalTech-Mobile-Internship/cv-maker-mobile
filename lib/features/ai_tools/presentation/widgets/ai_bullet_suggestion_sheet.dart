@@ -67,7 +67,7 @@ class _AiBulletSuggestionSheetState extends State<_AiBulletSuggestionSheet> {
         ),
         children: [
           const Text(
-            'Gợi ý từ AI',
+            'Gợi ý viết lại',
             style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 18,

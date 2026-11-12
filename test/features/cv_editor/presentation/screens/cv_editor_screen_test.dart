@@ -277,7 +277,7 @@ void main() {
     );
     expect(summaryField.controller?.text, original);
     expect(repo.list.single.summary, original);
-    expect(find.text('Chưa áp dụng gợi ý AI'), findsOneWidget);
+    expect(find.text('Chưa áp dụng'), findsOneWidget);
   });
 
   testWidgets('new CV keeps one stable local id across auto-saves', (

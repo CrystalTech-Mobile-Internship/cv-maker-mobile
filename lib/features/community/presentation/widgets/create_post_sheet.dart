@@ -209,7 +209,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Bài viết hiển thị cho mọi thành viên đã đăng nhập. Bài bị báo cáo nhiều lần sẽ tự động ẩn.',
+              'Bài bị báo cáo nhiều lần sẽ tự ẩn.',
               style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
             ),
           ],

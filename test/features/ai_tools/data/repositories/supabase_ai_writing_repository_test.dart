@@ -95,7 +95,7 @@ void main() {
             .having(
               (error) => error.message,
               'message',
-              contains('chưa được kích hoạt'),
+              contains('chưa dùng được'),
             ),
       ),
     );

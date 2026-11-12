@@ -187,8 +187,8 @@ abstract final class CvTemplateCatalog {
     ),
     CvTemplate(
       id: 'premium_ai_focus',
-      name: 'AI Optimized',
-      audience: 'Premium • Tối ưu bằng AI',
+      name: 'Modern Focus',
+      audience: 'Premium • Gọn, hiện đại',
       description: 'Gợi ý nội dung và từ khóa theo vị trí ứng tuyển.',
       accentHex: '#4F46E5',
       layout: CvTemplateLayout.executive,

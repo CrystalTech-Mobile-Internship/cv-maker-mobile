@@ -71,7 +71,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Gói hiện tại: Free'), findsOneWidget);
-    expect(find.text('Lượt AI hôm nay: 4/15'), findsOneWidget);
+    expect(find.text('Đã dùng hôm nay: 4/15 lượt'), findsOneWidget);
     expect(find.textContaining('đang chờ xác nhận'), findsOneWidget);
   });
 }

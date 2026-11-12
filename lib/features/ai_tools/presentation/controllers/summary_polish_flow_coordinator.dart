@@ -104,9 +104,8 @@ class SummaryPolishFlowCoordinator {
         return SummaryPolishFlowResult.applied(suggestion);
       } catch (_) {
         return const SummaryPolishFlowResult.failed(
-          messageVi: 'Không thể lưu gợi ý AI. Nội dung gốc vẫn an toàn.',
-          messageEn:
-              'Could not save the AI suggestion. Original content is safe.',
+          messageVi: 'Chưa lưu được. Nội dung cũ vẫn giữ nguyên.',
+          messageEn: 'Could not save. Your original text is kept.',
         );
       }
     }
@@ -121,8 +120,8 @@ class SummaryPolishFlowCoordinator {
   }) {
     if (!isAuthenticated) {
       return const SummaryPolishFlowResult.failed(
-        messageVi: 'Đăng nhập để sử dụng trợ lý AI an toàn.',
-        messageEn: 'Sign in to use the AI writing assistant.',
+        messageVi: 'Cần đăng nhập để dùng chức năng này.',
+        messageEn: 'Sign in to use this feature.',
       );
     }
     if (targetRole.isEmpty) {
@@ -133,7 +132,7 @@ class SummaryPolishFlowCoordinator {
     }
     if (original.length < 40) {
       return const SummaryPolishFlowResult.failed(
-        messageVi: 'Tóm tắt cần ít nhất 40 ký tự để AI có đủ ngữ cảnh.',
+        messageVi: 'Hãy viết ít nhất 40 ký tự trước.',
         messageEn: 'The summary needs at least 40 characters.',
       );
     }

@@ -270,7 +270,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   color: AppTheme.primarySlate,
                 ),
                 title: const Text('Nâng cấp Pro'),
-                subtitle: const Text('Nhiều lượt AI hơn, mẫu CV cao cấp'),
+                subtitle: const Text('Thêm lượt dùng, mẫu CV cao cấp'),
                 trailing: const Icon(Icons.chevron_right_rounded),
                 onTap: () => context.push('/upgrade-pro'),
               ),

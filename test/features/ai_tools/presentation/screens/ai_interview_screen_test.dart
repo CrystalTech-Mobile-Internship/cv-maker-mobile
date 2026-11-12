@@ -43,7 +43,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('ai-chat-send')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Đăng nhập để dùng AI'), findsOneWidget);
+    expect(find.text('Cần đăng nhập'), findsOneWidget);
     expect(repository.interviewCalls, isEmpty);
   });
 
