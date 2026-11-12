@@ -1,3 +1,8 @@
+import '../../../cv_editor/domain/models/cv_section_definition.dart';
+import '../../../cv_editor/domain/services/cv_item_order_service.dart';
+import '../../../cv_editor/domain/services/cv_quality_checker.dart';
+import '../widgets/cv_item_reorder_sheet.dart';
+import '../widgets/cv_quality_sheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -111,6 +116,56 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         isError: true,
       );
     }
+  }
+
+  /// Persists a content change made from the preview (e.g. item order).
+  Future<void> _saveContent(CvModel updated) async {
+    final stamped = updated.copyWith(
+      isSynced: false,
+      updatedAt: DateTime.now().toUtc(),
+    );
+    setState(() {
+      _workingCv = stamped;
+      _pdfBytes = _generatePdf(_previewCv);
+    });
+    if (_isEphemeralPreview) return;
+    try {
+      await ref.read(cvRepositoryProvider).save(stamped);
+    } catch (_) {
+      if (!mounted) return;
+      _showMessage(
+        _isEnglish
+            ? 'The preview changed, but it could not be saved locally.'
+            : 'Bản xem trước đã thay đổi nhưng chưa thể lưu vào máy.',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _reorderSectionItems(String section) async {
+    final definition = CvSectionDefinition.findById(section);
+    final order = await showCvItemReorderSheet(
+      context,
+      sectionTitle: definition?.title(_isEnglish ? 'en' : 'vi') ?? section,
+      items: CvItemOrderService.itemsFor(_workingCv, section),
+      isEnglish: _isEnglish,
+    );
+    if (order == null || !mounted) return;
+    await _saveContent(CvItemOrderService.reorder(_workingCv, section, order));
+    if (!mounted) return;
+    _showMessage(
+      _isEnglish ? 'Updated entry order.' : 'Đã cập nhật thứ tự các mục.',
+    );
+  }
+
+  void _showQualityCheck() {
+    showCvQualitySheet(
+      context,
+      report: CvQualityChecker.check(_workingCv),
+      onEdit: _isEphemeralPreview
+          ? null
+          : () => context.push('/editor', extra: _workingCv),
+    );
   }
 
   void _retryPreview() {
@@ -514,6 +569,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                 cv: _previewCv,
                 language: _workingCv.language,
                 onToggleVisibility: _toggleSectionVisibility,
+                onReorderItems: _reorderSectionItems,
+                onCheckQuality: _showQualityCheck,
                 onOrderChanged: (newOrder) {
                   _updateDocumentSettings(sectionOrder: newOrder);
                   _showMessage(
