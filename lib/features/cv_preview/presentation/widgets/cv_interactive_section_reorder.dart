@@ -20,6 +20,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
     this.onSwitchToPdfView,
     this.onToggleVisibility,
     this.onReorderItems,
+    this.contentCv,
     this.onCheckQuality,
   });
 
@@ -34,6 +35,10 @@ class CvInteractiveSectionReorder extends StatelessWidget {
   /// Opens item-level ordering for a section (experience, projects...).
   final ValueChanged<String>? onReorderItems;
   final VoidCallback? onCheckQuality;
+
+  /// The user's real CV when [cv] includes sample filler content. Entry
+  /// ordering is only offered for real entries.
+  final CvModel? contentCv;
 
   bool get _isEn => language == 'en';
 
@@ -191,7 +196,7 @@ class CvInteractiveSectionReorder extends StatelessWidget {
   }
 
   int _itemCount(String section) =>
-      CvItemOrderService.itemsFor(cv, section).length;
+      CvItemOrderService.itemsFor(contentCv ?? cv, section).length;
 
   bool _canReorderItems(String section) =>
       onReorderItems != null &&

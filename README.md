@@ -4,9 +4,9 @@
 
 ---
 
-## 🚀 Trạng thái dự án (Cập nhật Tuần 9)
+## 🚀 Trạng thái dự án
 
-Dự án đã hoàn thành toàn bộ các mốc tính năng cốt lõi và mở rộng của Tuần 9:
+Các nhóm tính năng đã hoàn thành:
 
 ### 1. Trải nghiệm tự làm CV chuyên nghiệp (CV Builder & Editor)
 - **Kéo thả / Sắp xếp bố cục section động**: Hỗ trợ người dùng thay đổi thứ tự hiển thị của các khối nội dung (*Tóm tắt, Học vấn, Kinh nghiệm, Kỹ năng, Dự án, Chứng chỉ*) thông qua `SectionReorderSheet`. Bố cục tùy biến được lưu tự động và phản ánh chính xác lên cả bản xem trước và file xuất ra.
@@ -29,6 +29,9 @@ Dự án đã hoàn thành toàn bộ các mốc tính năng cốt lõi và mở
   - Bật / tắt ẩn hiện mục CV linh hoạt: Nút mắt ẩn/hiện trực tiếp trên thẻ mục, xuất PDF và Word tự động loại bỏ mục ẩn qua `visibleSectionOrder`.
   - Đối chiếu từ khóa JD tuyển dụng (`CvJdMatcherSheet`): Đánh giá độ tương thích % ATS với tin tuyển dụng, phân tích từ khóa đã có và gợi ý thêm từ khóa còn thiếu.
   - Giả lập in ấn đen-trắng (B&W Grayscale Simulation): Kiểm tra độ sắc nét và tương phản của tài liệu khi HR in ra máy in laser văn phòng.
+  - **Kéo thả sắp xếp mục con**: chạm vào thẻ mục (Kinh nghiệm, Dự án, Học vấn, Kỹ năng, Chứng chỉ) để kéo thả thứ tự từng mục bên trong, kèm nút "Mới nhất lên đầu".
+  - **Kiểm tra chất lượng CV (offline)**: chấm điểm và chỉ ra thiếu thông tin, email sai định dạng, xưng "tôi", chỗ `[điền]` chưa thay, gạch đầu dòng quá dài/ngắn, động từ lặp, thiếu số liệu, kỹ năng trùng.
+- **Chấm điểm ATS theo JD (offline)**: chọn CV đã lưu, dán JD bất kỳ; ứng dụng tự trích từ khóa (Việt/Anh, có từ đồng nghĩa), tính % phù hợp và thêm kỹ năng còn thiếu 1 chạm.
 
 ### 2. Đầu ra tài liệu đa định dạng (PDF Vector & Microsoft Word DOCX)
 - **Xuất PDF Vector A4 sắc nét**: Hỗ trợ hiển thị chuẩn kích thước A4 (595.28 × 841.89 pt), ngắt trang thông minh, nhúng ảnh đại diện và font tiếng Việt Unicode đầy đủ.
@@ -47,7 +50,23 @@ Dự án đã hoàn thành toàn bộ các mốc tính năng cốt lõi và mở
 - **Sao lưu / Phục hồi offline**: Xuất toàn bộ CV ra file JSON có đánh dấu phiên bản và khôi phục không ghi đè.
 - **Nhập CV từ Word (.docx) & PDF**: Trích xuất thông tin tự động và hiển thị qua hộp thoại xem lại (`ResumeImportReviewDialog`).
 
-### 5. Hỗ trợ đa nền tảng (Android, iOS & Web)
+### 5. Trợ lý AI tạo CV (OpenRouter qua Supabase Edge Function)
+- **Trò chuyện tạo CV**: AI hỏi từng bước (vị trí, học vấn, kinh nghiệm, dự án, kỹ năng...) rồi soạn bản nháp CV; người dùng xem lại trước khi lưu.
+- **Tải CV PDF/Word lên và bóc tách bằng AI**: văn bản được trích ngay trên máy, người dùng chọn bóc tách bằng AI (chính xác hơn) hoặc trên máy (miễn phí, offline); AI lỗi thì tự chuyển sang bóc tách trên máy.
+- **AI viết lại gạch đầu dòng kinh nghiệm**, **viết lại tóm tắt** và **viết thư xin việc theo JD**, đều có bước so sánh/chỉnh sửa trước khi áp dụng.
+- **Giới hạn lượt**: Khách không dùng AI; Free 15 lượt/ngày, Pro 200 lượt/ngày — kiểm soát trên database, client không thể bỏ qua.
+- **Bảo mật**: key OpenRouter chỉ nằm trong Supabase Function Secrets (không có trong app/`.env`), xác thực JWT, giới hạn kích thước, chống prompt injection, không log nội dung CV. Chi tiết: [docs/ai-assistant.md](docs/ai-assistant.md).
+
+### 6. Đồng bộ 2 Supabase project
+- Tự chuyển sang project dự phòng khi project ưu tiên không phản hồi lúc khởi động.
+- Giữ nguyên CV trên máy khi đổi project (nhận lại CV của cùng email).
+- Edge Function `mirror-sync` chạy định kỳ sao chép CV và lệnh xóa giữa hai project (ghép người dùng theo email, Last-Write-Wins, không ghi lặp). Chi tiết: [docs/dual-supabase-sync.md](docs/dual-supabase-sync.md).
+
+### 7. Cộng đồng & việc làm
+- Tab **Cộng đồng**: thảo luận, chia sẻ việc làm, nhờ góp ý CV; lọc, tìm kiếm, thích, bình luận, báo cáo vi phạm.
+- RLS cho mọi bảng, tự ẩn bài bị báo cáo nhiều lần, giới hạn tần suất đăng, cảnh báo khi bài có email/số điện thoại. Chi tiết: [docs/community.md](docs/community.md).
+
+### 8. Hỗ trợ đa nền tảng (Android, iOS & Web)
 - Android & iOS: SQLite cục bộ qua Drift Native.
 - Web: Drift Web Worker + SQLite WASM lưu trữ an toàn trong IndexedDB/OPFS.
 
@@ -78,7 +97,8 @@ lib/
     ├── cv_preview/       # Xem trước A4, dịch vụ xuất PDF vector và Microsoft Word (.docx)
     ├── cv_backup/        # Dịch vụ xuất/nhập sao lưu JSON ngoại tuyến
     ├── resume_import/    # Đọc và phân tích hồ sơ cũ từ DOCX/PDF
-    └── ai_tools/         # Điều phối và giao diện gợi ý AI Summary
+    ├── ai_tools/         # Trợ lý AI: trò chuyện tạo CV, bóc tách CV, viết lại, thư xin việc, ATS
+    └── community/        # Cộng đồng: thảo luận, việc làm, góp ý CV
 ```
 
 Mỗi feature tuân thủ nghiêm ngặt 3 tầng:
@@ -144,6 +164,12 @@ Chạy toàn bộ kiểm thử tự động:
 flutter test
 ```
 
+Kiểm thử Edge Functions (cần Node.js, dùng Deno qua `npx`):
+```bash
+npx -y deno test supabase/functions/cv-assistant/handler_test.ts
+npx -y deno test supabase/functions/mirror-sync/mirror_test.ts
+```
+
 Chạy riêng các nhóm kiểm thử tính năng:
 - **CV Editor & Tools**: `flutter test test/features/cv_editor/`
 - **PDF & Word (.docx) Export**: `flutter test test/features/cv_preview/`
@@ -153,14 +179,15 @@ Chạy riêng các nhóm kiểm thử tính năng:
 
 ## 📚 Tài liệu chi tiết trong dự án
 
-- [Kế hoạch & Phân công Tuần 9](internship-notes/week/week9/week09_plan.md)
-- [Báo cáo hoàn thiện DOCX, Sync Preview & Section Reorder](internship-notes/week/week9/day03_sync_preview_docx_and_section_reorder.md)
 - [Đặc tả yêu cầu phần mềm (SRS)](docs/requirements.md)
 - [Luồng người dùng MVP](docs/mvp-flow.md)
 - [Sao lưu và khôi phục CV ngoại tuyến](docs/local-backup.md)
 - [Nhập CV từ Word/PDF](docs/resume-import.md)
 - [Hướng dẫn và kiến trúc Web](docs/web-support.md)
 - [Quy trình phối hợp Coding Agent](docs/agent-workflow.md)
+- [Trợ lý AI tạo CV](docs/ai-assistant.md)
+- [Đồng bộ 2 Supabase project](docs/dual-supabase-sync.md)
+- [Cộng đồng & việc làm](docs/community.md)
 
 ---
 
