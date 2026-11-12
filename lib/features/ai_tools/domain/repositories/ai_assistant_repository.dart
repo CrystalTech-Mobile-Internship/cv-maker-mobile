@@ -12,6 +12,9 @@ abstract interface class AiAssistantRepository {
 
   Future<AiQuota> fetchQuota();
 
+  /// Reads the text of a public job posting page (no credit used).
+  Future<String> fetchJobPosting(String url);
+
   Future<AiInterviewReply> interview({
     required List<AiChatMessage> messages,
     required String language,

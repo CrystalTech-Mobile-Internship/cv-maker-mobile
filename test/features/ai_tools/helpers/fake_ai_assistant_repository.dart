@@ -22,6 +22,14 @@ class FakeAiAssistantRepository implements AiAssistantRepository {
   Future<AiQuota> fetchQuota() async =>
       const AiQuota(plan: 'free', used: 0, limit: 15, remaining: 15);
 
+  String jobPostingText = 'Tuyển Flutter developer biết Dart, Git và Docker.';
+
+  @override
+  Future<String> fetchJobPosting(String url) async {
+    _maybeFail();
+    return jobPostingText;
+  }
+
   @override
   Future<AiInterviewReply> interview({
     required List<AiChatMessage> messages,
