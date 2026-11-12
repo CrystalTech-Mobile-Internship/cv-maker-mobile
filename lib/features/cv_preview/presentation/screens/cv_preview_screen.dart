@@ -20,7 +20,6 @@ import '../providers/pdf_export_provider.dart';
 import '../providers/docx_export_provider.dart';
 import '../../data/services/pdf_platform_storage.dart';
 import '../widgets/a4_pdf_preview.dart';
-import '../widgets/cv_preview_controls.dart';
 import '../widgets/export_pdf_dialog.dart';
 import '../widgets/cv_interactive_section_reorder.dart';
 import '../widgets/template_gallery_sheet.dart';
@@ -180,6 +179,54 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
           ? null
           : () => context.push('/editor', extra: _workingCv),
     );
+  }
+
+  void _openJobMatch() {
+    CvJdMatcherSheet.show(
+      context: context,
+      cv: _workingCv,
+      isEnglish: _isEnglish,
+      onAddMissingSkill: (newSkill) {
+        final updatedSkills = List<SkillModel>.from(_workingCv.skills)
+          ..add(newSkill);
+        final updated = _workingCv.copyWith(skills: updatedSkills);
+        setState(() {
+          _workingCv = updated;
+          _pdfBytes = _generatePdf(_previewCv);
+        });
+        _updateDocumentSettings();
+      },
+    );
+  }
+
+  void _onMenuSelected(_PreviewMenu item) {
+    switch (item) {
+      case _PreviewMenu.jobMatch:
+        _openJobMatch();
+      case _PreviewMenu.pageFit:
+        CvPageFitSheet.show(
+          context: context,
+          currentScale: _workingCv.fontSizeScale,
+          isEnglish: _isEnglish,
+          onScaleChanged: (value) =>
+              _updateDocumentSettings(fontSizeScale: value),
+        );
+      case _PreviewMenu.language:
+        _updateDocumentSettings(language: _isEnglish ? 'vi' : 'en');
+      case _PreviewMenu.sample:
+        _toggleSampleContent(!_showSampleContent);
+      case _PreviewMenu.grayscale:
+        setState(() => _isGrayscaleSimulation = !_isGrayscaleSimulation);
+      case _PreviewMenu.reset:
+        _updateDocumentSettings(
+          templateId: 'harvard_ats',
+          fontSizeScale: 1,
+          primaryColor: '#1E293B',
+          sectionOrder: List.of(CvModel.defaultSectionOrder),
+        );
+      case _PreviewMenu.edit:
+        context.push('/editor', extra: _workingCv);
+    }
   }
 
   void _retryPreview() {
@@ -359,63 +406,18 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         title: Text(_isEnglish ? 'Resume Preview' : 'Xem trước CV'),
         actions: [
           _buildAtsBadge(),
-          // ATS Job Description Matcher
+          // Template Gallery Picker
           IconButton(
-            key: const Key('preview-jd-matcher-btn'),
-            tooltip: _isEnglish
-                ? 'Match with Job Description'
-                : 'So khớp với tin tuyển dụng',
-            icon: const Icon(Icons.document_scanner_outlined),
+            key: const Key('preview-template-gallery-btn'),
+            tooltip: _isEnglish ? 'Template gallery' : 'Đổi mẫu CV',
+            icon: const Icon(Icons.style_outlined),
             onPressed: () {
-              CvJdMatcherSheet.show(
+              TemplateGallerySheet.show(
                 context: context,
-                cv: _workingCv,
+                selectedTemplateId: _workingCv.templateId,
                 isEnglish: _isEnglish,
-                onAddMissingSkill: (newSkill) {
-                  final updatedSkills = List<SkillModel>.from(_workingCv.skills)
-                    ..add(newSkill);
-                  final updated = _workingCv.copyWith(skills: updatedSkills);
-                  setState(() {
-                    _workingCv = updated;
-                    _pdfBytes = _generatePdf(_previewCv);
-                  });
-                  _updateDocumentSettings();
-                },
-              );
-            },
-          ),
-          // B&W Grayscale Simulation Button
-          IconButton(
-            key: const Key('preview-bw-filter-btn'),
-            tooltip: _isEnglish
-                ? (_isGrayscaleSimulation
-                      ? 'Disable B&W filter'
-                      : 'Simulate B&W printing')
-                : (_isGrayscaleSimulation
-                      ? 'Tắt bộ lọc đen trắng'
-                      : 'Xem như khi in đen trắng'),
-            icon: Icon(
-              _isGrayscaleSimulation
-                  ? Icons.filter_b_and_w_rounded
-                  : Icons.filter_b_and_w_outlined,
-              color: _isGrayscaleSimulation ? AppTheme.brandIndigo : null,
-            ),
-            onPressed: () => setState(
-              () => _isGrayscaleSimulation = !_isGrayscaleSimulation,
-            ),
-          ),
-          // Page Fit & Layout Optimizer (1-Page Auto-fit)
-          IconButton(
-            key: const Key('preview-page-fit-btn'),
-            tooltip: _isEnglish ? 'Page fit & layout' : 'Căn chỉnh 1 trang',
-            icon: const Icon(Icons.auto_fix_high_outlined),
-            onPressed: () {
-              CvPageFitSheet.show(
-                context: context,
-                currentScale: _workingCv.fontSizeScale,
-                isEnglish: _isEnglish,
-                onScaleChanged: (newScale) {
-                  _updateDocumentSettings(fontSizeScale: newScale);
+                onSelectTemplate: (newId) {
+                  _updateDocumentSettings(templateId: newId);
                 },
               );
             },
@@ -450,28 +452,59 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
               );
             },
           ),
-          // Template Gallery Picker
-          IconButton(
-            key: const Key('preview-template-gallery-btn'),
-            tooltip: _isEnglish ? 'Template gallery' : 'Đổi mẫu CV',
-            icon: const Icon(Icons.style_outlined),
-            onPressed: () {
-              TemplateGallerySheet.show(
-                context: context,
-                selectedTemplateId: _workingCv.templateId,
-                isEnglish: _isEnglish,
-                onSelectTemplate: (newId) {
-                  _updateDocumentSettings(templateId: newId);
-                },
-              );
-            },
+          PopupMenuButton<_PreviewMenu>(
+            key: const Key('preview-more-menu'),
+            tooltip: _isEnglish ? 'More' : 'Thêm',
+            onSelected: _onMenuSelected,
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                key: const Key('preview-jd-matcher-btn'),
+                value: _PreviewMenu.jobMatch,
+                child: Text(
+                  _isEnglish ? 'Match a job posting' : 'So khớp tin tuyển dụng',
+                ),
+              ),
+              PopupMenuItem(
+                key: const Key('preview-page-fit-btn'),
+                value: _PreviewMenu.pageFit,
+                child: Text(
+                  _isEnglish ? 'Text size & page fit' : 'Cỡ chữ, vừa trang',
+                ),
+              ),
+              PopupMenuItem(
+                value: _PreviewMenu.language,
+                child: Text(
+                  _isEnglish
+                      ? 'Switch CV to Vietnamese'
+                      : 'Chuyển CV sang tiếng Anh',
+                ),
+              ),
+              CheckedPopupMenuItem(
+                value: _PreviewMenu.sample,
+                checked: _showSampleContent,
+                child: Text(
+                  _isEnglish ? 'Show sample text' : 'Hiện nội dung mẫu',
+                ),
+              ),
+              CheckedPopupMenuItem(
+                key: const Key('preview-bw-filter-btn'),
+                value: _PreviewMenu.grayscale,
+                checked: _isGrayscaleSimulation,
+                child: Text(
+                  _isEnglish ? 'Black & white print' : 'Xem bản in đen trắng',
+                ),
+              ),
+              PopupMenuItem(
+                value: _PreviewMenu.reset,
+                child: Text(_isEnglish ? 'Reset layout' : 'Khôi phục mặc định'),
+              ),
+              if (!_isEphemeralPreview)
+                PopupMenuItem(
+                  value: _PreviewMenu.edit,
+                  child: Text(_isEnglish ? 'Edit content' : 'Chỉnh nội dung'),
+                ),
+            ],
           ),
-          if (!_isEphemeralPreview)
-            IconButton(
-              tooltip: _isEnglish ? 'Edit content' : 'Chỉnh nội dung',
-              onPressed: () => context.push('/editor', extra: _workingCv),
-              icon: const Icon(Icons.edit_outlined),
-            ),
           const SizedBox(width: 4),
         ],
       ),
@@ -519,28 +552,6 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
 
           // Main View Body
           if (isPdfMode) ...[
-            CvPreviewControls(
-              language: _workingCv.language,
-              fontSizeScale: _workingCv.fontSizeScale,
-              showSampleContent: _showSampleContent,
-              onSampleContentChanged: _toggleSampleContent,
-              onLanguageChanged: (value) {
-                if (value != _workingCv.language) {
-                  _updateDocumentSettings(language: value);
-                }
-              },
-              onFontSizeScaleChanged: (value) {
-                if ((value - _workingCv.fontSizeScale).abs() >= 0.02) {
-                  _updateDocumentSettings(fontSizeScale: value);
-                }
-              },
-              onResetFormatting: () => _updateDocumentSettings(
-                language: 'vi',
-                templateId: 'harvard_ats',
-                fontSizeScale: 1,
-                primaryColor: '#1E293B',
-              ),
-            ),
             Expanded(
               child: _isGrayscaleSimulation
                   ? ColorFiltered(
@@ -670,4 +681,14 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       ),
     );
   }
+}
+
+enum _PreviewMenu {
+  jobMatch,
+  pageFit,
+  language,
+  sample,
+  grayscale,
+  reset,
+  edit,
 }

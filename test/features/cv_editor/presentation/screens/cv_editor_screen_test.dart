@@ -331,9 +331,9 @@ void main() {
     expect(find.text('Cá nhân'), findsNothing);
 
     // Switch to English via the compact language selector.
-    final enButton = find.text('EN');
-    expect(enButton, findsOneWidget);
-    await tester.tap(enButton);
+    final languageToggle = find.byKey(const Key('editor-language-toggle'));
+    expect(find.text('VI'), findsOneWidget);
+    await tester.tap(languageToggle);
     await tester.pumpAndSettle();
 
     // The active Education tab changes language; inactive tabs remain icons.
@@ -495,10 +495,11 @@ void main() {
     // is intentionally not duplicated as Flutter Text widgets anymore.
     expect(find.byType(PdfPreview), findsOneWidget);
     expect(find.text('Xem trước CV'), findsOneWidget);
-    expect(find.byKey(const Key('font-size-percentage-field')), findsOneWidget);
-    expect(find.byKey(const Key('decrease-font-size')), findsOneWidget);
-    expect(find.byKey(const Key('increase-font-size')), findsOneWidget);
-    expect(find.text('100'), findsOneWidget);
+    expect(find.byKey(const Key('preview-more-menu')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('preview-more-menu')));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Cỡ chữ, vừa trang'), findsOneWidget);
+    expect(find.text('Hiện nội dung mẫu'), findsOneWidget);
     expect(find.text('Tải tệp (PDF / Word)'), findsOneWidget);
   });
 }

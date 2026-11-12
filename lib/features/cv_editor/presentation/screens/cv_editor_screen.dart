@@ -1377,18 +1377,19 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         ),
         actions: [
           _buildCompletenessBadge(isEn),
-          IconButton(
-            tooltip: isEn ? 'Starter Samples' : 'Mẫu gợi ý',
-            icon: const Icon(Icons.lightbulb_outline_rounded),
-            onPressed: _openStarterSamplePicker,
+          TextButton(
+            key: const Key('editor-language-toggle'),
+            onPressed: () => _changeLanguage(
+              language: _selectedLanguage == 'vi' ? 'en' : 'vi',
+              notify: true,
+            ),
+            child: Text(
+              _selectedLanguage == 'vi' ? 'VI' : 'EN',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
           ),
           IconButton(
-            tooltip: isEn ? 'Reorder Sections' : 'Sắp xếp bố cục',
-            icon: const Icon(Icons.swap_vert_rounded),
-            onPressed: _openSectionReorderSheet,
-          ),
-          IconButton(
-            tooltip: isEn ? 'Preview PDF' : 'Xem trước PDF',
+            tooltip: isEn ? 'Preview' : 'Xem trước',
             icon: const Icon(Icons.picture_as_pdf_outlined),
             onPressed: _openPreview,
           ),
@@ -1450,80 +1451,6 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         builder: (context, pageConstraints) {
           final editorPane = Column(
             children: [
-              // Language Switcher Banner
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade200),
-                  ),
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final selector = SegmentedButton<String>(
-                      showSelectedIcon: false,
-                      segments: const [
-                        ButtonSegment(value: 'vi', label: Text('VI')),
-                        ButtonSegment(value: 'en', label: Text('EN')),
-                      ],
-                      selected: {_selectedLanguage},
-                      style: ButtonStyle(
-                        visualDensity: VisualDensity.compact,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding: WidgetStateProperty.all(
-                          const EdgeInsets.symmetric(horizontal: 10),
-                        ),
-                      ),
-                      onSelectionChanged: (set) {
-                        final newLang = set.first;
-                        if (newLang != _selectedLanguage) {
-                          _changeLanguage(language: newLang, notify: true);
-                        }
-                      },
-                    );
-                    final label = Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.language_rounded,
-                          size: 18,
-                          color: Colors.grey.shade700,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          isEn ? 'Language:' : 'Ngôn ngữ CV:',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade800,
-                          ),
-                        ),
-                      ],
-                    );
-
-                    if (constraints.maxWidth < 360) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          label,
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: selector,
-                          ),
-                        ],
-                      );
-                    }
-                    return Row(children: [label, const Spacer(), selector]);
-                  },
-                ),
-              ),
-
               // Quick formatting, sizing, samples & reorder toolbar
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 6, 16, 4),
