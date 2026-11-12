@@ -50,9 +50,34 @@ class EnvConstants {
     anonKey: _value('SUPABASE_ANON_KEY'),
   );
 
+  static SupabaseEnvironment? _resolvedOverride;
+
+  /// Set once at startup by the profile resolver when failover picked a
+  /// different project than [preferredSupabaseEnvironment].
+  static void useResolvedEnvironment(SupabaseEnvironment? environment) {
+    _resolvedOverride = environment;
+  }
+
+  /// Project actually used by this app run.
+  static SupabaseEnvironment? get activeSupabaseEnvironment =>
+      _resolvedOverride ?? preferredSupabaseEnvironment;
+
+  /// The other configured project, used only when the preferred one is
+  /// unreachable at startup. Disable with `SUPABASE_FAILOVER=off`.
+  static SupabaseEnvironment? get fallbackSupabaseEnvironment {
+    if (_value('SUPABASE_FAILOVER').toLowerCase() == 'off') return null;
+    final preferred = preferredSupabaseEnvironment;
+    for (final candidate in [_primarySupabase, _secondarySupabase]) {
+      if (candidate.isConfigured && candidate.name != preferred?.name) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+
   /// Selects one backend for the entire app process. Auth sessions and user IDs
   /// are project-specific, so the app must never switch projects mid-session.
-  static SupabaseEnvironment? get activeSupabaseEnvironment {
+  static SupabaseEnvironment? get preferredSupabaseEnvironment {
     final requested = _value('SUPABASE_ACTIVE_PROFILE').toLowerCase();
     if (requested == 'primary') return _primarySupabase;
     if (requested == 'secondary') return _secondarySupabase;

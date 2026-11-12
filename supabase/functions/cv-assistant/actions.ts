@@ -58,7 +58,9 @@ function bool(value: unknown) {
 }
 
 /** Extracts the first JSON object from a model reply (tolerates fences). */
-export function extractJsonObject(text: string): Record<string, unknown> | null {
+export function extractJsonObject(
+  text: string,
+): Record<string, unknown> | null {
   const cleaned = text.replace(/```(?:json)?/gi, "").trim();
   const start = cleaned.indexOf("{");
   const end = cleaned.lastIndexOf("}");
@@ -219,7 +221,9 @@ const interview: ActionDefinition<InterviewInput> = {
       {
         role: "system",
         content: [
-          `You are a friendly career coach helping a user build a CV in ${languageName(input.language)}.`,
+          `You are a friendly career coach helping a user build a CV in ${
+            languageName(input.language)
+          }.`,
           "Interview the user step by step: target role, contact details, education, work experience, projects, skills, certifications, then a short professional summary.",
           "Ask at most two focused questions per reply. Acknowledge what they said briefly. Encourage concrete results (numbers, tools, impact) but never invent them.",
           untrustedNotice,
@@ -257,7 +261,9 @@ const generateCv: ActionDefinition<InterviewInput> = {
       {
         role: "system",
         content: [
-          `Convert the interview into a structured CV written in ${languageName(input.language)}.`,
+          `Convert the interview into a structured CV written in ${
+            languageName(input.language)
+          }.`,
           honesty,
           "Rewrite experience bullets with strong action verbs and the user's own facts. Write a 2-4 sentence summary.",
           untrustedNotice,
@@ -335,7 +341,9 @@ const polishSummary: ActionDefinition<SummaryInput> = {
       {
         role: "system",
         content: [
-          `Rewrite the CV professional summary in ${languageName(input.language)}.`,
+          `Rewrite the CV professional summary in ${
+            languageName(input.language)
+          }.`,
           "Return only the rewritten summary as plain text: 2-4 concise sentences, ATS-friendly keywords.",
           honesty,
           untrustedNotice,
@@ -388,7 +396,9 @@ const improveBullets: ActionDefinition<BulletsInput> = {
       {
         role: "system",
         content: [
-          `Rewrite CV experience bullet points in ${languageName(input.language)}.`,
+          `Rewrite CV experience bullet points in ${
+            languageName(input.language)
+          }.`,
           "Start each bullet with a strong action verb, keep each under 30 words, follow the action-result pattern, and keep the same facts.",
           honesty,
           "If a result has no number, do not add one; you may suggest measurable wording with [placeholders] like [x%] for the user to fill.",
@@ -445,7 +455,9 @@ const coverLetter: ActionDefinition<CoverLetterInput> = {
       {
         role: "system",
         content: [
-          `Write a concise cover letter (180-260 words) in ${languageName(input.language)} for this job.`,
+          `Write a concise cover letter (180-260 words) in ${
+            languageName(input.language)
+          } for this job.`,
           "Use only facts from the CV, connect them to the job requirements, professional and warm tone, plain text with paragraphs, no placeholders except [Tên người nhận] / [Hiring Manager] when unknown.",
           honesty,
           untrustedNotice,

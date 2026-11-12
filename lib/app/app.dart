@@ -6,6 +6,7 @@ import '../core/constants/app_constants.dart';
 import '../features/auth/domain/models/auth_user.dart';
 import '../features/auth/presentation/auth_redirect.dart';
 import '../features/auth/presentation/providers/auth_providers.dart';
+import '../features/cv_editor/data/services/linked_account_cv_adopter.dart';
 import 'routes.dart';
 import 'theme.dart';
 
@@ -38,6 +39,7 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
     ) {
       next.whenData((change) {
         unawaited(_persistAuthenticatedSession(change));
+        unawaited(_adoptLinkedAccountCvs(change));
         _handleAuthChange(change);
       });
     });
@@ -62,6 +64,30 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
           stack: stackTrace,
           library: 'authentication',
           context: ErrorDescription('while persisting authenticated session'),
+        ),
+      );
+    }
+  }
+
+  /// Keeps CVs created with the same email on the other Supabase project
+  /// visible after a project switch.
+  Future<void> _adoptLinkedAccountCvs(AuthSessionChange change) async {
+    final user = change.user;
+    final relevant =
+        change.event == AuthSessionEvent.signedIn ||
+        change.event == AuthSessionEvent.initial;
+    if (!relevant || user == null || user.email.isEmpty) return;
+    try {
+      await ref
+          .read(linkedAccountCvAdopterProvider)
+          .adopt(userId: user.id, email: user.email);
+    } catch (error, stackTrace) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'authentication',
+          context: ErrorDescription('while linking CVs from another project'),
         ),
       );
     }
