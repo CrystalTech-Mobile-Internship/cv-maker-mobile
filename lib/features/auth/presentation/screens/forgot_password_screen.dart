@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,9 +31,23 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
   final _codeController = TextEditingController();
   bool _sent = false;
+  int _cooldown = 0;
+  Timer? _timer;
+
+  /// Prevents repeated sends while the email service has a low hourly limit.
+  void _startCooldown() {
+    _timer?.cancel();
+    setState(() => _cooldown = 60);
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return timer.cancel();
+      setState(() => _cooldown--);
+      if (_cooldown <= 0) timer.cancel();
+    });
+  }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _emailController.dispose();
     _codeController.dispose();
     super.dispose();
@@ -53,6 +69,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         .requestPasswordReset(_emailController.text);
     if (!mounted) return;
     setState(() => _sent = result.isSuccess);
+    if (result.isSuccess) _startCooldown();
     _toast(result.message, isError: !result.isSuccess);
   }
 
@@ -138,7 +155,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       ),
                       const SizedBox(height: 20),
                       FilledButton.icon(
-                        onPressed: isLoading ? null : _submit,
+                        onPressed: isLoading || _cooldown > 0 ? null : _submit,
                         icon: isLoading
                             ? const SizedBox.square(
                                 dimension: 18,
@@ -149,7 +166,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                               )
                             : const Icon(Icons.send_rounded),
                         label: Text(
-                          _sent ? 'Gửi lại liên kết' : 'Gửi liên kết',
+                          _cooldown > 0
+                              ? 'Gửi lại sau ${_cooldown}s'
+                              : _sent
+                              ? 'Gửi lại liên kết'
+                              : 'Gửi liên kết',
                         ),
                       ),
                       if (showCode) ...[

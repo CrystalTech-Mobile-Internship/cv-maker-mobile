@@ -223,9 +223,7 @@ class AuthController extends StateNotifier<AuthActionState> {
     Future<AuthActionResult> Function() action,
   ) async {
     if (state.isLoading) {
-      return AuthActionResult.failure(
-        'Một thao tác tài khoản đang được xử lý.',
-      );
+      return AuthActionResult.failure('Đang xử lý, vui lòng đợi.');
     }
     state = state.copyWith(isLoading: true);
     try {

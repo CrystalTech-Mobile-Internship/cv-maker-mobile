@@ -201,6 +201,15 @@ class SupabaseAuthRepository implements AuthRepository {
     if (error is StateError) return AuthFailure(error.message, cause: error);
     if (error is AuthException) {
       final message = error.message.toLowerCase();
+      if (error.statusCode == '429' ||
+          message.contains('rate limit') ||
+          message.contains('security purposes')) {
+        return AuthFailure(
+          'Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi ít phút rồi thử lại, '
+          'hoặc đăng nhập bằng Google.',
+          cause: error,
+        );
+      }
       if (message.contains('invalid login credentials')) {
         return AuthFailure('Email hoặc mật khẩu không đúng.', cause: error);
       }

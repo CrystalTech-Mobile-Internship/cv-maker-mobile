@@ -33,6 +33,7 @@ class MyCvsView extends StatelessWidget {
     required this.onRestoreBackup,
     required this.onOpenAts,
     required this.onOpenAiInterview,
+    this.onBackupGuestCvs,
     required this.onOpenPro,
     required this.onRetry,
     required this.onEdit,
@@ -57,6 +58,9 @@ class MyCvsView extends StatelessWidget {
   final VoidCallback onRestoreBackup;
   final VoidCallback onOpenAts;
   final VoidCallback onOpenAiInterview;
+
+  /// Assigns CVs created without an account to the signed-in account.
+  final VoidCallback? onBackupGuestCvs;
   final VoidCallback onOpenPro;
   final VoidCallback onRetry;
   final ValueChanged<CvModel> onEdit;
@@ -102,7 +106,8 @@ class MyCvsView extends StatelessWidget {
           error: (error, _) => _MessageCard(
             icon: Icons.error_outline_rounded,
             title: 'Không thể tải danh sách hồ sơ',
-            message: error.toString(),
+            message:
+                'Không đọc được CV trên máy. Hãy tải lại trang hoặc mở lại ứng dụng.',
             action: 'Thử lại',
             onPressed: onRetry,
           ),
@@ -116,16 +121,29 @@ class MyCvsView extends StatelessWidget {
                 onPressed: onCreate,
               );
             }
-            return CvLibrarySection(
-              items: items,
-              isDesktop: isDesktop,
-              itemBuilder: _cvCard,
+            final guestCount = isSignedIn
+                ? items.where((cv) => cv.userId == null).length
+                : 0;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (guestCount > 0 && onBackupGuestCvs != null) ...[
+                  _GuestBackupCard(
+                    count: guestCount,
+                    onBackup: onBackupGuestCvs!,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                CvLibrarySection(
+                  items: items,
+                  isDesktop: isDesktop,
+                  itemBuilder: _cvCard,
+                ),
+              ],
             );
           },
         ),
         const SizedBox(height: 18),
-        _ImportResumeCard(onImport: onImport),
-        const SizedBox(height: 12),
         AiAssistantCard(
           onChat: onOpenAiInterview,
           onImport: onImport,
@@ -318,64 +336,6 @@ class MyCvsView extends StatelessWidget {
   }
 }
 
-class _ImportResumeCard extends StatelessWidget {
-  const _ImportResumeCard({required this.onImport});
-
-  final VoidCallback onImport;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppTheme.tealSurface,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        key: const Key('import-existing-resume'),
-        onTap: onImport,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: AppTheme.accentTeal.withValues(alpha: 0.22),
-            ),
-          ),
-          child: const Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                foregroundColor: AppTheme.accentTeal,
-                child: Icon(Icons.upload_file_outlined),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Nhập CV Word hoặc PDF',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.primaryNavy,
-                      ),
-                    ),
-                    SizedBox(height: 3),
-                    Text(
-                      'Lấy nhanh thông tin, kiểm tra rồi đổi sang mẫu mới.',
-                      style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: AppTheme.accentTeal),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SyncBadge extends StatelessWidget {
   const _SyncBadge({required this.isSynced});
 
@@ -518,6 +478,36 @@ class _MessageCard extends StatelessWidget {
             icon: const Icon(Icons.add_rounded, size: 18),
             label: Text(action),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GuestBackupCard extends StatelessWidget {
+  const _GuestBackupCard({required this.count, required this.onBackup});
+
+  final int count;
+  final VoidCallback onBackup;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('guest-backup-card'),
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+      decoration: BoxDecoration(
+        color: AppTheme.indigoSurface,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '$count CV tạo khi chưa đăng nhập chưa được sao lưu vào tài khoản.',
+              style: const TextStyle(height: 1.35),
+            ),
+          ),
+          TextButton(onPressed: onBackup, child: const Text('Sao lưu ngay')),
         ],
       ),
     );
