@@ -67,4 +67,56 @@ abstract final class AiCreditCost {
   static const polishSummary = 1;
   static const improveBullets = 1;
   static const coverLetter = 2;
+  static const tailorCv = 3;
+  static const interviewQuestions = 1;
+  static const answerFeedback = 1;
+}
+
+/// AI proposal for tailoring a CV to one job description.
+class AiTailorResult {
+  const AiTailorResult({
+    required this.summary,
+    required this.skillsOrder,
+    required this.missingSkills,
+    required this.experienceBullets,
+    this.notes = const [],
+  });
+
+  final String summary;
+
+  /// Existing skill names, most relevant first.
+  final List<String> skillsOrder;
+
+  /// JD skills absent from the CV; only added if the user confirms.
+  final List<String> missingSkills;
+
+  /// Rewritten bullets keyed by experience id.
+  final Map<String, List<String>> experienceBullets;
+  final List<String> notes;
+}
+
+class AiInterviewQuestion {
+  const AiInterviewQuestion({
+    required this.question,
+    this.focus = '',
+    this.tip = '',
+  });
+
+  final String question;
+  final String focus;
+  final String tip;
+}
+
+class AiAnswerFeedback {
+  const AiAnswerFeedback({
+    required this.score,
+    required this.sampleAnswer,
+    this.strengths = const [],
+    this.improvements = const [],
+  });
+
+  final int score;
+  final String sampleAnswer;
+  final List<String> strengths;
+  final List<String> improvements;
 }

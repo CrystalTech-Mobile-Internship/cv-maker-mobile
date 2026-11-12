@@ -8,10 +8,12 @@ class AiAssistantCard extends StatelessWidget {
     super.key,
     required this.onChat,
     required this.onImport,
+    this.onPractice,
   });
 
   final VoidCallback onChat;
   final VoidCallback onImport;
+  final VoidCallback? onPractice;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +87,15 @@ class AiAssistantCard extends StatelessWidget {
               ),
             ],
           ),
+          if (onPractice != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                key: const ValueKey('open-interview-practice'),
+                onPressed: onPractice,
+                child: const Text('Luyện phỏng vấn với AI theo CV của bạn'),
+              ),
+            ),
         ],
       ),
     );

@@ -9,6 +9,7 @@ import '../features/auth/presentation/screens/reset_password_screen.dart';
 import '../features/auth/presentation/auth_redirect.dart';
 import '../features/ai_tools/presentation/screens/ai_interview_screen.dart';
 import '../features/ai_tools/presentation/screens/ats_scorer_screen.dart';
+import '../features/ai_tools/presentation/screens/interview_practice_screen.dart';
 import '../features/billing/presentation/screens/pro_upgrade_screen.dart';
 import '../features/community/domain/models/community_models.dart';
 import '../features/community/presentation/screens/community_post_screen.dart';
@@ -98,6 +99,15 @@ GoRouter createAppRouter({
           state.extra is CommunityPost ? null : '/home',
       builder: (context, state) =>
           CommunityPostScreen(post: state.extra! as CommunityPost),
+    ),
+    GoRoute(
+      path: '/interview-practice',
+      name: 'interview-practice',
+      builder: (context, state) => InterviewPracticeScreen(
+        args: state.extra is InterviewPracticeArgs
+            ? state.extra as InterviewPracticeArgs
+            : null,
+      ),
     ),
     GoRoute(
       path: '/upgrade-pro',

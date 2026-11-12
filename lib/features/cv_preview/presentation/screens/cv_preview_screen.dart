@@ -1,5 +1,6 @@
 import '../../../cv_editor/domain/models/cv_section_definition.dart';
 import '../../../cv_editor/domain/services/cv_item_order_service.dart';
+import '../../../cv_editor/domain/services/cv_quality_auto_fixer.dart';
 import '../../../cv_editor/domain/services/cv_quality_checker.dart';
 import '../widgets/cv_item_reorder_sheet.dart';
 import '../widgets/cv_quality_sheet.dart';
@@ -159,9 +160,22 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
   }
 
   void _showQualityCheck() {
+    final autoFix = CvQualityAutoFixer.fix(_workingCv);
     showCvQualitySheet(
       context,
       report: CvQualityChecker.check(_workingCv),
+      autoFixChanges: autoFix.changes,
+      onAutoFix: _isEphemeralPreview
+          ? null
+          : () async {
+              await _saveContent(autoFix.cv);
+              if (!mounted) return;
+              _showMessage(
+                _isEnglish
+                    ? 'Applied ${autoFix.changes.length} formatting fixes.'
+                    : 'Đã sửa nhanh ${autoFix.changes.length} nhóm lỗi định dạng.',
+              );
+            },
       onEdit: _isEphemeralPreview
           ? null
           : () => context.push('/editor', extra: _workingCv),

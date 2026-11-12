@@ -1,6 +1,8 @@
 import 'package:cv_maker_mobile/features/auth/domain/models/auth_user.dart';
 import 'package:cv_maker_mobile/features/auth/domain/repositories/auth_repository.dart';
 import 'package:cv_maker_mobile/features/auth/presentation/providers/auth_providers.dart';
+import 'package:cv_maker_mobile/features/billing/data/supabase_billing_repository.dart';
+import 'package:cv_maker_mobile/features/billing/domain/billing_models.dart';
 import 'package:cv_maker_mobile/features/billing/presentation/screens/pro_upgrade_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +41,11 @@ void main() {
     );
 
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('99.000đ'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('49.000đ'), findsOneWidget);
     expect(find.text('99.000đ'), findsOneWidget);
     await tester.scrollUntilVisible(
@@ -49,12 +56,15 @@ void main() {
     await tester.tap(find.text('Theo tháng'));
     await tester.pump();
     await tester.scrollUntilVisible(
-      find.text('Nội dung CK: CVPRO-MONTHLY'),
+      find.byKey(const ValueKey('pro-transfer-code')),
       300,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
-    expect(find.text('Nội dung CK: CVPRO-MONTHLY'), findsOneWidget);
+    final code = tester.widget<SelectableText>(
+      find.byKey(const ValueKey('pro-transfer-code')),
+    );
+    expect(code.data, 'Nội dung CK: CVPRO-MONTHLY-USER1');
     expect(find.text('Quét VietQR để nâng cấp'), findsOneWidget);
     expect(find.text('owner@example.com'), findsOneWidget);
     expect(find.text('Tôi đã chuyển khoản'), findsOneWidget);
@@ -65,6 +75,7 @@ Widget _appWithUser(AuthUser? user) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(_FakeAuthRepository(user)),
+      billingRepositoryProvider.overrideWithValue(_FakeBilling()),
     ],
     child: const MaterialApp(home: ProUpgradeScreen()),
   );
@@ -113,5 +124,15 @@ class _FakeAuthRepository implements AuthRepository {
 
   @override
   Future<AuthUser> updatePassword(String password) =>
+      throw UnimplementedError();
+}
+
+class _FakeBilling implements BillingRepository {
+  @override
+  Future<BillingStatus> fetchStatus() async =>
+      const BillingStatus(isPro: false);
+
+  @override
+  Future<ProUpgradeRequest> submitRequest(ProPlan plan) =>
       throw UnimplementedError();
 }

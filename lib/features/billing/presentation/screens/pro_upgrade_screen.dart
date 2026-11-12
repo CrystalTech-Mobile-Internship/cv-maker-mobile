@@ -4,7 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../auth/presentation/auth_redirect.dart';
+import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../data/supabase_billing_repository.dart';
+import '../../domain/billing_models.dart';
+import '../widgets/billing_status_card.dart';
 
 class ProUpgradeScreen extends ConsumerStatefulWidget {
   const ProUpgradeScreen({super.key});
@@ -15,15 +19,39 @@ class ProUpgradeScreen extends ConsumerStatefulWidget {
 
 class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
   String _plan = 'lifetime';
+  bool _submitting = false;
 
-  void _showPaymentPlaceholder() {
+  @override
+  void initState() {
+    super.initState();
+    // Show today's AI usage even before the first AI call of the session.
+    if (ref.read(currentAuthUserProvider) != null) {
+      ref.read(aiAssistantRepositoryProvider).fetchQuota().ignore();
+    }
+  }
+
+  Future<void> _submitRequest() async {
+    if (_submitting) return;
+    setState(() => _submitting = true);
+    try {
+      await ref
+          .read(billingRepositoryProvider)
+          .submitRequest(ProPlan.fromValue(_plan));
+      ref.invalidate(billingStatusProvider);
+      _toast(
+        'Đã gửi yêu cầu. Tài khoản được nâng cấp ngay khi xác nhận được chuyển khoản.',
+      );
+    } on BillingFailure catch (failure) {
+      _toast(failure.message);
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  void _toast(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Giao diện VietQR đã có. Cổng PayOS/SePay sẽ được kết nối sau.',
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
   }
 
@@ -41,10 +69,8 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF0F172A), Color(0xFF1E3A8A)],
-                ),
-                borderRadius: BorderRadius.circular(18),
+                color: AppTheme.primaryNavy,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,6 +91,10 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                 ],
               ),
             ),
+            if (authUser != null) ...[
+              const SizedBox(height: 16),
+              const BillingStatusCard(),
+            ],
             const SizedBox(height: 16),
             const _ComparisonCard(),
             const SizedBox(height: 16),
@@ -97,7 +127,18 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
               _AuthenticatedPaymentSection(
                 isLifetime: isLifetime,
                 accountEmail: authUser.email,
-                onConfirm: _showPaymentPlaceholder,
+                transferCode: proTransferCode(
+                  authUser.id,
+                  ProPlan.fromValue(_plan),
+                ),
+                hasPendingRequest:
+                    ref
+                        .watch(billingStatusProvider)
+                        .valueOrNull
+                        ?.hasPendingRequest ??
+                    false,
+                isSubmitting: _submitting,
+                onConfirm: _submitRequest,
               ),
           ],
         ),
@@ -161,11 +202,17 @@ class _AuthenticatedPaymentSection extends StatelessWidget {
   const _AuthenticatedPaymentSection({
     required this.isLifetime,
     required this.accountEmail,
+    required this.transferCode,
+    required this.hasPendingRequest,
+    required this.isSubmitting,
     required this.onConfirm,
   });
 
   final bool isLifetime;
   final String accountEmail;
+  final String transferCode;
+  final bool hasPendingRequest;
+  final bool isSubmitting;
   final VoidCallback onConfirm;
 
   @override
@@ -223,25 +270,36 @@ class _AuthenticatedPaymentSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              Text(
-                isLifetime
-                    ? 'Nội dung CK: CVPRO-LIFETIME'
-                    : 'Nội dung CK: CVPRO-MONTHLY',
+              SelectableText(
+                'Nội dung CK: $transferCode',
+                key: const ValueKey('pro-transfer-code'),
                 style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Ghi đúng nội dung để hệ thống nhận ra tài khoản của bạn.',
+                style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
               ),
             ],
           ),
         ),
         const SizedBox(height: 16),
         FilledButton.icon(
-          onPressed: onConfirm,
+          key: const ValueKey('pro-confirm-transfer'),
+          onPressed: hasPendingRequest || isSubmitting ? null : onConfirm,
           style: AppTheme.createCvButton,
-          icon: const Icon(Icons.verified_rounded),
-          label: const Text('Tôi đã chuyển khoản'),
+          icon: const Icon(Icons.verified_outlined),
+          label: Text(
+            hasPendingRequest
+                ? 'Đang chờ xác nhận chuyển khoản'
+                : isSubmitting
+                ? 'Đang gửi...'
+                : 'Tôi đã chuyển khoản',
+          ),
         ),
         const SizedBox(height: 8),
         const Text(
-          'Thanh toán thật và mở khóa tài khoản Pro sẽ được xử lý ở bước sau.',
+          'Sau khi đối soát chuyển khoản, tài khoản được nâng lên Pro (200 lượt AI/ngày).',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 12,
