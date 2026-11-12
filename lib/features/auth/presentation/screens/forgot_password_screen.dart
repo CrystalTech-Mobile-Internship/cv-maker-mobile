@@ -4,13 +4,21 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/constants/auth_callback_parser.dart';
+import '../../../../core/constants/env_constants.dart';
 import '../providers/auth_providers.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
-  const ForgotPasswordScreen({super.key, this.linkError});
+  const ForgotPasswordScreen({
+    super.key,
+    this.linkError,
+    this.showRecoveryCode,
+  });
 
   /// Error code from a failed email link (e.g. `otp_expired`).
   final String? linkError;
+
+  /// Overrides the configuration flag (used by tests).
+  final bool? showRecoveryCode;
 
   @override
   ConsumerState<ForgotPasswordScreen> createState() =>
@@ -63,6 +71,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authControllerProvider).isLoading;
+    final showCode =
+        widget.showRecoveryCode ?? EnvConstants.recoveryCodeInEmail;
     return Scaffold(
       appBar: AppBar(title: const Text('Quên mật khẩu')),
       body: SafeArea(
@@ -104,8 +114,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       const SizedBox(height: 10),
                       Text(
                         _sent
-                            ? 'Mở liên kết trong email trên chính thiết bị/trình duyệt này, '
-                                  'hoặc nhập mã khôi phục trong email ở bên dưới.'
+                            ? (showCode
+                                  ? 'Mở liên kết trong email trên chính thiết bị và trình duyệt này, '
+                                        'hoặc nhập mã khôi phục trong email ở bên dưới.'
+                                  : 'Mở liên kết trong email trên chính thiết bị và trình duyệt này '
+                                        'để đặt mật khẩu mới.')
                             : 'Nhập email tài khoản. CV lưu trên thiết bị sẽ không bị thay đổi.',
                         textAlign: TextAlign.center,
                       ),
@@ -139,32 +152,34 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           _sent ? 'Gửi lại liên kết' : 'Gửi liên kết',
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      const Divider(),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Đã có mã khôi phục trong email?',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        key: const ValueKey('reset-code'),
-                        controller: _codeController,
-                        enabled: !isLoading,
-                        keyboardType: TextInputType.number,
-                        maxLength: 10,
-                        decoration: const InputDecoration(
-                          labelText: 'Mã khôi phục',
-                          hintText: 'Ví dụ: 123456',
-                          counterText: '',
+                      if (showCode) ...[
+                        const SizedBox(height: 20),
+                        const Divider(),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Đã có mã khôi phục trong email?',
+                          style: TextStyle(fontWeight: FontWeight.w700),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      OutlinedButton(
-                        key: const ValueKey('reset-verify-code'),
-                        onPressed: isLoading ? null : _verifyCode,
-                        child: const Text('Xác nhận mã'),
-                      ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          key: const ValueKey('reset-code'),
+                          controller: _codeController,
+                          enabled: !isLoading,
+                          keyboardType: TextInputType.number,
+                          maxLength: 10,
+                          decoration: const InputDecoration(
+                            labelText: 'Mã khôi phục',
+                            hintText: 'Ví dụ: 123456',
+                            counterText: '',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton(
+                          key: const ValueKey('reset-verify-code'),
+                          onPressed: isLoading ? null : _verifyCode,
+                          child: const Text('Xác nhận mã'),
+                        ),
+                      ],
                       TextButton(
                         onPressed: () => context.go('/login'),
                         child: const Text('Quay lại đăng nhập'),

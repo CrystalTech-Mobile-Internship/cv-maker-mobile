@@ -59,10 +59,8 @@ String describeAuthLinkError(String? code) {
       return 'Liên kết đã hết hạn hoặc đã được dùng. Hãy gửi lại liên kết mới.';
     case 'access_denied':
       return 'Liên kết không hợp lệ. Hãy gửi lại liên kết mới.';
-    case 'pkce':
-      return 'Liên kết phải được mở trên chính trình duyệt/thiết bị đã gửi yêu cầu. '
-          'Bạn có thể nhập mã khôi phục trong email thay thế.';
     default:
-      return 'Không mở được liên kết khôi phục. Hãy gửi lại hoặc nhập mã trong email.';
+      return 'Không mở được liên kết khôi phục. Hãy mở liên kết trên chính '
+          'thiết bị và trình duyệt đã gửi yêu cầu, hoặc gửi lại liên kết mới.';
   }
 }
