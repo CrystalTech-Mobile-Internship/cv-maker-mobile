@@ -141,3 +141,20 @@ sang tài khoản.
   `.env` của ứng dụng.
 - Trạng thái `Đã cấu hình` chỉ xác nhận SDK có URL/key; không được dùng như bằng
   chứng migration, RLS hay Sync Engine đã hoạt động.
+
+
+## Giới hạn thiết bị
+
+Mỗi tài khoản đăng nhập cùng lúc tối đa **1 trình duyệt web** và **1 điện thoại**.
+
+- Đăng nhập ở một trình duyệt khác (hoặc điện thoại khác) vẫn được phép; thiết
+  bị cũ cùng loại bị đăng xuất và thấy thông báo "Tài khoản vừa đăng nhập ở
+  thiết bị khác". CV trên thiết bị cũ không bị xóa.
+- Máy chủ (`claim_device_session`, migration `20261113000200_device_sessions.sql`)
+  ghi phiên đang hoạt động theo loại thiết bị và thu hồi refresh token của phiên
+  cũ, nên thiết bị cũ không thể tự gia hạn đăng nhập.
+- Thiết bị cũ đang mở app nhận thay đổi tức thời qua Realtime; nếu đang tắt thì
+  bị đăng xuất ở lần mở tiếp theo.
+- Mất mạng hoặc lỗi máy chủ không bao giờ tự đăng xuất người dùng.
+- Nhiều tab của cùng một trình duyệt dùng chung một phiên, không bị tính là
+  thiết bị khác.
