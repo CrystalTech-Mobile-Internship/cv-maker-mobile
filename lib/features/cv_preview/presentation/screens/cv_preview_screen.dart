@@ -31,8 +31,9 @@ import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/widgets/responsive_action_bar.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
+import '../widgets/cv_a4_design_board.dart';
 
-enum _PreviewMode { pdfA4, interactiveReorder }
+enum _PreviewMode { pdfA4, interactiveReorder, designA4 }
 
 class CvPreviewScreen extends ConsumerStatefulWidget {
   const CvPreviewScreen({super.key, this.cv});
@@ -404,6 +405,11 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The A4 designer needs room for the palette and a full-size sheet.
+    final canDesign = MediaQuery.sizeOf(context).width >= 1100;
+    if (!canDesign && _mode == _PreviewMode.designA4) {
+      _mode = _PreviewMode.pdfA4;
+    }
     final isPdfMode = _mode == _PreviewMode.pdfA4;
 
     return Scaffold(
@@ -537,7 +543,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
             // Full width on phones, a compact centred switch on computers.
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
+                constraints: BoxConstraints(maxWidth: canDesign ? 560 : 420),
                 child: SizedBox(
                   width: double.infinity,
                   child: SegmentedButton<_PreviewMode>(
@@ -566,6 +572,15 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                         ),
                         label: Text(_isEnglish ? 'Arrange' : 'Sắp xếp'),
                       ),
+                      if (canDesign)
+                        ButtonSegment(
+                          value: _PreviewMode.designA4,
+                          icon: const Icon(
+                            Icons.dashboard_customize_outlined,
+                            size: 16,
+                          ),
+                          label: Text(_isEnglish ? 'Design' : 'Thiết kế'),
+                        ),
                     ],
                     selected: {_mode},
                     onSelectionChanged: (set) {
@@ -615,6 +630,17 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                       isEnglish: _isEnglish,
                       onRetry: _retryPreview,
                     ),
+            ),
+          ] else if (_mode == _PreviewMode.designA4) ...[
+            Expanded(
+              child: CvA4DesignBoard(
+                key: const Key('preview-design-board'),
+                cv: _workingCv,
+                onLayoutChanged: (order, hidden) => _updateDocumentSettings(
+                  sectionOrder: order,
+                  hiddenSections: hidden,
+                ),
+              ),
             ),
           ] else ...[
             Expanded(
