@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Modal bottom sheet showcasing available CV templates with visual tags and 1-tap switching.
 class TemplateGallerySheet extends StatelessWidget {
@@ -25,7 +26,7 @@ class TemplateGallerySheet extends StatelessWidget {
     required ValueChanged<String> onSelectTemplate,
     bool isPro = false,
   }) {
-    return showModalBottomSheet(
+    return showAppSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

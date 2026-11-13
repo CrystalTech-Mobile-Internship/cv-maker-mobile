@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../app/theme.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Editable AI cover letter with a copy action.
 Future<void> showCoverLetterSheet(BuildContext context, String letter) {
   final controller = TextEditingController(text: letter);
-  return showModalBottomSheet<void>(
+  return showAppSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

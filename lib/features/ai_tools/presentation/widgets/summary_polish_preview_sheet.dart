@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 enum SummaryPolishPreviewAction { apply, retry, keepOriginal }
 
@@ -9,7 +10,7 @@ Future<SummaryPolishPreviewAction> showSummaryPolishPreviewSheet({
   required String provider,
   required bool isEnglish,
 }) async {
-  return await showModalBottomSheet<SummaryPolishPreviewAction>(
+  return await showAppSheet<SummaryPolishPreviewAction>(
         context: context,
         isScrollControlled: true,
         showDragHandle: true,

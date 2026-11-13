@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/services/cv_item_order_service.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Drag-and-drop ordering of the entries inside one CV section. Returns the
 /// new id order, or null when cancelled.
@@ -11,7 +12,7 @@ Future<List<String>?> showCvItemReorderSheet(
   required List<CvItemSummary> items,
   required bool isEnglish,
 }) {
-  return showModalBottomSheet<List<String>>(
+  return showAppSheet<List<String>>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

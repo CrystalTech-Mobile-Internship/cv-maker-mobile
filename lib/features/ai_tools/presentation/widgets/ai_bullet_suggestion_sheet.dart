@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../domain/models/ai_assistant_models.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Before/after comparison for AI-rewritten bullets. Returns the bullets the
 /// user chose to keep, or null when cancelled.
@@ -10,7 +11,7 @@ Future<List<String>?> showAiBulletSuggestionSheet(
   required List<String> original,
   required AiBulletSuggestion suggestion,
 }) {
-  return showModalBottomSheet<List<String>>(
+  return showAppSheet<List<String>>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
