@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
-import '../../../../core/widgets/responsive_layout_builder.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
 import '../../../cv_editor/domain/services/cv_completion_service.dart';
@@ -71,14 +70,47 @@ class MyCvsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayoutBuilder(
-      mobile: (context, constraints) => _content(context, isDesktop: false),
-      desktop: (context, constraints) => Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: _content(context, isDesktop: true),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        if (width >= 860) return _desktopContent(context);
+        if (width < 640) return _content(context, isDesktop: false);
+        return Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: _content(context, isDesktop: false),
+          ),
+        );
+      },
+    );
+  }
+
+  /// Computer layout: CV library on the left, tools in a side column.
+  Widget _desktopContent(BuildContext context) {
+    final cvs = cvsAsync.asData?.value ?? const <CvModel>[];
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: ListView(
+            key: const PageStorageKey('my-cvs'),
+            padding: const EdgeInsets.fromLTRB(32, 24, 24, 48),
+            children: [_library(context, isDesktop: true)],
+          ),
         ),
-      ),
+        Container(
+          key: const Key('my-cvs-side-panel'),
+          width: 360,
+          decoration: const BoxDecoration(
+            border: Border(left: BorderSide(color: AppTheme.softBorder)),
+          ),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 24, 24, 48),
+            children: _tools(context, cvs),
+          ),
+        ),
+      ],
     );
   }
 
@@ -93,74 +125,81 @@ class MyCvsView extends StatelessWidget {
         104,
       ),
       children: [
-        cvsAsync.when(
-          loading: () => const Padding(
-            padding: EdgeInsets.all(48),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          error: (error, _) => _MessageCard(
-            icon: Icons.error_outline_rounded,
-            title: 'Không thể tải danh sách hồ sơ',
-            message:
-                'Không đọc được CV trên máy. Hãy tải lại trang hoặc mở lại ứng dụng.',
-            action: 'Thử lại',
-            onPressed: onRetry,
-          ),
-          data: (items) {
-            if (items.isEmpty) {
-              return _MessageCard(
-                icon: Icons.note_add_outlined,
-                title: 'Chưa có hồ sơ CV nào',
-                message: 'Chọn một mẫu phù hợp và bắt đầu hồ sơ đầu tiên.',
-                action: 'Tạo CV đầu tiên',
-                onPressed: onCreate,
-              );
-            }
-            final guestCount = isSignedIn
-                ? items.where((cv) => cv.userId == null).length
-                : 0;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (guestCount > 0 && onBackupGuestCvs != null) ...[
-                  _GuestBackupCard(
-                    count: guestCount,
-                    onBackup: onBackupGuestCvs!,
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                CvLibrarySection(
-                  items: items,
-                  isDesktop: isDesktop,
-                  itemBuilder: _cvCard,
-                ),
-              ],
-            );
-          },
-        ),
+        _library(context, isDesktop: isDesktop),
         const SizedBox(height: 18),
-        AiAssistantCard(
-          onChat: onOpenAiInterview,
-          onImport: onImport,
-          onPractice: () => context.push('/interview-practice'),
-        ),
-        const SizedBox(height: 12),
-        LocalDataToolsCard(onExport: onExportAll, onRestore: onRestoreBackup),
-        const SizedBox(height: 12),
-        CloudSyncCard(
-          isSignedIn: isSignedIn,
-          localCount: cvs.length,
-          pendingCount: cvs.where((cv) => !cv.isSynced).length,
-          backendLabel: backendLabel,
-          isSyncing: isSyncing,
-          lastSyncedAt: lastSyncedAt,
-          onSync: onSync,
-          onLogin: onLogin,
-        ),
-        const SizedBox(height: 12),
-        UpcomingToolsRow(onOpenAts: onOpenAts, onOpenPro: onOpenPro),
+        ..._tools(context, cvs),
       ],
     );
+  }
+
+  Widget _library(BuildContext context, {required bool isDesktop}) {
+    return cvsAsync.when(
+      loading: () => const Padding(
+        padding: EdgeInsets.all(48),
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, _) => _MessageCard(
+        icon: Icons.error_outline_rounded,
+        title: 'Không thể tải danh sách hồ sơ',
+        message:
+            'Không đọc được CV trên máy. Hãy tải lại trang hoặc mở lại ứng dụng.',
+        action: 'Thử lại',
+        onPressed: onRetry,
+      ),
+      data: (items) {
+        if (items.isEmpty) {
+          return _MessageCard(
+            icon: Icons.note_add_outlined,
+            title: 'Chưa có hồ sơ CV nào',
+            message: 'Chọn một mẫu phù hợp và bắt đầu hồ sơ đầu tiên.',
+            action: 'Tạo CV đầu tiên',
+            onPressed: onCreate,
+          );
+        }
+        final guestCount = isSignedIn
+            ? items.where((cv) => cv.userId == null).length
+            : 0;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (guestCount > 0 && onBackupGuestCvs != null) ...[
+              _GuestBackupCard(count: guestCount, onBackup: onBackupGuestCvs!),
+              const SizedBox(height: 12),
+            ],
+            CvLibrarySection(
+              items: items,
+              isDesktop: isDesktop,
+              itemBuilder: _cvCard,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  List<Widget> _tools(BuildContext context, List<CvModel> cvs) {
+    return [
+      AiAssistantCard(
+        onChat: onOpenAiInterview,
+        onImport: onImport,
+        onPractice: () => context.push('/interview-practice'),
+      ),
+      const SizedBox(height: 12),
+      LocalDataToolsCard(onExport: onExportAll, onRestore: onRestoreBackup),
+      const SizedBox(height: 12),
+      CloudSyncCard(
+        isSignedIn: isSignedIn,
+        localCount: cvs.length,
+        pendingCount: cvs.where((cv) => !cv.isSynced).length,
+        backendLabel: backendLabel,
+        isSyncing: isSyncing,
+        lastSyncedAt: lastSyncedAt,
+        onSync: onSync,
+        onLogin: onLogin,
+      ),
+      const SizedBox(height: 12),
+      UpcomingToolsRow(onOpenAts: onOpenAts, onOpenPro: onOpenPro),
+    ];
   }
 
   Widget _cvCard(BuildContext context, CvModel cv) {

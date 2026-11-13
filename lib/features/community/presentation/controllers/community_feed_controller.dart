@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/community_live_updates.dart';
 import '../../data/repositories/supabase_community_repository.dart';
 import '../../domain/models/community_models.dart';
 import '../../domain/repositories/community_repository.dart';
@@ -147,6 +148,25 @@ class CommunityFeedController extends StateNotifier<CommunityFeedState> {
   }
 
   void dismissError() => state = state.copyWith(clearError: true);
+
+  /// Applies a change pushed by the server (another user posted, liked or
+  /// commented) without reloading the feed.
+  void applyLiveChange(CommunityPostChange change) {
+    final index = state.posts.indexWhere((p) => p.id == change.postId);
+    switch (change.type) {
+      case CommunityChangeType.removed:
+        if (index >= 0) remove(change.postId);
+      case CommunityChangeType.added:
+        final post = change.post;
+        if (post == null || index >= 0 || state.search.isNotEmpty) return;
+        if (state.kind != null && state.kind != post.kind) return;
+        prepend(post);
+      case CommunityChangeType.updated:
+        final post = change.post;
+        if (post == null || index < 0) return;
+        _replace(post.copyWith(likedByMe: state.posts[index].likedByMe));
+    }
+  }
 
   void _replace(CommunityPost post) {
     state = state.copyWith(

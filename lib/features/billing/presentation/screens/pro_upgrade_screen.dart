@@ -12,6 +12,7 @@ import '../widgets/bank_transfer_box.dart';
 import '../widgets/billing_status_card.dart';
 import '../../../../core/constants/env_constants.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/widgets/responsive_layout_builder.dart';
 
 class ProUpgradeScreen extends ConsumerStatefulWidget {
   const ProUpgradeScreen({super.key});
@@ -68,85 +69,88 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
         leading: homeFallbackLeading(context),
         title: const Text('Nâng cấp Pro'),
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-          children: [
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryNavy,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Smart CV Maker Pro',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
+      body: WebConstrainedWidth(
+        maxWidth: 760,
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            children: [
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryNavy,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Smart CV Maker Pro',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    'Mẫu CV cao cấp và 200 lượt dùng mỗi ngày.',
-                    style: TextStyle(color: Color(0xFFDBEAFE), height: 1.4),
-                  ),
-                ],
+                    SizedBox(height: 6),
+                    Text(
+                      'Mẫu CV cao cấp và 200 lượt dùng mỗi ngày.',
+                      style: TextStyle(color: Color(0xFFDBEAFE), height: 1.4),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            if (authUser != null) ...[
+              if (authUser != null) ...[
+                const SizedBox(height: 16),
+                const BillingStatusCard(),
+              ],
               const SizedBox(height: 16),
-              const BillingStatusCard(),
-            ],
-            const SizedBox(height: 16),
-            const _ComparisonCard(),
-            const SizedBox(height: 16),
-            _PlanCard(
-              selected: _plan == 'monthly',
-              title: 'Theo tháng',
-              price: '49.000đ',
-              detail: 'Dùng trong 30 ngày',
-              onTap: () => setState(() => _plan = 'monthly'),
-            ),
-            const SizedBox(height: 10),
-            _PlanCard(
-              selected: isLifetime,
-              title: 'Trọn đời',
-              price: '99.000đ',
-              detail: 'Thanh toán một lần • Tiết kiệm hơn',
-              badge: 'Khuyên dùng',
-              onTap: () => setState(() => _plan = 'lifetime'),
-            ),
-            const SizedBox(height: 18),
-            if (authUser == null)
-              _LoginRequiredCard(
-                onLogin: () =>
-                    context.push(authEntryLocation('/login', '/upgrade-pro')),
-                onRegister: () => context.push(
-                  authEntryLocation('/register', '/upgrade-pro'),
-                ),
-              )
-            else
-              _AuthenticatedPaymentSection(
-                isLifetime: isLifetime,
-                accountEmail: authUser.email,
-                transferCode: proTransferCode(
-                  authUser.id,
-                  ProPlan.fromValue(_plan),
-                ),
-                hasPendingRequest:
-                    ref
-                        .watch(billingStatusProvider)
-                        .valueOrNull
-                        ?.hasPendingRequest ??
-                    false,
-                isSubmitting: _submitting,
-                onConfirm: _submitRequest,
+              const _ComparisonCard(),
+              const SizedBox(height: 16),
+              _PlanCard(
+                selected: _plan == 'monthly',
+                title: 'Theo tháng',
+                price: '49.000đ',
+                detail: 'Dùng trong 30 ngày',
+                onTap: () => setState(() => _plan = 'monthly'),
               ),
-          ],
+              const SizedBox(height: 10),
+              _PlanCard(
+                selected: isLifetime,
+                title: 'Trọn đời',
+                price: '99.000đ',
+                detail: 'Thanh toán một lần • Tiết kiệm hơn',
+                badge: 'Khuyên dùng',
+                onTap: () => setState(() => _plan = 'lifetime'),
+              ),
+              const SizedBox(height: 18),
+              if (authUser == null)
+                _LoginRequiredCard(
+                  onLogin: () =>
+                      context.push(authEntryLocation('/login', '/upgrade-pro')),
+                  onRegister: () => context.push(
+                    authEntryLocation('/register', '/upgrade-pro'),
+                  ),
+                )
+              else
+                _AuthenticatedPaymentSection(
+                  isLifetime: isLifetime,
+                  accountEmail: authUser.email,
+                  transferCode: proTransferCode(
+                    authUser.id,
+                    ProPlan.fromValue(_plan),
+                  ),
+                  hasPendingRequest:
+                      ref
+                          .watch(billingStatusProvider)
+                          .valueOrNull
+                          ?.hasPendingRequest ??
+                      false,
+                  isSubmitting: _submitting,
+                  onConfirm: _submitRequest,
+                ),
+            ],
+          ),
         ),
       ),
     );

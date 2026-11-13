@@ -14,30 +14,36 @@ class UpcomingToolsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _ToolTile(
-            title: 'Chấm điểm CV',
-            subtitle: 'Theo tin tuyển dụng',
-            icon: Icons.analytics_outlined,
-            iconColor: AppTheme.brandIndigo,
-            iconBackground: AppTheme.indigoSurface,
-            onTap: onOpenAts,
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _ToolTile(
-            title: 'Nâng cấp Pro',
-            subtitle: 'VietQR • Mẫu VIP',
-            icon: Icons.workspace_premium_rounded,
-            iconColor: AppTheme.warningAmber,
-            iconBackground: AppTheme.amberSurface,
-            onTap: onOpenPro,
-          ),
-        ),
-      ],
+    final ats = _ToolTile(
+      title: 'Chấm điểm CV',
+      subtitle: 'Theo tin tuyển dụng',
+      icon: Icons.analytics_outlined,
+      iconColor: AppTheme.brandIndigo,
+      iconBackground: AppTheme.indigoSurface,
+      onTap: onOpenAts,
+    );
+    final pro = _ToolTile(
+      title: 'Nâng cấp Pro',
+      subtitle: 'Thêm lượt dùng, mẫu Pro',
+      icon: Icons.workspace_premium_outlined,
+      iconColor: AppTheme.brandIndigo,
+      iconBackground: AppTheme.indigoSurface,
+      onTap: onOpenPro,
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Side panels on computers are narrow: stack the tiles there.
+        if (constraints.maxWidth < 380) {
+          return Column(children: [ats, const SizedBox(height: 10), pro]);
+        }
+        return Row(
+          children: [
+            Expanded(child: ats),
+            const SizedBox(width: 10),
+            Expanded(child: pro),
+          ],
+        );
+      },
     );
   }
 }
