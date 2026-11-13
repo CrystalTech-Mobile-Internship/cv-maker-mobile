@@ -8,7 +8,7 @@ Không chạy migration trên project dùng chung hoặc production trước khi
 
 ## 2. File quan trọng
 
-- Migration: `supabase/migrations/20261006000100_create_profiles_and_cvs.sql`.
+- Migration: `supabase/migrations/20261021000100_enable_offline_cloud_sync.sql`.
 - Test RLS: `supabase/tests/cvs_rls.test.sql`.
 - Data dictionary: `docs/database/data-dictionary.md`.
 - Mapping local/cloud: `docs/database/local-cloud-mapping.md`.

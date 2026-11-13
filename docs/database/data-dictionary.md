@@ -2,7 +2,7 @@
 
 - Trạng thái: Bản thiết kế MVP
 - Ngày cập nhật: 06/10/2026
-- Migration: `supabase/migrations/20261006000100_create_profiles_and_cvs.sql`
+- Migration: `supabase/migrations/20261021000100_enable_offline_cloud_sync.sql`
 
 ## 1. Nguyên tắc
 

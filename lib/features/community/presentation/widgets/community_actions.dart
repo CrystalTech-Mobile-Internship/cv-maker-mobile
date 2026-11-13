@@ -5,7 +5,9 @@ import '../../data/repositories/supabase_community_repository.dart';
 import '../../domain/models/community_models.dart';
 import '../../domain/repositories/community_repository.dart';
 import '../controllers/community_feed_controller.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import 'community_post_card.dart';
+import 'create_post_sheet.dart';
 
 void _toast(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
@@ -75,4 +77,20 @@ Future<bool> handleCommunityPostAction(
     if (context.mounted) _toast(context, failure.message);
   }
   return false;
+}
+
+/// Opens the composer and publishes the post at the top of the feed.
+Future<void> createCommunityPost(BuildContext context, WidgetRef ref) async {
+  final draft = await showCreatePostSheet(context);
+  if (draft == null || !context.mounted) return;
+  final user = ref.read(currentAuthUserProvider);
+  try {
+    final post = await ref
+        .read(communityRepositoryProvider)
+        .createPost(draft, authorName: user?.displayName ?? '');
+    ref.read(communityFeedControllerProvider.notifier).prepend(post);
+    if (context.mounted) _toast(context, 'Đã đăng bài.');
+  } on CommunityFailure catch (failure) {
+    if (context.mounted) _toast(context, failure.message);
+  }
 }

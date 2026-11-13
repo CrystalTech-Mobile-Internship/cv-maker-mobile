@@ -18,6 +18,7 @@ import '../widgets/cover_letter_sheet.dart';
 import '../widgets/job_posting_input.dart';
 import 'interview_practice_screen.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/utils/cv_id.dart';
 
 /// Scores a saved CV against a pasted job description. Runs fully offline:
 /// keywords are extracted from the JD with [JdKeywordExtractor] and matched
@@ -163,7 +164,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
       final copy = applyTailoring(
         cv,
         result,
-        newId: 'tailored-${now.microsecondsSinceEpoch}',
+        newId: newCvId(),
         title: '${cv.title} (theo tin tuyển dụng)',
         confirmedSkills: confirmed,
         now: now,

@@ -102,7 +102,8 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
               initialValue: _sourceCvId,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.content_copy_outlined),
-                helperText: 'Dùng lại thông tin nhưng tạo một CV độc lập.',
+                helperText: 'Có thể chép từ CV đã có.',
+                helperMaxLines: 2,
               ),
               items: [
                 const DropdownMenuItem<String?>(
