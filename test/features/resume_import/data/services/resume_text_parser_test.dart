@@ -67,4 +67,62 @@ TOEIC 700 — IIG Việt Nam | 2026
     expect(draft.skills, isEmpty);
     expect(draft.warnings.first, contains('rất ít chữ'));
   });
+
+  test('reads an English CV whose introduction has no heading', () {
+    const text = '''
+LE MINH KHOA
+Da Nang, Vietnam  •  minhkhoa.dev@example.com  •  +84 -900000006  •  github.com/example-khoa
+
+Final-year Software Engineering student focused on backend development.
+Experienced in building web and mobile apps with Java and React. Seeking a
+Backend or Full-stack opportunity to build reliable products.
+EDUCATION
+Example University of Technology — Software Engineering      Sep 2022 – Present
+GPA: 3.2 / 4.0
+SKILLS
+Languages: Java, JavaScript, TypeScript
+Backend: Spring Boot, RESTful API, Redis
+Frontend: ReactJS, Flutter
+Databases: MySQL, PostgreSQL
+PROJECT
+TravelHub – Tour Booking Platform Apr 2026 – Jun 2026
+Spring Boot, PostgreSQL, ReactJS | Full Stack Developer (Team of 5)
+• Built tour and booking services.
+StudyNote – Mobile Learning App Sep 2025 – Nov 2025
+React Native, TypeScript | Mobile Developer (Team of 2)
+• Built course browsing and lesson screens.
+''';
+    final draft = parser.parse(sourceName: 'cv.pdf', text: text);
+
+    expect(draft.fullName, 'LE MINH KHOA');
+    expect(draft.address, 'Da Nang, Vietnam');
+    expect(
+      draft.summary,
+      startsWith('Final-year Software Engineering student'),
+    );
+    expect(draft.targetRole, 'Backend or Full-stack');
+    expect(
+      draft.skills,
+      containsAll(['Java', 'Spring Boot', 'ReactJS', 'PostgreSQL']),
+    );
+    expect(draft.skills.any((skill) => skill.contains(':')), isFalse);
+    expect(draft.projects.map((p) => p.name), [
+      'TravelHub – Tour Booking Platform',
+      'StudyNote – Mobile Learning App',
+    ]);
+    expect(draft.projects.first.startDate, DateTime.utc(2026, 4));
+    expect(draft.educations.single.startDate, DateTime.utc(2022, 9));
+    expect(draft.educations.single.isCurrent, isTrue);
+  });
+
+  test('never uses a long sentence as the target role', () {
+    final draft = parser.parse(
+      sourceName: 'cv.pdf',
+      text:
+          'TRAN AN\n'
+          'Student with a strong interest in building products that help people learn.\n'
+          'an.tran@example.com\n',
+    );
+    expect(draft.targetRole, isEmpty);
+  });
 }

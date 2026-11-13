@@ -156,10 +156,10 @@ export function createHandler(deps: Dependencies) {
 
     const started = Date.now();
     try {
-      const completion = await deps.complete(
-        action.buildMessages(input),
-        action.options,
-      );
+      const completion = await deps.complete(action.buildMessages(input), {
+        ...action.options,
+        accept: (text: string) => action.parse(text, input) !== null,
+      });
       const result = action.parse(completion.text, input);
       if (!result) throw new ProviderError("UNPARSEABLE");
       log({
