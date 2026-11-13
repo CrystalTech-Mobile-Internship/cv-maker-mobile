@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/models.dart';
 import '../../domain/models/ai_assistant_models.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Builds the tailored copy of [cv]. The original CV is never modified.
 CvModel applyTailoring(
@@ -51,7 +52,7 @@ Future<Set<String>?> showAiTailorReviewSheet(
   required CvModel cv,
   required AiTailorResult result,
 }) {
-  return showModalBottomSheet<Set<String>>(
+  return showAppSheet<Set<String>>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

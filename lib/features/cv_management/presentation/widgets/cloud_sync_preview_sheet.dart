@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cloud_sync_preview.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Modal bottom sheet presenting a pre-sync preview to the user.
 ///
@@ -24,7 +25,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
     required CloudSyncPreview preview,
     required VoidCallback onExportBackup,
   }) {
-    return showModalBottomSheet<bool>(
+    return showAppSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -54,17 +55,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Top drag pill
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              AppSheetHandle(margin: const EdgeInsets.only(bottom: 16)),
 
               // Title and icon row
               Row(

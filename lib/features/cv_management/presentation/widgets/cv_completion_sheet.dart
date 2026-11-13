@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/services/cv_completion_service.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 Future<void> showCvCompletionSheet(
   BuildContext context,
@@ -10,7 +11,7 @@ Future<void> showCvCompletionSheet(
   required VoidCallback onContinueEditing,
 }) {
   final report = CvCompletionService.evaluate(cv);
-  return showModalBottomSheet<void>(
+  return showAppSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

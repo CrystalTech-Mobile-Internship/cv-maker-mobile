@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../domain/models/skill_model.dart';
 import '../../domain/services/cv_skill_catalog_service.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Modal sheet that allows users to quickly browse and pick skills from curated domain lists.
 class SkillBankSheet extends StatefulWidget {
@@ -23,7 +24,7 @@ class SkillBankSheet extends StatefulWidget {
     required ValueChanged<SkillModel> onAddSkill,
     String language = 'vi',
   }) {
-    return showModalBottomSheet<void>(
+    return showAppSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -101,17 +102,7 @@ class _SkillBankSheetState extends State<SkillBankSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          AppSheetHandle(margin: const EdgeInsets.only(top: 12, bottom: 8)),
 
           // Header
           Padding(

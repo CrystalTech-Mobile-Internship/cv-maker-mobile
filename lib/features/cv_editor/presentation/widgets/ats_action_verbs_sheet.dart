@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../app/theme.dart';
 import '../../domain/services/cv_action_verbs_service.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Interactive modal sheet that presents candidates with standard ATS Action Verbs
 /// and Google XYZ formula examples to boost bullet-point impact.
@@ -21,7 +22,7 @@ class AtsActionVerbsSheet extends StatefulWidget {
     required String language,
     ValueChanged<String>? onInsertVerb,
   }) {
-    return showModalBottomSheet<void>(
+    return showAppSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -78,17 +79,7 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
       child: Column(
         children: [
           // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          AppSheetHandle(margin: const EdgeInsets.only(top: 12, bottom: 8)),
 
           // Header
           Padding(
@@ -98,12 +89,12 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.deepOrange.withAlpha(25),
+                    color: AppTheme.brandIndigo.withAlpha(25),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.bolt_rounded,
-                    color: Colors.deepOrange,
+                    color: AppTheme.brandIndigo,
                     size: 20,
                   ),
                 ),
@@ -243,7 +234,7 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: Colors.deepOrange.withAlpha(20),
+                                      color: AppTheme.brandIndigo.withAlpha(20),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -251,7 +242,7 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
                                       style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.deepOrange,
+                                        color: AppTheme.brandIndigo,
                                       ),
                                     ),
                                   ),
@@ -387,7 +378,7 @@ class _AtsActionVerbsSheetState extends State<AtsActionVerbsSheet> {
         ),
       ),
       selected: isSelected,
-      selectedColor: Colors.deepOrange,
+      selectedColor: AppTheme.brandIndigo,
       backgroundColor: Colors.grey.shade100,
       side: BorderSide.none,
       onSelected: (_) => setState(() => _selectedCategory = id),

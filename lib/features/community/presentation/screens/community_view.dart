@@ -11,6 +11,7 @@ import '../../data/community_live_updates.dart';
 import '../controllers/community_feed_controller.dart';
 import '../widgets/community_actions.dart';
 import '../widgets/community_post_card.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Community tab: discussions, shared jobs and CV review requests.
 class CommunityView extends ConsumerStatefulWidget {
@@ -65,7 +66,7 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
       (null, 'Tất cả'),
       for (final kind in CommunityPostKind.values) (kind, kind.label),
     ];
-    await showModalBottomSheet<void>(
+    await showAppSheet<void>(
       context: context,
       showDragHandle: true,
       builder: (sheetContext) => SafeArea(

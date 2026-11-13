@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 Future<String?> showRenameCvDialog(BuildContext context, CvModel cv) async {
   final controller = TextEditingController(text: cv.title);
@@ -65,7 +66,7 @@ Future<void> showPremiumTemplateInfo(
   CvTemplate template, {
   VoidCallback? onViewProPlans,
 }) {
-  return showModalBottomSheet<void>(
+  return showAppSheet<void>(
     context: context,
     showDragHandle: true,
     builder: (context) => SafeArea(

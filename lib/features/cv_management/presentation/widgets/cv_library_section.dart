@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/services/cv_completion_service.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 enum CvLibraryFilter { all, cloud, local, incomplete }
 
@@ -94,7 +95,7 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
   };
 
   Future<void> _openOptions() async {
-    await showModalBottomSheet<void>(
+    await showAppSheet<void>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,

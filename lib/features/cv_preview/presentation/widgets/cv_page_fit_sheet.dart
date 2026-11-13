@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Modal bottom sheet allowing users to auto-fit their CV to 1 Page A4
 /// or choose standard density presets with ATS advice.
@@ -22,7 +23,7 @@ class CvPageFitSheet extends StatefulWidget {
     required ValueChanged<double> onScaleChanged,
     bool isEnglish = false,
   }) {
-    return showModalBottomSheet<void>(
+    return showAppSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -68,17 +69,7 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          AppSheetHandle(margin: const EdgeInsets.only(top: 12, bottom: 8)),
 
           // Header
           Padding(
@@ -153,7 +144,7 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                   // Preset 1: Auto 1-Page
                   _buildPresetCard(
                     icon: Icons.electric_bolt_rounded,
-                    iconColor: Colors.amber.shade800,
+                    iconColor: AppTheme.brandIndigo,
                     title: widget.isEnglish
                         ? 'Auto-Fit 1 Page A4 (85%)'
                         : 'Gọn 1 trang (85%)',
@@ -183,7 +174,7 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                   // Preset 3: Spacious 115%
                   _buildPresetCard(
                     icon: Icons.zoom_in_rounded,
-                    iconColor: Colors.teal,
+                    iconColor: AppTheme.brandIndigo,
                     title: widget.isEnglish
                         ? 'Spacious / Large (115%)'
                         : 'Thoáng, dễ đọc (115%)',
@@ -267,16 +258,16 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0FDF4),
+                      color: AppTheme.surfaceLight,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFBBF7D0)),
+                      border: Border.all(color: AppTheme.softBorder),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Icon(
                           Icons.lightbulb_outline_rounded,
-                          color: Color(0xFF16A34A),
+                          color: AppTheme.mutedText,
                           size: 20,
                         ),
                         const SizedBox(width: 10),
@@ -288,7 +279,7 @@ class _CvPageFitSheetState extends State<CvPageFitSheet> {
                             style: const TextStyle(
                               fontSize: 12,
                               height: 1.4,
-                              color: Color(0xFF166534),
+                              color: AppTheme.primarySlate,
                             ),
                           ),
                         ),
