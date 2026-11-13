@@ -280,8 +280,9 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
     try {
       if (chosenFileName.toLowerCase().endsWith('.docx')) {
         final docxService = ref.read(docxExportServiceProvider);
+        // Sample lines only guide on screen; files contain real content.
         final docxBytes = await docxService.generateDocx(
-          cv: _previewCv,
+          cv: _workingCv,
           language: _workingCv.language,
         );
         final savedPath = await savePdfBytes(docxBytes, chosenFileName);
@@ -294,7 +295,9 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         );
         return;
       }
-      final bytes = await _pdfBytes;
+      final bytes = _showSampleContent
+          ? await _generatePdf(_workingCv)
+          : await _pdfBytes;
       final pdfService = ref.read(pdfExportServiceProvider);
       final result =
           await OfflinePdfExportController(
