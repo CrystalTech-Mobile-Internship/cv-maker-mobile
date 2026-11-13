@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../features/auth/data/repositories/supabase_device_session_repository.dart';
 import '../features/auth/domain/models/auth_user.dart';
 import '../features/auth/presentation/auth_redirect.dart';
+import '../features/auth/presentation/controllers/device_session_guard.dart';
 import '../features/auth/presentation/providers/auth_providers.dart';
 import '../features/cv_editor/data/services/linked_account_cv_adopter.dart';
 import '../features/cv_management/presentation/controllers/dashboard_sync_controller.dart';
@@ -32,6 +34,34 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
     startInGuestMode: widget.startInGuestMode,
     startAuthenticated: widget.startAuthenticated,
   );
+  final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+  late final _deviceGuard = DeviceSessionGuard(
+    ref.read(deviceSessionRepositoryProvider),
+    onReplaced: _signOutReplacedDevice,
+  );
+
+  @override
+  void dispose() {
+    unawaited(_deviceGuard.stop());
+    super.dispose();
+  }
+
+  /// Another browser (or phone) signed in to this account: leave quietly.
+  /// CVs stay on this device.
+  Future<void> _signOutReplacedDevice() async {
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+    } catch (_) {
+      // The session was already revoked on the server.
+    }
+    _messengerKey.currentState?.showSnackBar(
+      const SnackBar(
+        content: Text('Tài khoản vừa đăng nhập ở thiết bị khác.'),
+        behavior: SnackBarBehavior.floating,
+        duration: Duration(seconds: 6),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +71,7 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
     ) {
       next.whenData((change) {
         unawaited(_persistAuthenticatedSession(change));
+        unawaited(_deviceGuard.handle(change));
         unawaited(_adoptThenSync(change));
         _handleAuthChange(change);
       });
@@ -48,6 +79,7 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
 
     return MaterialApp.router(
       title: AppConstants.appName,
+      scaffoldMessengerKey: _messengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: _router,

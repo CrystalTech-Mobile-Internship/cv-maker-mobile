@@ -29,7 +29,8 @@ param(
     '20261112000300_dual_project_mirror.sql',
     '20261112000400_community.sql',
     '20261112000500_pro_upgrade_requests.sql',
-    '20261113000100_community_realtime.sql'
+    '20261113000100_community_realtime.sql',
+    '20261113000200_device_sessions.sql'
   )
 )
 
