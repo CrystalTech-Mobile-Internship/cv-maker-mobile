@@ -223,7 +223,7 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 420,
+              maxCrossAxisExtent: 520,
               mainAxisExtent: 238,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,

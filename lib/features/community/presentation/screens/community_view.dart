@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/theme.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/models/community_models.dart';
+import '../../data/community_live_updates.dart';
 import '../controllers/community_feed_controller.dart';
 import '../widgets/community_actions.dart';
 import '../widgets/community_post_card.dart';
@@ -22,6 +23,7 @@ class CommunityView extends ConsumerStatefulWidget {
 class _CommunityViewState extends ConsumerState<CommunityView> {
   final _search = TextEditingController();
   Timer? _debounce;
+  StreamSubscription<CommunityPostChange>? _live;
   bool _loadedOnce = false;
 
   @override
@@ -33,6 +35,7 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
   @override
   void dispose() {
     _debounce?.cancel();
+    _live?.cancel();
     _search.dispose();
     super.dispose();
   }
@@ -40,7 +43,12 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
   void _ensureLoaded() {
     if (_loadedOnce || ref.read(currentAuthUserProvider) == null) return;
     _loadedOnce = true;
-    ref.read(communityFeedControllerProvider.notifier).refresh();
+    final controller = ref.read(communityFeedControllerProvider.notifier);
+    controller.refresh();
+    _live ??= ref
+        .read(communityLiveUpdatesProvider)
+        .postChanges()
+        .listen(controller.applyLiveChange, onError: (_) {});
   }
 
   void _onSearchChanged(String value) {

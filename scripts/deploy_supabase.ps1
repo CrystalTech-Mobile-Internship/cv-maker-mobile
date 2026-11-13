@@ -28,7 +28,8 @@ param(
     '20261112000200_ai_credits_and_entitlements.sql',
     '20261112000300_dual_project_mirror.sql',
     '20261112000400_community.sql',
-    '20261112000500_pro_upgrade_requests.sql'
+    '20261112000500_pro_upgrade_requests.sql',
+    '20261113000100_community_realtime.sql'
   )
 )
 

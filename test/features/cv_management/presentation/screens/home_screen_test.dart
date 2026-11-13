@@ -317,6 +317,32 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('computers get a sidebar layout instead of bottom navigation', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1366, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [cvRepositoryProvider.overrideWithValue(FakeCvRepository())],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('desktop-sidebar')), findsOneWidget);
+    expect(find.byKey(const Key('desktop-page-header')), findsOneWidget);
+    expect(find.byKey(const Key('my-cvs-side-panel')), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await tester.tap(find.text('Mẫu CV'));
+    await tester.pumpAndSettle();
+    expect(find.text('Chọn mẫu CV'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('account is an in-place tab and keeps bottom navigation', (
     tester,
   ) async {

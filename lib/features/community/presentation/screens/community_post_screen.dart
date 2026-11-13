@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +13,8 @@ import '../controllers/community_feed_controller.dart';
 import '../widgets/community_actions.dart';
 import '../widgets/community_post_card.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/widgets/responsive_layout_builder.dart';
+import '../../data/community_live_updates.dart';
 
 /// Post detail with comments.
 class CommunityPostScreen extends ConsumerStatefulWidget {
@@ -28,6 +32,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   List<CommunityComment>? _comments;
   String? _error;
   bool _sending = false;
+  StreamSubscription<CommunityCommentChange>? _live;
 
   CommunityPost get _post {
     final feed = ref.watch(communityFeedControllerProvider).posts;
@@ -41,10 +46,36 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
   void initState() {
     super.initState();
     _load();
+    _live = ref
+        .read(communityLiveUpdatesProvider)
+        .commentChanges(widget.post.id)
+        .listen(_applyLiveComment, onError: (_) {});
+  }
+
+  void _applyLiveComment(CommunityCommentChange change) {
+    if (!mounted) return;
+    final current = _comments;
+    if (current == null) return;
+    final exists = current.any((c) => c.id == change.commentId);
+    if (change.type == CommunityChangeType.removed) {
+      if (exists) {
+        setState(
+          () => _comments = [
+            for (final c in current)
+              if (c.id != change.commentId) c,
+          ],
+        );
+      }
+      return;
+    }
+    final comment = change.comment;
+    if (comment == null || exists) return;
+    setState(() => _comments = [...current, comment]);
   }
 
   @override
   void dispose() {
+    _live?.cancel();
     _input.dispose();
     super.dispose();
   }
@@ -74,7 +105,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
           );
       if (!mounted) return;
       _input.clear();
-      final comments = [...?_comments, comment];
+      final comments = [
+        ...?_comments?.where((c) => c.id != comment.id),
+        comment,
+      ];
       setState(() => _comments = comments);
       ref
           .read(communityFeedControllerProvider.notifier)
@@ -120,102 +154,105 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
         leading: homeFallbackLeading(context),
         title: Text(post.kind.label),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  CommunityPostCard(
-                    post: post,
-                    isMine: post.authorId == userId,
-                    expanded: true,
-                    onOpen: () {},
-                    onLike: () => ref
-                        .read(communityFeedControllerProvider.notifier)
-                        .toggleLike(post),
-                    onAction: (action) async {
-                      final deleted = await handleCommunityPostAction(
-                        context,
-                        ref,
-                        post,
-                        action,
-                      );
-                      if (deleted && context.mounted) Navigator.pop(context);
-                    },
-                  ),
-                  if (post.jobUrl != null) ...[
-                    const SizedBox(height: 12),
-                    _ApplyLink(url: post.jobUrl!),
-                  ],
-                  const SizedBox(height: 20),
-                  Text(
-                    'Bình luận (${_comments?.length ?? post.commentCount})',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.primaryNavy,
+      body: WebConstrainedWidth(
+        maxWidth: 760,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    CommunityPostCard(
+                      post: post,
+                      isMine: post.authorId == userId,
+                      expanded: true,
+                      onOpen: () {},
+                      onLike: () => ref
+                          .read(communityFeedControllerProvider.notifier)
+                          .toggleLike(post),
+                      onAction: (action) async {
+                        final deleted = await handleCommunityPostAction(
+                          context,
+                          ref,
+                          post,
+                          action,
+                        );
+                        if (deleted && context.mounted) Navigator.pop(context);
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (_error != null)
+                    if (post.jobUrl != null) ...[
+                      const SizedBox(height: 12),
+                      _ApplyLink(url: post.jobUrl!),
+                    ],
+                    const SizedBox(height: 20),
                     Text(
-                      _error!,
-                      style: const TextStyle(color: AppTheme.dangerRose),
-                    )
-                  else if (_comments == null)
-                    const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (_comments!.isEmpty)
-                    const Text(
-                      'Chưa có bình luận nào.',
-                      style: TextStyle(color: AppTheme.mutedText),
-                    )
-                  else
-                    for (final comment in _comments!)
-                      _CommentTile(
-                        comment: comment,
-                        canDelete: comment.authorId == userId,
-                        onDelete: () => _deleteComment(comment),
-                      ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-              decoration: const BoxDecoration(
-                color: AppTheme.surfaceCard,
-                border: Border(top: BorderSide(color: AppTheme.softBorder)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      key: const ValueKey('comment-input'),
-                      controller: _input,
-                      minLines: 1,
-                      maxLines: 4,
-                      maxLength: 1500,
-                      decoration: const InputDecoration(
-                        hintText: 'Viết bình luận...',
-                        counterText: '',
-                        isDense: true,
+                      'Bình luận (${_comments?.length ?? post.commentCount})',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.primaryNavy,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    key: const ValueKey('comment-send'),
-                    tooltip: 'Gửi',
-                    onPressed: _sending ? null : _send,
-                    icon: const Icon(Icons.send_rounded),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    if (_error != null)
+                      Text(
+                        _error!,
+                        style: const TextStyle(color: AppTheme.dangerRose),
+                      )
+                    else if (_comments == null)
+                      const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_comments!.isEmpty)
+                      const Text(
+                        'Chưa có bình luận nào.',
+                        style: TextStyle(color: AppTheme.mutedText),
+                      )
+                    else
+                      for (final comment in _comments!)
+                        _CommentTile(
+                          comment: comment,
+                          canDelete: comment.authorId == userId,
+                          onDelete: () => _deleteComment(comment),
+                        ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Container(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+                decoration: const BoxDecoration(
+                  color: AppTheme.surfaceCard,
+                  border: Border(top: BorderSide(color: AppTheme.softBorder)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        key: const ValueKey('comment-input'),
+                        controller: _input,
+                        minLines: 1,
+                        maxLines: 4,
+                        maxLength: 1500,
+                        decoration: const InputDecoration(
+                          hintText: 'Viết bình luận...',
+                          counterText: '',
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filled(
+                      key: const ValueKey('comment-send'),
+                      tooltip: 'Gửi',
+                      onPressed: _sending ? null : _send,
+                      icon: const Icon(Icons.send_rounded),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

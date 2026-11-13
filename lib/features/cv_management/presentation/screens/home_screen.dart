@@ -29,6 +29,8 @@ import '../controllers/cv_list_provider.dart';
 import '../controllers/dashboard_sync_controller.dart';
 import '../widgets/cloud_sync_preview_sheet.dart';
 import '../widgets/create_cv_dialog.dart';
+import '../widgets/desktop_shell.dart';
+import '../../../auth/domain/models/auth_user.dart';
 import '../widgets/home_dialogs.dart';
 import '../widgets/my_cvs_view.dart';
 import '../widgets/template_catalog_view.dart';
@@ -358,44 +360,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(titleIcon, color: AppTheme.primarySlate),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            ),
-          ],
-        ),
-        actions: [
-          if (_selectedIndex == 0)
-            IconButton(
-              key: const Key('home-create-cv'),
-              tooltip: 'Tạo CV',
-              onPressed: _createCv,
-              icon: const Icon(Icons.add_rounded),
-            ),
-          if (_selectedIndex == 2 && user != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: FilledButton.icon(
-                key: const ValueKey('community-create-post'),
-                onPressed: () => createCommunityPost(context, ref),
-                style: FilledButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                ),
-                icon: const Icon(Icons.edit_outlined, size: 18),
-                label: const Text('Đăng bài'),
+      appBar: _isWide(context)
+          ? null
+          : AppBar(
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(titleIcon, color: AppTheme.primarySlate),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
+              actions: [
+                if (_selectedIndex == 0)
+                  IconButton(
+                    key: const Key('home-create-cv'),
+                    tooltip: 'Tạo CV',
+                    onPressed: _createCv,
+                    icon: const Icon(Icons.add_rounded),
+                  ),
+                if (_selectedIndex == 2 && user != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilledButton.icon(
+                      key: const ValueKey('community-create-post'),
+                      onPressed: () => createCommunityPost(context, ref),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                      ),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Đăng bài'),
+                    ),
+                  ),
+                const SizedBox(width: 4),
+              ],
             ),
-          const SizedBox(width: 4),
-        ],
-      ),
       body: SafeArea(
-        child: switch (_selectedIndex) {
+        child: _wideLayout(context, title, user, switch (_selectedIndex) {
           0 => MyCvsView(
             cvsAsync: cvsAsync,
             isSignedIn: user != null,
@@ -442,36 +450,99 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           2 => const CommunityView(),
           _ => const AccountScreen(embedded: true),
-        },
+        }),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() => _selectedIndex = index);
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.folder_copy_outlined),
-            selectedIcon: Icon(Icons.folder_copy_rounded),
-            label: 'CV của tôi',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.palette_outlined),
-            selectedIcon: Icon(Icons.palette_rounded),
-            label: 'Mẫu CV',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.forum_outlined),
-            selectedIcon: Icon(Icons.forum_rounded),
-            label: 'Cộng đồng',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_circle_outlined),
-            selectedIcon: Icon(Icons.account_circle_rounded),
-            label: 'Tài khoản',
-          ),
-        ],
+      bottomNavigationBar: _isWide(context)
+          ? null
+          : NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (index) {
+                setState(() => _selectedIndex = index);
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.folder_copy_outlined),
+                  selectedIcon: Icon(Icons.folder_copy_rounded),
+                  label: 'CV của tôi',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.palette_outlined),
+                  selectedIcon: Icon(Icons.palette_rounded),
+                  label: 'Mẫu CV',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.forum_outlined),
+                  selectedIcon: Icon(Icons.forum_rounded),
+                  label: 'Cộng đồng',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.account_circle_outlined),
+                  selectedIcon: Icon(Icons.account_circle_rounded),
+                  label: 'Tài khoản',
+                ),
+              ],
+            ),
+    );
+  }
+
+  static const _destinations = [
+    (Icons.folder_copy_outlined, Icons.folder_copy_rounded, 'CV của tôi'),
+    (Icons.palette_outlined, Icons.palette_rounded, 'Mẫu CV'),
+    (Icons.forum_outlined, Icons.forum_rounded, 'Cộng đồng'),
+    (Icons.account_circle_outlined, Icons.account_circle_rounded, 'Tài khoản'),
+  ];
+
+  bool _isWide(BuildContext context) => MediaQuery.sizeOf(context).width >= 900;
+
+  /// Computer layout designed for wide screens (sidebar + page header).
+  Widget _wideLayout(
+    BuildContext context,
+    String title,
+    AuthUser? user,
+    Widget content,
+  ) {
+    if (!_isWide(context)) return content;
+    final page = switch (_selectedIndex) {
+      0 => content,
+      1 => content,
+      _ => Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 820),
+          child: content,
+        ),
       ),
+    };
+    return DesktopShell(
+      items: [
+        for (final item in _destinations)
+          DesktopNavItem(item.$1, item.$2, item.$3),
+      ],
+      selectedIndex: _selectedIndex,
+      onSelect: (index) => setState(() => _selectedIndex = index),
+      onCreate: _createCv,
+      title: title,
+      accountName: user?.displayName.isNotEmpty == true
+          ? user!.displayName
+          : user?.email,
+      accountDetail: user == null ? 'Đăng nhập để sao lưu CV' : user.email,
+      onAccount: () => setState(() => _selectedIndex = 3),
+      actions: [
+        if (_selectedIndex == 2 && user != null)
+          FilledButton.icon(
+            key: const ValueKey('community-create-post'),
+            onPressed: () => createCommunityPost(context, ref),
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            label: const Text('Đăng bài'),
+          ),
+        if (_selectedIndex == 0)
+          OutlinedButton.icon(
+            onPressed: _importResume,
+            icon: const Icon(Icons.upload_file_outlined, size: 18),
+            label: const Text('Tải CV lên'),
+          ),
+      ],
+      child: page,
     );
   }
 

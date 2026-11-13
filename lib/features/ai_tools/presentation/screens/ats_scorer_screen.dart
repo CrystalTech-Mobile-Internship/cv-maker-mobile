@@ -19,6 +19,7 @@ import '../widgets/job_posting_input.dart';
 import 'interview_practice_screen.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/utils/cv_id.dart';
+import '../../../../core/widgets/responsive_layout_builder.dart';
 
 /// Scores a saved CV against a pasted job description. Runs fully offline:
 /// keywords are extracted from the JD with [JdKeywordExtractor] and matched
@@ -198,89 +199,95 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
         title: const Text('Chấm điểm CV'),
         actions: const [AiQuotaChip(), SizedBox(width: 8)],
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-          children: [
-            const _HeroCard(),
-            const SizedBox(height: 16),
-            if (cvsAsync.isLoading && cvs.isEmpty)
-              const LinearProgressIndicator()
-            else if (cvs.isEmpty)
-              const _EmptyCvNotice()
-            else
-              DropdownButtonFormField<String>(
-                key: const ValueKey('ats-cv-picker'),
-                initialValue: cv?.id,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'CV cần chấm'),
-                items: [
-                  for (final item in cvs)
-                    DropdownMenuItem(
-                      value: item.id,
-                      child: Text(item.title, overflow: TextOverflow.ellipsis),
-                    ),
-                ],
-                onChanged: (value) => setState(() => _selectedCvId = value),
-              ),
-            const SizedBox(height: 12),
-            TextField(
-              key: const ValueKey('ats-jd-input'),
-              controller: _jdController,
-              minLines: 7,
-              maxLines: 12,
-              maxLength: 8000,
-              decoration: const InputDecoration(
-                labelText: 'Link hoặc nội dung tin tuyển dụng',
-                alignLabelWithHint: true,
-                hintText: 'https://... hoặc dán nội dung tin',
-              ),
-            ),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: () => _analyze(cv),
-              icon: const Icon(Icons.analytics_outlined),
-              label: const Text('Chấm điểm CV theo tin tuyển dụng'),
-            ),
-            if (report != null && cv != null) ...[
-              const SizedBox(height: 18),
-              _ScoreCard(report: report),
-              const SizedBox(height: 12),
-              _KeywordCard(
-                report: report,
-                onAddMissing: () =>
-                    _addMissingSkills(cv, report.missingKeywords),
-                onOpenEditor: () => context.push('/editor', extra: cv),
-              ),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                key: const ValueKey('ats-tailor'),
-                onPressed: () => _tailorWithAi(cv),
-                icon: const Icon(Icons.auto_awesome_outlined),
-                label: Text('Chỉnh CV theo tin này'),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                key: const ValueKey('ats-interview'),
-                onPressed: () => context.push(
-                  '/interview-practice',
-                  extra: InterviewPracticeArgs(
-                    cvId: cv.id,
-                    jobDescription: _jdController.text.trim(),
-                  ),
+      body: WebConstrainedWidth(
+        maxWidth: 760,
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            children: [
+              const _HeroCard(),
+              const SizedBox(height: 16),
+              if (cvsAsync.isLoading && cvs.isEmpty)
+                const LinearProgressIndicator()
+              else if (cvs.isEmpty)
+                const _EmptyCvNotice()
+              else
+                DropdownButtonFormField<String>(
+                  key: const ValueKey('ats-cv-picker'),
+                  initialValue: cv?.id,
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'CV cần chấm'),
+                  items: [
+                    for (final item in cvs)
+                      DropdownMenuItem(
+                        value: item.id,
+                        child: Text(
+                          item.title,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (value) => setState(() => _selectedCvId = value),
                 ),
-                icon: const Icon(Icons.record_voice_over_outlined),
-                label: const Text('Luyện phỏng vấn cho vị trí này'),
+              const SizedBox(height: 12),
+              TextField(
+                key: const ValueKey('ats-jd-input'),
+                controller: _jdController,
+                minLines: 7,
+                maxLines: 12,
+                maxLength: 8000,
+                decoration: const InputDecoration(
+                  labelText: 'Link hoặc nội dung tin tuyển dụng',
+                  alignLabelWithHint: true,
+                  hintText: 'https://... hoặc dán nội dung tin',
+                ),
               ),
               const SizedBox(height: 8),
-              OutlinedButton.icon(
-                key: const ValueKey('ats-cover-letter'),
-                onPressed: () => _writeCoverLetter(cv),
-                icon: const Icon(Icons.mail_outline_rounded),
-                label: Text('Viết thư xin việc'),
+              FilledButton.icon(
+                onPressed: () => _analyze(cv),
+                icon: const Icon(Icons.analytics_outlined),
+                label: const Text('Chấm điểm CV theo tin tuyển dụng'),
               ),
+              if (report != null && cv != null) ...[
+                const SizedBox(height: 18),
+                _ScoreCard(report: report),
+                const SizedBox(height: 12),
+                _KeywordCard(
+                  report: report,
+                  onAddMissing: () =>
+                      _addMissingSkills(cv, report.missingKeywords),
+                  onOpenEditor: () => context.push('/editor', extra: cv),
+                ),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  key: const ValueKey('ats-tailor'),
+                  onPressed: () => _tailorWithAi(cv),
+                  icon: const Icon(Icons.auto_awesome_outlined),
+                  label: Text('Chỉnh CV theo tin này'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  key: const ValueKey('ats-interview'),
+                  onPressed: () => context.push(
+                    '/interview-practice',
+                    extra: InterviewPracticeArgs(
+                      cvId: cv.id,
+                      jobDescription: _jdController.text.trim(),
+                    ),
+                  ),
+                  icon: const Icon(Icons.record_voice_over_outlined),
+                  label: const Text('Luyện phỏng vấn cho vị trí này'),
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton.icon(
+                  key: const ValueKey('ats-cover-letter'),
+                  onPressed: () => _writeCoverLetter(cv),
+                  icon: const Icon(Icons.mail_outline_rounded),
+                  label: Text('Viết thư xin việc'),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

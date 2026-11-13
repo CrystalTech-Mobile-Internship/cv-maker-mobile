@@ -1,5 +1,6 @@
 import 'package:cv_maker_mobile/features/auth/domain/models/auth_user.dart';
 import 'package:cv_maker_mobile/features/auth/presentation/providers/auth_providers.dart';
+import 'package:cv_maker_mobile/features/community/data/community_live_updates.dart';
 import 'package:cv_maker_mobile/features/community/data/repositories/supabase_community_repository.dart';
 import 'package:cv_maker_mobile/features/community/domain/models/community_models.dart';
 import 'package:cv_maker_mobile/features/community/domain/repositories/community_repository.dart';
@@ -78,6 +79,59 @@ class _FakeRepository implements CommunityRepository {
 }
 
 void main() {
+  test('live changes add, update and remove posts in the feed', () async {
+    final controller = CommunityFeedController(_FakeRepository([_post('1')]));
+    await controller.refresh();
+
+    controller.applyLiveChange(
+      CommunityPostChange(
+        CommunityChangeType.added,
+        postId: '2',
+        post: _post('2'),
+      ),
+    );
+    expect(controller.state.posts.map((p) => p.id), ['2', '1']);
+
+    // Same post again (our own insert echoed back) is not duplicated.
+    controller.applyLiveChange(
+      CommunityPostChange(
+        CommunityChangeType.added,
+        postId: '2',
+        post: _post('2'),
+      ),
+    );
+    expect(controller.state.posts, hasLength(2));
+
+    await controller.toggleLike(controller.state.posts.last);
+    controller.applyLiveChange(
+      CommunityPostChange(
+        CommunityChangeType.updated,
+        postId: '1',
+        post: _post('1').copyWith(likeCount: 5, commentCount: 2),
+      ),
+    );
+    final updated = controller.state.posts.last;
+    expect(updated.likeCount, 5);
+    expect(updated.commentCount, 2);
+    expect(updated.likedByMe, isTrue);
+
+    controller.applyLiveChange(
+      const CommunityPostChange(CommunityChangeType.removed, postId: '2'),
+    );
+    expect(controller.state.posts.map((p) => p.id), ['1']);
+
+    // Posts outside the active filter are ignored.
+    await controller.setKind(CommunityPostKind.job);
+    controller.applyLiveChange(
+      CommunityPostChange(
+        CommunityChangeType.added,
+        postId: '3',
+        post: _post('3', kind: CommunityPostKind.discussion),
+      ),
+    );
+    expect(controller.state.posts.map((p) => p.id), ['1']);
+  });
+
   group('CommunityPostDraft', () {
     test('requires a company for job posts and a valid URL', () {
       expect(
