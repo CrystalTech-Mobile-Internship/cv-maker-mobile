@@ -44,20 +44,41 @@ final class ResumeTextParser {
       'skills',
       'kỹ năng',
       'projects',
+      'project',
+      'personal projects',
       'dự án',
       'certifications',
+      'certificates',
+      'certificate',
       'chứng chỉ',
+      'technical skills',
+      'activities',
+      'hoạt động',
+      'awards',
+      'giải thưởng',
     };
-    final identityLines = lines
-        .where(
-          (line) =>
-              !line.contains('@') && (phone.isEmpty || !line.contains(phone)),
-        )
+    final firstHeading = lines.indexWhere(
+      (line) => headings.contains(_headingKey(line)),
+    );
+    final intro = firstHeading < 0
+        ? lines.take(8).toList(growable: false)
+        : lines.take(firstHeading).toList(growable: false);
+    final contactLine = intro.firstWhere(
+      (line) =>
+          line.contains('@') || (phone.isNotEmpty && line.contains(phone)),
+      orElse: () => '',
+    );
+    final introBody = intro
+        .where((line) => line != contactLine)
         .where((line) => !headings.contains(_headingKey(line)))
-        .take(2)
         .toList(growable: false);
+    // Name, then an optional short title line ("Backend Developer").
+    final identityLines = <String>[
+      if (introBody.isNotEmpty) introBody.first,
+      if (introBody.length > 1 && _looksLikeTitle(introBody[1])) introBody[1],
+    ];
 
-    final summary = _section(
+    final headedSummary = _section(
       lines,
       starts: const {
         'summary',
@@ -71,17 +92,27 @@ final class ResumeTextParser {
       },
       allHeadings: headings,
     ).join(' ');
+    // Many CVs put a short introduction under the contact line without a
+    // "Summary" heading.
+    final introSummary = intro
+        .where((line) => line != contactLine && !identityLines.contains(line))
+        .join(' ');
+    final summary = headedSummary.isNotEmpty
+        ? headedSummary
+        : (introSummary.length >= 60 ? introSummary : '');
     final skillLines = _section(
       lines,
-      starts: const {'skills', 'kỹ năng'},
+      starts: const {'skills', 'kỹ năng', 'technical skills'},
       allHeadings: headings,
     );
     final skills = skillLines
+        // "Backend: Spring Boot, Redis" -> "Spring Boot, Redis"
+        .map((line) => line.replaceFirst(RegExp(r'^[^:,]{2,30}:\s*'), ''))
         .expand((line) => line.split(RegExp(r'[,;|•·]')))
         .map((skill) => skill.trim())
         .where((skill) => skill.length >= 2 && skill.length <= 48)
-        .take(18)
         .toSet()
+        .take(40)
         .toList(growable: false);
 
     final educationLines = _section(
@@ -96,12 +127,17 @@ final class ResumeTextParser {
     );
     final projectLines = _section(
       lines,
-      starts: const {'projects', 'dự án'},
+      starts: const {'projects', 'project', 'personal projects', 'dự án'},
       allHeadings: headings,
     );
     final certificationLines = _section(
       lines,
-      starts: const {'certifications', 'chứng chỉ'},
+      starts: const {
+        'certifications',
+        'certificates',
+        'certificate',
+        'chứng chỉ',
+      },
       allHeadings: headings,
     );
     final educations = _parseEducations(educationLines);
@@ -126,10 +162,10 @@ final class ResumeTextParser {
       sourceName: sourceName,
       rawText: normalized,
       fullName: identityLines.isEmpty ? '' : identityLines.first,
-      targetRole: identityLines.length < 2 ? '' : identityLines[1],
+      targetRole: _targetRole(identityLines, summary),
       email: email,
       phone: phone,
-      address: '',
+      address: _address(contactLine, email: email),
       summary: summary,
       skills: skills,
       educations: educations,
@@ -139,6 +175,71 @@ final class ResumeTextParser {
       warnings: warnings,
     );
   }
+
+  /// A short title line under the name, or the role named in the summary
+  /// ("Seeking a Backend Developer role", "ứng tuyển vị trí ...").
+  static String _targetRole(List<String> identityLines, String summary) {
+    if (identityLines.length > 1) return identityLines[1];
+    final english = RegExp(
+      r'(?:seeking|looking for)\s+(?:an?\s+)?(.{3,70}?)\s+(?:opportunit(?:y|ies)|position|role|internship)',
+      caseSensitive: false,
+    ).firstMatch(summary);
+    if (english != null) return _capitalize(english.group(1)!.trim());
+    final vietnamese = RegExp(
+      r'vị trí\s+([^,.;]{3,60})',
+      caseSensitive: false,
+    ).firstMatch(summary);
+    if (vietnamese != null) return _capitalize(vietnamese.group(1)!.trim());
+    return '';
+  }
+
+  /// The part of the contact line that is not an email, phone or link.
+  static String _address(String contactLine, {required String email}) {
+    if (contactLine.isEmpty) return '';
+    for (final part in contactLine.split(RegExp(r'\s*[•·|]\s*'))) {
+      final value = part.trim();
+      if (value.isEmpty || value.contains('@')) continue;
+      if (email.isNotEmpty && value.contains(email)) continue;
+      final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+      if (digits.length >= 6) continue;
+      if (RegExp(
+        r'https?://|www\.|github\.com|linkedin\.com',
+        caseSensitive: false,
+      ).hasMatch(value)) {
+        continue;
+      }
+      if (RegExp(r'[A-Za-zÀ-ỹ]').hasMatch(value)) return value;
+    }
+    return '';
+  }
+
+  /// "SmartEnglish AI - Learning App Aug 2026 - Present | In Development"
+  /// -> "SmartEnglish AI - Learning App".
+  static String _titleBeforeBar(String line) {
+    final withoutDates = line
+        .replaceAll(_dateToken, '')
+        .replaceAll(
+          RegExp(
+            r'\b(?:present|current|now|hiện tại|nay)\b',
+            caseSensitive: false,
+          ),
+          '',
+        );
+    return withoutDates
+        .split('|')
+        .first
+        .replaceAll(RegExp(r'(?:\s*[-–—]\s*)+$'), '')
+        .replaceAll(RegExp(r'\s{2,}'), ' ')
+        .trim();
+  }
+
+  static bool _looksLikeTitle(String value) =>
+      value.length <= 60 &&
+      value.split(RegExp(r'\s+')).length <= 8 &&
+      !value.endsWith('.');
+
+  static String _capitalize(String value) =>
+      value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
   static String _cleanLine(String value) =>
       value.replaceFirst(RegExp(r'^[\s•·▪◦●○\-–—]+'), '').trim();
@@ -160,7 +261,7 @@ final class ResumeTextParser {
       if (allHeadings.contains(_headingKey(lines[index]))) break;
       result.add(lines[index]);
     }
-    return result.take(12).toList(growable: false);
+    return result.take(80).toList(growable: false);
   }
 
   static List<ResumeEducationDraft> _parseEducations(List<String> lines) {
@@ -221,36 +322,73 @@ final class ResumeTextParser {
           final text = entry.join(' ');
           final dates = _dateRange(text);
           final header = _headerParts(entry.first);
-          final url = RegExp(
-            r'https?://[^\s]+',
-            caseSensitive: false,
-          ).firstMatch(text)?.group(0);
-          final technologyLine = entry.where(
+          final url =
+              RegExp(
+                r'https?://[^\s]+',
+                caseSensitive: false,
+              ).firstMatch(text)?.group(0) ??
+              RegExp(r'\bgithub\.com/[^\s,]+', caseSensitive: false)
+                  .firstMatch(text)
+                  ?.group(0)
+                  ?.replaceFirst(RegExp(r'^'), 'https://');
+          final labelledTech = entry.where(
             (line) => RegExp(
               r'^(?:technologies|tech stack|công nghệ)\s*:',
               caseSensitive: false,
             ).hasMatch(line),
           );
-          final technologies = technologyLine
-              .expand(
-                (line) =>
-                    line.split(':').skip(1).join(':').split(RegExp(r'[,;|]')),
-              )
-              .map((item) => item.trim())
-              .where((item) => item.isNotEmpty)
-              .toList(growable: false);
+          // "Spring Boot, PostgreSQL | Full Stack Developer (Team of 5)",
+          // possibly wrapped over several lines that end with a comma.
+          final body = entry.skip(1).toList(growable: false);
+          final infoIndex = body.indexWhere(
+            (line) => line.contains('|') && line.contains(','),
+          );
+          var infoStart = infoIndex;
+          while (infoStart > 0 && body[infoStart - 1].trim().endsWith(',')) {
+            infoStart--;
+          }
+          final infoLines = infoIndex < 0
+              ? const <String>[]
+              : body.sublist(infoStart, infoIndex + 1);
+          final infoLine = infoLines.isEmpty ? null : infoLines.join(' ');
+          final technologies =
+              <String>[
+                    ...labelledTech.expand(
+                      (line) => line
+                          .split(':')
+                          .skip(1)
+                          .join(':')
+                          .split(RegExp(r'[,;|]')),
+                    ),
+                    if (infoLine != null)
+                      ...infoLine.split('|').first.split(','),
+                  ]
+                  .map((item) => item.trim())
+                  .where((item) => item.isNotEmpty)
+                  .toList();
+          final role = infoLine != null
+              ? infoLine.split('|').last.trim()
+              : (header.length > 1 && entry.length > 1 ? header[1] : '');
+          // Keep "Name – Subtitle" together when the role comes from a
+          // separate line.
+          final name = infoLine != null || entry.length == 1
+              ? _titleBeforeBar(entry.first)
+              : (header.isEmpty ? '' : header.first);
           final details = entry
               .skip(1)
               .where(
                 (line) =>
                     !_containsDate(line) &&
-                    !line.contains('http://') &&
-                    !line.contains('https://') &&
-                    !technologyLine.contains(line),
+                    !infoLines.contains(line) &&
+                    !labelledTech.contains(line) &&
+                    !RegExp(
+                      r'https?://|github\.com/',
+                      caseSensitive: false,
+                    ).hasMatch(line),
               );
           return ResumeProjectDraft(
-            name: header.isEmpty ? '' : header.first,
-            role: header.length > 1 ? header[1] : '',
+            name: name,
+            role: role,
             description: details.join('\n'),
             technologies: technologies,
             sourceUrl: url,
@@ -327,8 +465,25 @@ final class ResumeTextParser {
         .toList(growable: false);
   }
 
+  static const _months = {
+    'jan': 1,
+    'feb': 2,
+    'mar': 3,
+    'apr': 4,
+    'may': 5,
+    'jun': 6,
+    'jul': 7,
+    'aug': 8,
+    'sep': 9,
+    'oct': 10,
+    'nov': 11,
+    'dec': 12,
+  };
+
+  /// "2024", "03/2024", "3-2024" or "Aug 2024".
   static final RegExp _dateToken = RegExp(
-    r'(?<!\d)(?:(?:0?[1-9]|1[0-2])[/-])?(?:19|20)\d{2}(?!\d)',
+    r'(?:\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+|(?<!\d)(?:0?[1-9]|1[0-2])[/-])?(?<!\d)(?:19|20)\d{2}(?!\d)',
+    caseSensitive: false,
   );
 
   static bool _containsDate(String value) => _dateToken.hasMatch(value);
@@ -353,8 +508,14 @@ final class ResumeTextParser {
   }
 
   static DateTime _parseDate(String value) {
+    final year = int.parse(
+      RegExp(r'(?:19|20)\d{2}').firstMatch(value)!.group(0)!,
+    );
+    final named = RegExp(r'^[a-z]{3}', caseSensitive: false).firstMatch(value);
+    if (named != null) {
+      return DateTime.utc(year, _months[named.group(0)!.toLowerCase()] ?? 1);
+    }
     final parts = value.split(RegExp(r'[/\\-]'));
-    final year = int.parse(parts.last);
     final month = parts.length > 1 ? int.parse(parts.first) : 1;
     return DateTime.utc(year, month);
   }
