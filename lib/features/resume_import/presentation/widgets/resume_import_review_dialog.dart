@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
 import '../../domain/models/resume_import_draft.dart';
+import '../../domain/services/resume_language.dart';
 
 final class ResumeImportReviewResult {
   const ResumeImportReviewResult({
@@ -61,7 +62,13 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
   late final _address = TextEditingController(text: widget.draft.address);
   late final _summary = TextEditingController(text: widget.draft.summary);
   String _templateId = CvTemplateCatalog.freeTemplates.first.id;
-  String _language = 'vi';
+  late String _language = detectResumeLanguage(
+    [
+      widget.draft.summary,
+      widget.draft.targetRole,
+      widget.draft.rawText,
+    ].join('\n'),
+  );
 
   @override
   void dispose() {
@@ -81,14 +88,26 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final screen = MediaQuery.sizeOf(context);
+    final wide = screen.width >= 900;
     return Dialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      // Wider than the default dialog so both columns have room.
+      constraints: BoxConstraints(maxWidth: wide ? 980 : 720),
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 720, maxHeight: 760),
+        constraints: BoxConstraints(
+          maxWidth: wide ? 980 : 720,
+          maxHeight: screen.height * 0.9,
+        ),
         child: Column(
+          // Shrinks to the content; scrolls only when it is really long.
+          mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 12, 10),
+              padding: const EdgeInsets.fromLTRB(20, 16, 12, 10),
               child: Row(
                 children: [
                   const Icon(
@@ -114,147 +133,31 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
               ),
             ),
             const Divider(height: 1),
-            Expanded(
-              child: ListView(
+            Flexible(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.amberSurface,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.draft.sourceName,
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(height: 4),
-                        for (final warning in widget.draft.warnings)
-                          Text(
-                            '• $warning',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _field(_title, 'Tên hồ sơ', Icons.description_outlined),
-                  _field(_name, 'Họ và tên', Icons.person_outline_rounded),
-                  _field(_role, 'Vị trí ứng tuyển', Icons.work_outline_rounded),
-                  _field(_email, 'Email', Icons.email_outlined),
-                  _field(_phone, 'Số điện thoại', Icons.phone_outlined),
-                  _field(_address, 'Địa chỉ', Icons.location_on_outlined),
-                  TextField(
-                    controller: _summary,
-                    minLines: 4,
-                    maxLines: 8,
-                    decoration: const InputDecoration(
-                      labelText: 'Tóm tắt',
-                      alignLabelWithHint: true,
-                      prefixIcon: Icon(Icons.subject_rounded),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  DropdownButtonFormField<String>(
-                    initialValue: _templateId,
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Template áp dụng',
-                      prefixIcon: Icon(Icons.palette_outlined),
-                    ),
-                    items: [
-                      for (final template in CvTemplateCatalog.freeTemplates)
-                        DropdownMenuItem(
-                          value: template.id,
-                          child: Text(
-                            template.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) setState(() => _templateId = value);
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment(value: 'vi', label: Text('Tiếng Việt')),
-                      ButtonSegment(value: 'en', label: Text('English')),
-                    ],
-                    selected: {_language},
-                    onSelectionChanged: (value) {
-                      setState(() => _language = value.first);
-                    },
-                  ),
-                  if (widget.draft.skills.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      'Kỹ năng tìm thấy (${widget.draft.skills.length})',
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 4,
-                      children: [
-                        for (final skill in widget.draft.skills)
-                          Chip(label: Text(skill)),
-                      ],
-                    ),
-                  ],
-                  if (_structuredItemCount > 0) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      'Học vấn, kinh nghiệm, dự án ($_structuredItemCount)',
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (widget.draft.educations.isNotEmpty)
-                          _countChip(
-                            Icons.school_outlined,
-                            'Học vấn',
-                            widget.draft.educations.length,
-                          ),
-                        if (widget.draft.experiences.isNotEmpty)
-                          _countChip(
-                            Icons.work_outline_rounded,
-                            'Kinh nghiệm',
-                            widget.draft.experiences.length,
-                          ),
-                        if (widget.draft.projects.isNotEmpty)
-                          _countChip(
-                            Icons.account_tree_outlined,
-                            'Dự án',
-                            widget.draft.projects.length,
-                          ),
-                        if (widget.draft.certifications.isNotEmpty)
-                          _countChip(
-                            Icons.workspace_premium_outlined,
-                            'Chứng chỉ',
-                            widget.draft.certifications.length,
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Các mục này sẽ được đưa vào đúng tab để bạn kiểm tra và chỉnh sửa tiếp.',
-                      style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
-                    ),
-                  ],
-                ],
+                child: wide
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 6, child: _profileColumn(wide: true)),
+                          const SizedBox(width: 24),
+                          Expanded(flex: 5, child: _contentColumn()),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _profileColumn(wide: false),
+                          const SizedBox(height: 4),
+                          _contentColumn(),
+                        ],
+                      ),
               ),
             ),
             const Divider(height: 1),
-            Padding(
+            Container(
+              alignment: Alignment.centerRight,
               padding: const EdgeInsets.all(14),
               child: Wrap(
                 alignment: WrapAlignment.end,
@@ -277,6 +180,192 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
           ],
         ),
       ),
+    );
+  }
+
+  /// Name, contact details and summary.
+  Widget _profileColumn({required bool wide}) {
+    final warnings = widget.draft.warnings;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppTheme.surfaceLight,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.softBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.draft.sourceName,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 4),
+              for (final warning in warnings)
+                Text(
+                  warning,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.mutedText,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        _field(_title, 'Tên hồ sơ', Icons.description_outlined),
+        _field(_name, 'Họ và tên', Icons.person_outline_rounded),
+        _field(_role, 'Vị trí ứng tuyển', Icons.work_outline_rounded),
+        if (wide)
+          Row(
+            children: [
+              Expanded(child: _field(_email, 'Email', Icons.email_outlined)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _field(_phone, 'Số điện thoại', Icons.phone_outlined),
+              ),
+            ],
+          )
+        else ...[
+          _field(_email, 'Email', Icons.email_outlined),
+          _field(_phone, 'Số điện thoại', Icons.phone_outlined),
+        ],
+        _field(_address, 'Địa chỉ', Icons.location_on_outlined),
+        TextField(
+          controller: _summary,
+          minLines: wide ? 5 : 4,
+          maxLines: 8,
+          decoration: const InputDecoration(
+            labelText: 'Tóm tắt',
+            alignLabelWithHint: true,
+            prefixIcon: Icon(Icons.subject_rounded),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Template, language and what else was found in the file.
+  Widget _contentColumn() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 4),
+        DropdownButtonFormField<String>(
+          initialValue: _templateId,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'Mẫu CV',
+            prefixIcon: Icon(Icons.palette_outlined),
+          ),
+          items: [
+            for (final template in CvTemplateCatalog.freeTemplates)
+              DropdownMenuItem(
+                value: template.id,
+                child: Text(
+                  template.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+          ],
+          onChanged: (value) {
+            if (value != null) setState(() => _templateId = value);
+          },
+        ),
+        const SizedBox(height: 12),
+        SegmentedButton<String>(
+          showSelectedIcon: false,
+          segments: const [
+            ButtonSegment(value: 'vi', label: Text('Tiếng Việt')),
+            ButtonSegment(value: 'en', label: Text('English')),
+          ],
+          selected: {_language},
+          onSelectionChanged: (value) {
+            setState(() => _language = value.first);
+          },
+        ),
+        if (_structuredItemCount > 0) ...[
+          const SizedBox(height: 16),
+          Text(
+            'Học vấn, kinh nghiệm, dự án ($_structuredItemCount)',
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              if (widget.draft.educations.isNotEmpty)
+                _countChip(
+                  Icons.school_outlined,
+                  'Học vấn',
+                  widget.draft.educations.length,
+                ),
+              if (widget.draft.experiences.isNotEmpty)
+                _countChip(
+                  Icons.work_outline_rounded,
+                  'Kinh nghiệm',
+                  widget.draft.experiences.length,
+                ),
+              if (widget.draft.projects.isNotEmpty)
+                _countChip(
+                  Icons.account_tree_outlined,
+                  'Dự án',
+                  widget.draft.projects.length,
+                ),
+              if (widget.draft.certifications.isNotEmpty)
+                _countChip(
+                  Icons.workspace_premium_outlined,
+                  'Chứng chỉ',
+                  widget.draft.certifications.length,
+                ),
+            ],
+          ),
+        ],
+        if (widget.draft.skills.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          Text(
+            'Kỹ năng tìm thấy (${widget.draft.skills.length})',
+            style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final skill in widget.draft.skills)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppTheme.softBorder),
+                  ),
+                  child: Text(
+                    skill,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primarySlate,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 10),
+        const Text(
+          'Các mục sẽ được đưa vào đúng phần để bạn chỉnh sửa tiếp.',
+          style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
+        ),
+      ],
     );
   }
 

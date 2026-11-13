@@ -4,6 +4,7 @@ import 'package:archive/archive.dart';
 
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../domain/repositories/document_export_repository.dart';
+import '../../../cv_editor/domain/services/cv_bullet_cleaner.dart';
 
 class DocxExportServiceImpl implements DocumentExportRepository {
   const DocxExportServiceImpl();
@@ -13,6 +14,7 @@ class DocxExportServiceImpl implements DocumentExportRepository {
     required CvModel cv,
     required String language,
   }) async {
+    cv = CvBulletCleaner.clean(cv);
     final isEn = language == 'en';
     final buffer = StringBuffer();
 

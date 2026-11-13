@@ -35,6 +35,7 @@ import '../widgets/home_dialogs.dart';
 import '../widgets/my_cvs_view.dart';
 import '../widgets/template_catalog_view.dart';
 import '../../../../core/utils/cv_id.dart';
+import '../../../resume_import/domain/services/resume_language.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -141,7 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             .parseResume(
               sourceName: source.fileName,
               text: source.text,
-              language: 'vi',
+              language: detectResumeLanguage(source.text),
             ),
       );
     } on AiWritingFailure catch (failure) {
