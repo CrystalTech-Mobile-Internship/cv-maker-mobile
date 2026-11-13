@@ -7,6 +7,7 @@ import '../../../cv_editor/domain/models/project_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../domain/services/pdf_export_service.dart';
 import 'pdf_platform_storage.dart' as platform;
+import '../../../cv_editor/domain/services/cv_bullet_cleaner.dart';
 
 class PdfExportServiceImpl implements PdfExportService {
   static Future<_PdfFontSet>? _fontSetFuture;
@@ -17,6 +18,7 @@ class PdfExportServiceImpl implements PdfExportService {
     required String language,
     String templateId = 'harvard_ats',
   }) async {
+    cv = CvBulletCleaner.clean(cv);
     final isEn = language == 'en';
     final scale = (cv.fontSizeScale > 0) ? cv.fontSizeScale : 1.0;
     final templateStyle = _TemplateStyle.fromId(
