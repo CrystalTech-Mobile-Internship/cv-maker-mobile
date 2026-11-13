@@ -1,4 +1,10 @@
+<p align="center">
+  <img src="docs/images/logo.png" alt="Smart CV Maker" width="96">
+</p>
+
 # Smart CV Maker
+
+Trang web: **https://smartcv-maker.vercel.app**
 
 Ứng dụng tạo CV chuyên nghiệp cho sinh viên, fresher và người đi làm. Chạy trên
 **Android**, **iOS** và **Web** (có giao diện riêng cho máy tính). Dữ liệu được

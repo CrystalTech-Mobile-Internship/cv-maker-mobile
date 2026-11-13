@@ -124,17 +124,13 @@ class _Sidebar extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: AppTheme.primarySlate,
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: const Icon(
-                  Icons.description_rounded,
-                  size: 19,
-                  color: Colors.white,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(9),
+                child: Image.asset(
+                  'assets/brand/logo.png',
+                  width: 34,
+                  height: 34,
+                  filterQuality: FilterQuality.medium,
                 ),
               ),
               const SizedBox(width: 10),

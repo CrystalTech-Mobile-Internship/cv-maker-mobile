@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../app/theme.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../auth_redirect.dart';
 import '../providers/auth_providers.dart';
@@ -220,17 +219,13 @@ class _BrandHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 72,
-          height: 72,
-          decoration: BoxDecoration(
-            color: AppTheme.primarySlate,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Icon(
-            Icons.description_rounded,
-            size: 40,
-            color: Colors.white,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Image.asset(
+            'assets/brand/logo.png',
+            width: 72,
+            height: 72,
+            filterQuality: FilterQuality.medium,
           ),
         ),
         const SizedBox(height: 20),
