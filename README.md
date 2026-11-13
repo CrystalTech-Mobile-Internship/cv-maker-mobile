@@ -1,199 +1,279 @@
-# Smart CV Maker Mobile
+# Smart CV Maker
 
-Ứng dụng Flutter giúp sinh viên, fresher và người đi làm tự tạo và tùy biến CV chuyên nghiệp đa nền tảng (**Android**, **iOS** và **Web**). Dự án xây dựng theo kiến trúc **Clean Architecture** và triết lý **Offline-First**: người dùng có thể tạo, kéo thả sắp xếp bố cục, dùng các gợi ý mẫu "Điền vào chỗ trống", phóng to/thu nhỏ cỡ chữ và xuất file **PDF vector A4** hoặc **Microsoft Word (.docx)** hoàn toàn không cần kết nối mạng. Khi đăng nhập và có mạng, ứng dụng hỗ trợ **Xem trước đồng bộ Cloud an toàn** với Supabase mà không lo mất dữ liệu cục bộ.
+Ứng dụng tạo CV chuyên nghiệp cho sinh viên, fresher và người đi làm. Chạy trên
+**Android**, **iOS** và **Web** (có giao diện riêng cho máy tính). Dữ liệu được
+lưu trên máy trước nên vẫn dùng được khi mất mạng; khi đăng nhập, CV được sao
+lưu lên tài khoản và đồng bộ giữa các thiết bị.
 
----
+<p align="center">
+  <img src="docs/images/d_home.png" alt="Trang CV của tôi trên máy tính" width="860">
+</p>
 
-## 🚀 Trạng thái dự án
-
-Các nhóm tính năng đã hoàn thành:
-
-### 1. Trải nghiệm tự làm CV chuyên nghiệp (CV Builder & Editor)
-- **Kéo thả / Sắp xếp bố cục section động**: Hỗ trợ người dùng thay đổi thứ tự hiển thị của các khối nội dung (*Tóm tắt, Học vấn, Kinh nghiệm, Kỹ năng, Dự án, Chứng chỉ*) thông qua `SectionReorderSheet`. Bố cục tùy biến được lưu tự động và phản ánh chính xác lên cả bản xem trước và file xuất ra.
-- **Gợi ý mẫu khởi tạo nhanh ("Điền vào mẫu" / Placeholder Fill-in)**:
-  - Tích hợp hàng chip gợi ý trực tiếp ngay dưới trường Tóm tắt bản thân (*Fresher IT*, *Mobile Flutter*, *Backend Dev*, *Kinh doanh & Marketing*) — 1 chạm điền ngay mẫu câu chuẩn ATS.
-  - Tích hợp nút hành động thứ cấp trong trạng thái rỗng (*Empty state*) của các tab Học vấn, Kinh nghiệm, Kỹ năng, Dự án.
-  - Modal `StarterSamplePickerSheet` duyệt và áp dụng nhanh trọn bộ nội dung mẫu song ngữ (VI / EN).
-- **Thanh công cụ Typography & Phóng to thu nhỏ kích thước chữ**:
-  - `EditorTypographyToolbar` cho phép người dùng tự do điều chỉnh tỉ lệ font từ **75% đến 140%**, kèm các mốc nhanh (**85%**, **100%**, **115%**, **130%**) và badge hiển thị % trực tiếp.
-  - Phím tắt soạn thảo nhanh: In đậm (`**`), Gạch đầu dòng (`•`), Chèn liên kết (`🔗`).
-- **Thư viện kỹ năng gợi ý theo ngành nghề (`SkillBankSheet`)**: Khám phá và thêm nhanh kỹ năng 1 chạm phân theo 5 lĩnh vực chuyên môn (*Mobile, Frontend, Backend, Data/AI, Kỹ năng mềm*), tự động đánh dấu các kỹ năng đã có trong hồ sơ.
-- **Ngân hàng từ khóa hành động ATS & Công thức Google XYZ (`AtsActionVerbsSheet`)**: Cung cấp danh mục động từ hành động mạnh mẽ (*Phát triển, Tối ưu hóa, Triển khai, Dẫn dắt, Đo lường...*) kèm hướng dẫn cấu trúc câu chuẩn quốc tế giúp ứng viên viết bullet point gây ấn tượng.
-- **Kho 17 Mẫu CV đa dạng**: 14 template Free (*Harvard ATS, Modern Minimalist, Tech Lead, Executive, Compact, ...*) và 3 template Pro với hệ màu sắc và bố cục phong phú.
-- **Không gian xem trước tương tác (Interactive Preview & Drag-and-Drop Workspace)**:
-  - Chế độ kép chuyển đổi linh hoạt: **[📄 Trang A4 (PDF)]** ↔ **[🔀 Bố cục kéo thả]**.
-  - Kéo thả sắp xếp trực tiếp các section trên màn hình xem trước (`CvInteractiveSectionReorder`), tự động lưu SQLite và cập nhật tức thì vào bản in.
-  - Bộ sưu tập đổi mẫu CV 1-chạm (`TemplateGallerySheet`) và bảng chọn 8 màu sắc chủ đạo (`CvPreviewColorSheet`) ngay tại màn hình xem trước.
-  - Huy hiệu điểm ATS và checklist 8 tiêu chí chuẩn tuyển dụng quốc tế.
-  - Tối ưu bố cục & Căn chỉnh 1 trang A4 (`CvPageFitSheet`): Preset 85% Auto-fit 1 trang tránh rớt dòng lẻ loi, kèm lời khuyên chuyên môn từ HR.
-  - Bật / tắt ẩn hiện mục CV linh hoạt: Nút mắt ẩn/hiện trực tiếp trên thẻ mục, xuất PDF và Word tự động loại bỏ mục ẩn qua `visibleSectionOrder`.
-  - Đối chiếu từ khóa JD tuyển dụng (`CvJdMatcherSheet`): Đánh giá độ tương thích % ATS với tin tuyển dụng, phân tích từ khóa đã có và gợi ý thêm từ khóa còn thiếu.
-  - Giả lập in ấn đen-trắng (B&W Grayscale Simulation): Kiểm tra độ sắc nét và tương phản của tài liệu khi HR in ra máy in laser văn phòng.
-  - **Kéo thả sắp xếp mục con**: chạm vào thẻ mục (Kinh nghiệm, Dự án, Học vấn, Kỹ năng, Chứng chỉ) để kéo thả thứ tự từng mục bên trong, kèm nút "Mới nhất lên đầu".
-  - **Kiểm tra chất lượng CV (offline)**: chấm điểm và chỉ ra thiếu thông tin, email sai định dạng, xưng "tôi", chỗ `[điền]` chưa thay, gạch đầu dòng quá dài/ngắn, động từ lặp, thiếu số liệu, kỹ năng trùng.
-- **Chấm điểm ATS theo JD (offline)**: chọn CV đã lưu, dán JD bất kỳ; ứng dụng tự trích từ khóa (Việt/Anh, có từ đồng nghĩa), tính % phù hợp và thêm kỹ năng còn thiếu 1 chạm.
-
-### 2. Đầu ra tài liệu đa định dạng (PDF Vector & Microsoft Word DOCX)
-- **Xuất PDF Vector A4 sắc nét**: Hỗ trợ hiển thị chuẩn kích thước A4 (595.28 × 841.89 pt), ngắt trang thông minh, nhúng ảnh đại diện và font tiếng Việt Unicode đầy đủ.
-- **Xuất Microsoft Word (.docx) MVP**: Tự động đóng gói cấu trúc ZIP OpenXML chuẩn Microsoft Word, chạy 100% offline, 0MB bloatware, cho phép mở và tự do chỉnh sửa trên Microsoft Word, Google Docs hoặc LibreOffice.
-- **Hộp thoại chọn định dạng xuất**: `ExportPdfDialog` cho phép lựa chọn linh hoạt giữa PDF (giữ nguyên layout đồ họa) và Word (ưu tiên chỉnh sửa trên máy tính).
-
-### 3. Đồng bộ Cloud có kiểm soát & Bảo vệ dữ liệu (Safe Cloud Sync)
-- **Xem trước đồng bộ Cloud (`CloudSyncPreviewSheet`)**: Đối chiếu dữ liệu read-only trước khi ghi:
-  - ⬆️ Số CV tải lên Cloud (bản sửa trên máy mới hơn)
-  - ⬇️ Số CV tải về máy (bản trên cloud mới hơn)
-  - ⚠️ Số CV xung đột (giải quyết an toàn theo Last-Write-Wins)
-  - 🗑️ Số CV xóa trên Cloud theo hàng đợi
-- **Bảo toàn dữ liệu Local-First**: SQLite trên máy luôn là nguồn dữ liệu chính. Tích hợp nút **"Sao lưu JSON ra máy tính trước"** ngay trên dialog xem trước trước khi thực hiện đồng bộ.
-
-### 4. Sao lưu & Nhập CV từ tài liệu cũ
-- **Sao lưu / Phục hồi offline**: Xuất toàn bộ CV ra file JSON có đánh dấu phiên bản và khôi phục không ghi đè.
-- **Nhập CV từ Word (.docx) & PDF**: Trích xuất thông tin tự động và hiển thị qua hộp thoại xem lại (`ResumeImportReviewDialog`).
-
-### 5. Trợ lý AI tạo CV (OpenRouter qua Supabase Edge Function)
-- **Trò chuyện tạo CV**: AI hỏi từng bước (vị trí, học vấn, kinh nghiệm, dự án, kỹ năng...) rồi soạn bản nháp CV; người dùng xem lại trước khi lưu.
-- **Tải CV PDF/Word lên và bóc tách bằng AI**: văn bản được trích ngay trên máy, người dùng chọn bóc tách bằng AI (chính xác hơn) hoặc trên máy (miễn phí, offline); AI lỗi thì tự chuyển sang bóc tách trên máy.
-- **AI viết lại gạch đầu dòng kinh nghiệm**, **viết lại tóm tắt** và **viết thư xin việc theo JD**, đều có bước so sánh/chỉnh sửa trước khi áp dụng.
-- **Giới hạn lượt**: Khách không dùng AI; Free 15 lượt/ngày, Pro 200 lượt/ngày — kiểm soát trên database, client không thể bỏ qua.
-- **Bảo mật**: key OpenRouter chỉ nằm trong Supabase Function Secrets (không có trong app/`.env`), xác thực JWT, giới hạn kích thước, chống prompt injection, không log nội dung CV. Chi tiết: [docs/ai-assistant.md](docs/ai-assistant.md).
-
-### 6. Đồng bộ 2 Supabase project
-- Tự chuyển sang project dự phòng khi project ưu tiên không phản hồi lúc khởi động.
-- Giữ nguyên CV trên máy khi đổi project (nhận lại CV của cùng email).
-- Edge Function `mirror-sync` chạy định kỳ sao chép CV và lệnh xóa giữa hai project (ghép người dùng theo email, Last-Write-Wins, không ghi lặp). Chi tiết: [docs/dual-supabase-sync.md](docs/dual-supabase-sync.md).
-
-### 7. Cộng đồng & việc làm
-- Tab **Cộng đồng**: thảo luận, chia sẻ việc làm, nhờ góp ý CV; lọc, tìm kiếm, thích, bình luận, báo cáo vi phạm.
-- RLS cho mọi bảng, tự ẩn bài bị báo cáo nhiều lần, giới hạn tần suất đăng, cảnh báo khi bài có email/số điện thoại. Chi tiết: [docs/community.md](docs/community.md).
-
-### 8. Hỗ trợ đa nền tảng (Android, iOS & Web)
-- Android & iOS: SQLite cục bộ qua Drift Native.
-- Web: Drift Web Worker + SQLite WASM lưu trữ an toàn trong IndexedDB/OPFS.
+<p align="center">
+  <img src="docs/images/m_home.png" alt="CV của tôi trên điện thoại" width="200">
+  &nbsp;
+  <img src="docs/images/m_preview.png" alt="Xem trước bản in A4" width="200">
+  &nbsp;
+  <img src="docs/images/m_arrange.png" alt="Sắp xếp các mục CV" width="200">
+</p>
 
 ---
 
-## 🛠 Công nghệ sử dụng
+## Mục lục
 
-- **Flutter 3.x & Dart 3.x**: Cross-platform mobile & web development.
-- **Riverpod (StateNotifier / Provider)**: Quản lý trạng thái phân tầng, phản ứng nhanh.
-- **GoRouter**: Điều hướng khai báo (declarative routing), hỗ trợ deep-linking và URL Web.
-- **Drift (SQLite) & sqlite3.wasm**: Cơ sở dữ liệu quan hệ cục bộ cho offline-first caching và đồng bộ.
-- **Supabase**: Backend-as-a-Service (PostgreSQL, Row-Level Security, Supabase Auth email/Google).
-- **PDF & Printing**: Kết xuất tài liệu PDF vector khổ A4 và xem trước tương tác.
-- **Archive**: Đóng gói và trích xuất OpenXML ZIP phục vụ đọc/ghi file Microsoft Word (`.docx`).
+- [Hướng dẫn tạo CV từng bước](#hướng-dẫn-tạo-cv-từng-bước)
+- [Tính năng chính](#tính-năng-chính)
+- [Giao diện trên máy tính](#giao-diện-trên-máy-tính)
+- [Công nghệ](#công-nghệ)
+- [Cài đặt và chạy](#cài-đặt-và-chạy)
+- [Deploy bản web](#deploy-bản-web)
+- [Kiểm thử](#kiểm-thử)
+- [Tài liệu](#tài-liệu)
 
 ---
 
-## 📐 Kiến trúc phần mềm (Clean Architecture)
+## Hướng dẫn tạo CV từng bước
+
+### Bước 1. Đăng nhập hoặc dùng thử
+
+<img src="docs/images/m_login.png" alt="Màn hình đăng nhập" width="220" align="right">
+
+- **Đăng nhập** bằng email/mật khẩu hoặc Google để CV được sao lưu vào tài khoản.
+- Chưa có tài khoản: bấm **Tạo tài khoản**.
+- Muốn thử nhanh: bấm **Dùng thử không cần tài khoản** — CV vẫn lưu trên máy,
+  sau này đăng nhập sẽ được hỏi để sao lưu.
+
+<br clear="right">
+
+### Bước 2. Tạo CV mới và chọn mẫu
+
+<img src="docs/images/m_create.png" alt="Hộp thoại tạo CV" width="220" align="right">
+
+1. Ở trang **CV của tôi**, bấm dấu **+** (trên máy tính: nút **Tạo CV mới** ở thanh bên).
+2. Đặt **tên hồ sơ**, ví dụ "CV Thực tập Flutter".
+3. Chọn **Dữ liệu ban đầu**: hồ sơ trống hoặc chép từ CV đã có.
+4. Chọn **mẫu CV** rồi bấm **Tạo ngay**.
+
+Tài khoản Free dùng 6 mẫu; gói Pro mở thêm 11 mẫu.
+
+<br clear="right">
+
+### Bước 3. Điền thông tin
+
+<img src="docs/images/m_editor.png" alt="Trình chỉnh sửa CV" width="220" align="right">
+
+- Các thẻ phía trên: **Cá nhân, Học vấn, Kinh nghiệm, Kỹ năng, Dự án, Chứng chỉ**.
+- Thanh công cụ: **Mẫu gợi ý** (điền nhanh câu mẫu), **Động từ mạnh**, cỡ chữ,
+  **Màu CV**, in đậm, gạch đầu dòng, chèn link.
+- Nút **Viết lại** giúp chỉnh câu giới thiệu cho gọn và chuyên nghiệp hơn.
+- Huy hiệu **%** ở góc trên cho biết CV đã đầy đủ bao nhiêu; bấm vào để xem còn thiếu gì.
+- CV tự lưu trên máy khi gõ; bấm **Lưu vào tài khoản** để sao lưu.
+
+<br clear="right">
+
+### Bước 4. Xem trước bản in
+
+<img src="docs/images/m_preview.png" alt="Xem trước bản in A4" width="220" align="right">
+
+- Bấm **Xem trước CV** để thấy đúng trang A4 sẽ in ra.
+- Thanh trên cùng: đổi **mẫu**, đổi **màu**, và menu **⋮** với: so khớp tin tuyển
+  dụng, chỉnh cỡ chữ cho vừa 1 trang, chuyển CV sang tiếng Anh, xem bản in đen trắng.
+
+<br clear="right">
+
+### Bước 5. Sắp xếp các mục
+
+<img src="docs/images/m_arrange.png" alt="Sắp xếp các mục" width="220" align="right">
+
+- Chuyển sang thẻ **Sắp xếp**.
+- Kéo thả (hoặc dùng mũi tên) để đổi thứ tự các mục.
+- Bấm biểu tượng **con mắt** để ẩn/hiện một mục trên bản in.
+- Chạm vào một mục có nhiều dòng (Kinh nghiệm, Kỹ năng…) để sắp xếp từng dòng bên trong.
+
+<br clear="right">
+
+### Bước 6. Tải CV về máy
+
+<img src="docs/images/m_export.png" alt="Tải CV về máy" width="220" align="right">
+
+- Bấm **Tải PDF/Word**.
+- Chọn **PDF (A4)** để gửi nhà tuyển dụng, hoặc **Word (.docx)** để sửa tiếp trên
+  Word/Google Docs.
+- Đặt tên tệp rồi bấm **Tải PDF**.
+
+<br clear="right">
+
+> Mẹo: có thể bỏ qua bước 2–3 bằng **Tạo CV nhanh** — trả lời vài câu hỏi trong
+> **Trò chuyện tạo CV**, hoặc **Tải CV PDF/Word** cũ lên để ứng dụng tự điền.
+
+---
+
+## Tính năng chính
+
+**Tạo và chỉnh sửa CV**
+- 17 mẫu CV (6 miễn phí, 11 gói Pro), 8 màu chủ đạo, chỉnh cỡ chữ 75–140%.
+- Gợi ý câu mẫu, thư viện kỹ năng theo ngành, danh sách động từ mạnh.
+- Kiểm tra chất lượng CV: thiếu thông tin, email sai, câu quá dài/ngắn, thiếu số liệu.
+- Xuất **PDF A4** sắc nét (đủ dấu tiếng Việt) và **Word (.docx)**, chạy ngay trên máy.
+
+**Trợ giúp tìm việc**
+- **So khớp tin tuyển dụng**: dán link hoặc nội dung tin, xem % phù hợp và thêm kỹ năng còn thiếu.
+- **Trò chuyện tạo CV**, **tải CV cũ lên để tự điền**, **viết lại** câu giới thiệu
+  và kinh nghiệm, **thư xin việc** theo tin tuyển dụng.
+- **Luyện phỏng vấn** dựa trên CV, có nhận xét cho từng câu trả lời.
+- Tài khoản Free 15 lượt/ngày, Pro 200 lượt/ngày.
+
+**Tài khoản và dữ liệu**
+- Đăng nhập email/mật khẩu hoặc Google; quên mật khẩu qua email.
+- Lưu trên máy trước, đồng bộ khi có mạng; tự sao lưu CV của chế độ dùng thử sau khi đăng nhập.
+- Xuất/khôi phục tệp sao lưu; hai máy chủ Supabase dự phòng cho nhau.
+
+**Cộng đồng**
+- Thảo luận, chia sẻ việc làm, nhờ góp ý CV; tìm kiếm và lọc theo loại bài.
+- Bài mới, lượt thích và bình luận **cập nhật tức thời** không cần tải lại.
+- Báo cáo bài vi phạm, giới hạn tần suất đăng để chống spam.
+
+**Gói Pro**
+- Thanh toán chuyển khoản qua mã VietQR; quản trị viên duyệt yêu cầu nâng cấp.
+
+---
+
+## Giao diện trên máy tính
+
+Bản web trên máy tính có bố cục riêng: thanh điều hướng bên trái, tiêu đề trang
+cố định và nội dung chia cột.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/images/d_editor.png" alt="Chỉnh sửa có xem trước song song" width="420"><br>Chỉnh sửa với bản xem trước A4 song song</td>
+    <td align="center"><img src="docs/images/d_templates.png" alt="Thư viện mẫu CV" width="420"><br>Thư viện mẫu CV (mẫu Pro có khóa)</td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="docs/images/d_community.png" alt="Cộng đồng" width="620"><br>Cộng đồng việc làm</td>
+  </tr>
+</table>
+
+---
+
+## Công nghệ
+
+| Phần | Công nghệ |
+| --- | --- |
+| Ứng dụng | Flutter 3 / Dart 3, Riverpod, GoRouter |
+| Lưu trên máy | Drift (SQLite), SQLite WASM + IndexedDB trên web |
+| Backend | Supabase: PostgreSQL + Row Level Security, Auth (email, Google), Realtime |
+| Xử lý phía máy chủ | Supabase Edge Functions (TypeScript/Deno) gọi mô hình AI qua OpenRouter, giới hạn lượt dùng theo gói |
+| Tài liệu | `pdf`/`printing` cho PDF A4, OpenXML (`archive`) cho Word |
+| Hosting web | Vercel, tự deploy khi nhánh `main` có code mới |
+
+Khóa AI chỉ nằm trong Supabase Function Secrets, không có trong ứng dụng.
+Mọi bảng dữ liệu người dùng đều bật RLS: mỗi người chỉ đọc/ghi được dữ liệu của mình.
+
+Cấu trúc mã nguồn theo Clean Architecture, chia theo tính năng:
 
 ```text
 lib/
-├── app/                  # Theme, Router và cấu hình ứng dụng
-├── core/                 # Cấu hình Database (Drift), Supabase, hằng số
+├── app/            # Theme, router, cấu hình ứng dụng
+├── core/           # Database (Drift), Supabase, tiện ích dùng chung
 └── features/
-    ├── auth/             # Đăng nhập, đăng ký, phiên đăng nhập, Guest Mode
-    ├── cv_management/    # Màn hình chính Dashboard, danh mục mẫu CV, Cloud Sync Card & Preview
-    ├── cv_editor/        # Editor đa tab, thanh công cụ Typography, Reorder Sheet, Starter Samples
-    ├── cv_preview/       # Xem trước A4, dịch vụ xuất PDF vector và Microsoft Word (.docx)
-    ├── cv_backup/        # Dịch vụ xuất/nhập sao lưu JSON ngoại tuyến
-    ├── resume_import/    # Đọc và phân tích hồ sơ cũ từ DOCX/PDF
-    ├── ai_tools/         # Trợ lý AI: trò chuyện tạo CV, bóc tách CV, viết lại, thư xin việc, ATS
-    └── community/        # Cộng đồng: thảo luận, việc làm, góp ý CV
+    ├── auth/           # Đăng nhập, đăng ký, tài khoản
+    ├── cv_management/  # Trang chính, thư viện mẫu, đồng bộ, giao diện máy tính
+    ├── cv_editor/      # Trình chỉnh sửa và công cụ viết CV
+    ├── cv_preview/     # Xem trước, sắp xếp, xuất PDF/Word
+    ├── cv_backup/      # Sao lưu và khôi phục
+    ├── resume_import/  # Nhập CV từ PDF/Word
+    ├── ai_tools/       # Trò chuyện tạo CV, chấm điểm, luyện phỏng vấn
+    ├── community/      # Cộng đồng
+    ├── billing/        # Gói Pro
+    └── legal/          # Điều khoản, chính sách bảo mật
 ```
 
-Mỗi feature tuân thủ nghiêm ngặt 3 tầng:
-1. **Domain**: Models, Use cases, Repository Interfaces (độc lập hoàn toàn với framework và thư viện ngoài).
-2. **Data**: Data sources (SQLite Drift, Supabase REST), Repositories Implementation, Mappers.
-3. **Presentation**: Screens, Widgets, Riverpod Controllers/Notifiers.
+Mỗi tính năng có 3 tầng: `domain/` (model, interface), `data/` (SQLite,
+Supabase, repository), `presentation/` (màn hình, widget, controller).
 
 ---
 
-## 💻 Yêu cầu môi trường & Cài đặt
+## Cài đặt và chạy
 
-- Flutter SDK `^3.11.4` (hoặc mới hơn).
-- Dart SDK `^3.11.0`.
-- Android Studio / VS Code có Flutter Extension.
-- Thiết bị thật Android (Samsung Galaxy A11 hoặc tương đương) / Máy ảo Android / Trình duyệt Chrome cho Web.
-
-### Cài đặt mã nguồn
+Yêu cầu: Flutter 3.41 trở lên, Android Studio hoặc VS Code, Chrome cho bản web.
 
 ```bash
 git clone https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile.git
+```
+
+```bash
 cd cv-maker-mobile
+```
+
+```bash
 flutter pub get
 ```
 
-### Cấu hình biến môi trường (`.env`)
+Tạo tệp cấu hình từ mẫu rồi điền thông tin Supabase (chỉ khóa publishable/anon):
 
-Sao chép file mẫu và cấu hình:
-
-PowerShell:
-```powershell
-Copy-Item .env.example .env
-```
-
-macOS/Linux:
 ```bash
 cp .env.example .env
 ```
 
-Điền các thông số Supabase của dự án vào `.env`. Khi chưa có thông số, ứng dụng tự động chạy ở **Chế độ Khách (Guest Mode)** hoàn toàn bình thường.
+Chưa có thông tin Supabase thì ứng dụng vẫn chạy ở chế độ dùng thử.
 
-### Chạy ứng dụng
+Chạy trên điện thoại:
 
-- Chạy trên thiết bị di động (Android / iOS):
-  ```bash
-  flutter run
-  ```
-- Chạy trên trình duyệt Web:
-  ```bash
-  flutter run -d chrome
-  ```
+```bash
+flutter run
+```
+
+Chạy trên trình duyệt:
+
+```bash
+flutter run -d chrome
+```
+
+Dựng backend Supabase (migration, Edge Functions, secrets): xem
+[docs/ai-assistant.md](docs/ai-assistant.md) và `scripts/deploy_supabase.ps1`.
 
 ---
 
-## 🧪 Kiểm tra chất lượng & Test Suite
+## Deploy bản web
 
-Chạy phân tích tĩnh mã nguồn:
+Bản web được deploy lên **Vercel**: mỗi lần nhánh `main` có code mới, Vercel tự
+build (`scripts/vercel_build.sh`) và cập nhật trang. Các bước kết nối lần đầu và
+cấu hình Supabase cho tên miền mới: [docs/deploy-web.md](docs/deploy-web.md).
+
+---
+
+## Kiểm thử
+
 ```bash
-dart analyze lib
+flutter analyze
 ```
 
-Chạy toàn bộ kiểm thử tự động:
 ```bash
 flutter test
 ```
 
-Kiểm thử Edge Functions (cần Node.js, dùng Deno qua `npx`):
+Kiểm thử Edge Functions (cần Node.js):
+
 ```bash
-npx -y deno test supabase/functions/cv-assistant/handler_test.ts
-npx -y deno test supabase/functions/mirror-sync/mirror_test.ts
+npx -y deno test supabase/functions/
 ```
 
-Chạy riêng các nhóm kiểm thử tính năng:
-- **CV Editor & Tools**: `flutter test test/features/cv_editor/`
-- **PDF & Word (.docx) Export**: `flutter test test/features/cv_preview/`
-- **Cloud Sync & Safety**: `flutter test test/features/cv_management/`
-
 ---
 
-## 📚 Tài liệu chi tiết trong dự án
+## Tài liệu
 
-- [Đặc tả yêu cầu phần mềm (SRS)](docs/requirements.md)
-- [Luồng người dùng MVP](docs/mvp-flow.md)
-- [Sao lưu và khôi phục CV ngoại tuyến](docs/local-backup.md)
-- [Nhập CV từ Word/PDF](docs/resume-import.md)
-- [Hướng dẫn và kiến trúc Web](docs/web-support.md)
-- [Quy trình phối hợp Coding Agent](docs/agent-workflow.md)
-- [Trợ lý AI tạo CV](docs/ai-assistant.md)
+- [Đặc tả yêu cầu](docs/requirements.md) · [Luồng người dùng](docs/mvp-flow.md)
+- [Trợ lý AI và giới hạn lượt](docs/ai-assistant.md)
 - [Đồng bộ 2 Supabase project](docs/dual-supabase-sync.md)
-- [Cộng đồng & việc làm](docs/community.md)
+- [Cộng đồng](docs/community.md)
+- [Sao lưu và khôi phục](docs/local-backup.md) · [Nhập CV từ Word/PDF](docs/resume-import.md)
+- [Bản web](docs/web-support.md) · [Deploy web lên Vercel](docs/deploy-web.md)
 
 ---
 
-## 👥 Nhóm thực hiện
+## Nhóm thực hiện
 
-- **Nguyễn Tuấn Anh** — Fullstack Mobile Engineer (Trải nghiệm ứng dụng, Editor & Bố cục, Đầu ra PDF/DOCX, Sync Preview & Backup).
-- **Nguyễn Hoàng Phong** — Fullstack Mobile Engineer (Supabase Backend, Migration, RLS, Edge Functions).
+- **Nguyễn Tuấn Anh** — Fullstack Mobile Engineer (trải nghiệm ứng dụng, trình chỉnh sửa, xuất PDF/Word, đồng bộ và sao lưu).
+- **Nguyễn Hoàng Phong** — Fullstack Mobile Engineer (Supabase backend, migration, RLS, Edge Functions).
 
-*Dự án thực tập doanh nghiệp (Internship 2026).*
+*Dự án thực tập doanh nghiệp 2026.*

@@ -23,7 +23,7 @@ void main() {
       );
 
       // Verify dialog title and default text
-      expect(find.text('Xuất tệp PDF A4'), findsOneWidget);
+      expect(find.text('Tải CV về máy'), findsOneWidget);
       expect(find.text('CV_Nguyen_Tuan_Anh'), findsOneWidget);
       expect(find.text('.pdf'), findsOneWidget);
       expect(find.text('Lưu vào máy'), findsOneWidget);
@@ -54,7 +54,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Export PDF File'), findsOneWidget);
+    expect(find.text('Download CV'), findsOneWidget);
 
     // Clear the text
     await tester.enterText(find.byType(TextField), '');

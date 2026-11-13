@@ -102,12 +102,12 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                    color: AppTheme.indigoSurface,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
-                    Icons.picture_as_pdf_rounded,
-                    color: AppTheme.primarySlate,
+                    Icons.file_download_outlined,
+                    color: AppTheme.brandIndigo,
                     size: 28,
                   ),
                 ),
@@ -117,7 +117,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isEn ? 'Export PDF File' : 'Xuất tệp PDF A4',
+                        isEn ? 'Download CV' : 'Tải CV về máy',
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -143,16 +143,21 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
 
             // Format Selector (PDF vs Word DOCX)
             SegmentedButton<String>(
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                selectedBackgroundColor: AppTheme.indigoSurface,
+                selectedForegroundColor: AppTheme.brandIndigo,
+              ),
               segments: [
                 ButtonSegment(
                   value: 'pdf',
                   icon: const Icon(Icons.picture_as_pdf_rounded),
-                  label: Text(isEn ? 'PDF (A4)' : 'PDF (Chuẩn A4)'),
+                  label: const Text('PDF (A4)'),
                 ),
                 ButtonSegment(
                   value: 'docx',
                   icon: const Icon(Icons.description_rounded),
-                  label: Text(isEn ? 'Word (.docx)' : 'Word (.docx)'),
+                  label: const Text('Word (.docx)'),
                 ),
               ],
               selected: {_format},
@@ -164,7 +169,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
 
             // Form Input Field for Filename
             Text(
-              isEn ? 'File Name:' : 'Đặt tên cho tệp PDF:',
+              isEn ? 'File name:' : 'Tên tệp:',
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -228,8 +233,8 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(
-                    Icons.folder_special_rounded,
-                    color: AppTheme.accentTeal,
+                    Icons.folder_outlined,
+                    color: AppTheme.mutedText,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
