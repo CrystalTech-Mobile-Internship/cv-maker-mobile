@@ -1,4 +1,5 @@
 import '../../domain/models/models.dart';
+import '../../domain/models/month_date.dart';
 
 /// Converts the storage-neutral CV domain models to and from Supabase rows.
 ///
@@ -283,7 +284,7 @@ final class CvSupabaseMapper {
   static DateTime? _firstDate(Map<String, dynamic> map, List<String> keys) {
     for (final key in keys) {
       final value = _date(map[key]);
-      if (value != null) return value;
+      if (value != null) return normalizeMonthDate(value);
     }
     return null;
   }

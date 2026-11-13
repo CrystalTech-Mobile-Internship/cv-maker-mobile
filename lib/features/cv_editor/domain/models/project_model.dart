@@ -1,3 +1,5 @@
+import 'month_date.dart';
+
 const _unsetProjectValue = Object();
 
 /// One personal, academic, or professional project in a CV.
@@ -39,10 +41,10 @@ class ProjectModel {
       sourceUrl: json['sourceUrl'] as String?,
       startDate: json['startDate'] == null
           ? null
-          : DateTime.parse(json['startDate'] as String).toUtc(),
+          : parseMonthDate(json['startDate'] as String),
       endDate: json['endDate'] == null
           ? null
-          : DateTime.parse(json['endDate'] as String).toUtc(),
+          : parseMonthDate(json['endDate'] as String),
       teamSize: json['teamSize'] as int?,
     );
   }

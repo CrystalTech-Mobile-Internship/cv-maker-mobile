@@ -1,3 +1,5 @@
+import 'month_date.dart';
+
 const _unsetCertificationValue = Object();
 
 class CertificationModel {
@@ -25,7 +27,7 @@ class CertificationModel {
         score: json['score'] as String?,
         issueDate: json['issueDate'] == null
             ? null
-            : DateTime.parse(json['issueDate'] as String).toUtc(),
+            : parseMonthDate(json['issueDate'] as String),
         credentialUrl: json['credentialUrl'] as String?,
       );
 

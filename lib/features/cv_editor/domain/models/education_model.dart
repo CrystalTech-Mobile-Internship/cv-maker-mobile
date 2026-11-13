@@ -1,3 +1,5 @@
+import 'month_date.dart';
+
 const _unsetEducationValue = Object();
 
 /// One education entry in a CV.
@@ -30,10 +32,10 @@ class EducationModel {
       institution: json['institution'] as String? ?? '',
       degree: json['degree'] as String? ?? '',
       fieldOfStudy: json['fieldOfStudy'] as String? ?? '',
-      startDate: DateTime.parse(json['startDate'] as String).toUtc(),
+      startDate: parseMonthDate(json['startDate'] as String),
       endDate: json['endDate'] == null
           ? null
-          : DateTime.parse(json['endDate'] as String).toUtc(),
+          : parseMonthDate(json['endDate'] as String),
       isCurrent: json['isCurrent'] as bool? ?? false,
       gpa: json['gpa'] as String?,
       achievements: List<String>.from(
