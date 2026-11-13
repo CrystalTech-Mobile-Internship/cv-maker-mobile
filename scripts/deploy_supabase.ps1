@@ -30,7 +30,8 @@ param(
     '20261112000400_community.sql',
     '20261112000500_pro_upgrade_requests.sql',
     '20261113000100_community_realtime.sql',
-    '20261113000200_device_sessions.sql'
+    '20261113000200_device_sessions.sql',
+    '20261113000300_restore_updated_at_triggers.sql'
   )
 )
 
