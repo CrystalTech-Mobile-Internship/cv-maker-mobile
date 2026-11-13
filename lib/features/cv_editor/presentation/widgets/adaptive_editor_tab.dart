@@ -11,7 +11,11 @@ class AdaptiveEditorTab extends StatelessWidget {
     required this.index,
     required this.icon,
     required this.label,
+    this.showLabel = false,
   });
+
+  /// Computers have room for every label next to its icon.
+  final bool showLabel;
 
   final TabController controller;
   final int index;
@@ -20,6 +24,30 @@ class AdaptiveEditorTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (showLabel) {
+      return Tab(
+        child: AnimatedBuilder(
+          animation: controller,
+          builder: (context, _) {
+            final isSelected = controller.index == index;
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      );
+    }
     return Tab(
       child: AnimatedBuilder(
         animation: controller,

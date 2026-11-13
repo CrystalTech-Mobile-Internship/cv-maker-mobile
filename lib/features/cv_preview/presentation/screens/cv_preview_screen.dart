@@ -29,6 +29,8 @@ import '../widgets/cv_page_fit_sheet.dart';
 import '../widgets/cv_jd_matcher_sheet.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/widgets/responsive_action_bar.dart';
+import '../../../../core/widgets/responsive_layout_builder.dart';
 
 enum _PreviewMode { pdfA4, interactiveReorder }
 
@@ -265,7 +267,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
     final fullName = _workingCv.personalInfo.fullName.trim();
     final defaultBaseName = fullName.isNotEmpty
         ? 'CV_${fullName.replaceAll(RegExp(r'\s+'), '_')}'
-        : (_isEnglish ? 'CV_My_Resume' : 'CV_Nguyen_Tuan_Anh');
+        : (_isEnglish ? 'CV_My_Resume' : 'CV_cua_toi');
 
     final chosenFileName = await ExportPdfDialog.show(
       context: context,
@@ -532,31 +534,45 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
               color: Colors.white,
               border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
             ),
-            child: SizedBox(
-              width: double.infinity,
-              child: SegmentedButton<_PreviewMode>(
-                key: const Key('preview-mode-segmented'),
-                style: SegmentedButton.styleFrom(
-                  selectedBackgroundColor: AppTheme.brandIndigo.withAlpha(25),
-                  selectedForegroundColor: AppTheme.brandIndigo,
-                  visualDensity: VisualDensity.compact,
+            // Full width on phones, a compact centred switch on computers.
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<_PreviewMode>(
+                    key: const Key('preview-mode-segmented'),
+                    style: SegmentedButton.styleFrom(
+                      selectedBackgroundColor: AppTheme.brandIndigo.withAlpha(
+                        25,
+                      ),
+                      selectedForegroundColor: AppTheme.brandIndigo,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    segments: [
+                      ButtonSegment(
+                        value: _PreviewMode.pdfA4,
+                        icon: const Icon(
+                          Icons.picture_as_pdf_outlined,
+                          size: 16,
+                        ),
+                        label: Text(_isEnglish ? 'Print view' : 'Bản in'),
+                      ),
+                      ButtonSegment(
+                        value: _PreviewMode.interactiveReorder,
+                        icon: const Icon(
+                          Icons.drag_indicator_rounded,
+                          size: 16,
+                        ),
+                        label: Text(_isEnglish ? 'Arrange' : 'Sắp xếp'),
+                      ),
+                    ],
+                    selected: {_mode},
+                    onSelectionChanged: (set) {
+                      setState(() => _mode = set.first);
+                    },
+                  ),
                 ),
-                segments: [
-                  ButtonSegment(
-                    value: _PreviewMode.pdfA4,
-                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 16),
-                    label: Text(_isEnglish ? 'Print view' : 'Bản in'),
-                  ),
-                  ButtonSegment(
-                    value: _PreviewMode.interactiveReorder,
-                    icon: const Icon(Icons.drag_indicator_rounded, size: 16),
-                    label: Text(_isEnglish ? 'Arrange' : 'Sắp xếp'),
-                  ),
-                ],
-                selected: {_mode},
-                onSelectionChanged: (set) {
-                  setState(() => _mode = set.first);
-                },
               ),
             ),
           ),
@@ -602,36 +618,39 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
             ),
           ] else ...[
             Expanded(
-              child: CvInteractiveSectionReorder(
-                cv: _previewCv,
-                language: _workingCv.language,
-                onToggleVisibility: _toggleSectionVisibility,
-                onReorderItems: _reorderSectionItems,
-                contentCv: _workingCv,
-                onCheckQuality: _showQualityCheck,
-                onOrderChanged: (newOrder) {
-                  _updateDocumentSettings(sectionOrder: newOrder);
-                  _showMessage(
-                    _isEnglish
-                        ? 'Updated section order for A4 export.'
-                        : 'Đã đổi thứ tự các mục.',
-                  );
-                },
-                onResetToDefault: () {
-                  _updateDocumentSettings(
-                    sectionOrder: List.of(CvModel.defaultSectionOrder),
-                  );
-                  _showMessage(
-                    _isEnglish
-                        ? 'Reset to the recommended layout.'
-                        : 'Đã khôi phục bố cục khuyến nghị.',
-                  );
-                },
-                onSwitchToPdfView: () =>
-                    setState(() => _mode = _PreviewMode.pdfA4),
-                onEditSection: (sectionKey) {
-                  context.push('/editor', extra: _workingCv);
-                },
+              child: WebConstrainedWidth(
+                maxWidth: 760,
+                child: CvInteractiveSectionReorder(
+                  cv: _previewCv,
+                  language: _workingCv.language,
+                  onToggleVisibility: _toggleSectionVisibility,
+                  onReorderItems: _reorderSectionItems,
+                  contentCv: _workingCv,
+                  onCheckQuality: _showQualityCheck,
+                  onOrderChanged: (newOrder) {
+                    _updateDocumentSettings(sectionOrder: newOrder);
+                    _showMessage(
+                      _isEnglish
+                          ? 'Updated section order for A4 export.'
+                          : 'Đã đổi thứ tự các mục.',
+                    );
+                  },
+                  onResetToDefault: () {
+                    _updateDocumentSettings(
+                      sectionOrder: List.of(CvModel.defaultSectionOrder),
+                    );
+                    _showMessage(
+                      _isEnglish
+                          ? 'Reset to the recommended layout.'
+                          : 'Đã khôi phục bố cục khuyến nghị.',
+                    );
+                  },
+                  onSwitchToPdfView: () =>
+                      setState(() => _mode = _PreviewMode.pdfA4),
+                  onEditSection: (sectionKey) {
+                    context.push('/editor', extra: _workingCv);
+                  },
+                ),
               ),
             ),
           ],
@@ -651,39 +670,30 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
               ),
             ],
           ),
-          child: Row(
+          child: ResponsiveActionBar(
             children: [
-              if (!isPdfMode) ...[
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => setState(() => _mode = _PreviewMode.pdfA4),
-                    icon: const Icon(Icons.picture_as_pdf_outlined),
-                    label: Text(_isEnglish ? 'View A4 PDF' : 'Xem bản in A4'),
-                  ),
+              if (!isPdfMode)
+                OutlinedButton.icon(
+                  onPressed: () => setState(() => _mode = _PreviewMode.pdfA4),
+                  icon: const Icon(Icons.picture_as_pdf_outlined),
+                  label: Text(_isEnglish ? 'View A4 PDF' : 'Xem bản in A4'),
                 ),
-                const SizedBox(width: 12),
-              ],
-              Expanded(
-                flex: isPdfMode ? 1 : 1,
-                child: FilledButton.icon(
-                  onPressed: _isExporting ? null : _handleExportPdf,
-                  icon: _isExporting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.download_rounded),
-                  label: Text(
-                    _isExporting
-                        ? (_isEnglish ? 'Exporting...' : 'Đang xuất tệp...')
-                        : (_isEnglish
-                              ? 'Download (PDF / Word)'
-                              : 'Tải PDF/Word'),
-                  ),
+              FilledButton.icon(
+                onPressed: _isExporting ? null : _handleExportPdf,
+                icon: _isExporting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.download_rounded),
+                label: Text(
+                  _isExporting
+                      ? (_isEnglish ? 'Exporting...' : 'Đang xuất tệp...')
+                      : (_isEnglish ? 'Download (PDF / Word)' : 'Tải PDF/Word'),
                 ),
               ),
             ],

@@ -182,7 +182,7 @@ class _ExportPdfDialogState extends State<ExportPdfDialog> {
               autofocus: true,
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               decoration: InputDecoration(
-                hintText: isEn ? 'e.g. My_Resume' : 'Ví dụ: CV_Nguyen_Tuan_Anh',
+                hintText: isEn ? 'e.g. My_Resume' : 'Ví dụ: CV_Nguyen_Van_A',
                 errorText: _errorText,
                 suffixIcon: Container(
                   padding: const EdgeInsets.symmetric(
