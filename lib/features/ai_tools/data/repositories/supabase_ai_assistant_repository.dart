@@ -11,7 +11,7 @@ import 'supabase_ai_writing_repository.dart' show aiFailureCodeForStatus;
 class SupabaseAiAssistantRepository implements AiAssistantRepository {
   SupabaseAiAssistantRepository(
     this._remote, {
-    Duration timeout = const Duration(seconds: 90),
+    Duration timeout = const Duration(seconds: 130),
     void Function(AiQuota quota)? onQuota,
   }) : _timeout = timeout,
        _onQuota = onQuota;

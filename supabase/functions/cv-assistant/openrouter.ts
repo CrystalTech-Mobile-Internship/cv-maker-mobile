@@ -10,6 +10,10 @@ export type CompletionOptions = {
   maxTokens: number;
   temperature: number;
   json: boolean;
+  /** Wait per model; long documents need more than the default. */
+  timeoutMs?: number;
+  /** Rejecting a reply moves on to the next model instead of failing. */
+  accept?: (text: string) => boolean;
 };
 
 export type CompletionResult = { text: string; model: string };
@@ -46,6 +50,8 @@ export function createOpenRouterComplete(
   env: (name: string) => string | undefined,
   fetchImpl: typeof fetch = fetch,
   timeoutMs = 45_000,
+  // Total budget across all models, kept below the app's own wait.
+  deadlineMs = 110_000,
 ): CompleteFn {
   return async (messages, options) => {
     const apiKey = env("OPENROUTER_API_KEY");
@@ -53,9 +59,18 @@ export function createOpenRouterComplete(
 
     const models = configuredModels(env);
     let lastError = "NO_MODEL";
+    const started = Date.now();
     for (const model of models) {
+      const remaining = deadlineMs - (Date.now() - started);
+      if (remaining < 5_000) {
+        lastError = lastError === "NO_MODEL" ? "DEADLINE" : lastError;
+        break;
+      }
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      const timer = setTimeout(
+        () => controller.abort(),
+        Math.min(options.timeoutMs ?? timeoutMs, remaining),
+      );
       try {
         const response = await fetchImpl(
           "https://openrouter.ai/api/v1/chat/completions",
@@ -88,6 +103,10 @@ export function createOpenRouterComplete(
         const text = String(data?.choices?.[0]?.message?.content ?? "").trim();
         if (!text) {
           lastError = "EMPTY";
+          continue;
+        }
+        if (options.accept && !options.accept(text)) {
+          lastError = "UNPARSEABLE";
           continue;
         }
         return { text, model };

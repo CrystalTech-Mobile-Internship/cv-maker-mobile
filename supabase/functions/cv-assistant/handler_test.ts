@@ -195,6 +195,64 @@ Deno.test("falls back to the next model when one fails", async () => {
   assertEquals(seen, ["a", "b"]);
 });
 
+Deno.test("moves to the next model when a reply cannot be used", async () => {
+  const seen: string[] = [];
+  const fakeFetch = (async (_url: string, init: RequestInit) => {
+    const model = JSON.parse(String(init.body)).model as string;
+    seen.push(model);
+    const content = model === "a" ? "not json" : '{"ok":true}';
+    return new Response(
+      JSON.stringify({ choices: [{ message: { content } }] }),
+    );
+  }) as unknown as typeof fetch;
+  const complete = createOpenRouterComplete(
+    (name) =>
+      ({ OPENROUTER_API_KEY: "k", OPENROUTER_MODELS: "a,b" } as Record<
+        string,
+        string
+      >)[name],
+    fakeFetch,
+  );
+  const result = await complete([{ role: "user", content: "hi" }], {
+    maxTokens: 10,
+    temperature: 0,
+    json: true,
+    accept: (text) => text.startsWith("{"),
+  });
+  assertEquals(result, { text: '{"ok":true}', model: "b" });
+  assertEquals(seen, ["a", "b"]);
+});
+
+Deno.test("stops trying models once the time budget is spent", async () => {
+  let calls = 0;
+  const fakeFetch = (async () => {
+    calls++;
+    return new Response("busy", { status: 429 });
+  }) as unknown as typeof fetch;
+  const complete = createOpenRouterComplete(
+    (name) =>
+      ({ OPENROUTER_API_KEY: "k", OPENROUTER_MODELS: "a,b,c" } as Record<
+        string,
+        string
+      >)[name],
+    fakeFetch,
+    45_000,
+    0,
+  );
+  let error = "";
+  try {
+    await complete([{ role: "user", content: "hi" }], {
+      maxTokens: 10,
+      temperature: 0,
+      json: false,
+    });
+  } catch (e) {
+    error = (e as Error).message;
+  }
+  assertEquals(error, "DEADLINE");
+  assertEquals(calls, 0);
+});
+
 import { partialJsonString } from "./actions.ts";
 
 Deno.test("recovers reply from truncated JSON", () => {

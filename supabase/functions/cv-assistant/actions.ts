@@ -290,7 +290,8 @@ type ParseInput = { text: string; language: Language };
 
 const parseResume: ActionDefinition<ParseInput> = {
   cost: 2,
-  options: { maxTokens: 6000, temperature: 0.1, json: true },
+  // A two-page CV takes the free models 35-60 s to structure.
+  options: { maxTokens: 6000, temperature: 0.1, json: true, timeoutMs: 75_000 },
   validate(raw) {
     const input = raw as Record<string, unknown>;
     const text = str(input?.text, 14_000);
