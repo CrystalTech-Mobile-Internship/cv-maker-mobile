@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cv_maker_mobile/features/cv_editor/domain/models/models.dart';
 import 'package:flutter/services.dart';
@@ -84,16 +85,16 @@ void main() {
 
   group('CV seed assets', () {
     const assetPaths = [
-      'assets/mock_cvs/student_cv.json',
-      'assets/mock_cvs/fresher_cv.json',
-      'assets/mock_cvs/experienced_cv.json',
-      'assets/mock_cvs/tuananh_fullstack_cv.json',
-      'assets/mock_cvs/tran_van_hoa_cv.json',
+      'test/fixtures/cvs/student_cv.json',
+      'test/fixtures/cvs/fresher_cv.json',
+      'test/fixtures/cvs/experienced_cv.json',
+      'test/fixtures/cvs/fullstack_cv.json',
+      'test/fixtures/cvs/sidebar_cv.json',
     ];
 
     for (final assetPath in assetPaths) {
       test('parses $assetPath into a complete CvModel', () async {
-        final source = await rootBundle.loadString(assetPath);
+        final source = File(assetPath).readAsStringSync();
         final cv = CvModel.fromJson(jsonDecode(source) as Map<String, dynamic>);
 
         expect(cv.id, isNotEmpty);

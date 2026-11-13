@@ -8,9 +8,8 @@
 ## 1. Nguồn thiết kế
 
 - Project Stitch: <https://stitch.withgoogle.com/projects/12690341350869870212>
-- Ảnh bàn giao: `docs/design/wireframes/`
+- Wireframe giai đoạn đầu: `docs/design/wireframes/` (giao diện thật xem ảnh trong `docs/images/`)
 - Đặc tả giao diện: `docs/design/ui-specification.md`
-- Kết quả review và backlog: `docs/design/wireframe-review.md`
 
 ## 2. Danh sách ảnh
 
