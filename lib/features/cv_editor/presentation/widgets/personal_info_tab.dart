@@ -90,7 +90,7 @@ class PersonalInfoTab extends StatelessWidget {
                 onChanged: onFieldChanged,
                 decoration: InputDecoration(
                   labelText: _isEn ? 'Full Name *' : 'Họ và tên *',
-                  hintText: _isEn ? 'Nguyen Tuan Anh' : 'Nguyễn Tuấn Anh',
+                  hintText: _isEn ? 'Jane Doe' : 'Nguyễn Văn A',
                   prefixIcon: const Icon(Icons.badge_outlined),
                 ),
               ),
