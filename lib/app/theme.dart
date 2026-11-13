@@ -43,6 +43,15 @@ class AppTheme {
         onError: Colors.white,
       ),
       scaffoldBackgroundColor: surfaceLight,
+      // On computers sheets and dialogs stay at a readable width, centred,
+      // instead of stretching across the whole screen. Phones are narrower
+      // than these limits, so nothing changes there.
+      bottomSheetTheme: const BottomSheetThemeData(
+        constraints: BoxConstraints(maxWidth: 640),
+      ),
+      dialogTheme: const DialogThemeData(
+        constraints: BoxConstraints(minWidth: 280, maxWidth: 600),
+      ),
       iconTheme: const IconThemeData(color: primarySlate, size: 24),
       primaryIconTheme: const IconThemeData(color: primarySlate, size: 24),
       appBarTheme: AppBarTheme(

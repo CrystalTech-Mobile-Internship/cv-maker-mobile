@@ -35,6 +35,7 @@ import '../../domain/services/cv_completion_service.dart';
 import '../../../cv_management/presentation/widgets/cv_completion_sheet.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/utils/cv_id.dart';
+import '../../../../core/widgets/responsive_action_bar.dart';
 
 class CvEditorScreen extends ConsumerStatefulWidget {
   const CvEditorScreen({super.key, this.initialCv});
@@ -1359,6 +1360,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     final summaryPolishState = ref.watch(summaryPolishControllerProvider);
     final isSignedIn = ref.watch(currentAuthUserProvider) != null;
     final isEn = _isEn;
+    final isWideEditor = MediaQuery.sizeOf(context).width >= 900;
 
     return Scaffold(
       appBar: AppBar(
@@ -1407,46 +1409,55 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
           preferredSize: const Size.fromHeight(48),
           child: TabBar(
             controller: _tabController,
-            isScrollable: false,
+            isScrollable: isWideEditor,
+            tabAlignment: isWideEditor ? TabAlignment.start : null,
             labelColor: AppTheme.accentTeal,
             unselectedLabelColor: Colors.grey.shade600,
             indicatorColor: AppTheme.accentTeal,
             indicatorWeight: 3.5,
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.grey.shade200,
-            labelPadding: EdgeInsets.zero,
+            labelPadding: isWideEditor
+                ? const EdgeInsets.symmetric(horizontal: 18)
+                : EdgeInsets.zero,
             tabs: [
               AdaptiveEditorTab(
+                showLabel: isWideEditor,
                 controller: _tabController,
                 index: 0,
                 icon: Icons.person_outline,
                 label: isEn ? 'Personal' : 'Cá nhân',
               ),
               AdaptiveEditorTab(
+                showLabel: isWideEditor,
                 controller: _tabController,
                 index: 1,
                 icon: Icons.school_outlined,
                 label: isEn ? 'Education' : 'Học vấn',
               ),
               AdaptiveEditorTab(
+                showLabel: isWideEditor,
                 controller: _tabController,
                 index: 2,
                 icon: Icons.work_outline,
                 label: isEn ? 'Experience' : 'Kinh nghiệm',
               ),
               AdaptiveEditorTab(
+                showLabel: isWideEditor,
                 controller: _tabController,
                 index: 3,
                 icon: Icons.psychology_outlined,
                 label: isEn ? 'Skills' : 'Kỹ năng',
               ),
               AdaptiveEditorTab(
+                showLabel: isWideEditor,
                 controller: _tabController,
                 index: 4,
                 icon: Icons.folder_copy_outlined,
                 label: isEn ? 'Projects' : 'Dự án',
               ),
               AdaptiveEditorTab(
+                showLabel: isWideEditor,
                 controller: _tabController,
                 index: 5,
                 icon: Icons.workspace_premium_outlined,
@@ -1771,33 +1782,28 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
           ],
         ),
         child: SafeArea(
-          child: Row(
+          child: ResponsiveActionBar(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _isSaving ? null : _handleSave,
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          isEn
-                              ? (isSignedIn ? 'Back up' : 'Save Locally')
-                              : (isSignedIn
-                                    ? 'Lưu vào tài khoản'
-                                    : 'Lưu vào máy'),
-                        ),
-                ),
+              OutlinedButton(
+                onPressed: _isSaving ? null : _handleSave,
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        isEn
+                            ? (isSignedIn ? 'Back up' : 'Save Locally')
+                            : (isSignedIn
+                                  ? 'Lưu vào tài khoản'
+                                  : 'Lưu vào máy'),
+                      ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: _isSaving ? null : _openPreview,
-                  icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-                  label: Text(isEn ? 'Preview CV' : 'Xem trước CV'),
-                ),
+              ElevatedButton.icon(
+                onPressed: _isSaving ? null : _openPreview,
+                icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                label: Text(isEn ? 'Preview CV' : 'Xem trước CV'),
               ),
             ],
           ),

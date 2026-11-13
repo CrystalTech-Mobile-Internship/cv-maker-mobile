@@ -9,6 +9,7 @@ import '../../domain/repositories/ai_assistant_repository.dart';
 import '../controllers/ai_interview_controller.dart';
 import '../widgets/ai_access_guard.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/widgets/responsive_layout_builder.dart';
 
 /// Conversational CV builder: the AI interviews the user, then turns the
 /// conversation into a CV draft that goes through the normal review dialog.
@@ -140,77 +141,80 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
           ),
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                controller: _scroll,
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                itemCount: state.messages.length + (state.isSending ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index >= state.messages.length) {
-                    return const _TypingBubble();
-                  }
-                  return _MessageBubble(message: state.messages[index]);
-                },
+      body: WebConstrainedWidth(
+        maxWidth: 820,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  controller: _scroll,
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                  itemCount: state.messages.length + (state.isSending ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= state.messages.length) {
+                      return const _TypingBubble();
+                    }
+                    return _MessageBubble(message: state.messages[index]);
+                  },
+                ),
               ),
-            ),
-            if (state.errorMessage != null)
-              _ErrorBanner(
-                message: state.errorMessage!,
-                code: state.errorCode,
-                onDismiss: controller.dismissError,
+              if (state.errorMessage != null)
+                _ErrorBanner(
+                  message: state.errorMessage!,
+                  code: state.errorCode,
+                  onDismiss: controller.dismissError,
+                ),
+              if (state.userTurns == 0)
+                SizedBox(
+                  height: 44,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: _quickReplies.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) => ActionChip(
+                      label: Text(_quickReplies[index]),
+                      onPressed: state.isBusy
+                          ? null
+                          : () => _send(_quickReplies[index]),
+                    ),
+                  ),
+                ),
+              _Composer(
+                controller: _input,
+                enabled: !state.isBusy,
+                onSend: _send,
               ),
-            if (state.userTurns == 0)
-              SizedBox(
-                height: 44,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: _quickReplies.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) => ActionChip(
-                    label: Text(_quickReplies[index]),
-                    onPressed: state.isBusy
-                        ? null
-                        : () => _send(_quickReplies[index]),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    key: const ValueKey('ai-generate-cv'),
+                    onPressed: state.canGenerate ? _generate : null,
+                    icon: state.isGenerating
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.description_outlined),
+                    label: Text(
+                      state.isGenerating
+                          ? 'Đang soạn CV...'
+                          : state.canGenerate
+                          ? 'Tạo CV từ cuộc trò chuyện (${AiCreditCost.generateCv} lượt)'
+                          : 'Trả lời thêm vài câu để tạo CV',
+                    ),
                   ),
                 ),
               ),
-            _Composer(
-              controller: _input,
-              enabled: !state.isBusy,
-              onSend: _send,
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-              child: SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  key: const ValueKey('ai-generate-cv'),
-                  onPressed: state.canGenerate ? _generate : null,
-                  icon: state.isGenerating
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.description_outlined),
-                  label: Text(
-                    state.isGenerating
-                        ? 'Đang soạn CV...'
-                        : state.canGenerate
-                        ? 'Tạo CV từ cuộc trò chuyện (${AiCreditCost.generateCv} lượt)'
-                        : 'Trả lời thêm vài câu để tạo CV',
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -229,7 +233,7 @@ class _MessageBubble extends StatelessWidget {
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * 0.82,
+          maxWidth: (MediaQuery.sizeOf(context).width * 0.82).clamp(0, 640),
         ),
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 4),
