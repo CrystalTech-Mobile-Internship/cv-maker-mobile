@@ -42,8 +42,13 @@ for name in \
   fi
 done
 
+# Names only, never values.
+echo "Settings received: $(cut -d= -f1 .env | tr '\n' ' ')"
+
 if ! grep -qE '^SUPABASE_(PRIMARY_|SECONDARY_)?URL=' .env; then
-  echo "Missing Supabase settings: add them in Vercel > Settings > Environment Variables." >&2
+  echo "Missing Supabase settings: add SUPABASE_SECONDARY_URL and" >&2
+  echo "SUPABASE_SECONDARY_ANON_KEY in Vercel > Settings > Environment Variables" >&2
+  echo "(Production), then redeploy." >&2
   exit 1
 fi
 
