@@ -270,10 +270,3 @@ npx -y deno test supabase/functions/
 - [Bản web](docs/web-support.md) · [Deploy web lên Vercel](docs/deploy-web.md)
 
 ---
-
-## Nhóm thực hiện
-
-- **Nguyễn Tuấn Anh** — Fullstack Mobile Engineer (trải nghiệm ứng dụng, trình chỉnh sửa, xuất PDF/Word, đồng bộ và sao lưu).
-- **Nguyễn Hoàng Phong** — Fullstack Mobile Engineer (Supabase backend, migration, RLS, Edge Functions).
-
-*Dự án thực tập doanh nghiệp 2026.*
