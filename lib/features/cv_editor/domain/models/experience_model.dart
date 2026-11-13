@@ -1,3 +1,5 @@
+import 'month_date.dart';
+
 const _unsetExperienceValue = Object();
 
 /// One employment or internship entry in a CV.
@@ -28,10 +30,10 @@ class ExperienceModel {
       jobTitle: json['jobTitle'] as String? ?? '',
       company: json['company'] as String? ?? '',
       location: json['location'] as String? ?? '',
-      startDate: DateTime.parse(json['startDate'] as String).toUtc(),
+      startDate: parseMonthDate(json['startDate'] as String),
       endDate: json['endDate'] == null
           ? null
-          : DateTime.parse(json['endDate'] as String).toUtc(),
+          : parseMonthDate(json['endDate'] as String),
       isCurrent: json['isCurrent'] as bool? ?? false,
       bulletPoints: List<String>.from(
         json['bulletPoints'] as List<dynamic>? ?? const [],

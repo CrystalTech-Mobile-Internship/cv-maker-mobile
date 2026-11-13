@@ -1300,7 +1300,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     final month = int.tryParse(parts[0]);
     final year = int.tryParse(parts[1]);
     if (month == null || year == null || month < 1 || month > 12) return null;
-    return DateTime(year, month).toUtc();
+    return DateTime.utc(year, month);
   }
 
   void _openPreview() {
