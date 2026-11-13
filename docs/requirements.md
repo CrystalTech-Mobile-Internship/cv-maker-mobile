@@ -202,7 +202,7 @@ Nhằm chứng minh tính khả thi thương mại và bài toán sản phẩm t
 | :--- | :--- | :--- |
 | **Giá thành** | **0 VNĐ** | **49.000 VNĐ / tháng** hoặc **99.000 VNĐ vĩnh viễn** |
 | **Số lượng bản CV** | Tối đa 2 bản CV | **Không giới hạn** |
-| **Kho mẫu Template** | 4 mẫu Free trong MVP | Các mẫu Premium bổ sung trong giai đoạn sau |
+| **Kho mẫu Template** | 6 mẫu Free | 11 mẫu Pro (mở khi nâng cấp gói Pro) |
 | **Độ nét PDF** | Xuất PDF tiêu chuẩn | **Xuất PDF Vector A4 sắc nét tối đa** |
 | **Watermark** | Có dòng watermark nhỏ: *"Tạo bởi Smart CV Maker"* | **Không có Watermark (Bản in sạch 100%)** |
 | **Trợ lý AI** | 3 lượt dùng thử AI gợi ý cơ bản | **Không giới hạn lượt dùng AI** |

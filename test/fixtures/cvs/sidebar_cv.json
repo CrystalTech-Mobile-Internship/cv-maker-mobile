@@ -9,11 +9,11 @@
   "personalInfo": {
     "fullName": "Trần Văn Hòa",
     "targetRole": "Thực tập sinh Phát triển phần mềm",
-    "email": "tranvanhoa.it@example.com",
-    "phone": "0909 123 456",
+    "email": "vanhoa@example.com",
+    "phone": "0900000005",
     "address": "TP. Hồ Chí Minh",
-    "linkedInUrl": "https://linkedin.com/in/tranvanhoa-it",
-    "githubUrl": "https://github.com/tranvanhoa-it",
+    "linkedInUrl": "https://www.linkedin.com/in/example-sidebar",
+    "githubUrl": "https://github.com/example-sidebar",
     "avatarPath": null,
     "avatarPosition": "left"
   },
@@ -58,11 +58,36 @@
     }
   ],
   "skills": [
-    {"id": "54000000-0000-4000-8000-000000000001", "name": "Flutter, Dart, Material Design", "category": "hard", "proficiency": 75},
-    {"id": "54000000-0000-4000-8000-000000000002", "name": "Supabase, Firebase, REST API", "category": "hard", "proficiency": 65},
-    {"id": "54000000-0000-4000-8000-000000000003", "name": "SQLite, Drift, PostgreSQL", "category": "hard", "proficiency": 65},
-    {"id": "54000000-0000-4000-8000-000000000004", "name": "Git, GitHub, Postman, Figma", "category": "hard", "proficiency": 70},
-    {"id": "54000000-0000-4000-8000-000000000005", "name": "Làm việc nhóm, giao tiếp, tự học", "category": "soft", "proficiency": 75}
+    {
+      "id": "54000000-0000-4000-8000-000000000001",
+      "name": "Flutter, Dart, Material Design",
+      "category": "hard",
+      "proficiency": 75
+    },
+    {
+      "id": "54000000-0000-4000-8000-000000000002",
+      "name": "Supabase, Firebase, REST API",
+      "category": "hard",
+      "proficiency": 65
+    },
+    {
+      "id": "54000000-0000-4000-8000-000000000003",
+      "name": "SQLite, Drift, PostgreSQL",
+      "category": "hard",
+      "proficiency": 65
+    },
+    {
+      "id": "54000000-0000-4000-8000-000000000004",
+      "name": "Git, GitHub, Postman, Figma",
+      "category": "hard",
+      "proficiency": 70
+    },
+    {
+      "id": "54000000-0000-4000-8000-000000000005",
+      "name": "Làm việc nhóm, giao tiếp, tự học",
+      "category": "soft",
+      "proficiency": 75
+    }
   ],
   "projects": [
     {
@@ -70,8 +95,13 @@
       "name": "Smart CV Maker",
       "role": "Mobile Full-stack Developer",
       "description": "Xây dựng trình soạn CV offline-first, xem trước đúng khổ A4 và xuất PDF trên Android.\nThiết kế Clean Architecture, lưu cục bộ bằng Drift và chuẩn bị đồng bộ Supabase.\nTối ưu biểu mẫu động, template và trải nghiệm khách vãng lai.",
-      "technologies": ["Flutter", "Riverpod", "Drift", "Supabase"],
-      "sourceUrl": "https://github.com/tranvanhoa-it/smart-cv-maker",
+      "technologies": [
+        "Flutter",
+        "Riverpod",
+        "Drift",
+        "Supabase"
+      ],
+      "sourceUrl": "https://github.com/example/project-1",
       "demoUrl": null,
       "teamSize": 1,
       "startDate": "2026-09-01T00:00:00.000Z",
@@ -82,8 +112,12 @@
       "name": "Ứng dụng Quản lý Chi tiêu",
       "role": "Flutter Developer",
       "description": "Phân loại giao dịch, thống kê theo tháng và cảnh báo vượt ngân sách.\nCài đặt đăng nhập, sao lưu dữ liệu và biểu đồ trực quan.\nViết kiểm thử cho nghiệp vụ tính tổng và bộ lọc giao dịch.",
-      "technologies": ["Flutter", "Firebase", "SQLite"],
-      "sourceUrl": "https://github.com/tranvanhoa-it/expense-tracker",
+      "technologies": [
+        "Flutter",
+        "Firebase",
+        "SQLite"
+      ],
+      "sourceUrl": "https://github.com/example/project-2",
       "demoUrl": null,
       "teamSize": 1,
       "startDate": "2026-02-01T00:00:00.000Z",
@@ -94,8 +128,12 @@
       "name": "Hệ thống Đặt lịch Khám bệnh",
       "role": "Mobile Developer",
       "description": "Phụ trách luồng tìm bác sĩ, đặt lịch và quản lý lịch hẹn trên ứng dụng mobile.\nTích hợp API, xác thực người dùng và thông báo trạng thái lịch hẹn.\nPhối hợp nhóm theo Scrum, quản lý source code bằng GitHub.",
-      "technologies": ["Flutter", "Spring Boot", "MySQL"],
-      "sourceUrl": "https://github.com/tranvanhoa-it/clinic-booking",
+      "technologies": [
+        "Flutter",
+        "Spring Boot",
+        "MySQL"
+      ],
+      "sourceUrl": "https://github.com/example/project-3",
       "demoUrl": null,
       "teamSize": 4,
       "startDate": "2025-09-01T00:00:00.000Z",
@@ -106,8 +144,12 @@
       "name": "Ứng dụng Bán hàng Mini Shop",
       "role": "Full-stack Developer",
       "description": "Xây dựng giỏ hàng, đặt hàng, lịch sử mua và quản lý sản phẩm.\nThiết kế bảng dữ liệu, chính sách truy cập và truy vấn Supabase.\nThực hiện kiểm thử luồng mua hàng và sửa lỗi hiển thị trên thiết bị thật.",
-      "technologies": ["Flutter", "Supabase", "PostgreSQL"],
-      "sourceUrl": "https://github.com/tranvanhoa-it/mini-shop",
+      "technologies": [
+        "Flutter",
+        "Supabase",
+        "PostgreSQL"
+      ],
+      "sourceUrl": "https://github.com/example/project-4",
       "demoUrl": "https://mini-shop.example.com",
       "teamSize": 3,
       "startDate": "2025-03-01T00:00:00.000Z",
