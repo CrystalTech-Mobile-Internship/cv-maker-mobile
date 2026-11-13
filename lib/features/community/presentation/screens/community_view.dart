@@ -6,13 +6,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
-import '../../data/repositories/supabase_community_repository.dart';
 import '../../domain/models/community_models.dart';
-import '../../domain/repositories/community_repository.dart';
 import '../controllers/community_feed_controller.dart';
 import '../widgets/community_actions.dart';
 import '../widgets/community_post_card.dart';
-import '../widgets/create_post_sheet.dart';
 
 /// Community tab: discussions, shared jobs and CV review requests.
 class CommunityView extends ConsumerStatefulWidget {
@@ -53,31 +50,53 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
     });
   }
 
-  Future<void> _createPost() async {
-    final draft = await showCreatePostSheet(context);
-    if (draft == null || !mounted) return;
-    final user = ref.read(currentAuthUserProvider);
-    try {
-      final post = await ref
-          .read(communityRepositoryProvider)
-          .createPost(draft, authorName: user?.displayName ?? '');
-      ref.read(communityFeedControllerProvider.notifier).prepend(post);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đã đăng bài.'),
-          behavior: SnackBarBehavior.floating,
+  Future<void> _openFilters() async {
+    final controller = ref.read(communityFeedControllerProvider.notifier);
+    final current = ref.read(communityFeedControllerProvider).kind;
+    final options = <(CommunityPostKind?, String)>[
+      (null, 'Tất cả'),
+      for (final kind in CommunityPostKind.values) (kind, kind.label),
+    ];
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          key: const ValueKey('community-filter-sheet'),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Loại bài viết',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.primaryNavy,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final option in options)
+                    ChoiceChip(
+                      label: Text(option.$2),
+                      selected: current == option.$1,
+                      showCheckmark: false,
+                      onSelected: (_) {
+                        controller.setKind(option.$1);
+                        Navigator.of(sheetContext).pop();
+                      },
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
-      );
-    } on CommunityFailure catch (failure) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(failure.message),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+      ),
+    );
   }
 
   @override
@@ -97,48 +116,30 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _search,
-                  onChanged: _onSearchChanged,
-                  textInputAction: TextInputAction.search,
-                  decoration: const InputDecoration(
-                    hintText: 'Tìm bài viết, vị trí, công ty...',
-                    prefixIcon: Icon(Icons.search, size: 20),
-                    isDense: true,
-                  ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: TextField(
+            controller: _search,
+            onChanged: _onSearchChanged,
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: state.kind == null
+                  ? 'Tìm bài viết, vị trí, công ty...'
+                  : 'Tìm trong ${state.kind!.label}',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon: IconButton(
+                key: const ValueKey('community-filter-button'),
+                tooltip: 'Lọc',
+                onPressed: _openFilters,
+                icon: Icon(
+                  Icons.tune_rounded,
+                  size: 20,
+                  color: state.kind == null
+                      ? AppTheme.mutedText
+                      : AppTheme.brandIndigo,
                 ),
               ),
-              const SizedBox(width: 10),
-              FilledButton(
-                key: const ValueKey('community-create-post'),
-                onPressed: _createPost,
-                child: const Text('Đăng bài'),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 48,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            children: [
-              _FilterChip(
-                label: 'Tất cả',
-                selected: state.kind == null,
-                onSelected: () => controller.setKind(null),
-              ),
-              for (final kind in CommunityPostKind.values)
-                _FilterChip(
-                  label: kind.label,
-                  selected: state.kind == kind,
-                  onSelected: () => controller.setKind(kind),
-                ),
-            ],
+              isDense: true,
+            ),
           ),
         ),
         if (state.errorMessage != null)
@@ -218,31 +219,6 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        showCheckmark: false,
-        onSelected: (_) => onSelected(),
-      ),
     );
   }
 }

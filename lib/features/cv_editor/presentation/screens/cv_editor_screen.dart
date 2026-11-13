@@ -34,6 +34,7 @@ import '../widgets/editor_typography_toolbar.dart';
 import '../../domain/services/cv_completion_service.dart';
 import '../../../cv_management/presentation/widgets/cv_completion_sheet.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/utils/cv_id.dart';
 
 class CvEditorScreen extends ConsumerStatefulWidget {
   const CvEditorScreen({super.key, this.initialCv});
@@ -86,7 +87,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     super.initState();
     _tabController = TabController(length: 6, vsync: this);
     final now = DateTime.now().toUtc();
-    _draftId = widget.initialCv?.id ?? 'local-${now.microsecondsSinceEpoch}';
+    _draftId = widget.initialCv?.id ?? newCvId();
     _draftCreatedAt = widget.initialCv?.createdAt ?? now;
     _selectedLanguage = widget.initialCv?.language ?? 'vi';
     _loadInitialCv();
@@ -327,6 +328,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   }
 
   Future<void> _handleSave() async {
+    // A pending auto-save would write the draft again after the cloud copy
+    // replaced it.
+    _debounceTimer?.cancel();
     setState(() => _isSaving = true);
     final model = _buildCvModel();
     final userId = ref.read(currentAuthUserProvider)?.id;

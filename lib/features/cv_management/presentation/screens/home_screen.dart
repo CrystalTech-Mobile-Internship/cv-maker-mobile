@@ -20,6 +20,7 @@ import '../../../resume_import/presentation/resume_draft_saver.dart';
 import '../../../resume_import/presentation/widgets/resume_import_mode_sheet.dart';
 import '../../../ai_tools/domain/models/ai_assistant_models.dart';
 import '../../../community/presentation/screens/community_view.dart';
+import '../../../community/presentation/widgets/community_actions.dart';
 import '../../../ai_tools/domain/repositories/ai_assistant_repository.dart';
 import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
 import '../../../ai_tools/presentation/widgets/ai_access_guard.dart';
@@ -31,6 +32,7 @@ import '../widgets/create_cv_dialog.dart';
 import '../widgets/home_dialogs.dart';
 import '../widgets/my_cvs_view.dart';
 import '../widgets/template_catalog_view.dart';
+import '../../../../core/utils/cv_id.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -60,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final now = DateTime.now().toUtc();
     final source = request.sourceCv;
     final cv = CvModel(
-      id: 'local-${now.microsecondsSinceEpoch}',
+      id: newCvId(),
       userId: ref.read(currentAuthUserProvider)?.id,
       title: request.title,
       templateId: request.templateId,
@@ -216,7 +218,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _duplicateCv(CvModel cv) async {
     try {
-      final newId = 'local-${DateTime.now().microsecondsSinceEpoch}';
+      final newId = newCvId();
       await ref.read(cvRepositoryProvider).duplicate(cv.id, newId: newId);
       if (mounted) _showMessage('Đã nhân bản CV thành công.');
     } catch (_) {
@@ -229,11 +231,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       final now = DateTime.now();
       final copy = await ref
           .read(cvRepositoryProvider)
-          .duplicate(
-            cv.id,
-            newId: 'backup-${now.microsecondsSinceEpoch}',
-            now: now.toUtc(),
-          );
+          .duplicate(cv.id, newId: newCvId(), now: now.toUtc());
       final stamp =
           '${now.day.toString().padLeft(2, '0')}/'
           '${now.month.toString().padLeft(2, '0')} '
@@ -378,6 +376,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               tooltip: 'Tạo CV',
               onPressed: _createCv,
               icon: const Icon(Icons.add_rounded),
+            ),
+          if (_selectedIndex == 2 && user != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilledButton.icon(
+                key: const ValueKey('community-create-post'),
+                onPressed: () => createCommunityPost(context, ref),
+                style: FilledButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+                icon: const Icon(Icons.edit_outlined, size: 18),
+                label: const Text('Đăng bài'),
+              ),
             ),
           const SizedBox(width: 4),
         ],

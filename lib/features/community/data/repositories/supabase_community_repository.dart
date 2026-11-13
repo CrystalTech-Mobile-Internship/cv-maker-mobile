@@ -177,10 +177,11 @@ class SupabaseCommunityRepository implements CommunityRepository {
     return _guard(() async {
       final client = _client;
       if (liked) {
+        // ON CONFLICT DO NOTHING: likes are insert-only (no update grant).
         await client.from('community_likes').upsert({
           'post_id': postId,
           'user_id': client.auth.currentUser!.id,
-        });
+        }, ignoreDuplicates: true);
       } else {
         await client
             .from('community_likes')

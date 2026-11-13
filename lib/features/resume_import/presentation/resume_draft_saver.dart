@@ -7,6 +7,7 @@ import '../../cv_editor/domain/models/cv_model.dart';
 import '../../cv_editor/domain/models/cv_template.dart';
 import '../domain/models/resume_import_draft.dart';
 import 'widgets/resume_import_review_dialog.dart';
+import '../../../core/utils/cv_id.dart';
 
 /// Shows the review dialog for [draft] (from a file import or the AI
 /// assistant) and saves the confirmed CV locally. Returns the saved CV, or
@@ -23,7 +24,7 @@ Future<CvModel?> reviewAndSaveResumeDraft(
   final now = DateTime.now().toUtc();
   final template = CvTemplateCatalog.byId(review.templateId);
   final cv = draft.toCv(
-    id: '$idPrefix-${now.microsecondsSinceEpoch}',
+    id: newCvId(),
     userId: ref.read(currentAuthUserProvider)?.id,
     title: review.title,
     templateId: review.templateId,
