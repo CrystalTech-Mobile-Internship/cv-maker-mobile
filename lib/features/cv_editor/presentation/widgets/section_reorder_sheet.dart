@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../domain/models/cv_section_definition.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 class SectionReorderSheet extends StatefulWidget {
   const SectionReorderSheet({
@@ -21,7 +22,7 @@ class SectionReorderSheet extends StatefulWidget {
     required String language,
     required ValueChanged<List<String>> onOrderChanged,
   }) {
-    return showModalBottomSheet(
+    return showAppSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -101,17 +102,7 @@ class _SectionReorderSheetState extends State<SectionReorderSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Drag handle pill
-            Center(
-              child: Container(
-                margin: const EdgeInsets.only(top: 10, bottom: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
+            AppSheetHandle(margin: const EdgeInsets.only(top: 10, bottom: 8)),
             // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

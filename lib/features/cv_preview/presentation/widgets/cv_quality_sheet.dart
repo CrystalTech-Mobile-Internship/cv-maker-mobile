@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/services/cv_quality_checker.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 const _sectionLabels = {
   'personal': 'Thông tin cá nhân',
@@ -21,7 +22,7 @@ Future<void> showCvQualitySheet(
   List<String> autoFixChanges = const [],
   VoidCallback? onAutoFix,
 }) {
-  return showModalBottomSheet<void>(
+  return showAppSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

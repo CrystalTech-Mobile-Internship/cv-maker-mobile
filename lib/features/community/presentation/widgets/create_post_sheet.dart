@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../domain/models/community_models.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Collects a validated [CommunityPostDraft]. Returns null when cancelled.
 Future<CommunityPostDraft?> showCreatePostSheet(BuildContext context) {
-  return showModalBottomSheet<CommunityPostDraft>(
+  return showAppSheet<CommunityPostDraft>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,

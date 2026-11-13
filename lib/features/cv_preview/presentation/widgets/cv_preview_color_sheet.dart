@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../../cv_editor/presentation/widgets/editor_typography_toolbar.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Modal sheet for selecting CV primary color theme directly from the Preview Screen.
 class CvPreviewColorSheet extends StatelessWidget {
@@ -22,7 +23,7 @@ class CvPreviewColorSheet extends StatelessWidget {
     required bool isEnglish,
     required ValueChanged<String> onColorSelected,
   }) {
-    return showModalBottomSheet(
+    return showAppSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -57,16 +58,7 @@ class CvPreviewColorSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Drag handle
-          Center(
-            child: Container(
-              width: 44,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+          const AppSheetHandle(),
           const SizedBox(height: 16),
 
           // Header

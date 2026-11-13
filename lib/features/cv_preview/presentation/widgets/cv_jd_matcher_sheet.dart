@@ -6,6 +6,7 @@ import '../../../ai_tools/presentation/widgets/job_posting_input.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../domain/services/cv_jd_matcher_service.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 /// Compares the CV with a job posting pasted as a link or as text.
 class CvJdMatcherSheet extends ConsumerStatefulWidget {
@@ -26,7 +27,7 @@ class CvJdMatcherSheet extends ConsumerStatefulWidget {
     required ValueChanged<SkillModel> onAddMissingSkill,
     bool isEnglish = false,
   }) {
-    return showModalBottomSheet<void>(
+    return showAppSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,

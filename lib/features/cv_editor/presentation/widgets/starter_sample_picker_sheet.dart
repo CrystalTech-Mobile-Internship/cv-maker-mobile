@@ -7,6 +7,7 @@ import '../../domain/models/experience_model.dart';
 import '../../domain/models/project_model.dart';
 import '../../domain/models/skill_model.dart';
 import '../../domain/services/cv_starter_template_service.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 class StarterSamplePickerSheet extends StatelessWidget {
   const StarterSamplePickerSheet({
@@ -40,7 +41,7 @@ class StarterSamplePickerSheet extends StatelessWidget {
     ValueChanged<List<EducationModel>>? onAddEducation,
     ValueChanged<List<CertificationModel>>? onAddCertifications,
   }) {
-    return showModalBottomSheet(
+    return showAppSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -77,17 +78,7 @@ class StarterSamplePickerSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Pill
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 10, bottom: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              AppSheetHandle(margin: const EdgeInsets.only(top: 10, bottom: 8)),
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -99,12 +90,12 @@ class StarterSamplePickerSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.amber.shade100,
+                        color: AppTheme.indigoSurface,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
                         Icons.lightbulb_outline_rounded,
-                        color: Colors.amber,
+                        color: AppTheme.brandIndigo,
                         size: 22,
                       ),
                     ),

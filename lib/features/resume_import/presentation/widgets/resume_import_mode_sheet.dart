@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
+import '../../../../core/widgets/app_sheet.dart';
 
 enum ResumeImportMode { onDevice, ai }
 
@@ -13,7 +14,7 @@ Future<ResumeImportMode?> showResumeImportModeSheet(
   required bool isSignedIn,
   required int aiCost,
 }) {
-  return showModalBottomSheet<ResumeImportMode>(
+  return showAppSheet<ResumeImportMode>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
