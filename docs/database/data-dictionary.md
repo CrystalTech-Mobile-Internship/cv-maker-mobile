@@ -2,7 +2,7 @@
 
 - Trạng thái: Bản thiết kế MVP
 - Ngày cập nhật: 06/10/2026
-- Migration: `supabase/migrations/20261006000100_create_profiles_and_cvs.sql`
+- Migration: `supabase/migrations/20261021000100_enable_offline_cloud_sync.sql`
 
 ## 1. Nguyên tắc
 
@@ -59,7 +59,7 @@ Cloud giữ một bản JSON đầy đủ của CV để mapping trực tiếp v
 ### template_id
 
 - Kiểu: `text`, bắt buộc.
-- Chỉ nhận `harvard_ats` hoặc `modern_minimalist` trong MVP.
+- Nhận một trong bốn giá trị MVP: `harvard_ats`, `modern_minimalist`, `minimalist_clean` hoặc `creative_tech`.
 
 ### payload
 
@@ -94,4 +94,3 @@ Cloud giữ một bản JSON đầy đủ của CV để mapping trực tiếp v
 - Bảng AI hoặc quota AI.
 - Chia sẻ CV công khai.
 - Lịch sử phiên bản CV.
-- Template thứ ba, thứ tư.

@@ -13,6 +13,7 @@ MVP cho phép người dùng tạo, chỉnh sửa, lưu, xem trước, xuất v�
 ### Tài khoản
 
 - Sử dụng ứng dụng không cần đăng nhập bằng Guest Mode.
+- Ghi nhớ Guest Mode để lần mở ứng dụng tiếp theo vào thẳng workspace local; người dùng vẫn có thể chủ động chuyển sang đăng nhập từ Dashboard.
 - Đăng ký và đăng nhập bằng email, mật khẩu.
 - Yêu cầu đặt lại mật khẩu.
 - Hỏi người dùng trước khi chuyển CV Guest sang tài khoản.
@@ -27,7 +28,7 @@ MVP cho phép người dùng tạo, chỉnh sửa, lưu, xem trước, xuất v�
 
 ### Template và tài liệu
 
-- Hai template: Harvard ATS và Modern Minimalist.
+- Bốn template Free: Harvard ATS, Modern Minimalist, Minimalist Clean và Creative Tech. Minimalist Clean và Creative Tech hỗ trợ ảnh đại diện lưu local; hai mẫu ATS còn lại giữ bố cục không ảnh.
 - Preview dùng dữ liệu thật của CV đang chọn.
 - Xuất PDF A4 đọc được tiếng Việt và không cắt mất nội dung.
 - Chia sẻ PDF qua System Share Sheet của Android/iOS.
@@ -42,7 +43,6 @@ MVP cho phép người dùng tạo, chỉnh sửa, lưu, xem trước, xuất v�
 
 - Gemini AI viết lại Summary, Bullet Enhancer và ATS Scoring.
 - Nhập CV từ PDF hoặc Word.
-- Template thứ ba và thứ tư.
 - Đồng bộ xung đột phức tạp giữa nhiều thiết bị.
 - Đa ngôn ngữ giao diện.
 - Web Admin, tuyển dụng, thanh toán hoặc mạng xã hội nghề nghiệp.
@@ -61,7 +61,7 @@ Các mục này chỉ được mở lại sau khi luồng cốt lõi vượt qua
 1. Khảo sát, user flow, wireframe và kiến trúc.
 2. UI/UX và cấu trúc dữ liệu local.
 3. Form, state management và auto-save.
-4. Preview, hai template và PDF.
+4. Preview, bốn template Free và PDF.
 5. Supabase Auth, schema, RLS và đồng bộ.
 6. Kiểm thử, sửa lỗi và đóng gói Android.
 7. Chỉ xem xét AI sau khi hoàn thành các bước trên.

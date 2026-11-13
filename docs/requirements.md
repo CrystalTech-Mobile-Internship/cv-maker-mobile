@@ -25,11 +25,13 @@
 ### 1.1. Phạm vi MVP đã được nhóm xác nhận ngày 06/10/2026
 
 - Ứng dụng hỗ trợ cả Guest Mode, đăng ký, đăng nhập và quên mật khẩu.
-- MVP có đúng hai template: Harvard ATS và Modern Minimalist.
+- MVP có bốn template Free: Harvard ATS, Modern Minimalist, Minimalist Clean và Creative Tech.
 - Xuất PDF A4 và chia sẻ bằng System Share Sheet là chức năng bắt buộc.
 - Dữ liệu được lưu local bằng Drift + SQLite trước; đồng bộ Supabase triển khai sau khi luồng local ổn định.
 - Gemini AI được hoãn đến sau khi các chức năng cốt lõi đạt tiêu chí nghiệm thu.
-- Không nhập CV từ PDF hoặc Word trong MVP.
+- Nhập CV từ PDF hoặc Word không thuộc MVP ban đầu. Tính năng này đã được triển
+  khai như phần mở rộng sau MVP theo hướng local-first; phạm vi và giới hạn nằm
+  tại `docs/resume-import.md`.
 - Giao diện MVP dùng tiếng Việt.
 - Android là nền tảng kiểm thử chính. Mã nguồn vẫn phải tương thích iOS, nhưng chưa bắt buộc tạo bản build iOS khi nhóm không có macOS.
 
@@ -62,7 +64,7 @@ Nhập liệu Form động (Offline) ➔ Tự động gắn vào Template chuẩ
 * **UG-01:** Tôi muốn tạo mới và quản lý nhiều bản CV khác nhau trực tiếp trên điện thoại.
 * **UG-02:** Tôi muốn ứng dụng tự động lưu dữ liệu ngay cả khi mất mạng hoặc lỡ tay tắt app.
 * **UG-03 (sau MVP):** Tôi muốn được AI gợi ý cách diễn đạt kinh nghiệm làm việc chuyên nghiệp (Action Verbs + Metrics + Impact).
-* **UG-04:** Tôi muốn chuyển đổi giữa hai mẫu Harvard ATS và Modern Minimalist mà không bị mất dữ liệu đã nhập.
+* **UG-04:** Tôi muốn chuyển đổi giữa các mẫu Free mà không bị mất dữ liệu đã nhập.
 * **UG-05:** Tôi muốn xem trước tài liệu như bản in thật trên khổ A4 trước khi quyết định xuất file.
 * **UG-06:** Tôi muốn xuất file PDF vector sắc nét không lỗi font tiếng Việt và chia sẻ trực tiếp qua Zalo/Email.
 
@@ -85,8 +87,8 @@ Nhập liệu Form động (Offline) ➔ Tự động gắn vào Template chuẩ
 * **F10 - Thuật toán Ngắt trang thông minh (Smart Pagination):** Tự động tính toán chiều cao khối nội dung để phân tách nhiều trang A4, chống cắt đôi dòng chữ hoặc để tiêu đề lẻ loi cuối trang.
 * **F11 - Mẫu Template 01 (Harvard Academic):** Bố cục 1 cột truyền thống, tối ưu máy quét ATS, đường kẻ phân cách sắc sảo.
 * **F12 - Mẫu Template 02 (Modern Minimalist):** Bố cục 2 cột bất đối xứng (Sidebar thông tin/kỹ năng + Nội dung kinh nghiệm).
-* **F13 - Mẫu Template 03 (Minimalist Clean — sau MVP):** Phong cách Châu Âu thanh lịch, thoáng đãng, nhấn mạnh kiểu chữ.
-* **F14 - Mẫu Template 04 (Creative Tech Lead — sau MVP):** Thiết kế cho ngành Công nghệ/Sáng tạo có thanh Timeline quá trình công tác.
+* **F13 - Mẫu Template 03 (Minimalist Clean — Free):** Phong cách Châu Âu thanh lịch, thoáng đãng, phù hợp giáo dục, y tế và hỗ trợ ảnh đại diện tuỳ chọn.
+* **F14 - Mẫu Template 04 (Creative Tech — Free):** Thiết kế có màu nhấn dành cho ngành Công nghệ/Sáng tạo và hỗ trợ ảnh đại diện tuỳ chọn.
 * **F15 - Live Preview tương tác:** Trình xem trước PDF tương tác thời gian thực (phóng to, thu nhỏ, xoay trang).
 * **F16 - Bộ điều khiển giao diện (Styling Controls):** Đổi màu chủ đạo (Color Palette), tùy biến kích cỡ chữ (Font size) và khoảng cách dòng.
 
@@ -178,4 +180,72 @@ Tự động chuyển sang Groq Llama 3.3 (Fallback)
            ↓
 Thông báo lỗi thân thiện & gợi ý người dùng thử lại
 ```
+
+---
+
+## 9. CHIẾN LƯỢC ĐA NỀN TẢNG (CROSS-PLATFORM & WEB) VÀ MÔ HÌNH THƯƠNG MẠI HÓA (FREEMIUM)
+
+### 9.1. Kiến trúc Đa nền tảng (Android, iOS & Web)
+Để tối ưu hóa trải nghiệm người dùng và thuyết phục Hội đồng chuyên môn, dự án triển khai theo kiến trúc **Adaptive Multiplatform** từ một codebase Flutter duy nhất:
+* **Mobile (Android & iOS):** Màn hình cảm ứng dọc (360px - 430px), tối ưu cho thao tác một tay, điều hướng dạng Wizard/Tabs, xem trước PDF qua BottomSheet hoặc Preview Screen riêng.
+* **Web (Desktop/Tablet Browser):** Màn hình ngang (>= 900px), tự động chuyển sang bố cục **Split-View**:
+  - **Cột trái (45%):** Form chỉnh sửa CV động (Accordion/Tabs cho Thông tin, Kinh nghiệm, Học vấn, Kỹ năng).
+  - **Cột phải (55%):** Khung Live Preview A4 hiển thị theo thời gian thực (Realtime Hot Canvas). Khi người dùng gõ phím bên trái, tờ giấy A4 bên phải cập nhật tức thì.
+  - **Thanh điều hướng trên (Top Bar):** Đổi màu sắc, chọn Template, nút In ấn trực tiếp, nút Xuất PDF và nút **"Nâng cấp PRO 💎"**.
+* **Đồng bộ cơ sở dữ liệu trên Web:** Sử dụng `drift_flutter` hỗ trợ Web WASM (WebAssembly SQLite) kết hợp Supabase Cloud Realtime để dữ liệu chỉnh sửa trên Web và Điện thoại tự động đồng bộ qua lại.
+
+### 9.2. Mô hình Thương mại hóa Freemium & Cổng thanh toán VietQR
+
+Nhằm chứng minh tính khả thi thương mại và bài toán sản phẩm thực tế, ứng dụng áp dụng mô hình phân tầng dịch vụ (Tiering Model):
+
+| Tiêu chí | Gói Miễn Phí (FREE) | Gói Chuyên Nghiệp (PRO / VIP) |
+| :--- | :--- | :--- |
+| **Giá thành** | **0 VNĐ** | **49.000 VNĐ / tháng** hoặc **99.000 VNĐ vĩnh viễn** |
+| **Số lượng bản CV** | Tối đa 2 bản CV | **Không giới hạn** |
+| **Kho mẫu Template** | 4 mẫu Free trong MVP | Các mẫu Premium bổ sung trong giai đoạn sau |
+| **Độ nét PDF** | Xuất PDF tiêu chuẩn | **Xuất PDF Vector A4 sắc nét tối đa** |
+| **Watermark** | Có dòng watermark nhỏ: *"Tạo bởi Smart CV Maker"* | **Không có Watermark (Bản in sạch 100%)** |
+| **Trợ lý AI** | 3 lượt dùng thử AI gợi ý cơ bản | **Không giới hạn lượt dùng AI** |
+| **AI ATS Matcher** | Không hỗ trợ | **Hỗ trợ không giới hạn**: Dán JD tuyển dụng để chấm điểm và trích xuất từ khóa |
+
+### 9.3. Quy trình Tích hợp Thanh toán VietQR Tự động (PayOS / SePay)
+Thay vì sử dụng Google/Apple In-App Purchase phức tạp và bị khấu trừ 30%, hệ thống tích hợp luồng thanh toán QR chuẩn Open Banking Việt Nam:
+1. Người dùng bấm **"Nâng cấp PRO"** trên màn hình Mobile hoặc Web.
+2. Hệ thống gọi API (PayOS / SePay) tạo giao dịch thanh toán kèm mã giao dịch động (VD: `PRO_CV_USER123`).
+3. Ứng dụng hiển thị **Mã VietQR động** kèm số tiền và nội dung chuyển khoản tự động điền sẵn.
+4. Người dùng quét mã trên ứng dụng ngân hàng và chuyển tiền.
+5. Cổng thanh toán gửi **Webhook** về Supabase Database / Edge Function để xác thực giao dịch thành công.
+6. Trường `is_pro = true` trong bảng `profiles` được cập nhật; ứng dụng tự động mở khóa toàn bộ quyền lợi PRO trong vòng 3 giây mà không cần người dùng thao tác lại.
+
+---
+
+## 10. MỞ RỘNG BẢNG TÍNH NĂNG CHI TIẾT (EXTENDED FEATURES)
+
+* **F26 - Mô hình Tài khoản Pro & Thanh toán VietQR:** Hệ thống kiểm soát tính năng Freemium, hiển thị Paywall Dialog, tạo mã VietQR động và lắng nghe trạng thái nâng cấp tài khoản tự động.
+* **F27 - Giao diện Adaptive Web Split-View:** Bố cục chia đôi màn hình trên trình duyệt Web/Tablet, hỗ trợ Live Preview A4 thời gian thực song song với Form nhập liệu.
+* **F28 - Trợ lý AI ATS Scorer & JD Matcher:** Cho phép người dùng nhập bản mô tả công việc (Job Description) từ nhà tuyển dụng, AI phân tích so khớp, chấm điểm % phù hợp và đề xuất từ khóa kỹ năng còn thiếu.
+* **F29 - Động cơ CV Song ngữ (English & Tiếng Việt) & Xuất PDF Tiếng Anh Chuẩn Quốc Tế:** Hỗ trợ tạo và kết xuất bản in PDF 100% bằng tiếng Anh chuẩn ATS chuyên ngành kỹ thuật (từ tiêu đề mục, mốc thời gian, kỹ năng, đến nội dung tóm tắt và dự án), đáp ứng trọn vẹn nhu cầu ứng tuyển của sinh viên ngành CNTT/Kỹ thuật vào các doanh nghiệp công nghệ toàn cầu.
+
+---
+
+## 11. ĐẶC TẢ ĐỘNG CƠ CV SONG NGỮ (BILINGUAL RESUME ENGINE)
+
+Đối với sinh viên ngành Kỹ thuật / Công nghệ thông tin, ứng tuyển các vị trí như Software Engineer, Data Engineer, DevOps, AI Engineer hầu hết đều yêu cầu nộp hồ sơ xin việc (Resume/CV) hoàn toàn bằng **tiếng Anh**:
+
+### 11.1. Chuẩn hóa Tiêu đề & Cấu trúc Bản in PDF Tiếng Anh (English Template Section Mapping)
+Khi người dùng chọn chế độ CV Tiếng Anh (`cvLanguage = 'en'`), toàn bộ các thành phần trên bản vẽ PDF A4 được tự động dịch chuyển sang chuẩn mực ATS quốc tế:
+
+| Thành phần CV | Hiển thị Bản in Tiếng Việt (🇻🇳 vi) | Hiển thị Bản in Tiếng Anh (🇬🇧 en) |
+| :--- | :--- | :--- |
+| **Mục Tóm tắt** | `TÓM TẮT MỤC TIÊU NGHỀ NGHIỆP` | **`PROFESSIONAL SUMMARY`** |
+| **Mục Học vấn** | `HỌC VẤN` | **`EDUCATION`** |
+| **Mục Kinh nghiệm** | `KINH NGHIỆM LÀM VIỆC & DỰ ÁN` | **`WORK EXPERIENCE & TECHNICAL PROJECTS`** |
+| **Mục Kỹ năng** | `KỸ NĂNG CHUYÊN MÔN` | **`TECHNICAL SKILLS`** |
+| **Mục Chứng chỉ** | `CHỨNG CHỈ & GIẢI THƯỞNG` | **`CERTIFICATIONS & HONORS`** |
+| **Mốc thời gian** | `10/2026 - Hiện tại` | **`10/2026 - Present`** |
+| **Chân trang** | `Trang 1 / 1` | **`Page 1 of 1`** |
+
+### 11.2. Trợ lý AI Hỗ trợ Chuyển ngữ & Tối ưu Thuật ngữ Kỹ thuật (Tech English AI)
+- AI nhận văn bản nháp tiếng Việt hoặc tiếng Anh sơ cấp của sinh viên, tự động dịch và nâng cấp bằng các **Action Verbs mạnh** (*Architected, Engineered, Spearheaded, Implemented, Streamlined, Deployed...*).
+- Định dạng theo chuẩn công thức đo lường tác động: **Action + Context + Metric / Impact** (VD: *"Engineered a real-time sync engine reducing latency by 40%"*).
 

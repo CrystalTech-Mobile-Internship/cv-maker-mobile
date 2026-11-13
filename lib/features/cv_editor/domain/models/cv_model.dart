@@ -1,3 +1,4 @@
+import 'certification_model.dart';
 import 'education_model.dart';
 import 'experience_model.dart';
 import 'personal_info_model.dart';
@@ -12,6 +13,7 @@ class CvModel {
     required this.id,
     required this.title,
     required this.templateId,
+    this.language = 'vi',
     required this.primaryColor,
     required this.fontSizeScale,
     required this.personalInfo,
@@ -24,15 +26,31 @@ class CvModel {
     List<ExperienceModel> experiences = const [],
     List<SkillModel> skills = const [],
     List<ProjectModel> projects = const [],
+    List<CertificationModel> certifications = const [],
+    List<String> sectionOrder = defaultSectionOrder,
+    List<String> hiddenSections = const [],
   }) : educations = List.unmodifiable(educations),
        experiences = List.unmodifiable(experiences),
        skills = List.unmodifiable(skills),
-       projects = List.unmodifiable(projects);
+       projects = List.unmodifiable(projects),
+       certifications = List.unmodifiable(certifications),
+       sectionOrder = List.unmodifiable(sectionOrder),
+       hiddenSections = List.unmodifiable(hiddenSections);
+
+  static const List<String> defaultSectionOrder = [
+    'summary',
+    'experience',
+    'projects',
+    'education',
+    'skills',
+    'certifications',
+  ];
 
   final String id;
   final String? userId;
   final String title;
   final String templateId;
+  final String language; // 'vi' or 'en'
   final String primaryColor;
   final double fontSizeScale;
   final PersonalInfoModel personalInfo;
@@ -41,11 +59,37 @@ class CvModel {
   final List<ExperienceModel> experiences;
   final List<SkillModel> skills;
   final List<ProjectModel> projects;
+  final List<CertificationModel> certifications;
+  final List<String> sectionOrder;
+  final List<String> hiddenSections;
   final bool isSynced;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  factory CvModel.empty({required String id, String? userId, DateTime? now}) {
+  List<String> get effectiveSectionOrder {
+    final current = List<String>.from(sectionOrder);
+    for (final section in defaultSectionOrder) {
+      if (!current.contains(section)) {
+        current.add(section);
+      }
+    }
+    return current;
+  }
+
+  List<String> get visibleSectionOrder {
+    return effectiveSectionOrder
+        .where((section) => !hiddenSections.contains(section))
+        .toList();
+  }
+
+  bool isSectionVisible(String section) => !hiddenSections.contains(section);
+
+  factory CvModel.empty({
+    required String id,
+    String? userId,
+    String language = 'vi',
+    DateTime? now,
+  }) {
     final timestamp = (now ?? DateTime.now()).toUtc();
 
     return CvModel(
@@ -53,6 +97,7 @@ class CvModel {
       userId: userId,
       title: 'CV chưa đặt tên',
       templateId: 'harvard_ats',
+      language: language,
       primaryColor: '#1E293B',
       fontSizeScale: 1,
       personalInfo: const PersonalInfoModel(),
@@ -60,6 +105,8 @@ class CvModel {
       isSynced: false,
       createdAt: timestamp,
       updatedAt: timestamp,
+      sectionOrder: defaultSectionOrder,
+      hiddenSections: const [],
     );
   }
 
@@ -71,6 +118,7 @@ class CvModel {
       userId: json['userId'] as String?,
       title: json['title'] as String? ?? 'CV chưa đặt tên',
       templateId: json['templateId'] as String? ?? 'harvard_ats',
+      language: json['language'] as String? ?? 'vi',
       primaryColor: json['primaryColor'] as String? ?? '#1E293B',
       fontSizeScale: (json['fontSizeScale'] as num? ?? 1).toDouble(),
       personalInfo: PersonalInfoModel.fromJson(
@@ -86,6 +134,20 @@ class CvModel {
       ),
       skills: _readModelList(json['skills'], SkillModel.fromJson),
       projects: _readModelList(json['projects'], ProjectModel.fromJson),
+      certifications: _readModelList(
+        json['certifications'],
+        CertificationModel.fromJson,
+      ),
+      sectionOrder:
+          (json['sectionOrder'] as List<dynamic>?)
+              ?.map((item) => item.toString())
+              .toList() ??
+          defaultSectionOrder,
+      hiddenSections:
+          (json['hiddenSections'] as List<dynamic>?)
+              ?.map((item) => item.toString())
+              .toList() ??
+          const [],
       isSynced: json['isSynced'] as bool? ?? false,
       createdAt: json['createdAt'] == null
           ? updatedAt
@@ -100,6 +162,7 @@ class CvModel {
       'userId': userId,
       'title': title,
       'templateId': templateId,
+      'language': language,
       'primaryColor': primaryColor,
       'fontSizeScale': fontSizeScale,
       'personalInfo': personalInfo.toJson(),
@@ -108,6 +171,9 @@ class CvModel {
       'experiences': experiences.map((item) => item.toJson()).toList(),
       'skills': skills.map((item) => item.toJson()).toList(),
       'projects': projects.map((item) => item.toJson()).toList(),
+      'certifications': certifications.map((item) => item.toJson()).toList(),
+      'sectionOrder': sectionOrder,
+      'hiddenSections': hiddenSections,
       'isSynced': isSynced,
       'createdAt': createdAt.toUtc().toIso8601String(),
       'updatedAt': updatedAt.toUtc().toIso8601String(),
@@ -119,6 +185,7 @@ class CvModel {
     Object? userId = _unsetCvValue,
     String? title,
     String? templateId,
+    String? language,
     String? primaryColor,
     double? fontSizeScale,
     PersonalInfoModel? personalInfo,
@@ -127,6 +194,9 @@ class CvModel {
     List<ExperienceModel>? experiences,
     List<SkillModel>? skills,
     List<ProjectModel>? projects,
+    List<CertificationModel>? certifications,
+    List<String>? sectionOrder,
+    List<String>? hiddenSections,
     bool? isSynced,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -138,6 +208,7 @@ class CvModel {
           : userId as String?,
       title: title ?? this.title,
       templateId: templateId ?? this.templateId,
+      language: language ?? this.language,
       primaryColor: primaryColor ?? this.primaryColor,
       fontSizeScale: fontSizeScale ?? this.fontSizeScale,
       personalInfo: personalInfo ?? this.personalInfo,
@@ -146,6 +217,9 @@ class CvModel {
       experiences: experiences ?? this.experiences,
       skills: skills ?? this.skills,
       projects: projects ?? this.projects,
+      certifications: certifications ?? this.certifications,
+      sectionOrder: sectionOrder ?? this.sectionOrder,
+      hiddenSections: hiddenSections ?? this.hiddenSections,
       isSynced: isSynced ?? this.isSynced,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

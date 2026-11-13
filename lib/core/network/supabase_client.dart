@@ -1,17 +1,40 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../constants/env_constants.dart';
+import 'supabase_profile_resolver.dart';
 
 /// Helper to initialize and access Supabase
 class SupabaseService {
   static bool _initialized = false;
   static bool get isInitialized => _initialized;
 
-  static Future<void> initialize() async {
+  static bool _usingFallback = false;
+
+  /// True when the preferred project was unreachable and the mirror project
+  /// was selected for this run.
+  static bool get isUsingFallback => _usingFallback;
+
+  static Future<void> initialize({SupabaseHealthProbe? probe}) async {
+    if (_initialized) return;
+
+    final resolution = await SupabaseProfileResolver.resolve(
+      preferred: EnvConstants.preferredSupabaseEnvironment,
+      fallback: EnvConstants.fallbackSupabaseEnvironment,
+      probe: probe ?? SupabaseProfileResolver.httpHealthProbe,
+    );
+    _usingFallback = resolution.usedFallback;
+    if (resolution.usedFallback) {
+      EnvConstants.useResolvedEnvironment(resolution.environment);
+      debugPrint(
+        '⚠️ [SupabaseService] Project ưu tiên không phản hồi, '
+        'chuyển sang ${resolution.environment?.label}.',
+      );
+    }
+
     if (!EnvConstants.isSupabaseConfigured) {
       debugPrint(
-        '⚠️ [SupabaseService] SUPABASE_URL hoặc SUPABASE_ANON_KEY chưa được cấu hình thực tế.\n'
-        'Ứng dụng sẽ hoạt động ở chế độ Local / Offline Guest cho đến khi nhận key từ Phong.',
+        '⚠️ [SupabaseService] Supabase profile đang chọn chưa được cấu hình.\n'
+        'Ứng dụng sẽ hoạt động ở chế độ Local / Offline Guest.',
       );
       return;
     }
@@ -23,7 +46,9 @@ class SupabaseService {
         anonKey: EnvConstants.supabaseAnonKey,
       );
       _initialized = true;
-      debugPrint('✅ [SupabaseService] Supabase đã khởi tạo thành công.');
+      debugPrint(
+        '✅ [SupabaseService] Đã khởi tạo ${EnvConstants.supabaseProfileLabel}.',
+      );
     } catch (e) {
       debugPrint('❌ [SupabaseService] Lỗi khởi tạo Supabase: $e');
     }
@@ -33,5 +58,21 @@ class SupabaseService {
   static SupabaseClient? get client {
     if (!_initialized) return null;
     return Supabase.instance.client;
+  }
+
+  static String get activeProfileLabel => !_initialized
+      ? 'Không khả dụng'
+      : _usingFallback
+      ? '${EnvConstants.supabaseProfileLabel} (dự phòng)'
+      : EnvConstants.supabaseProfileLabel;
+
+  /// Throws a clear configuration error instead of returning a nullable client
+  /// deep inside a data source.
+  static SupabaseClient get requiredClient {
+    final value = client;
+    if (value == null) {
+      throw StateError('Chưa kết nối được máy chủ. Hãy thử lại sau.');
+    }
+    return value;
   }
 }

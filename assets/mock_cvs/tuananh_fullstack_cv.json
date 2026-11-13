@@ -1,0 +1,157 @@
+{
+  "id": "40000000-0000-4000-8000-000000000001",
+  "userId": null,
+  "title": "CV Nguyễn Tuấn Anh - Full Stack & AI Engineer",
+  "templateId": "harvard_ats",
+  "language": "en",
+  "primaryColor": "#1E293B",
+  "fontSizeScale": 1.0,
+  "personalInfo": {
+    "fullName": "NGUYỄN TUẤN ANH",
+    "targetRole": "Full Stack Developer & AI Engineer",
+    "email": "nguyentuananh11a1.lhpt@gmail.com",
+    "phone": "+84-963684871",
+    "address": "Ho Chi Minh City, Vietnam",
+    "linkedInUrl": null,
+    "githubUrl": "https://github.com/TuanANh561",
+    "avatarPath": null
+  },
+  "summary": "Final-year Software Engineering student focused on applied AI and full-stack product development. Experienced in building AI-powered web and mobile applications using Java, Spring Boot, FastAPI, React, React Native. Currently developing SmartEnglish AI as a graduation thesis project, with hands-on work in multimodal document processing, AI-assisted content generation, conversational AI, speaking practice, quiz systems, and real-time communication. Seeking an AI Engineering, Backend, or Full-stack opportunity to turn AI capabilities into reliable solutions for real-world problems.",
+  "educations": [
+    {
+      "id": "41000000-0000-4000-8000-000000000001",
+      "institution": "Industrial University of Ho Chi Minh City (IUH)",
+      "degree": "Bachelor of Engineering",
+      "fieldOfStudy": "Software Engineering",
+      "startDate": "2022-09-01T00:00:00.000Z",
+      "endDate": null,
+      "isCurrent": true,
+      "gpa": "3.15 / 4.0",
+      "achievements": [
+        "TOEIC: 570 / 990"
+      ]
+    }
+  ],
+  "experiences": [
+    {
+      "id": "42000000-0000-4000-8000-000000000001",
+      "jobTitle": "Full Stack Developer (Team of 2) • Java, Spring Boot, FastAPI, Google Gemini, ReactJS, React Native, PostgreSQL, Redis, WebSocket, AWS S3, Cloudflare R2, Docker",
+      "company": "SmartEnglish AI - AI-Powered English Learning Ecosystem",
+      "location": "github.com/smartenglish-be • github.com/smartenglish-fe-admin • github.com/smartenglish-fe-student",
+      "startDate": "2026-08-01T00:00:00.000Z",
+      "endDate": null,
+      "isCurrent": true,
+      "bulletPoints": [
+        "Co-developed an AI-powered English learning ecosystem as a graduation thesis project, comprising an Admin/Teacher web portal, a cross-platform learner mobile application, and a microservices-based backend.",
+        "Took primary responsibility for the Admin/Teacher portal and related backend features for learning content, courses, exams, classrooms, subscriptions, dashboards, reports, and role-based operations.",
+        "Built an AI-powered multimodal PDF-to-vocabulary pipeline with structured extraction, duplicate validation, human review, and bulk database persistence; also integrated AI-assisted content generation, role-play scenarios, and Gemini Vision vocabulary recognition.",
+        "Developed mobile speaking, pronunciation, AI role-play, and quiz/exam flows supporting listening, reading, multiple question types, scoring, XP rewards, answer review, and attempt history.",
+        "Implemented real-time messaging with WebSocket/STOMP/SockJS and applied JWT/RBAC, Redis caching and AI quotas, Kafka events and request validation across the platform.",
+        "Integrated Neon PostgreSQL for service data, AWS S3 for images and documents, and Cloudflare R2 for course video storage and automatic media cleanup."
+      ]
+    },
+    {
+      "id": "42000000-0000-4000-8000-000000000002",
+      "jobTitle": "Full Stack Developer (Team of 5) • Spring Boot, PostgreSQL, Redis, Docker, AWS S3, JWT, Microservices, ReactJS",
+      "company": "GoTour – Tour Booking Platform",
+      "location": "github.com/gotour-backend • github.com/gotour-frontend",
+      "startDate": "2026-04-01T00:00:00.000Z",
+      "endDate": "2026-06-30T00:00:00.000Z",
+      "isCurrent": false,
+      "bulletPoints": [
+        "Developed core services including Tour, Destination, Category, and Departure management using a Microservices architecture.",
+        "Designed and implemented RESTful APIs for tour, category, destination, departure, and user management.",
+        "Implemented JWT-based authentication, Redis caching, and centralized system logging to improve security and performance.",
+        "Integrated AWS S3 for scalable image storage and management, and collaborated with team members using Agile Scrum practices."
+      ]
+    },
+    {
+      "id": "42000000-0000-4000-8000-000000000003",
+      "jobTitle": "Full Stack Developer (Team of 5) • NestJS, TypeScript, ReactJS, Flutter, MongoDB, WebSocket, WebRTC, STUN/TURN",
+      "company": "QuickChat – Real-Time Messaging Platform",
+      "location": "github.com/quickchat-backend • github.com/quickchat-FE-web • github.com/quickchat-FE-mobile",
+      "startDate": "2026-04-01T00:00:00.000Z",
+      "endDate": "2026-06-30T00:00:00.000Z",
+      "isCurrent": false,
+      "bulletPoints": [
+        "Built a real-time messaging platform supporting text, voice, and video communication between users.",
+        "Implemented one-to-one voice and video calling features using WebRTC for real-time peer-to-peer communication.",
+        "Configured and deployed STUN/TURN servers to enable reliable P2P connections across NAT and restricted network environments.",
+        "Developed backend APIs using NestJS and TypeScript, integrating WebSocket and MongoDB to handle real-time communication and data management."
+      ]
+    },
+    {
+      "id": "42000000-0000-4000-8000-000000000004",
+      "jobTitle": "Full Stack Developer (Team of 2) • Java, Spring Boot, React Native (Expo), TypeScript",
+      "company": "E-Learning Platform",
+      "location": "github.com/e-learning-backend • github.com/e-learning-mobile",
+      "startDate": "2025-09-01T00:00:00.000Z",
+      "endDate": "2025-11-30T00:00:00.000Z",
+      "isCurrent": false,
+      "bulletPoints": [
+        "Developed a student mobile application using React Native (Expo) and TypeScript for cross-platform mobile development.",
+        "Implemented core features including course browsing, lesson viewing, user authentication, and profile management.",
+        "Integrated RESTful backend APIs to support data fetching, user information, and learning content delivery.",
+        "Designed reusable UI components and handled application state to provide a consistent and responsive user experience."
+      ]
+    }
+  ],
+  "skills": [
+    {
+      "id": "43000000-0000-4000-8000-000000000001",
+      "name": "Java, JavaScript, TypeScript",
+      "category": "hard",
+      "proficiency": 90
+    },
+    {
+      "id": "43000000-0000-4000-8000-000000000002",
+      "name": "Spring Boot, Spring MVC, Spring Security, JPA/Hibernate, RESTful API, Redis, WebSocket, NestJS, FastAPI",
+      "category": "hard",
+      "proficiency": 90
+    },
+    {
+      "id": "43000000-0000-4000-8000-000000000003",
+      "name": "ReactJS, Tailwind CSS, React Native, Flutter, TanStack Query, Zustand",
+      "category": "hard",
+      "proficiency": 85
+    },
+    {
+      "id": "43000000-0000-4000-8000-000000000004",
+      "name": "MySQL, PostgreSQL, MongoDB",
+      "category": "hard",
+      "proficiency": 85
+    },
+    {
+      "id": "43000000-0000-4000-8000-000000000005",
+      "name": "AWS S3, Docker, Git/GitHub, Cloudflare R2",
+      "category": "hard",
+      "proficiency": 80
+    },
+    {
+      "id": "43000000-0000-4000-8000-000000000006",
+      "name": "Postman/Swagger, WebRTC, Jira, Figma, Prompt Engineering",
+      "category": "soft",
+      "proficiency": 85
+    }
+  ],
+  "projects": [
+    {
+      "id": "44000000-0000-4000-8000-000000000001",
+      "name": "SmartEnglish AI",
+      "role": "Full Stack Developer",
+      "description": "Graduation thesis project: AI-powered multimodal English learning ecosystem.",
+      "technologies": [
+        "Java",
+        "Spring Boot",
+        "FastAPI",
+        "Gemini AI",
+        "React Native"
+      ],
+      "sourceUrl": "https://github.com/smartenglish-be",
+      "startDate": "2026-08-01T00:00:00.000Z"
+    }
+  ],
+  "isSynced": false,
+  "createdAt": "2026-10-12T00:00:00.000Z",
+  "updatedAt": "2026-10-12T00:00:00.000Z"
+}

@@ -1,6 +1,6 @@
 ---
 name: smart-cv-feature
-description: Implements and refactors Smart CV Maker Flutter features using Riverpod, GoRouter, offline-first persistence, and testable architecture. Use when adding screens, CV models, editor behavior, local storage, preview, PDF, or feature-level tests in this repository.
+description: Implements and refactors Smart CV Maker Flutter features using Riverpod, GoRouter, Drift offline-first persistence, and testable architecture. Use when adding screens, CV models, editor tools, drag-and-drop preview behavior, templates, PDF/DOCX export, resume import, community pages, or feature-level tests in this repository.
 ---
 
 # Smart CV Feature
@@ -18,6 +18,30 @@ Read `AGENTS.md`, `docs/requirements.md`, and `docs/mvp-flow.md`. Inspect the re
 5. Handle loading, empty, offline, success, and error states that apply.
 6. Add or update tests.
 7. Format, analyze, test, and review the diff.
+
+## Project map
+
+| Area | Location | Notes |
+| --- | --- | --- |
+| CV aggregate | `lib/features/cv_editor/domain/models/cv_model.dart` | `sectionOrder`, `hiddenSections`, `language` (`vi`/`en`) are part of the CV and must survive save, backup, sync and export. |
+| Local storage | `lib/core/database/` (Drift) | Source of truth at runtime; `payload_json` stores the full CV snapshot. |
+| Editor | `lib/features/cv_editor/presentation/` | Tabs live in `widgets/`; helper sheets (skill bank, action verbs, starter samples, section reorder, typography toolbar). |
+| Preview | `lib/features/cv_preview/` | A4 PDF preview, interactive drag-and-drop layout, template gallery, colour sheet, page fit, JD matcher. |
+| Export | `cv_preview/data/services/` | Vector PDF (`pdf`), DOCX (OpenXML via `archive`). Both must honour `visibleSectionOrder`. |
+| Import | `lib/features/resume_import/` | On-device DOCX/PDF text extraction + heuristic parser; AI parsing is an optional enhancement. |
+| AI tools | `lib/features/ai_tools/` | Always via Supabase Edge Functions — see `smart-cv-ai`. |
+| Templates | `cv_template.dart` + `AppConstants` | Every template id must also be seeded in the cloud `templates` table. |
+
+## CV-building UX conventions
+
+- Follow `smart-cv-ui` for colours, spacing, icons and component patterns.
+
+- Every new CV-assist tool must be usable offline unless it is an AI feature; AI features must degrade with a clear message, never a crash.
+- Labels are bilingual: follow `cv.language` for content shown on the CV and Vietnamese for app chrome.
+- Drag-and-drop and reorder interactions persist immediately through the repository and must update the PDF preview and both exporters.
+- Bottom sheets for tools return values to the caller; the screen/controller performs the save.
+- Suggestions (skills, keywords, AI text) are applied only after an explicit user action and must be undoable or editable.
+- Never invent user facts in samples or suggestions; mark sample content as sample.
 
 ## Architecture rules
 
@@ -45,10 +69,20 @@ Read `AGENTS.md`, `docs/requirements.md`, and `docs/mvp-flow.md`. Inspect the re
 Run the narrowest relevant test first, then:
 
 ```bash
-dart format --output=none --set-exit-if-changed lib test
+dart format <changed files only>
 flutter analyze
 flutter test
 ```
 
+- Format only the files you changed; running `dart format lib` reformats unrelated files and pollutes the commit.
+- Widget tests that scroll long `ListView`s should enlarge `tester.view.physicalSize` or use `scrollUntilVisible`.
+- Screenshot tests write into `artifacts/` (ignored by Git).
+
 Report commands that could not run and why. Do not commit or push unless explicitly requested.
+
+## Git
+
+- Branch from `develop` as `feature/<short-name>`, `fix/<short-name>` or `chore/<short-name>`; merge back with `git merge --no-ff` and a `merge: integrate <topic>` message.
+- Commit messages are English Conventional Commits describing the change only — no tool attribution, `Co-Authored-By` trailers, or schedule references (week/day numbers).
+- Commit with the repository's configured Git identity.
 

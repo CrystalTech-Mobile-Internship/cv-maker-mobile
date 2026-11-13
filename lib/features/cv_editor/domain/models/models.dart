@@ -1,4 +1,7 @@
+export 'certification_model.dart';
 export 'cv_model.dart';
+export 'cv_section_definition.dart';
+export 'cv_template.dart';
 export 'education_model.dart';
 export 'experience_model.dart';
 export 'personal_info_model.dart';

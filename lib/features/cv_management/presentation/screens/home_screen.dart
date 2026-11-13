@@ -1,206 +1,554 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../app/theme.dart';
 
-class HomeScreen extends StatelessWidget {
+export '../controllers/cv_list_provider.dart' show cvListStreamProvider;
+
+import '../../../../app/theme.dart';
+import '../../../auth/data/guest_session_service.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../auth/presentation/screens/account_screen.dart';
+import '../../../cv_backup/data/repositories/cv_backup_provider.dart';
+import '../../../cv_backup/domain/repositories/cv_backup_repository.dart';
+import '../../../cv_editor/data/repositories/cv_repository_provider.dart';
+import '../../../cv_editor/data/repositories/cv_sync_repository.dart';
+import '../../../cv_editor/domain/models/models.dart';
+import '../../../resume_import/data/repositories/resume_import_provider.dart';
+import '../../../resume_import/domain/repositories/resume_import_repository.dart';
+import '../../../resume_import/domain/models/resume_import_draft.dart';
+import '../../../resume_import/presentation/resume_draft_saver.dart';
+import '../../../resume_import/presentation/widgets/resume_import_mode_sheet.dart';
+import '../../../ai_tools/domain/models/ai_assistant_models.dart';
+import '../../../community/presentation/screens/community_view.dart';
+import '../../../community/presentation/widgets/community_actions.dart';
+import '../../../ai_tools/domain/repositories/ai_assistant_repository.dart';
+import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
+import '../../../ai_tools/presentation/widgets/ai_access_guard.dart';
+import '../../../billing/data/supabase_billing_repository.dart';
+import '../controllers/cv_list_provider.dart';
+import '../controllers/dashboard_sync_controller.dart';
+import '../widgets/cloud_sync_preview_sheet.dart';
+import '../widgets/create_cv_dialog.dart';
+import '../widgets/desktop_shell.dart';
+import '../../../auth/domain/models/auth_user.dart';
+import '../widgets/home_dialogs.dart';
+import '../widgets/my_cvs_view.dart';
+import '../widgets/template_catalog_view.dart';
+import '../../../../core/utils/cv_id.dart';
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppConstants.appName),
-        actions: [
-          IconButton(
-            tooltip: 'Đăng xuất',
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () => context.go('/login'),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Welcome & AI Status Banner
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primarySlate, Color(0xFF334155)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  int _selectedIndex = 0;
+
+  Future<void> _openEditor([CvModel? cv]) async {
+    await context.push('/editor', extra: cv);
+  }
+
+  Future<void> _createCv({String initialTemplate = 'harvard_ats'}) async {
+    final existingCvs =
+        ref.read(cvListStreamProvider).asData?.value ?? const [];
+    final request = await showCreateCvDialog(
+      context,
+      initialTemplate: initialTemplate,
+      existingCvs: existingCvs,
+      isPro: ref.read(isProProvider),
+    );
+    if (request == null) return;
+
+    final now = DateTime.now().toUtc();
+    final source = request.sourceCv;
+    final cv = CvModel(
+      id: newCvId(),
+      userId: ref.read(currentAuthUserProvider)?.id,
+      title: request.title,
+      templateId: request.templateId,
+      language: request.language,
+      primaryColor: CvTemplateCatalog.byId(request.templateId).accentHex,
+      fontSizeScale: 1,
+      summary: source?.summary ?? '',
+      personalInfo: source?.personalInfo ?? const PersonalInfoModel(),
+      educations: source?.educations ?? const [],
+      experiences: source?.experiences ?? const [],
+      skills: source?.skills ?? const [],
+      projects: source?.projects ?? const [],
+      certifications: source?.certifications ?? const [],
+      isSynced: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    try {
+      await ref.read(cvRepositoryProvider).save(cv);
+      if (!mounted) return;
+      setState(() => _selectedIndex = 0);
+      _showMessage('Đã tạo CV mới thành công.');
+      await _openEditor(cv);
+    } catch (_) {
+      if (mounted) _showMessage('Không thể tạo CV. Hãy thử lại.');
+    }
+  }
+
+  Future<void> _importResume() async {
+    final importer = ref.read(resumeImportRepositoryProvider);
+    try {
+      final source = await importer.pickAndExtractText();
+      if (source == null || !mounted) return;
+      final mode = await showResumeImportModeSheet(
+        context,
+        fileName: source.fileName,
+        characterCount: source.text.length,
+        isSignedIn: ref.read(currentAuthUserProvider) != null,
+        aiCost: AiCreditCost.parseResume,
+      );
+      if (mode == null || !mounted) return;
+
+      ResumeImportDraft? draft;
+      if (mode == ResumeImportMode.ai) {
+        draft = await _parseWithAi(source);
+        if (draft == null) return;
+      } else {
+        draft = importer.parseText(source);
+      }
+      if (!mounted) return;
+      final cv = await reviewAndSaveResumeDraft(context, ref, draft);
+      if (cv == null || !mounted) return;
+      _showMessage('Đã nhập CV và lưu an toàn trên thiết bị.');
+      await _openEditor(cv);
+    } on ResumeImportException catch (error) {
+      if (mounted) _showMessage(error.message);
+    } catch (_) {
+      if (mounted) _showMessage('Không thể nhập CV. Hãy kiểm tra lại tệp.');
+    }
+  }
+
+  /// AI extraction with an automatic offline fallback so an AI outage never
+  /// blocks the import.
+  Future<ResumeImportDraft?> _parseWithAi(ResumeTextSource source) async {
+    if (!await ensureAiAccess(context, ref)) return null;
+    if (!mounted) return null;
+    try {
+      return await runWithAiProgress(
+        context,
+        'Đang đọc CV...',
+        () => ref
+            .read(aiAssistantRepositoryProvider)
+            .parseResume(
+              sourceName: source.fileName,
+              text: source.text,
+              language: 'vi',
+            ),
+      );
+    } on AiWritingFailure catch (failure) {
+      if (!mounted) return null;
+      _showMessage(
+        '${describeAiFailure(failure)} Đã chuyển sang đọc trên máy.',
+      );
+      return ref.read(resumeImportRepositoryProvider).parseText(source);
+    }
+  }
+
+  Future<void> _exportAllCvs() async {
+    final cvs = ref.read(cvListStreamProvider).asData?.value ?? const [];
+    if (cvs.isEmpty) {
+      _showMessage('Chưa có CV nào để sao lưu.');
+      return;
+    }
+    try {
+      final uri = await ref.read(cvBackupRepositoryProvider).exportBackup(cvs);
+      if (!mounted || uri == null) return;
+      _showMessage('Đã xuất bản sao của ${cvs.length} CV.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể xuất bản sao dữ liệu.');
+    }
+  }
+
+  Future<void> _restoreCvBackup() async {
+    try {
+      final imported = await ref
+          .read(cvBackupRepositoryProvider)
+          .importBackup();
+      if (imported == null || !mounted) return;
+      final userId = ref.read(currentAuthUserProvider)?.id;
+      final baseTime = DateTime.now().toUtc();
+      for (var index = 0; index < imported.length; index++) {
+        final source = imported[index];
+        final restoredAt = baseTime.add(Duration(microseconds: index));
+        await ref
+            .read(cvRepositoryProvider)
+            .save(
+              source.copyWith(
+                id: 'restored-${restoredAt.microsecondsSinceEpoch}-$index',
+                userId: userId,
+                title: '${source.title} — Khôi phục',
+                isSynced: false,
+                createdAt: restoredAt,
+                updatedAt: restoredAt,
               ),
-              child: Row(
+            );
+      }
+      if (mounted) {
+        _showMessage(
+          'Đã khôi phục ${imported.length} CV thành bản mới trên thiết bị.',
+        );
+      }
+    } on CvBackupException catch (error) {
+      if (mounted) _showMessage(error.message);
+    } catch (_) {
+      if (mounted) _showMessage('Không thể khôi phục tệp sao lưu.');
+    }
+  }
+
+  Future<void> _renameCv(CvModel cv) async {
+    final title = await showRenameCvDialog(context, cv);
+    if (title == null) return;
+
+    try {
+      await ref
+          .read(cvRepositoryProvider)
+          .save(cv.copyWith(title: title, updatedAt: DateTime.now().toUtc()));
+      if (mounted) _showMessage('Đã đổi tên CV thành công.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể đổi tên CV.');
+    }
+  }
+
+  Future<void> _duplicateCv(CvModel cv) async {
+    try {
+      final newId = newCvId();
+      await ref.read(cvRepositoryProvider).duplicate(cv.id, newId: newId);
+      if (mounted) _showMessage('Đã nhân bản CV thành công.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể nhân bản CV.');
+    }
+  }
+
+  Future<void> _createBackup(CvModel cv) async {
+    try {
+      final now = DateTime.now();
+      final copy = await ref
+          .read(cvRepositoryProvider)
+          .duplicate(cv.id, newId: newCvId(), now: now.toUtc());
+      final stamp =
+          '${now.day.toString().padLeft(2, '0')}/'
+          '${now.month.toString().padLeft(2, '0')} '
+          '${now.hour.toString().padLeft(2, '0')}:'
+          '${now.minute.toString().padLeft(2, '0')}';
+      await ref
+          .read(cvRepositoryProvider)
+          .save(copy.copyWith(title: '${cv.title} — Sao lưu $stamp'));
+      if (mounted) _showMessage('Đã tạo bản sao dự phòng trên thiết bị.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể tạo bản sao dự phòng.');
+    }
+  }
+
+  Future<void> _deleteCv(CvModel cv) async {
+    if (!await showDeleteCvConfirmation(context, cv)) return;
+
+    try {
+      await ref.read(cvRepositoryProvider).deleteById(cv.id);
+      if (mounted) _showMessage('Đã xoá CV thành công.');
+    } catch (_) {
+      if (mounted) _showMessage('Không thể xoá CV.');
+    }
+  }
+
+  Future<void> _openLogin() async {
+    await ref.read(guestSessionServiceProvider).setGuestMode(false);
+    if (mounted) context.go('/login');
+  }
+
+  /// Moves CVs created without an account into the signed-in account
+  /// (after the user taps the button) and backs them up.
+  Future<void> _backupGuestCvs() async {
+    final user = ref.read(currentAuthUserProvider);
+    if (user == null) return _openLogin();
+    final cvs = ref.read(cvListStreamProvider).asData?.value ?? const [];
+    final guest = cvs.where((cv) => cv.userId == null).toList();
+    if (guest.isEmpty) return;
+    final repository = ref.read(cvRepositoryProvider);
+    for (final cv in guest) {
+      await repository.save(cv.copyWith(userId: user.id), now: cv.updatedAt);
+    }
+    final result = await ref
+        .read(dashboardSyncControllerProvider.notifier)
+        .synchronize(user.id);
+    if (!mounted) return;
+    _showMessage(
+      result.isSuccess
+          ? 'Đã sao lưu ${guest.length} CV vào tài khoản.'
+          : 'CV đã được gắn vào tài khoản; sẽ sao lưu lại khi có mạng.',
+    );
+  }
+
+  Future<void> _syncAll() async {
+    final user = ref.read(currentAuthUserProvider);
+    if (user == null) return _openLogin();
+
+    final backendLabel = ref.read(authRepositoryProvider).backendLabel;
+    final preview = await ref
+        .read(cvSyncRepositoryProvider)
+        .inspectSyncPreview(
+          userId: user.id,
+          userEmail: user.email,
+          backendLabel: backendLabel,
+        );
+
+    if (!mounted) return;
+
+    final confirmed = await CloudSyncPreviewSheet.show(
+      context,
+      preview: preview,
+      onExportBackup: () {
+        _exportAllCvs();
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final result = await ref
+        .read(dashboardSyncControllerProvider.notifier)
+        .synchronize(user.id);
+    if (!mounted) return;
+    if (!result.isSuccess) {
+      _showMessage(result.errorMessage ?? 'Một số CV chưa thể đồng bộ.');
+      return;
+    }
+    _showMessage(
+      result.synchronizedCount == 0
+          ? 'Chưa có CV nào để đồng bộ.'
+          : _syncSuccessMessage(result),
+    );
+  }
+
+  String _syncSuccessMessage(CvSyncResult result) {
+    final actions = <String>[
+      if (result.uploadedCount > 0) '${result.uploadedCount} tải lên',
+      if (result.downloadedCount > 0) '${result.downloadedCount} tải về',
+      if (result.deletedCount > 0) '${result.deletedCount} xoá trên tài khoản',
+    ];
+    final conflicts = result.conflictCount > 0
+        ? ' • ${result.conflictCount} CV sửa ở hai nơi, đã giữ bản mới nhất'
+        : '';
+    return 'Đồng bộ xong: ${actions.join(', ')}$conflicts.';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = ref.watch(currentAuthUserProvider);
+    final backendLabel = ref.watch(authRepositoryProvider).backendLabel;
+    final cvsAsync = ref.watch(cvListStreamProvider);
+    final syncState = ref.watch(dashboardSyncControllerProvider);
+    final title = switch (_selectedIndex) {
+      0 => 'CV của tôi',
+      1 => 'Mẫu CV',
+      2 => 'Cộng đồng',
+      _ => 'Tài khoản',
+    };
+    final titleIcon = switch (_selectedIndex) {
+      0 => Icons.description_rounded,
+      1 => Icons.palette_rounded,
+      2 => Icons.forum_outlined,
+      _ => Icons.account_circle_outlined,
+    };
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: _isWide(context)
+          ? null
+          : AppBar(
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.accentTeal.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.auto_awesome_rounded,
-                      color: AppTheme.accentCyan,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Trợ lý CV Chuẩn ATS',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Tối ưu hóa từ khóa tuyển dụng & định dạng xuất A4 chuẩn quốc tế.',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+                  Icon(titleIcon, color: AppTheme.primarySlate),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
+              actions: [
+                if (_selectedIndex == 0)
+                  IconButton(
+                    key: const Key('home-create-cv'),
+                    tooltip: 'Tạo CV',
+                    onPressed: _createCv,
+                    icon: const Icon(Icons.add_rounded),
+                  ),
+                if (_selectedIndex == 2 && user != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilledButton.icon(
+                      key: const ValueKey('community-create-post'),
+                      onPressed: () => createCommunityPost(context, ref),
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                      ),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Đăng bài'),
+                    ),
+                  ),
+                const SizedBox(width: 4),
+              ],
             ),
-            const SizedBox(height: 24),
-
-            // Section Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Danh sách hồ sơ của bạn',
-                  style: Theme.of(context).textTheme.titleLarge,
+      body: SafeArea(
+        child: _wideLayout(context, title, user, switch (_selectedIndex) {
+          0 => MyCvsView(
+            cvsAsync: cvsAsync,
+            isSignedIn: user != null,
+            displayName: user?.displayName,
+            backendLabel: backendLabel,
+            isSyncing: syncState.isSyncing,
+            lastSyncedAt: syncState.lastSyncedAt,
+            onSync: _syncAll,
+            onLogin: _openLogin,
+            onCreate: _createCv,
+            onImport: _importResume,
+            onExportAll: _exportAllCvs,
+            onRestoreBackup: _restoreCvBackup,
+            onOpenAts: () => context.push('/ats-scorer'),
+            onOpenAiInterview: () => context.push('/ai-interview'),
+            onBackupGuestCvs: _backupGuestCvs,
+            onOpenPro: () => context.push('/upgrade-pro'),
+            onRetry: () => ref.invalidate(cvListStreamProvider),
+            onEdit: _openEditor,
+            onPreview: (cv) => context.push('/preview', extra: cv),
+            onRename: _renameCv,
+            onDuplicate: _duplicateCv,
+            onBackup: _createBackup,
+            onDelete: _deleteCv,
+          ),
+          1 => TemplateCatalogView(
+            isPro: ref.watch(isProProvider),
+            onUseTemplate: (template) =>
+                _createCv(initialTemplate: template.id),
+            onPreviewTemplate: (template) {
+              final sample =
+                  CvModel.empty(id: 'template-preview-${template.id}').copyWith(
+                    title: template.name,
+                    templateId: template.id,
+                    primaryColor: template.accentHex,
+                  );
+              context.push('/preview', extra: sample);
+            },
+            onPremiumTap: (template) => showPremiumTemplateInfo(
+              context,
+              template,
+              onViewProPlans: () => context.push('/upgrade-pro'),
+            ),
+          ),
+          2 => const CommunityView(),
+          _ => const AccountScreen(embedded: true),
+        }),
+      ),
+      bottomNavigationBar: _isWide(context)
+          ? null
+          : NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (index) {
+                setState(() => _selectedIndex = index);
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.folder_copy_outlined),
+                  selectedIcon: Icon(Icons.folder_copy_rounded),
+                  label: 'CV của tôi',
                 ),
-                Text(
-                  '1 hồ sơ',
-                  style: Theme.of(context).textTheme.bodyMedium,
+                NavigationDestination(
+                  icon: Icon(Icons.palette_outlined),
+                  selectedIcon: Icon(Icons.palette_rounded),
+                  label: 'Mẫu CV',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.forum_outlined),
+                  selectedIcon: Icon(Icons.forum_rounded),
+                  label: 'Cộng đồng',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.account_circle_outlined),
+                  selectedIcon: Icon(Icons.account_circle_rounded),
+                  label: 'Tài khoản',
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+    );
+  }
 
-            // Sample CV Item Card
-            Card(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () => context.push('/editor'),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: AppTheme.primarySlate.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.article_outlined,
-                              color: AppTheme.primarySlate,
-                              size: 26,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Flutter Software Engineer',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Cập nhật: Hôm nay • Mẫu Harvard ATS',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppTheme.successGreen.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.bolt, color: AppTheme.successGreen, size: 14),
-                                SizedBox(width: 2),
-                                Text(
-                                  '88 ATS',
-                                  style: TextStyle(
-                                    color: AppTheme.successGreen,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(height: 1),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton.icon(
-                            onPressed: () => context.push('/preview'),
-                            icon: const Icon(Icons.visibility_outlined, size: 18),
-                            label: const Text('Xem & Xuất PDF'),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton.icon(
-                            onPressed: () => context.push('/editor'),
-                            icon: const Icon(Icons.edit_outlined, size: 18),
-                            label: const Text('Chỉnh sửa'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+  static const _destinations = [
+    (Icons.folder_copy_outlined, Icons.folder_copy_rounded, 'CV của tôi'),
+    (Icons.palette_outlined, Icons.palette_rounded, 'Mẫu CV'),
+    (Icons.forum_outlined, Icons.forum_rounded, 'Cộng đồng'),
+    (Icons.account_circle_outlined, Icons.account_circle_rounded, 'Tài khoản'),
+  ];
+
+  bool _isWide(BuildContext context) => MediaQuery.sizeOf(context).width >= 900;
+
+  /// Computer layout designed for wide screens (sidebar + page header).
+  Widget _wideLayout(
+    BuildContext context,
+    String title,
+    AuthUser? user,
+    Widget content,
+  ) {
+    if (!_isWide(context)) return content;
+    final page = switch (_selectedIndex) {
+      0 => content,
+      1 => content,
+      _ => Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 820),
+          child: content,
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/editor'),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Tạo CV mới'),
-      ),
+    };
+    return DesktopShell(
+      items: [
+        for (final item in _destinations)
+          DesktopNavItem(item.$1, item.$2, item.$3),
+      ],
+      selectedIndex: _selectedIndex,
+      onSelect: (index) => setState(() => _selectedIndex = index),
+      onCreate: _createCv,
+      title: title,
+      accountName: user?.displayName.isNotEmpty == true
+          ? user!.displayName
+          : user?.email,
+      accountDetail: user == null ? 'Đăng nhập để sao lưu CV' : user.email,
+      onAccount: () => setState(() => _selectedIndex = 3),
+      actions: [
+        if (_selectedIndex == 2 && user != null)
+          FilledButton.icon(
+            key: const ValueKey('community-create-post'),
+            onPressed: () => createCommunityPost(context, ref),
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            label: const Text('Đăng bài'),
+          ),
+        if (_selectedIndex == 0)
+          OutlinedButton.icon(
+            onPressed: _importResume,
+            icon: const Icon(Icons.upload_file_outlined, size: 18),
+            label: const Text('Tải CV lên'),
+          ),
+      ],
+      child: page,
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
   }
 }

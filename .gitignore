@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+.ui-review/
 
 # Symbolication related
 app.*.symbols
@@ -46,3 +47,11 @@ app.*.map.json
 
 
 .env
+supabase/functions/.env
+
+artifacts/
+
+# Supabase CLI local state
+supabase/.temp/
+
+supabase/.branches/

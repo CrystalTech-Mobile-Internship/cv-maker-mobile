@@ -27,14 +27,20 @@ description: Reviews and validates Smart CV Maker changes for correctness, data 
 - [ ] Public configuration examples contain placeholders only.
 - [ ] Comments describe intent, not obvious syntax.
 - [ ] Documentation does not claim unfinished behavior is complete.
+- [ ] Root `.env` (bundled as a Flutter asset) contains no AI, service-role or third-party secret.
+- [ ] AI requests go through an Edge Function that verifies the JWT and consumes quota server-side.
+- [ ] New cloud columns/tables have an idempotent migration applied to both Supabase projects.
+- [ ] Section order, hidden sections and language survive save → sync → export.
+- [ ] Commit messages are English, focused, and contain no tool attribution or schedule references.
 
 ## Validation commands
 
 ```bash
-dart format --output=none --set-exit-if-changed lib test
+dart format --output=none --set-exit-if-changed <changed files>
 flutter analyze
 flutter test
 git diff --check
+git grep -nE "sk-or-|service_role|OPENROUTER_API_KEY=[^r]" -- . ':!*.example'
 ```
 
 ## Report format
