@@ -122,12 +122,12 @@ void main() {
   });
 
   test(
-    'PdfExportServiceImpl generates valid PDF bytes for 2-page Tuan Anh fullstack CV',
+    'PdfExportServiceImpl generates valid PDF bytes for 2-page fullstack sample CV',
     () async {
       final service = PdfExportServiceImpl();
-      final source = await rootBundle.loadString(
-        'assets/mock_cvs/tuananh_fullstack_cv.json',
-      );
+      final source = File(
+        'test/fixtures/cvs/fullstack_cv.json',
+      ).readAsStringSync();
       final cv = CvModel.fromJson(jsonDecode(source) as Map<String, dynamic>);
 
       final bytes = await service.generateCvPdf(
@@ -145,9 +145,9 @@ void main() {
   );
 
   test('Trần Văn Hòa sample generates the 1/3–2/3 sidebar CV', () async {
-    final source = await rootBundle.loadString(
-      'assets/mock_cvs/tran_van_hoa_cv.json',
-    );
+    final source = File(
+      'test/fixtures/cvs/sidebar_cv.json',
+    ).readAsStringSync();
     final cv = CvModel.fromJson(jsonDecode(source) as Map<String, dynamic>);
     expect(cv.projects, hasLength(4));
     expect(cv.certifications.single.score, '700 / 990');
