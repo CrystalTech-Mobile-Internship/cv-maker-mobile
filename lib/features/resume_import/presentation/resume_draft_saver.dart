@@ -8,6 +8,8 @@ import '../../cv_editor/domain/models/cv_template.dart';
 import '../domain/models/resume_import_draft.dart';
 import 'widgets/resume_import_review_dialog.dart';
 import '../../../core/utils/cv_id.dart';
+import '../../cv_editor/domain/services/cv_bullet_cleaner.dart';
+import '../../cv_editor/domain/services/cv_item_order_service.dart';
 
 /// Shows the review dialog for [draft] (from a file import or the AI
 /// assistant) and saves the confirmed CV locally. Returns the saved CV, or
@@ -38,5 +40,19 @@ Future<CvModel?> reviewAndSaveResumeDraft(
     correctedAddress: review.address,
     correctedSummary: review.summary,
   );
-  return ref.read(cvRepositoryProvider).save(cv);
+  return ref
+      .read(cvRepositoryProvider)
+      .save(_newestFirst(CvBulletCleaner.clean(cv)));
+}
+
+/// Imported CVs list the newest work first, like a reviewer expects.
+CvModel _newestFirst(CvModel cv) {
+  var result = cv;
+  for (final section in const ['experience', 'projects', 'education']) {
+    final ids = CvItemOrderService.newestFirst(
+      CvItemOrderService.itemsFor(result, section),
+    );
+    result = CvItemOrderService.reorder(result, section, ids);
+  }
+  return result;
 }

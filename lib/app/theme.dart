@@ -41,6 +41,21 @@ class AppTheme {
         onSurface: primaryNavy,
         error: dangerRose,
         onError: Colors.white,
+        // Soft grey outlines instead of near-black borders, and a calm
+        // indigo tint for selected segments.
+        outline: const Color(0xFFCBD5E1),
+        outlineVariant: softBorder,
+        secondaryContainer: indigoSurface,
+        onSecondaryContainer: brandIndigo,
+      ),
+      dividerTheme: const DividerThemeData(color: softBorder, thickness: 1),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: SegmentedButton.styleFrom(
+          selectedBackgroundColor: indigoSurface,
+          selectedForegroundColor: brandIndigo,
+          foregroundColor: primarySlate,
+          side: const BorderSide(color: Color(0xFFCBD5E1)),
+        ),
       ),
       scaffoldBackgroundColor: surfaceLight,
       // On computers sheets and dialogs stay at a readable width, centred,
