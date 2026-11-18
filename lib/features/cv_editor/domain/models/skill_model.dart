@@ -17,6 +17,7 @@ class SkillModel {
     required this.name,
     required this.category,
     this.proficiency = 0,
+    this.group = '',
   }) : assert(
          proficiency >= 0 && proficiency <= 100,
          'proficiency must be between 0 and 100',
@@ -27,12 +28,16 @@ class SkillModel {
   final SkillCategory category;
   final int proficiency;
 
+  /// Optional heading such as `Frontend`; empty lets the CV guess it.
+  final String group;
+
   factory SkillModel.fromJson(Map<String, dynamic> json) {
     return SkillModel(
       id: json['id'] as String,
       name: json['name'] as String? ?? '',
       category: SkillCategory.fromJson(json['category'] as String),
       proficiency: json['proficiency'] as int? ?? 0,
+      group: json['group'] as String? ?? '',
     );
   }
 
@@ -42,6 +47,7 @@ class SkillModel {
       'name': name,
       'category': category.name,
       'proficiency': proficiency,
+      if (group.isNotEmpty) 'group': group,
     };
   }
 
@@ -50,12 +56,14 @@ class SkillModel {
     String? name,
     SkillCategory? category,
     int? proficiency,
+    String? group,
   }) {
     return SkillModel(
       id: id ?? this.id,
       name: name ?? this.name,
       category: category ?? this.category,
       proficiency: proficiency ?? this.proficiency,
+      group: group ?? this.group,
     );
   }
 }

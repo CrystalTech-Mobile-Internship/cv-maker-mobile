@@ -10,6 +10,7 @@ import '../../domain/models/pdf_section_region.dart';
 import '../../domain/services/pdf_export_service.dart';
 import 'pdf_platform_storage.dart' as platform;
 import '../../../cv_editor/domain/services/cv_bullet_cleaner.dart';
+import '../../../cv_editor/domain/services/cv_skill_grouper.dart';
 
 class PdfExportServiceImpl implements PdfExportService {
   static final _fontSets = <String, Future<_PdfFontSet>>{};
@@ -640,18 +641,33 @@ class PdfExportServiceImpl implements PdfExportService {
                   ],
                   if (cv.skills.isNotEmpty) ...[
                     heading(isEn ? 'SKILLS' : 'KỸ NĂNG', light: true),
-                    ...cv.skills.map(
-                      (e) => pw.Padding(
-                        padding: const pw.EdgeInsets.only(bottom: 3),
-                        child: pw.Text(
-                          '• ${e.name}',
-                          style: pw.TextStyle(
-                            fontSize: small,
-                            color: PdfColors.white,
-                          ),
+                    for (final line in CvSkillGrouper.lines(
+                      cv.skills,
+                      isEn: isEn,
+                    ))
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.only(bottom: 4),
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text(
+                              line.label,
+                              style: pw.TextStyle(
+                                fontSize: small,
+                                fontWeight: pw.FontWeight.bold,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                            pw.Text(
+                              line.text,
+                              style: pw.TextStyle(
+                                fontSize: small,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
                   ],
                 ],
               ),
@@ -906,39 +922,29 @@ class PdfExportServiceImpl implements PdfExportService {
     bool isEn,
     double scale,
   ) {
-    final hard = skills
-        .where((s) => s.category == SkillCategory.hard)
-        .map((s) => s.name)
-        .join(', ');
-    final soft = skills
-        .where((s) => s.category == SkillCategory.soft)
-        .map((s) => s.name)
-        .join(', ');
+    final lines = CvSkillGrouper.lines(skills, isEn: isEn);
+    final style = pw.TextStyle(
+      fontSize: 9.5 * scale,
+      lineSpacing: 1.8 * scale,
+      color: PdfColors.grey900,
+    );
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
-        if (hard.isNotEmpty)
+        for (final line in lines)
           pw.Padding(
             padding: pw.EdgeInsets.only(bottom: 2 * scale),
-            child: pw.Text(
-              '• ${isEn ? "Technical & Frameworks: " : "Kỹ năng chuyên môn: "}$hard',
-              style: pw.TextStyle(
-                fontSize: 9.5 * scale,
-                lineSpacing: 1.8 * scale,
-                color: PdfColors.grey900,
-              ),
-            ),
-          ),
-        if (soft.isNotEmpty)
-          pw.Padding(
-            padding: pw.EdgeInsets.only(bottom: 2 * scale),
-            child: pw.Text(
-              '• ${isEn ? "Methodologies & Soft Skills: " : "Kỹ năng mềm & Phương pháp: "}$soft',
-              style: pw.TextStyle(
-                fontSize: 9.5 * scale,
-                lineSpacing: 1.8 * scale,
-                color: PdfColors.grey900,
+            child: pw.RichText(
+              text: pw.TextSpan(
+                style: style,
+                children: [
+                  pw.TextSpan(
+                    text: '${line.label}: ',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
+                  pw.TextSpan(text: line.text),
+                ],
               ),
             ),
           ),

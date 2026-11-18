@@ -219,6 +219,7 @@ final class CvSupabaseMapper {
           ? SkillCategory.soft
           : SkillCategory.hard,
       proficiency: _number(map['proficiency'])?.round() ?? 0,
+      group: _string(map['group']) ?? '',
     );
   }
 

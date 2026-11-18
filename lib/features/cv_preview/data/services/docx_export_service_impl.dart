@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../domain/repositories/document_export_repository.dart';
 import '../../../cv_editor/domain/services/cv_bullet_cleaner.dart';
+import '../../../cv_editor/domain/services/cv_skill_grouper.dart';
 
 class DocxExportServiceImpl implements DocumentExportRepository {
   const DocxExportServiceImpl();
@@ -190,28 +191,8 @@ class DocxExportServiceImpl implements DocumentExportRepository {
         case 'skills':
           if (cv.skills.isNotEmpty) {
             buffer.write(_buildHeading(isEn ? 'SKILLS' : 'KỸ NĂNG CHUYÊN MÔN'));
-            final hardSkills = cv.skills
-                .where((s) => s.category.name == 'hard')
-                .map((s) => s.name)
-                .join(', ');
-            final softSkills = cv.skills
-                .where((s) => s.category.name == 'soft')
-                .map((s) => s.name)
-                .join(', ');
-
-            if (hardSkills.isNotEmpty) {
-              buffer.write(
-                _buildParagraph(
-                  '${isEn ? "Technical Skills" : "Kỹ năng chuyên môn"}: $hardSkills',
-                ),
-              );
-            }
-            if (softSkills.isNotEmpty) {
-              buffer.write(
-                _buildParagraph(
-                  '${isEn ? "Soft Skills" : "Kỹ năng mềm"}: $softSkills',
-                ),
-              );
+            for (final line in CvSkillGrouper.lines(cv.skills, isEn: isEn)) {
+              buffer.write(_buildParagraph('${line.label}: ${line.text}'));
             }
           }
           break;

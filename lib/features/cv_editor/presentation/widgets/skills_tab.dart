@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../domain/models/skill_model.dart';
+import '../../domain/services/cv_skill_grouper.dart';
 import 'skill_bank_sheet.dart';
 
 /// Tab for displaying and managing Technical & Professional Skills.
@@ -170,12 +171,27 @@ class SkillsTab extends StatelessWidget {
             title: _isEn ? 'Technical & Hard Skills' : 'Kỹ năng chuyên môn',
           ),
           const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: hardSkills.map(_buildSkillChip).toList(),
-          ),
-          const SizedBox(height: 20),
+          for (final group in _hardGroups(hardSkills)) ...[
+            if (group.$1 != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  group.$1!,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.mutedText,
+                  ),
+                ),
+              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: group.$2.map(_buildSkillChip).toList(),
+            ),
+            const SizedBox(height: 14),
+          ],
+          const SizedBox(height: 6),
         ],
         if (softSkills.isNotEmpty) ...[
           _buildCategoryHeader(
@@ -206,6 +222,28 @@ class SkillsTab extends StatelessWidget {
         const SizedBox(height: 24),
       ],
     );
+  }
+
+  /// Technical skills split the same way as the printed CV. A null label
+  /// means nothing was recognised, so the chips show without a sub-heading.
+  List<(String?, List<SkillModel>)> _hardGroups(List<SkillModel> hard) {
+    final order = CvSkillGrouper.lines(
+      hard,
+      isEn: _isEn,
+    ).map((line) => line.label).toList();
+    final byLabel = <String, List<SkillModel>>{};
+    for (final skill in hard) {
+      byLabel
+          .putIfAbsent(CvSkillGrouper.labelFor(skill, isEn: _isEn), () => [])
+          .add(skill);
+    }
+    if (byLabel.length == 1 && !order.contains(byLabel.keys.first)) {
+      return [(null, hard)];
+    }
+    return [
+      for (final label in order)
+        if (byLabel[label] != null) (label, byLabel[label]!),
+    ];
   }
 
   Widget _buildCategoryHeader(
