@@ -53,7 +53,9 @@ class _A4PdfPreviewState extends State<A4PdfPreview> {
     if (event is PointerScaleEvent) {
       GestureBinding.instance.pointerSignalResolver.register(
         event,
-        (event) => _setZoom(_zoom * (event as PointerScaleEvent).scale),
+        (event) => _setZoom(
+          _zoom * (event as PointerScaleEvent).scale.clamp(0.9, 1.1),
+        ),
       );
     } else if (event is PointerScrollEvent &&
         HardwareKeyboard.instance.isControlPressed) {
