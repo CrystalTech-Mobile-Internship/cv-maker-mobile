@@ -35,9 +35,12 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
     startAuthenticated: widget.startAuthenticated,
   );
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+  // Multi-device restriction is disabled to allow smooth login across
+  // web browsers, tabs, and mobile devices without kick-out conflicts.
   late final _deviceGuard = DeviceSessionGuard(
     ref.read(deviceSessionRepositoryProvider),
     onReplaced: _signOutReplacedDevice,
+    enabled: false,
   );
 
   @override

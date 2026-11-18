@@ -9,16 +9,22 @@ import '../../domain/repositories/device_session_repository.dart';
 /// that was taken over (seen live, or when the app starts) calls
 /// [onReplaced], which signs it out. Errors never sign anyone out.
 class DeviceSessionGuard {
-  DeviceSessionGuard(this._repository, {required this.onReplaced});
+  DeviceSessionGuard(
+    this._repository, {
+    required this.onReplaced,
+    this.enabled = false,
+  });
 
   final DeviceSessionRepository _repository;
   final Future<void> Function() onReplaced;
+  final bool enabled;
 
   StreamSubscription<void>? _watch;
   String? _watchedUser;
   bool _signingOut = false;
 
   Future<void> handle(AuthSessionChange change) async {
+    if (!enabled) return;
     final user = change.user;
     switch (change.event) {
       case AuthSessionEvent.signedOut:
@@ -73,6 +79,7 @@ class DeviceSessionGuard {
   }
 
   Future<void> stop() async {
+    if (!enabled) return;
     await _watch?.cancel();
     _watch = null;
     _watchedUser = null;

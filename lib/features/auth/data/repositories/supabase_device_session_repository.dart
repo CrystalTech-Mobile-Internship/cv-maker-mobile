@@ -63,13 +63,9 @@ class SupabaseDeviceSessionRepository implements DeviceSessionRepository {
     _lastClaimedSessionId = null;
     if (client == null) return;
     try {
-      await client.rpc(
-        'release_device_session',
-        params: {
-          'p_platform': currentDevicePlatform,
-          if (mine != null) 'p_session_id': mine,
-        },
-      );
+      final params = <String, dynamic>{'p_platform': currentDevicePlatform};
+      if (mine != null) params['p_session_id'] = mine;
+      await client.rpc('release_device_session', params: params);
     } catch (_) {
       try {
         var query = client
