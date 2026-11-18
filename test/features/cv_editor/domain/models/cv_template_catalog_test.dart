@@ -2,11 +2,12 @@ import 'package:cv_maker_mobile/features/cv_editor/domain/models/cv_template.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('catalog keeps six free templates and the rest for Pro', () {
+  test('catalog keeps eight free templates and the rest for Pro', () {
     final free = CvTemplateCatalog.freeTemplates;
     final all = CvTemplateCatalog.allTemplates;
 
-    expect(free, hasLength(6));
+    expect(free, hasLength(8));
+    expect(free.where((item) => item.hasPhoto), hasLength(3));
     expect(free.every((item) => !item.isPremium), isTrue);
     expect(
       CvTemplateCatalog.premiumTemplates.every((t) => t.isPremium),

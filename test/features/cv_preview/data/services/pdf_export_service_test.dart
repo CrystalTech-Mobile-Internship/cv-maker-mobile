@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:cv_maker_mobile/features/cv_editor/domain/models/cv_font.dart';
 import 'package:cv_maker_mobile/features/cv_editor/domain/models/models.dart';
 import 'package:cv_maker_mobile/features/cv_preview/data/services/pdf_export_service_impl.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -55,6 +56,28 @@ void main() {
       expect(bytes, isNotEmpty, reason: template.name);
       expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-', reason: template.name);
     }
+  });
+
+  test('every bundled font renders Vietnamese text offline', () async {
+    final service = PdfExportServiceImpl();
+    final cv = CvModel.empty(id: 'fonts').copyWith(
+      summary: 'Kỹ sư phần mềm, thành thạo kiểm thử và triển khai ứng dụng.',
+    );
+
+    for (final font in CvFontCatalog.all) {
+      final bytes = await service.generateCvPdf(
+        cv: cv.copyWith(fontFamily: font.id),
+        language: 'vi',
+      );
+      expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-', reason: font.name);
+    }
+  });
+
+  test('unknown font id falls back to the default font', () {
+    expect(CvFontCatalog.byId('missing').id, CvFontCatalog.defaultId);
+    expect(CvFontCatalog.canUse('montserrat', isPro: false), isFalse);
+    expect(CvFontCatalog.canUse('inter', isPro: false), isTrue);
+    expect(CvFontCatalog.canUse('montserrat', isPro: true), isTrue);
   });
 
   test('photo template embeds a local avatar without Internet', () async {
@@ -144,9 +167,7 @@ void main() {
   );
 
   test('Trần Văn Hòa sample generates the 1/3–2/3 sidebar CV', () async {
-    final source = File(
-      'test/fixtures/cvs/sidebar_cv.json',
-    ).readAsStringSync();
+    final source = File('test/fixtures/cvs/sidebar_cv.json').readAsStringSync();
     final cv = CvModel.fromJson(jsonDecode(source) as Map<String, dynamic>);
     expect(cv.projects, hasLength(4));
     expect(cv.certifications.single.score, '700 / 990');
@@ -176,24 +197,27 @@ void main() {
     expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-');
   });
 
-  test('PdfExportServiceImpl exports PDF successfully with customized sectionOrder', () async {
-    final service = PdfExportServiceImpl();
-    final cv = CvModel.empty(id: 'reordered-cv').copyWith(
-      sectionOrder: [
-        'projects',
-        'skills',
-        'education',
-        'experience',
-        'summary',
-        'certifications',
-      ],
-    );
-    final bytes = await service.generateCvPdf(
-      cv: cv,
-      language: 'vi',
-      templateId: 'harvard_ats',
-    );
-    expect(bytes, isNotEmpty);
-    expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-');
-  });
+  test(
+    'PdfExportServiceImpl exports PDF successfully with customized sectionOrder',
+    () async {
+      final service = PdfExportServiceImpl();
+      final cv = CvModel.empty(id: 'reordered-cv').copyWith(
+        sectionOrder: [
+          'projects',
+          'skills',
+          'education',
+          'experience',
+          'summary',
+          'certifications',
+        ],
+      );
+      final bytes = await service.generateCvPdf(
+        cv: cv,
+        language: 'vi',
+        templateId: 'harvard_ats',
+      );
+      expect(bytes, isNotEmpty);
+      expect(ascii.decode(bytes.sublist(0, 5)), '%PDF-');
+    },
+  );
 }

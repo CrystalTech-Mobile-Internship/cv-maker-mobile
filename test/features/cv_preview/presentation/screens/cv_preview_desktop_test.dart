@@ -68,6 +68,28 @@ void main() {
     expect((await repo.getById('cv-desk'))?.fontSizeScale, 1.0);
   });
 
+  testWidgets('font picker saves a free font and locks Pro fonts', (
+    tester,
+  ) async {
+    final repo = await pump(tester);
+
+    await tester.tap(find.byKey(const Key('preview-font-btn')));
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.text('Phông chữ'), findsOneWidget);
+    expect(find.text('Pro'), findsNWidgets(3));
+
+    await tester.tap(find.byKey(const ValueKey('cv-font-lora')));
+    await tester.pump(const Duration(milliseconds: 600));
+    expect((await repo.getById('cv-desk'))?.fontFamily, 'lora');
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('preview-font-btn')),
+        matching: find.text('Lora'),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Ctrl+K hides the edit chat', (tester) async {
     await pump(tester);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);

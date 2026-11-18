@@ -16,6 +16,7 @@ class CvModel {
     this.language = 'vi',
     required this.primaryColor,
     required this.fontSizeScale,
+    this.fontFamily = 'roboto',
     required this.personalInfo,
     required this.summary,
     required this.isSynced,
@@ -53,6 +54,9 @@ class CvModel {
   final String language; // 'vi' or 'en'
   final String primaryColor;
   final double fontSizeScale;
+
+  /// Id from `CvFontCatalog`; unknown ids fall back to the default font.
+  final String fontFamily;
   final PersonalInfoModel personalInfo;
   final String summary;
   final List<EducationModel> educations;
@@ -121,6 +125,7 @@ class CvModel {
       language: json['language'] as String? ?? 'vi',
       primaryColor: json['primaryColor'] as String? ?? '#1E293B',
       fontSizeScale: (json['fontSizeScale'] as num? ?? 1).toDouble(),
+      fontFamily: json['fontFamily'] as String? ?? 'roboto',
       personalInfo: PersonalInfoModel.fromJson(
         Map<String, dynamic>.from(
           json['personalInfo'] as Map<dynamic, dynamic>? ?? const {},
@@ -165,6 +170,7 @@ class CvModel {
       'language': language,
       'primaryColor': primaryColor,
       'fontSizeScale': fontSizeScale,
+      'fontFamily': fontFamily,
       'personalInfo': personalInfo.toJson(),
       'summary': summary,
       'educations': educations.map((item) => item.toJson()).toList(),
@@ -188,6 +194,7 @@ class CvModel {
     String? language,
     String? primaryColor,
     double? fontSizeScale,
+    String? fontFamily,
     PersonalInfoModel? personalInfo,
     String? summary,
     List<EducationModel>? educations,
@@ -211,6 +218,7 @@ class CvModel {
       language: language ?? this.language,
       primaryColor: primaryColor ?? this.primaryColor,
       fontSizeScale: fontSizeScale ?? this.fontSizeScale,
+      fontFamily: fontFamily ?? this.fontFamily,
       personalInfo: personalInfo ?? this.personalInfo,
       summary: summary ?? this.summary,
       educations: educations ?? this.educations,

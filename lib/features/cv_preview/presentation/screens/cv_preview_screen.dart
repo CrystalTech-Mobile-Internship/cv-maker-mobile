@@ -25,6 +25,8 @@ import '../widgets/export_pdf_dialog.dart';
 import '../widgets/cv_interactive_section_reorder.dart';
 import '../widgets/template_gallery_sheet.dart';
 import '../widgets/cv_preview_color_sheet.dart';
+import '../widgets/cv_font_sheet.dart';
+import '../../../cv_editor/domain/models/cv_font.dart';
 import '../widgets/cv_page_fit_sheet.dart';
 import '../widgets/cv_jd_matcher_sheet.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
@@ -110,6 +112,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
     String? language,
     String? templateId,
     double? fontSizeScale,
+    String? fontFamily,
     String? primaryColor,
     List<String>? sectionOrder,
     List<String>? hiddenSections,
@@ -119,6 +122,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       language: language,
       templateId: templateId,
       fontSizeScale: fontSizeScale,
+      fontFamily: fontFamily,
       primaryColor: primaryColor,
       sectionOrder: sectionOrder,
       hiddenSections: hiddenSections,
@@ -245,6 +249,17 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       isEnglish: _isEnglish,
       isPro: ref.read(isProProvider),
       onSelectTemplate: (newId) => _updateDocumentSettings(templateId: newId),
+    );
+  }
+
+  void _openFonts() {
+    CvFontSheet.show(
+      context: context,
+      currentFontId: _workingCv.fontFamily,
+      isPro: ref.read(isProProvider),
+      isEnglish: _isEnglish,
+      onSelected: (id) => _updateDocumentSettings(fontFamily: id),
+      onLocked: () => context.push('/upgrade-pro'),
     );
   }
 
@@ -417,6 +432,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                 canUndo: _undo.isNotEmpty,
                 onTemplates: _openTemplates,
                 onColors: _openColors,
+                onFonts: _openFonts,
                 onFontScale: _changeFontScale,
                 onLanguage: () =>
                     _updateDocumentSettings(language: en ? 'vi' : 'en'),
@@ -561,6 +577,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
     switch (item) {
       case _PreviewMenu.jobMatch:
         _openJobMatch();
+      case _PreviewMenu.font:
+        _openFonts();
       case _PreviewMenu.pageFit:
         CvPageFitSheet.show(
           context: context,
@@ -579,6 +597,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         _updateDocumentSettings(
           templateId: 'harvard_ats',
           fontSizeScale: 1,
+          fontFamily: CvFontCatalog.defaultId,
           primaryColor: '#1E293B',
           sectionOrder: List.of(CvModel.defaultSectionOrder),
         );
@@ -889,6 +908,11 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                 ),
               ),
               PopupMenuItem(
+                key: const Key('preview-font-btn'),
+                value: _PreviewMenu.font,
+                child: Text(_isEnglish ? 'Font' : 'Phông chữ'),
+              ),
+              PopupMenuItem(
                 key: const Key('preview-page-fit-btn'),
                 value: _PreviewMenu.pageFit,
                 child: Text(
@@ -1120,6 +1144,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
 
 enum _PreviewMenu {
   jobMatch,
+  font,
   pageFit,
   language,
   sample,
@@ -1137,6 +1162,7 @@ class _DesktopToolbar extends StatelessWidget {
     required this.canUndo,
     required this.onTemplates,
     required this.onColors,
+    required this.onFonts,
     required this.onFontScale,
     required this.onLanguage,
     required this.onCheck,
@@ -1154,6 +1180,7 @@ class _DesktopToolbar extends StatelessWidget {
   final bool canUndo;
   final VoidCallback onTemplates;
   final VoidCallback onColors;
+  final VoidCallback onFonts;
   final ValueChanged<double> onFontScale;
   final VoidCallback onLanguage;
   final VoidCallback onCheck;
@@ -1214,6 +1241,12 @@ class _DesktopToolbar extends StatelessWidget {
                       ),
                     ),
                     label: Text(en ? 'Colour' : 'Màu CV'),
+                  ),
+                  TextButton.icon(
+                    key: const Key('preview-font-btn'),
+                    onPressed: onFonts,
+                    icon: const Icon(Icons.text_fields_rounded, size: 18),
+                    label: Text(CvFontCatalog.byId(cv.fontFamily).name),
                   ),
                   divider(),
                   Text(

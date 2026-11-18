@@ -36,6 +36,7 @@ import '../../../cv_management/presentation/widgets/cv_completion_sheet.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/utils/cv_id.dart';
 import '../../../../core/widgets/responsive_action_bar.dart';
+import '../../domain/services/cv_skill_grouper.dart';
 
 class CvEditorScreen extends ConsumerStatefulWidget {
   const CvEditorScreen({super.key, this.initialCv});
@@ -930,6 +931,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   Future<void> _showAddSkillDialog([SkillModel? editing]) async {
     final isEdit = editing != null;
     final nameCtrl = TextEditingController(text: editing?.name ?? '');
+    final groupCtrl = TextEditingController(text: editing?.group ?? '');
     var category = editing?.category ?? SkillCategory.hard;
     var proficiency = (editing?.proficiency ?? 85).toDouble();
 
@@ -983,6 +985,40 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                     setDialogState(() => category = set.first);
                   },
                 ),
+                if (category == SkillCategory.hard) ...[
+                  const SizedBox(height: 16),
+                  TextField(
+                    key: const Key('skill-group-field'),
+                    controller: groupCtrl,
+                    decoration: InputDecoration(
+                      labelText: _isEn ? 'Group' : 'Nhóm',
+                      hintText: _isEn
+                          ? 'Leave empty to sort automatically'
+                          : 'Để trống để tự chia nhóm',
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final label in CvSkillGrouper.suggestions(
+                        isEn: _isEn,
+                      ))
+                        ChoiceChip(
+                          label: Text(label),
+                          visualDensity: VisualDensity.compact,
+                          selected:
+                              groupCtrl.text.trim().toLowerCase() ==
+                              label.toLowerCase(),
+                          onSelected: (on) => setDialogState(
+                            () => groupCtrl.text = on ? label : '',
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Text(
                   _isEn
@@ -1034,6 +1070,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         name: nameCtrl.text.trim(),
         category: category,
         proficiency: proficiency.round(),
+        group: category == SkillCategory.hard ? groupCtrl.text.trim() : '',
       );
       setState(() {
         if (isEdit) {
@@ -1583,6 +1620,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                             AppConstants.templateMinimalistClean,
                             AppConstants.templateCreativeTech,
                             AppConstants.templateProfessionalSidebar,
+                            AppConstants.templateFreshProfile,
                           }.contains(
                             widget.initialCv?.templateId ??
                                 AppConstants.templateHarvardAts,
