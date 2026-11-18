@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:cv_maker_mobile/core/constants/auth_callback_parser.dart';
 import 'package:cv_maker_mobile/features/auth/data/repositories/supabase_device_session_repository.dart';
 import 'package:cv_maker_mobile/features/auth/domain/models/auth_user.dart';
 import 'package:cv_maker_mobile/features/auth/domain/repositories/device_session_repository.dart';
@@ -105,5 +106,13 @@ void main() {
     expect(sessionIdFromAccessToken(token), 'abc-123');
     expect(sessionIdFromAccessToken('not-a-token'), isNull);
     expect(sessionIdFromAccessToken(null), isNull);
+  });
+
+  test('OAuth callback flag can be set, checked, and marked handled', () {
+    setInitialOAuthCallbackForTest(true);
+    expect(isInitialOAuthCallback, isTrue);
+
+    markInitialOAuthCallbackHandled();
+    expect(isInitialOAuthCallback, isFalse);
   });
 }

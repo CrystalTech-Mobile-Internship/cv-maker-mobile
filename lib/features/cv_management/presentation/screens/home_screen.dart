@@ -458,7 +458,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         heroTag: 'home-chat-fab',
         tooltip: 'Trò chuyện để tạo CV',
         onPressed: () => context.push('/ai-interview'),
-        child: const Icon(Icons.smart_toy_outlined),
+        backgroundColor: AppTheme.brandIndigo,
+        foregroundColor: Colors.white,
+        child: const Icon(Icons.smart_toy_outlined, color: Colors.white),
       ),
       bottomNavigationBar: _isWide(context)
           ? null

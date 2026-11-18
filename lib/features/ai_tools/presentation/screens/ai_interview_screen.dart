@@ -453,7 +453,12 @@ class _Composer extends StatelessWidget {
             key: const ValueKey('ai-chat-send'),
             tooltip: 'Gửi',
             onPressed: enabled ? onSend : null,
-            icon: const Icon(Icons.send_rounded),
+            style: IconButton.styleFrom(
+              backgroundColor: AppTheme.brandIndigo,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: AppTheme.softBorder,
+            ),
+            icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
           ),
         ],
       ),
