@@ -21,7 +21,9 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Stream<AuthSessionChange> watchSession() async* {
-    final isOAuthSignIn = isInitialOAuthCallback && currentUser != null;
+    final isOAuthSignIn =
+        (isInitialOAuthCallback || isOAuthCallbackUri(Uri.base)) &&
+        currentUser != null;
     yield AuthSessionChange(
       event: isOAuthSignIn
           ? AuthSessionEvent.signedIn
@@ -199,7 +201,8 @@ class SupabaseAuthRepository implements AuthRepository {
       return AuthSessionEvent.userUpdated;
     }
     if (event == AuthChangeEvent.initialSession) {
-      if (isInitialOAuthCallback && currentUser != null) {
+      if ((isInitialOAuthCallback || isOAuthCallbackUri(Uri.base)) &&
+          currentUser != null) {
         return AuthSessionEvent.signedIn;
       }
       return AuthSessionEvent.initial;
