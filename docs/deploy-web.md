@@ -40,7 +40,14 @@ Supabase Dashboard → **Authentication → URL Configuration**:
 Thiếu bước này thì liên kết đặt lại mật khẩu và đăng nhập Google sẽ quay về
 sai địa chỉ. Đăng nhập email/mật khẩu không bị ảnh hưởng.
 
-## 3. Kiểm tra sau khi deploy
+## 3. Thống kê lượt truy cập
+
+`web/index.html` đã có sẵn script Vercel Web Analytics (ẩn danh, không dùng
+cookie). Chỉ cần bật trong Vercel → project → **Analytics → Enable**. Số liệu
+xuất hiện sau khi có người truy cập trang (có thể mất vài phút). Trình chặn
+quảng cáo có thể chặn việc đếm.
+
+## 4. Kiểm tra sau khi deploy
 
 - Mở trang, đăng ký hoặc đăng nhập, tạo một CV và bấm **Lưu vào tài khoản**.
 - Mở trên máy tính (giao diện thanh bên) và trên điện thoại (thanh điều hướng dưới).

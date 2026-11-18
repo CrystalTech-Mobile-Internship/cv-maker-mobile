@@ -93,6 +93,7 @@ abstract final class LegalDocuments {
       LegalSection('4. Mục đích sử dụng', [
         'Cung cấp và đồng bộ CV, đăng nhập, tính năng AI, cộng đồng và gói Pro.',
         'Chúng tôi không bán dữ liệu và không dùng CV của bạn để quảng cáo.',
+        'Bản web đếm lượt xem trang ẩn danh (không dùng cookie, không gắn với tài khoản) để biết trang nào được dùng nhiều.',
       ]),
       LegalSection('5. Chia sẻ dữ liệu', [
         'Dữ liệu chỉ được chia sẻ với nhà cung cấp hạ tầng (lưu trữ, gửi email, xử lý AI) ở mức cần thiết để vận hành dịch vụ, hoặc khi pháp luật yêu cầu.',
