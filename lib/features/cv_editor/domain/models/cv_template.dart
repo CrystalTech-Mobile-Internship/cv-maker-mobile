@@ -89,6 +89,24 @@ abstract final class CvTemplateCatalog {
       layout: CvTemplateLayout.academic,
       isNew: true,
     ),
+    CvTemplate(
+      id: AppConstants.templateProfessionalSidebar,
+      name: 'Professional Sidebar',
+      audience: 'Sinh viên • Có ảnh',
+      description: 'Sidebar kỹ năng và nội dung chính cân đối.',
+      accentHex: '#18A999',
+      layout: CvTemplateLayout.sidebar,
+      hasPhoto: true,
+    ),
+    CvTemplate(
+      id: AppConstants.templateFreshProfile,
+      name: 'Fresh Profile',
+      audience: 'Marketing • Dịch vụ • Có ảnh',
+      description: 'Ảnh nổi bật cùng mảng màu xanh tươi trẻ.',
+      accentHex: '#047857',
+      layout: CvTemplateLayout.freshPhoto,
+      hasPhoto: true,
+    ),
   ];
 
   static const premiumTemplates = <CvTemplate>[
@@ -132,16 +150,6 @@ abstract final class CvTemplateCatalog {
       isPremium: true,
     ),
     CvTemplate(
-      id: AppConstants.templateProfessionalSidebar,
-      name: 'Professional Sidebar',
-      audience: 'Sinh viên',
-      description: 'Sidebar kỹ năng và nội dung chính cân đối.',
-      accentHex: '#18A999',
-      layout: CvTemplateLayout.sidebar,
-      hasPhoto: true,
-      isPremium: true,
-    ),
-    CvTemplate(
       id: AppConstants.templateExecutiveNavy,
       name: 'Executive Navy',
       audience: 'Quản lý',
@@ -157,16 +165,6 @@ abstract final class CvTemplateCatalog {
       description: 'Bố cục cổ điển cho học thuật và chứng chỉ.',
       accentHex: '#9A3412',
       layout: CvTemplateLayout.academic,
-      isPremium: true,
-    ),
-    CvTemplate(
-      id: AppConstants.templateFreshProfile,
-      name: 'Fresh Profile',
-      audience: 'Marketing',
-      description: 'Ảnh nổi bật cùng mảng màu xanh tươi trẻ.',
-      accentHex: '#047857',
-      layout: CvTemplateLayout.freshPhoto,
-      hasPhoto: true,
       isPremium: true,
     ),
     CvTemplate(

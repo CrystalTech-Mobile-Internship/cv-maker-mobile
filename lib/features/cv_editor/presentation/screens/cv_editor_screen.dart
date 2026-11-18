@@ -1583,6 +1583,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                             AppConstants.templateMinimalistClean,
                             AppConstants.templateCreativeTech,
                             AppConstants.templateProfessionalSidebar,
+                            AppConstants.templateFreshProfile,
                           }.contains(
                             widget.initialCv?.templateId ??
                                 AppConstants.templateHarvardAts,
