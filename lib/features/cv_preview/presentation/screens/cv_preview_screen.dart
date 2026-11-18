@@ -63,6 +63,13 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
   bool _showAiPanel = true;
   bool _designOnPage = false;
   final List<CvModel> _undo = [];
+  final _shortcutFocus = FocusNode(debugLabel: 'preview-shortcuts');
+
+  @override
+  void dispose() {
+    _shortcutFocus.dispose();
+    super.dispose();
+  }
 
   bool get _isEnglish => _workingCv.language == 'en';
   bool get _isEphemeralPreview =>
@@ -382,91 +389,112 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         (_workingCv.visibleSectionOrder.isEmpty
             ? null
             : _workingCv.visibleSectionOrder.first);
-    return CallbackShortcuts(
-      bindings: _shortcuts,
-      child: Focus(
-        autofocus: true,
-        child: Column(
-          children: [
-            _DesktopToolbar(
-              isEnglish: en,
-              cv: _workingCv,
-              designOnPage: _designOnPage,
-              showAiPanel: _showAiPanel,
-              canUndo: _undo.isNotEmpty,
-              onTemplates: _openTemplates,
-              onColors: _openColors,
-              onFontScale: _changeFontScale,
-              onLanguage: () =>
-                  _updateDocumentSettings(language: en ? 'vi' : 'en'),
-              onCheck: _showQualityCheck,
-              onJobMatch: _openJobMatch,
-              onUndo: _undoLast,
-              onToggleDesign: () =>
-                  setState(() => _designOnPage = !_designOnPage),
-              onToggleAi: () => setState(() => _showAiPanel = !_showAiPanel),
-              onShortcuts: _showShortcuts,
-            ),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (!_designOnPage) ...[
-                    SizedBox(
-                      width: 280,
-                      child: PreviewSectionPanel(
-                        key: const Key('preview-section-panel'),
-                        cv: _workingCv,
-                        selected: selected,
-                        onSelect: _selectSection,
-                        onVisibleOrderChanged: _setVisibleOrder,
-                        onToggleVisibility: _toggleSectionVisibility,
-                        onReorderItems: _reorderSectionItems,
-                      ),
-                    ),
-                    const VerticalDivider(width: 1, color: AppTheme.softBorder),
-                  ],
-                  Expanded(
-                    child: _designOnPage
-                        ? CvA4DesignBoard(
-                            key: const Key('preview-design-board'),
-                            cv: _workingCv,
-                            onLayoutChanged: (order, hidden) =>
-                                _updateDocumentSettings(
-                                  sectionOrder: order,
-                                  hiddenSections: hidden,
-                                ),
-                          )
-                        : _printView(fitPage: true, clickable: true),
-                  ),
-                  if (_showAiPanel) ...[
-                    const VerticalDivider(width: 1, color: AppTheme.softBorder),
-                    SizedBox(
-                      width: 340,
-                      child: CvAiEditPanel(
-                        cv: _workingCv,
-                        section: _aiSection,
-                        onSectionChanged: (id) => setState(() {
-                          _aiSection = id;
-                          if (id != null) _selectedSection = id;
-                        }),
-                        onApply: (updated) async {
-                          await _saveContent(updated);
-                          if (!mounted) return;
-                          _showMessage(
-                            en
-                                ? 'Applied. Ctrl + Z to undo.'
-                                : 'Đã áp dụng. Bấm Ctrl + Z để hoàn tác.',
-                          );
-                        },
-                        onClose: () => setState(() => _showAiPanel = false),
-                      ),
-                    ),
-                  ],
-                ],
+    return Listener(
+      // After a click, give the keyboard back to the page shortcuts unless
+      // the user is typing in a field (a pressed button may have taken
+      // focus and then disappeared).
+      onPointerUp: (_) => WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final focused = FocusManager.instance.primaryFocus?.context;
+        final typing =
+            focused != null &&
+            (focused.widget is EditableText ||
+                focused.findAncestorWidgetOfExactType<EditableText>() != null);
+        if (!typing) _shortcutFocus.requestFocus();
+      }),
+      child: CallbackShortcuts(
+        bindings: _shortcuts,
+        child: Focus(
+          focusNode: _shortcutFocus,
+          autofocus: true,
+          child: Column(
+            children: [
+              _DesktopToolbar(
+                isEnglish: en,
+                cv: _workingCv,
+                designOnPage: _designOnPage,
+                showAiPanel: _showAiPanel,
+                canUndo: _undo.isNotEmpty,
+                onTemplates: _openTemplates,
+                onColors: _openColors,
+                onFontScale: _changeFontScale,
+                onLanguage: () =>
+                    _updateDocumentSettings(language: en ? 'vi' : 'en'),
+                onCheck: _showQualityCheck,
+                onJobMatch: _openJobMatch,
+                onUndo: _undoLast,
+                onToggleDesign: () =>
+                    setState(() => _designOnPage = !_designOnPage),
+                onToggleAi: () => setState(() => _showAiPanel = !_showAiPanel),
+                onShortcuts: _showShortcuts,
               ),
-            ),
-          ],
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!_designOnPage) ...[
+                      SizedBox(
+                        width: 280,
+                        child: PreviewSectionPanel(
+                          key: const Key('preview-section-panel'),
+                          cv: _workingCv,
+                          selected: selected,
+                          onSelect: _selectSection,
+                          onVisibleOrderChanged: _setVisibleOrder,
+                          onToggleVisibility: _toggleSectionVisibility,
+                          onReorderItems: _reorderSectionItems,
+                        ),
+                      ),
+                      const VerticalDivider(
+                        width: 1,
+                        color: AppTheme.softBorder,
+                      ),
+                    ],
+                    Expanded(
+                      child: _designOnPage
+                          ? CvA4DesignBoard(
+                              key: const Key('preview-design-board'),
+                              cv: _workingCv,
+                              onLayoutChanged: (order, hidden) =>
+                                  _updateDocumentSettings(
+                                    sectionOrder: order,
+                                    hiddenSections: hidden,
+                                  ),
+                            )
+                          : _printView(fitPage: true, clickable: true),
+                    ),
+                    if (_showAiPanel) ...[
+                      const VerticalDivider(
+                        width: 1,
+                        color: AppTheme.softBorder,
+                      ),
+                      SizedBox(
+                        width: 340,
+                        child: CvAiEditPanel(
+                          cv: _workingCv,
+                          section: _aiSection,
+                          onSectionChanged: (id) => setState(() {
+                            _aiSection = id;
+                            if (id != null) _selectedSection = id;
+                          }),
+                          onApply: (updated) async {
+                            await _saveContent(updated);
+                            if (!mounted) return;
+                            _showMessage(
+                              en
+                                  ? 'Applied. Ctrl + Z to undo.'
+                                  : 'Đã áp dụng. Bấm Ctrl + Z để hoàn tác.',
+                            );
+                          },
+                          onClose: () => setState(() => _showAiPanel = false),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
