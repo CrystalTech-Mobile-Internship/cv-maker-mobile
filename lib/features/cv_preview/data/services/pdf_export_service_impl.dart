@@ -5,6 +5,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/project_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
+import '../../domain/models/pdf_section_region.dart';
 import '../../domain/services/pdf_export_service.dart';
 import 'pdf_platform_storage.dart' as platform;
 import '../../../cv_editor/domain/services/cv_bullet_cleaner.dart';
@@ -17,8 +18,10 @@ class PdfExportServiceImpl implements PdfExportService {
     required CvModel cv,
     required String language,
     String templateId = 'harvard_ats',
+    List<PdfSectionRegion>? sectionRegions,
   }) async {
     cv = CvBulletCleaner.clean(cv);
+    final marks = <_SectionMark>[];
     final isEn = language == 'en';
     final scale = (cv.fontSizeScale > 0) ? cv.fontSizeScale : 1.0;
     final templateStyle = _TemplateStyle.fromId(
@@ -391,8 +394,16 @@ class PdfExportServiceImpl implements PdfExportService {
           for (final sectionKey in cv.visibleSectionOrder) {
             final widgets = sectionMap[sectionKey];
             if (widgets != null && widgets.isNotEmpty) {
+              // Zero-height marks record where each section starts; they
+              // do not change the layout.
+              if (sectionRegions != null) {
+                orderedSections.add(_SectionMarkWidget(sectionKey, marks));
+              }
               orderedSections.addAll(widgets);
             }
+          }
+          if (sectionRegions != null) {
+            orderedSections.add(_SectionMarkWidget('', marks));
           }
 
           return orderedSections;
@@ -400,7 +411,9 @@ class PdfExportServiceImpl implements PdfExportService {
       ),
     );
 
-    return doc.save();
+    final bytes = await doc.save();
+    sectionRegions?.addAll(_regionsFromMarks(marks, templateStyle.pageMargin));
+    return bytes;
   }
 
   static void _addProfessionalSidebarPage({
@@ -1249,4 +1262,86 @@ class _PdfFontSet {
 
   final pw.Font regular;
   final pw.Font bold;
+}
+
+/// Where a section started: page index, top y from the page bottom, and the
+/// content column it was drawn in.
+class _SectionMark {
+  const _SectionMark(this.section, this.page, this.y, this.left, this.width);
+
+  final String section;
+  final int page;
+  final double y;
+  final double left;
+  final double width;
+}
+
+class _SectionMarkWidget extends pw.Widget {
+  _SectionMarkWidget(this.section, this.sink);
+
+  final String section;
+  final List<_SectionMark> sink;
+
+  @override
+  void layout(
+    pw.Context context,
+    pw.BoxConstraints constraints, {
+    bool parentUsesSize = false,
+  }) {
+    final width = constraints.maxWidth.isFinite ? constraints.maxWidth : 0.0;
+    box = PdfRect(0, 0, width, 0);
+  }
+
+  @override
+  void paint(pw.Context context) {
+    super.paint(context);
+    final rect = box!;
+    sink.add(
+      _SectionMark(
+        section,
+        context.pageNumber - 1,
+        rect.bottom,
+        rect.left,
+        rect.width,
+      ),
+    );
+  }
+}
+
+/// Turns consecutive section marks into rectangles per page.
+List<PdfSectionRegion> _regionsFromMarks(
+  List<_SectionMark> marks,
+  pw.EdgeInsets m,
+) {
+  const h = PdfSectionRegion.pageHeight;
+  final regions = <PdfSectionRegion>[];
+  void add(String id, int page, double top, double bottom, _SectionMark at) {
+    if (bottom - top < 2) return;
+    regions.add(
+      PdfSectionRegion(
+        section: id,
+        page: page,
+        left: at.left,
+        top: top,
+        width: at.width,
+        height: bottom - top,
+      ),
+    );
+  }
+
+  for (var i = 0; i + 1 < marks.length; i++) {
+    final start = marks[i];
+    final end = marks[i + 1];
+    if (start.section.isEmpty) continue;
+    if (start.page == end.page) {
+      add(start.section, start.page, h - start.y, h - end.y, start);
+      continue;
+    }
+    add(start.section, start.page, h - start.y, h - m.bottom, start);
+    for (var page = start.page + 1; page < end.page; page++) {
+      add(start.section, page, m.top, h - m.bottom, start);
+    }
+    add(start.section, end.page, m.top, h - end.y, start);
+  }
+  return regions;
 }

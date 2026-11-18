@@ -48,258 +48,271 @@ class PersonalInfoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: titleController,
-                onChanged: onFieldChanged,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'CV Title' : 'Tên CV',
-                  hintText: _isEn
-                      ? 'e.g. Flutter Software Engineer Resume'
-                      : 'VD: CV Flutter Software Engineer',
-                  prefixIcon: const Icon(Icons.title_outlined),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _isEn ? 'Basic Information' : 'Thông tin cơ bản',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 14),
-              _ProfilePhotoPicker(
-                language: language,
-                avatarPath: avatarPath,
-                supportsProfilePhoto: supportsProfilePhoto,
-                onPickAvatar: onPickAvatar,
-                onRemoveAvatar: onRemoveAvatar,
-                avatarPosition: avatarPosition,
-                onAvatarPositionChanged: onAvatarPositionChanged,
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: fullNameController,
-                onChanged: onFieldChanged,
-                decoration: InputDecoration(
-                  labelText: _isEn ? 'Full Name *' : 'Họ và tên *',
-                  hintText: _isEn ? 'Jane Doe' : 'Nguyễn Văn A',
-                  prefixIcon: const Icon(Icons.badge_outlined),
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                key: const Key('target-role-field'),
-                controller: roleController,
-                onChanged: onFieldChanged,
-                decoration: InputDecoration(
-                  labelText: _isEn
-                      ? 'Target Role / Job Title *'
-                      : 'Vị trí ứng tuyển mục tiêu *',
-                  hintText: _isEn
-                      ? 'Flutter Software Engineer'
-                      : 'Kỹ sư phần mềm Flutter',
-                  prefixIcon: const Icon(Icons.work_history_outlined),
-                ),
-              ),
-              const SizedBox(height: 14),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final emailField = TextField(
-                    key: const Key('email-field'),
-                    controller: emailController,
-                    onChanged: onFieldChanged,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email *',
-                      hintText: 'user@example.com',
-                      prefixIcon: Icon(Icons.email_outlined),
-                    ),
-                  );
-                  final phoneField = TextField(
-                    key: const Key('phone-field'),
-                    controller: phoneController,
-                    onChanged: onFieldChanged,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      labelText: _isEn ? 'Phone Number *' : 'Số điện thoại *',
-                      hintText: '0901 234 567',
-                      prefixIcon: const Icon(Icons.phone_outlined),
-                    ),
-                  );
-
-                  if (constraints.maxWidth < 520) {
-                    return Column(
-                      children: [
-                        emailField,
-                        const SizedBox(height: 14),
-                        phoneField,
-                      ],
-                    );
-                  }
-                  return Row(
-                    children: [
-                      Expanded(child: emailField),
-                      const SizedBox(width: 12),
-                      Expanded(child: phoneField),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: locationController,
-                onChanged: onFieldChanged,
-                decoration: InputDecoration(
-                  labelText: _isEn
-                      ? 'Location / City, Country'
-                      : 'Địa chỉ / Thành phố',
-                  hintText: _isEn ? 'Hanoi, Vietnam' : 'Hà Nội, Việt Nam',
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Summary header with AI button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      _isEn ? 'Professional Summary' : 'Giới thiệu bản thân',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  FilledButton.tonalIcon(
-                    key: const Key('polish-summary-with-ai'),
-                    onPressed: isAiLoading ? null : onAiOptimize,
-                    icon: isAiLoading
-                        ? const SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.auto_awesome, size: 16),
-                    label: Text(
-                      isAiLoading
-                          ? (_isEn ? 'Optimizing...' : 'Đang tối ưu...')
-                          : (_isEn ? 'Rewrite' : 'Viết lại'),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                key: const Key('summary-field'),
-                controller: summaryController,
-                onChanged: onFieldChanged,
-                minLines: 5,
-                maxLines: 7,
-                textAlignVertical: TextAlignVertical.top,
-                decoration: InputDecoration(
-                  alignLabelWithHint: true,
-                  hintText: _isEn
-                      ? 'Write 2-3 concise sentences highlighting core technical strengths, measurable achievements, and career focus...'
-                      : 'Viết 2-3 câu ngắn gọn mô tả năng lực cốt lõi, thành tựu nổi bật và định hướng nghề nghiệp...',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _isEn
-                    ? 'Quick Starter Suggestions ("Fill-in"):'
-                    : 'Câu mẫu gợi ý:',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.grey.shade700,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                children: [
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.flash_on_rounded,
-                      size: 14,
-                      color: AppTheme.brandIndigo,
-                    ),
-                    label: Text(
-                      _isEn ? 'Mobile / Flutter' : 'Mobile / Flutter Dev',
-                    ),
-                    onPressed: () {
-                      summaryController.text = _isEn
-                          ? 'Proactive Flutter Software Engineer with strong experience in Clean Architecture, Riverpod, and offline-first mobile applications. Committed to high performance and maintainable code.'
-                          : 'Kỹ sư phần mềm Flutter với tư duy lập trình vững chắc, thành thạo Clean Architecture, Riverpod và cơ chế Offline-First. Đam mê tối ưu hiệu năng và trải nghiệm người dùng mượt mà.';
-                      onFieldChanged?.call(summaryController.text);
-                    },
-                  ),
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.school_outlined,
-                      size: 14,
-                      color: AppTheme.accentTeal,
-                    ),
-                    label: Text(
-                      _isEn ? 'Fresher IT' : 'Sinh viên IT / Fresher',
-                    ),
-                    onPressed: () {
-                      summaryController.text = _isEn
-                          ? 'Recent Computer Science graduate with hands-on project experience in mobile/web development. Quick learner with solid fundamentals in data structures, algorithms, and teamwork.'
-                          : 'Cử nhân Công nghệ Thông tin mới tốt nghiệp với nền tảng thuật toán, kiến trúc phần mềm và kỹ năng làm việc nhóm tốt. Mong muốn đóng góp giá trị và học hỏi nhanh trong môi trường chuyên nghiệp.';
-                      onFieldChanged?.call(summaryController.text);
-                    },
-                  ),
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.cloud_queue_rounded,
-                      size: 14,
-                      color: Colors.blue,
-                    ),
-                    label: Text(_isEn ? 'Backend Dev' : 'Lập trình Backend'),
-                    onPressed: () {
-                      summaryController.text = _isEn
-                          ? 'Backend Developer specializing in scalable REST APIs, PostgreSQL, authentication workflows, and cloud databases with a strong emphasis on system reliability.'
-                          : 'Lập trình viên Backend tập trung vào thiết kế REST API, cơ sở dữ liệu PostgreSQL/Supabase, bảo mật phân quyền RLS và kiến trúc hệ thống ổn định.';
-                      onFieldChanged?.call(summaryController.text);
-                    },
-                  ),
-                  ActionChip(
-                    avatar: const Icon(
-                      Icons.trending_up_rounded,
-                      size: 14,
-                      color: Colors.orange,
-                    ),
-                    label: Text(
-                      _isEn ? 'Business / Sales' : 'Kinh doanh & Marketing',
-                    ),
-                    onPressed: () {
-                      summaryController.text = _isEn
-                          ? 'Results-oriented business and marketing specialist with strong data analytics, client management, and multi-channel campaign execution skills.'
-                          : 'Chuyên viên Marketing & Phát triển kinh doanh hướng đến hiệu quả số liệu, thành thạo phân tích thị trường, quan hệ đối tác và quản lý chiến dịch đa kênh.';
-                      onFieldChanged?.call(summaryController.text);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-            ],
-          ),
+    final basic = <Widget>[
+      TextField(
+        controller: titleController,
+        onChanged: onFieldChanged,
+        decoration: InputDecoration(
+          labelText: _isEn ? 'CV Title' : 'Tên CV',
+          hintText: _isEn
+              ? 'e.g. Flutter Software Engineer Resume'
+              : 'VD: CV Flutter Software Engineer',
+          prefixIcon: const Icon(Icons.title_outlined),
         ),
       ),
+      const SizedBox(height: 16),
+      Text(
+        _isEn ? 'Basic Information' : 'Thông tin cơ bản',
+        style: Theme.of(
+          context,
+        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+      ),
+      const SizedBox(height: 14),
+      _ProfilePhotoPicker(
+        language: language,
+        avatarPath: avatarPath,
+        supportsProfilePhoto: supportsProfilePhoto,
+        onPickAvatar: onPickAvatar,
+        onRemoveAvatar: onRemoveAvatar,
+        avatarPosition: avatarPosition,
+        onAvatarPositionChanged: onAvatarPositionChanged,
+      ),
+      const SizedBox(height: 14),
+      TextField(
+        controller: fullNameController,
+        onChanged: onFieldChanged,
+        decoration: InputDecoration(
+          labelText: _isEn ? 'Full Name *' : 'Họ và tên *',
+          hintText: _isEn ? 'Jane Doe' : 'Nguyễn Văn A',
+          prefixIcon: const Icon(Icons.badge_outlined),
+        ),
+      ),
+      const SizedBox(height: 14),
+      TextField(
+        key: const Key('target-role-field'),
+        controller: roleController,
+        onChanged: onFieldChanged,
+        decoration: InputDecoration(
+          labelText: _isEn
+              ? 'Target Role / Job Title *'
+              : 'Vị trí ứng tuyển mục tiêu *',
+          hintText: _isEn
+              ? 'Flutter Software Engineer'
+              : 'Kỹ sư phần mềm Flutter',
+          prefixIcon: const Icon(Icons.work_history_outlined),
+        ),
+      ),
+      const SizedBox(height: 14),
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final emailField = TextField(
+            key: const Key('email-field'),
+            controller: emailController,
+            onChanged: onFieldChanged,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              labelText: 'Email *',
+              hintText: 'user@example.com',
+              prefixIcon: Icon(Icons.email_outlined),
+            ),
+          );
+          final phoneField = TextField(
+            key: const Key('phone-field'),
+            controller: phoneController,
+            onChanged: onFieldChanged,
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(
+              labelText: _isEn ? 'Phone Number *' : 'Số điện thoại *',
+              hintText: '0901 234 567',
+              prefixIcon: const Icon(Icons.phone_outlined),
+            ),
+          );
+
+          if (constraints.maxWidth < 520) {
+            return Column(
+              children: [emailField, const SizedBox(height: 14), phoneField],
+            );
+          }
+          return Row(
+            children: [
+              Expanded(child: emailField),
+              const SizedBox(width: 12),
+              Expanded(child: phoneField),
+            ],
+          );
+        },
+      ),
+      const SizedBox(height: 14),
+      TextField(
+        controller: locationController,
+        onChanged: onFieldChanged,
+        decoration: InputDecoration(
+          labelText: _isEn ? 'Location / City, Country' : 'Địa chỉ / Thành phố',
+          hintText: _isEn ? 'Hanoi, Vietnam' : 'Hà Nội, Việt Nam',
+          prefixIcon: const Icon(Icons.location_on_outlined),
+        ),
+      ),
+    ];
+    final summary = <Widget>[
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              _isEn ? 'Professional Summary' : 'Giới thiệu bản thân',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+          FilledButton.tonalIcon(
+            key: const Key('polish-summary-with-ai'),
+            onPressed: isAiLoading ? null : onAiOptimize,
+            icon: isAiLoading
+                ? const SizedBox.square(
+                    dimension: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.auto_awesome, size: 16),
+            label: Text(
+              isAiLoading
+                  ? (_isEn ? 'Optimizing...' : 'Đang tối ưu...')
+                  : (_isEn ? 'Rewrite' : 'Viết lại'),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      TextField(
+        key: const Key('summary-field'),
+        controller: summaryController,
+        onChanged: onFieldChanged,
+        minLines: 5,
+        maxLines: 7,
+        textAlignVertical: TextAlignVertical.top,
+        decoration: InputDecoration(
+          alignLabelWithHint: true,
+          hintText: _isEn
+              ? 'Write 2-3 concise sentences highlighting core technical strengths, measurable achievements, and career focus...'
+              : 'Viết 2-3 câu ngắn gọn mô tả năng lực cốt lõi, thành tựu nổi bật và định hướng nghề nghiệp...',
+        ),
+      ),
+      const SizedBox(height: 10),
+      Text(
+        _isEn ? 'Quick Starter Suggestions ("Fill-in"):' : 'Câu mẫu gợi ý:',
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: Colors.grey.shade700,
+        ),
+      ),
+      const SizedBox(height: 6),
+      Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        children: [
+          ActionChip(
+            avatar: const Icon(
+              Icons.flash_on_rounded,
+              size: 14,
+              color: AppTheme.brandIndigo,
+            ),
+            label: Text(_isEn ? 'Mobile / Flutter' : 'Mobile / Flutter Dev'),
+            onPressed: () {
+              summaryController.text = _isEn
+                  ? 'Proactive Flutter Software Engineer with strong experience in Clean Architecture, Riverpod, and offline-first mobile applications. Committed to high performance and maintainable code.'
+                  : 'Kỹ sư phần mềm Flutter với tư duy lập trình vững chắc, thành thạo Clean Architecture, Riverpod và cơ chế Offline-First. Đam mê tối ưu hiệu năng và trải nghiệm người dùng mượt mà.';
+              onFieldChanged?.call(summaryController.text);
+            },
+          ),
+          ActionChip(
+            avatar: const Icon(
+              Icons.school_outlined,
+              size: 14,
+              color: AppTheme.accentTeal,
+            ),
+            label: Text(_isEn ? 'Fresher IT' : 'Sinh viên IT / Fresher'),
+            onPressed: () {
+              summaryController.text = _isEn
+                  ? 'Recent Computer Science graduate with hands-on project experience in mobile/web development. Quick learner with solid fundamentals in data structures, algorithms, and teamwork.'
+                  : 'Cử nhân Công nghệ Thông tin mới tốt nghiệp với nền tảng thuật toán, kiến trúc phần mềm và kỹ năng làm việc nhóm tốt. Mong muốn đóng góp giá trị và học hỏi nhanh trong môi trường chuyên nghiệp.';
+              onFieldChanged?.call(summaryController.text);
+            },
+          ),
+          ActionChip(
+            avatar: const Icon(
+              Icons.cloud_queue_rounded,
+              size: 14,
+              color: Colors.blue,
+            ),
+            label: Text(_isEn ? 'Backend Dev' : 'Lập trình Backend'),
+            onPressed: () {
+              summaryController.text = _isEn
+                  ? 'Backend Developer specializing in scalable REST APIs, PostgreSQL, authentication workflows, and cloud databases with a strong emphasis on system reliability.'
+                  : 'Lập trình viên Backend tập trung vào thiết kế REST API, cơ sở dữ liệu PostgreSQL/Supabase, bảo mật phân quyền RLS và kiến trúc hệ thống ổn định.';
+              onFieldChanged?.call(summaryController.text);
+            },
+          ),
+          ActionChip(
+            avatar: const Icon(
+              Icons.trending_up_rounded,
+              size: 14,
+              color: Colors.orange,
+            ),
+            label: Text(_isEn ? 'Business / Sales' : 'Kinh doanh & Marketing'),
+            onPressed: () {
+              summaryController.text = _isEn
+                  ? 'Results-oriented business and marketing specialist with strong data analytics, client management, and multi-channel campaign execution skills.'
+                  : 'Chuyên viên Marketing & Phát triển kinh doanh hướng đến hiệu quả số liệu, thành thạo phân tích thị trường, quan hệ đối tác và quản lý chiến dịch đa kênh.';
+              onFieldChanged?.call(summaryController.text);
+            },
+          ),
+        ],
+      ),
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Wide panes: basic details on the left, summary on the right, so
+        // the whole tab fits without scrolling.
+        final twoColumns = constraints.maxWidth >= 760;
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: twoColumns ? 1100 : 800),
+              child: twoColumns
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: basic,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: summary,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        ...basic,
+                        const SizedBox(height: 24),
+                        ...summary,
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

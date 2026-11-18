@@ -1362,30 +1362,100 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     final isEn = _isEn;
     final isWideEditor = MediaQuery.sizeOf(context).width >= 900;
 
+    final tabBar = TabBar(
+      controller: _tabController,
+      isScrollable: isWideEditor,
+      tabAlignment: isWideEditor ? TabAlignment.start : null,
+      labelColor: AppTheme.accentTeal,
+      unselectedLabelColor: Colors.grey.shade600,
+      indicatorColor: AppTheme.accentTeal,
+      indicatorWeight: 3.5,
+      indicatorSize: TabBarIndicatorSize.tab,
+      dividerColor: isWideEditor ? Colors.transparent : Colors.grey.shade200,
+      labelPadding: isWideEditor
+          ? const EdgeInsets.symmetric(horizontal: 18)
+          : EdgeInsets.zero,
+      tabs: [
+        AdaptiveEditorTab(
+          showLabel: isWideEditor,
+          controller: _tabController,
+          index: 0,
+          icon: Icons.person_outline,
+          label: isEn ? 'Personal' : 'Cá nhân',
+        ),
+        AdaptiveEditorTab(
+          showLabel: isWideEditor,
+          controller: _tabController,
+          index: 1,
+          icon: Icons.school_outlined,
+          label: isEn ? 'Education' : 'Học vấn',
+        ),
+        AdaptiveEditorTab(
+          showLabel: isWideEditor,
+          controller: _tabController,
+          index: 2,
+          icon: Icons.work_outline,
+          label: isEn ? 'Experience' : 'Kinh nghiệm',
+        ),
+        AdaptiveEditorTab(
+          showLabel: isWideEditor,
+          controller: _tabController,
+          index: 3,
+          icon: Icons.psychology_outlined,
+          label: isEn ? 'Skills' : 'Kỹ năng',
+        ),
+        AdaptiveEditorTab(
+          showLabel: isWideEditor,
+          controller: _tabController,
+          index: 4,
+          icon: Icons.folder_copy_outlined,
+          label: isEn ? 'Projects' : 'Dự án',
+        ),
+        AdaptiveEditorTab(
+          showLabel: isWideEditor,
+          controller: _tabController,
+          index: 5,
+          icon: Icons.workspace_premium_outlined,
+          label: isEn ? 'Certificates' : 'Chứng chỉ',
+        ),
+      ],
+    );
+    final titleBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          widget.initialCv == null
+              ? (isEn ? 'New CV' : 'Tạo CV')
+              : (isEn ? 'Edit' : 'Chỉnh sửa'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          _syncStatusText,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.normal,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
       appBar: AppBar(
         leading: homeFallbackLeading(context),
         titleSpacing: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.initialCv == null
-                  ? (isEn ? 'New CV' : 'Tạo CV')
-                  : (isEn ? 'Edit' : 'Chỉnh sửa'),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              _syncStatusText,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.normal,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
+        // On computers the section tabs sit in the top bar to leave more
+        // room for the form and the A4 page.
+        title: isWideEditor
+            ? Row(
+                children: [
+                  titleBlock,
+                  const SizedBox(width: 24),
+                  Expanded(child: Center(child: tabBar)),
+                ],
+              )
+            : titleBlock,
         actions: [
           _buildCompletenessBadge(isEn),
           TextButton(
@@ -1405,67 +1475,12 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
             onPressed: _openPreview,
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: TabBar(
-            controller: _tabController,
-            isScrollable: isWideEditor,
-            tabAlignment: isWideEditor ? TabAlignment.start : null,
-            labelColor: AppTheme.accentTeal,
-            unselectedLabelColor: Colors.grey.shade600,
-            indicatorColor: AppTheme.accentTeal,
-            indicatorWeight: 3.5,
-            indicatorSize: TabBarIndicatorSize.tab,
-            dividerColor: Colors.grey.shade200,
-            labelPadding: isWideEditor
-                ? const EdgeInsets.symmetric(horizontal: 18)
-                : EdgeInsets.zero,
-            tabs: [
-              AdaptiveEditorTab(
-                showLabel: isWideEditor,
-                controller: _tabController,
-                index: 0,
-                icon: Icons.person_outline,
-                label: isEn ? 'Personal' : 'Cá nhân',
+        bottom: isWideEditor
+            ? null
+            : PreferredSize(
+                preferredSize: const Size.fromHeight(48),
+                child: tabBar,
               ),
-              AdaptiveEditorTab(
-                showLabel: isWideEditor,
-                controller: _tabController,
-                index: 1,
-                icon: Icons.school_outlined,
-                label: isEn ? 'Education' : 'Học vấn',
-              ),
-              AdaptiveEditorTab(
-                showLabel: isWideEditor,
-                controller: _tabController,
-                index: 2,
-                icon: Icons.work_outline,
-                label: isEn ? 'Experience' : 'Kinh nghiệm',
-              ),
-              AdaptiveEditorTab(
-                showLabel: isWideEditor,
-                controller: _tabController,
-                index: 3,
-                icon: Icons.psychology_outlined,
-                label: isEn ? 'Skills' : 'Kỹ năng',
-              ),
-              AdaptiveEditorTab(
-                showLabel: isWideEditor,
-                controller: _tabController,
-                index: 4,
-                icon: Icons.folder_copy_outlined,
-                label: isEn ? 'Projects' : 'Dự án',
-              ),
-              AdaptiveEditorTab(
-                showLabel: isWideEditor,
-                controller: _tabController,
-                index: 5,
-                icon: Icons.workspace_premium_outlined,
-                label: isEn ? 'Certificates' : 'Chứng chỉ',
-              ),
-            ],
-          ),
-        ),
       ),
       body: LayoutBuilder(
         builder: (context, pageConstraints) {
@@ -1720,42 +1735,12 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                   color: const Color(0xFFF1F5F9),
                   child: Column(
                     children: [
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.fromLTRB(18, 6, 10, 6),
-                        color: Colors.white,
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.description_outlined,
-                              size: 20,
-                              color: AppTheme.brandIndigo,
-                            ),
-                            const SizedBox(width: 9),
-                            Expanded(
-                              child: Text(
-                                isEn
-                                    ? 'Live A4 preview'
-                                    : 'Xem trước A4 trực tiếp',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  color: AppTheme.primaryNavy,
-                                ),
-                              ),
-                            ),
-                            TextButton.icon(
-                              onPressed: _openPreview,
-                              icon: const Icon(Icons.open_in_full_rounded),
-                              label: Text(isEn ? 'Open' : 'Mở rộng'),
-                            ),
-                          ],
-                        ),
-                      ),
                       Expanded(
                         child: pdfBytes == null
                             ? const Center(child: CircularProgressIndicator())
                             : A4PdfPreview(
                                 fitPage: true,
+                                onExpand: _openPreview,
                                 pdfBytes: pdfBytes,
                                 isEnglish: isEn,
                                 onRetry: () =>

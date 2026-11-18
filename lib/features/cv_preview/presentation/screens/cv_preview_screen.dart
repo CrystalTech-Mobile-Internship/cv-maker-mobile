@@ -33,7 +33,7 @@ import '../../../../core/widgets/responsive_action_bar.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
 import '../widgets/cv_a4_design_board.dart';
 import '../widgets/preview_section_panel.dart';
-import '../../../ai_tools/domain/services/cv_section_edit_mapper.dart';
+import '../../domain/models/pdf_section_region.dart';
 import '../../../ai_tools/presentation/widgets/cv_ai_edit_panel.dart';
 import 'package:flutter/services.dart';
 
@@ -58,7 +58,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
 
   // Desktop workspace state.
   String? _selectedSection;
-  String _aiSection = CvEditableSection.experience;
+  String? _aiSection;
+  List<PdfSectionRegion> _regions = [];
   bool _showAiPanel = true;
   bool _designOnPage = false;
   final List<CvModel> _undo = [];
@@ -80,12 +81,15 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
       : _workingCv;
 
   Future<Uint8List> _generatePdf(CvModel cv) {
+    // A fresh list per build; the page view reads it once the PDF is ready.
+    _regions = [];
     return ref
         .read(pdfExportServiceProvider)
         .generateCvPdf(
           cv: cv,
           language: cv.language,
           templateId: cv.templateId,
+          sectionRegions: _regions,
         );
   }
 
@@ -217,7 +221,8 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
   void _selectSection(String id) {
     setState(() {
       _selectedSection = id;
-      if (CvEditableSection.all.contains(id)) _aiSection = id;
+      _aiSection = id;
+      _showAiPanel = true;
     });
   }
 
@@ -347,9 +352,12 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
         _changeFontScale(-0.05),
   };
 
-  Widget _printView({bool fitPage = false}) {
+  Widget _printView({bool fitPage = false, bool clickable = false}) {
     final preview = A4PdfPreview(
       fitPage: fitPage,
+      sectionRegions: _regions,
+      selectedSection: clickable ? _aiSection : null,
+      onSectionTap: clickable ? _selectSection : null,
       pdfBytes: _pdfBytes,
       isEnglish: _isEnglish,
       onRetry: _retryPreview,
@@ -429,7 +437,7 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                                   hiddenSections: hidden,
                                 ),
                           )
-                        : _printView(fitPage: true),
+                        : _printView(fitPage: true, clickable: true),
                   ),
                   if (_showAiPanel) ...[
                     const VerticalDivider(width: 1, color: AppTheme.softBorder),
@@ -438,8 +446,10 @@ class _CvPreviewScreenState extends ConsumerState<CvPreviewScreen> {
                       child: CvAiEditPanel(
                         cv: _workingCv,
                         section: _aiSection,
-                        onSectionChanged: (id) =>
-                            setState(() => _aiSection = id),
+                        onSectionChanged: (id) => setState(() {
+                          _aiSection = id;
+                          if (id != null) _selectedSection = id;
+                        }),
                         onApply: (updated) async {
                           await _saveContent(updated);
                           if (!mounted) return;

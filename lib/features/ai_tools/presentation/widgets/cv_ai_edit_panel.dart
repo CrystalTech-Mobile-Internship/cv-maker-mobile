@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
+import '../../../cv_editor/domain/models/cv_section_definition.dart';
 import '../../domain/models/ai_assistant_models.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 import '../../domain/services/cv_section_edit_mapper.dart';
@@ -24,9 +25,10 @@ class CvAiEditPanel extends ConsumerStatefulWidget {
 
   final CvModel cv;
 
-  /// One of [CvEditableSection.all].
-  final String section;
-  final ValueChanged<String> onSectionChanged;
+  /// Selected section id, or null when nothing is picked yet. Sections
+  /// outside [CvEditableSection.all] are shown but cannot be sent.
+  final String? section;
+  final ValueChanged<String?> onSectionChanged;
   final ValueChanged<CvModel> onApply;
   final VoidCallback? onClose;
 
@@ -64,12 +66,30 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
   Future<void> _send([String? preset]) async {
     final text = (preset ?? _input.text).trim();
     if (text.isEmpty) return;
+    final section = widget.section;
+    if (section == null || !CvEditableSection.all.contains(section)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            section == null
+                ? (_en
+                      ? 'Click a section on the page first.'
+                      : 'Hãy bấm chọn một mục trên trang trước.')
+                : (_en
+                      ? 'This section cannot be edited here yet.'
+                      : 'Mục này chưa sửa nhanh được ở đây.'),
+          ),
+        ),
+      );
+      return;
+    }
     final ok = await ensureAiAccess(context, ref, redirectPath: '/home');
     if (!ok || !mounted) return;
     _input.clear();
     final hasContent = await ref
         .read(cvAiEditControllerProvider.notifier)
-        .request(cv: widget.cv, section: widget.section, instruction: text);
+        .request(cv: widget.cv, section: section, instruction: text);
     if (!hasContent && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -95,6 +115,10 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
       );
     });
   }
+
+  String _sectionTitle(String id) =>
+      CvSectionDefinition.findById(id)?.title(widget.cv.language) ??
+      CvEditableSection.label(id, english: _en);
 
   void _apply(int index, CvAiEditMessage message) {
     final proposal = message.proposal;
@@ -149,23 +173,6 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final section in CvEditableSection.all)
-                  ChoiceChip(
-                    key: ValueKey('ai-edit-section-$section'),
-                    label: Text(CvEditableSection.label(section, english: _en)),
-                    selected: widget.section == section,
-                    visualDensity: VisualDensity.compact,
-                    onSelected: (_) => widget.onSectionChanged(section),
-                  ),
-              ],
-            ),
-          ),
           const Divider(height: 1),
           Expanded(
             child: state.messages.isEmpty
@@ -174,6 +181,7 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
                     section: widget.section,
                     requests: _quickRequests,
                     onRequest: state.isBusy ? null : _send,
+                    onPick: widget.onSectionChanged,
                   )
                 : ListView.builder(
                     controller: _scroll,
@@ -251,6 +259,13 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
                 ],
               ),
             ),
+          if (widget.section != null)
+            _SelectedSectionChip(
+              label: _sectionTitle(widget.section!),
+              editable: CvEditableSection.all.contains(widget.section),
+              english: _en,
+              onRemove: () => widget.onSectionChanged(null),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
             child: Row(
@@ -305,43 +320,172 @@ class _EmptyHint extends StatelessWidget {
     required this.section,
     required this.requests,
     required this.onRequest,
+    required this.onPick,
   });
 
   final bool english;
-  final String section;
+  final String? section;
   final List<String> requests;
   final ValueChanged<String>? onRequest;
+  final ValueChanged<String?> onPick;
 
   @override
   Widget build(BuildContext context) {
-    final label = CvEditableSection.label(section, english: english);
+    final canEdit = section != null && CvEditableSection.all.contains(section);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Text(
           english
-              ? 'Pick a section, then say how to change it. You choose whether to apply the result. Each request uses ${AiCreditCost.editSection} credit.'
-              : 'Chọn một mục rồi nói bạn muốn sửa thế nào. Bạn xem trước rồi mới áp dụng. Mỗi lần dùng ${AiCreditCost.editSection} lượt.',
+              ? 'Click a section on the A4 page, then say how to change it. You see the result before applying it. Each request uses ${AiCreditCost.editSection} credit.'
+              : 'Bấm vào một mục trên trang A4 rồi nói bạn muốn sửa thế nào. Bạn xem trước rồi mới áp dụng. Mỗi lần dùng ${AiCreditCost.editSection} lượt.',
           style: const TextStyle(color: AppTheme.mutedText, height: 1.4),
         ),
-        const SizedBox(height: 12),
-        Text(
-          english ? 'Quick requests for $label' : 'Gợi ý cho mục $label',
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
+        const SizedBox(height: 14),
+        if (!canEdit) ...[
+          Text(
+            english ? 'Or pick one here' : 'Hoặc chọn nhanh',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final id in CvEditableSection.all)
+                ActionChip(
+                  key: ValueKey('ai-edit-section-$id'),
+                  label: Text(CvEditableSection.label(id, english: english)),
+                  onPressed: () => onPick(id),
+                ),
+            ],
+          ),
+        ] else ...[
+          Text(
+            english ? 'Quick requests' : 'Gợi ý yêu cầu',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final request in requests)
+                ActionChip(
+                  label: Text(request),
+                  onPressed: onRequest == null
+                      ? null
+                      : () => onRequest!(request),
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// The section the next request applies to, with an "x" in the corner.
+class _SelectedSectionChip extends StatelessWidget {
+  const _SelectedSectionChip({
+    required this.label,
+    required this.editable,
+    required this.english,
+    required this.onRemove,
+  });
+
+  final String label;
+  final bool editable;
+  final bool english;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 2),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            for (final request in requests)
-              ActionChip(
-                label: Text(request),
-                onPressed: onRequest == null ? null : () => onRequest!(request),
+            Container(
+              key: const ValueKey('ai-edit-selected'),
+              padding: const EdgeInsets.fromLTRB(10, 8, 22, 8),
+              decoration: BoxDecoration(
+                color: AppTheme.indigoSurface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppTheme.brandIndigo.withValues(alpha: 0.35),
+                ),
               ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.crop_free_rounded,
+                    size: 16,
+                    color: AppTheme.brandIndigo,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.brandIndigo,
+                          ),
+                        ),
+                        if (!editable)
+                          Text(
+                            english
+                                ? 'Not editable here yet'
+                                : 'Chưa sửa nhanh được mục này',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.mutedText,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              top: -8,
+              right: -8,
+              child: Material(
+                color: Colors.white,
+                shape: const CircleBorder(
+                  side: BorderSide(color: AppTheme.softBorder),
+                ),
+                child: InkWell(
+                  key: const ValueKey('ai-edit-selected-remove'),
+                  customBorder: const CircleBorder(),
+                  onTap: onRemove,
+                  child: Tooltip(
+                    message: english ? 'Remove' : 'Bỏ chọn',
+                    child: const Padding(
+                      padding: EdgeInsets.all(3),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 14,
+                        color: AppTheme.primarySlate,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
-      ],
+      ),
     );
   }
 }
