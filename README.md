@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/🌐_Dùng_trực_tiếp_trên_Web-smartcv--maker.vercel.app-2563EB?style=for-the-badge" alt="Trang web Smart CV" />
   </a>
   &nbsp;
-  <a href="https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest">
+  <a href="https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest/download/app-release.apk">
     <img src="https://img.shields.io/badge/📱_Tải_bản_Android_(APK)-Bản_mới_nhất-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Tải file APK Android" />
   </a>
 </p>
@@ -52,12 +52,12 @@ lưu lên tài khoản và đồng bộ giữa các thiết bị.
 Bạn có thể tải và cài đặt trực tiếp ứng dụng Smart CV Maker lên thiết bị Android:
 
 <p align="center">
-  <a href="https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest">
+  <a href="https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest/download/app-release.apk">
     <img src="https://img.shields.io/badge/Tải_ngay_file_APK-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Tải APK" />
   </a>
 </p>
 
-- 📥 **Link tải trực tiếp bản mới nhất**: **[GitHub Releases - app-release.apk](https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest)**
+- 📥 **Link tải trực tiếp bản mới nhất**: **[app-release.apk](https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest/download/app-release.apk)** (Android 7.0 trở lên)
 - 📋 **Tất cả các bản phát hành**: [Danh sách Releases](https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases)
 
 ### Các bước cài đặt:
