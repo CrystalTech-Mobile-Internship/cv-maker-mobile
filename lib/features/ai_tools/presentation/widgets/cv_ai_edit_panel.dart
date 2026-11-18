@@ -279,7 +279,16 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
                   key: const ValueKey('ai-edit-send'),
                   tooltip: _en ? 'Send' : 'Gửi',
                   onPressed: state.isBusy ? null : _send,
-                  icon: const Icon(Icons.send_rounded),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppTheme.brandIndigo,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: AppTheme.softBorder,
+                  ),
+                  icon: const Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ],
             ),
