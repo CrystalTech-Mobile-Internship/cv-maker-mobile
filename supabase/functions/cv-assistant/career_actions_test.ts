@@ -71,3 +71,49 @@ Deno.test("answer_feedback clamps the score", () => {
     null,
   );
 });
+
+Deno.test("edit_section rejects unknown sections and empty input", () => {
+  assertEquals(
+    actions.edit_section.validate({
+      section: "personal",
+      instruction: "ngắn hơn",
+      blocks: [{ id: "a", lines: ["x"] }],
+    }),
+    null,
+  );
+  assertEquals(
+    actions.edit_section.validate({
+      section: "summary",
+      instruction: "ngắn hơn",
+      blocks: [],
+    }),
+    null,
+  );
+});
+
+Deno.test("edit_section keeps only the blocks it sent", () => {
+  const input = actions.edit_section.validate({
+    section: "experience",
+    instruction: "Viết ngắn gọn hơn",
+    language: "vi",
+    blocks: [
+      { id: "e1", title: "Intern", lines: ["Làm app di động cho khách"] },
+      { id: "e2", title: "Dev", lines: ["Viết API"] },
+    ],
+  });
+  const result = actions.edit_section.parse(
+    JSON.stringify({
+      blocks: [
+        { id: "e1", lines: ["- Phát triển app di động"] },
+        { id: "e1", lines: ["trùng"] },
+        { id: "invented", lines: ["x"] },
+      ],
+      reply: "Đã rút gọn.",
+    }),
+    input,
+  );
+  assertEquals(result, {
+    blocks: [{ id: "e1", lines: ["Phát triển app di động"] }],
+    reply: "Đã rút gọn.",
+  });
+});

@@ -1722,7 +1722,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                     children: [
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.fromLTRB(18, 12, 18, 10),
+                        padding: const EdgeInsets.fromLTRB(18, 6, 10, 6),
                         color: Colors.white,
                         child: Row(
                           children: [
@@ -1755,6 +1755,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                         child: pdfBytes == null
                             ? const Center(child: CircularProgressIndicator())
                             : A4PdfPreview(
+                                fitPage: true,
                                 pdfBytes: pdfBytes,
                                 isEnglish: isEn,
                                 onRetry: () =>
@@ -1770,7 +1771,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
         },
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
+        padding: isWideEditor
+            ? const EdgeInsets.symmetric(horizontal: 16, vertical: 10)
+            : const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
