@@ -41,6 +41,7 @@ final class CvSupabaseMapper {
       hiddenSections: layout.hiddenSections,
       primaryColor: _string(row['primary_color']) ?? '#1E293B',
       fontSizeScale: _number(row['font_size_scale']) ?? 1,
+      fontFamily: layout.fontFamily,
       personalInfo: _personalInfoFromMap(_map(row['personal_info'])),
       summary: _string(row['summary']) ?? '',
       educations: (grouped['education'] ?? const [])
@@ -121,6 +122,7 @@ final class CvSupabaseMapper {
     'language': cv.language,
     'section_order': cv.sectionOrder,
     'hidden_sections': cv.hiddenSections,
+    'font_family': cv.fontFamily,
   };
 
   static _CvLayout _layoutFromMap(Map<String, dynamic>? map) {
@@ -138,6 +140,7 @@ final class CvSupabaseMapper {
       language: language == 'en' ? 'en' : 'vi',
       sectionOrder: order.isEmpty ? CvModel.defaultSectionOrder : order,
       hiddenSections: hidden,
+      fontFamily: _string(data['font_family']) ?? 'roboto',
     );
   }
 
@@ -322,11 +325,13 @@ final class _CvLayout {
     required this.language,
     required this.sectionOrder,
     required this.hiddenSections,
+    required this.fontFamily,
   });
 
   final String language;
   final List<String> sectionOrder;
   final List<String> hiddenSections;
+  final String fontFamily;
 }
 
 final class CvSectionPayload {

@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../../cv_editor/domain/models/cv_font.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/project_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
@@ -11,7 +12,7 @@ import 'pdf_platform_storage.dart' as platform;
 import '../../../cv_editor/domain/services/cv_bullet_cleaner.dart';
 
 class PdfExportServiceImpl implements PdfExportService {
-  static Future<_PdfFontSet>? _fontSetFuture;
+  static final _fontSets = <String, Future<_PdfFontSet>>{};
 
   @override
   Future<Uint8List> generateCvPdf({
@@ -38,7 +39,7 @@ class PdfExportServiceImpl implements PdfExportService {
 
     // Bundled Unicode fonts keep Vietnamese rendering deterministic and fully
     // offline. Falling back to Helvetica would silently drop diacritics.
-    final fonts = await _loadBundledFonts();
+    final fonts = await _loadBundledFonts(CvFontCatalog.byId(cv.fontFamily));
 
     final theme = pw.ThemeData.withFont(
       base: fonts.regular,
@@ -956,18 +957,21 @@ class PdfExportServiceImpl implements PdfExportService {
     return clean;
   }
 
-  static Future<_PdfFontSet> _loadBundledFonts() {
-    return _fontSetFuture ??= (() async {
-      final regularData = await rootBundle.load(
-        'assets/fonts/Roboto-Regular.ttf',
-      );
-      final boldData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
+  static Future<_PdfFontSet> _loadBundledFonts(CvFont font) {
+    final future = _fontSets[font.id] ??= (() async {
+      final regularData = await rootBundle.load(font.regularAsset);
+      final boldData = await rootBundle.load(font.boldAsset);
 
       return _PdfFontSet(
         regular: pw.Font.ttf(regularData),
         bold: pw.Font.ttf(boldData),
       );
     })();
+    // A failed load must not stay cached, or the font could never recover.
+    return future.catchError((Object error) {
+      _fontSets.remove(font.id);
+      throw error;
+    });
   }
 
   static Future<pw.MemoryImage?> _loadAvatarImage(

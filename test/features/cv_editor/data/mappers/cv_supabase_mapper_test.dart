@@ -85,6 +85,7 @@ void main() {
         'certifications',
       ],
       hiddenSections: const ['certifications'],
+      fontFamily: 'lora',
     );
 
     final row = CvSupabaseMapper.toCvRow(cv, userId: 'user-1');
@@ -98,6 +99,7 @@ void main() {
     expect(restored.language, 'en');
     expect(restored.sectionOrder.first, 'skills');
     expect(restored.hiddenSections, ['certifications']);
+    expect(restored.fontFamily, 'lora');
   });
 
   test('falls back to defaults for rows without layout settings', () {
@@ -113,5 +115,6 @@ void main() {
     expect(restored.language, 'vi');
     expect(restored.sectionOrder, CvModel.defaultSectionOrder);
     expect(restored.hiddenSections, isEmpty);
+    expect(restored.fontFamily, 'roboto');
   });
 }
