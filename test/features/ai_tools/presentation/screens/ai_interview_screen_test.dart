@@ -26,10 +26,10 @@ void main() {
     await tester.pumpWidget(app(FakeAiAssistantRepository()));
 
     expect(find.textContaining('Chào bạn!'), findsOneWidget);
-    final button = tester.widget<FilledButton>(
-      find.byKey(const ValueKey('ai-generate-cv')),
-    );
-    expect(button.onPressed, isNull);
+    expect(find.byKey(const ValueKey('ai-create-offer')), findsNothing);
+    expect(find.text('Trả lời thêm vài câu để tạo CV'), findsNothing);
+    expect(find.byKey(const ValueKey('ai-chat-ats')), findsOneWidget);
+    expect(find.byKey(const ValueKey('ai-chat-practice')), findsOneWidget);
   });
 
   testWidgets('asks guests to sign in instead of calling AI', (tester) async {
@@ -72,5 +72,45 @@ void main() {
 
     expect(repository.interviewCalls, hasLength(1));
     expect(find.text('Câu hỏi tiếp theo 1'), findsOneWidget);
+  });
+
+  testWidgets('asks to create the CV after enough answers; "Không" hides it', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({'ai_data_consent_v1': true});
+    await tester.pumpWidget(
+      app(
+        FakeAiAssistantRepository(),
+        user: const AuthUser(
+          id: 'u1',
+          email: 'test@example.com',
+          displayName: 'Test',
+          provider: 'email',
+          isEmailConfirmed: true,
+        ),
+      ),
+    );
+
+    for (final answer in ['a', 'b', 'c']) {
+      expect(find.byKey(const ValueKey('ai-create-offer')), findsNothing);
+      await tester.enterText(
+        find.byKey(const ValueKey('ai-chat-input')),
+        answer,
+      );
+      await tester.tap(find.byKey(const ValueKey('ai-chat-send')));
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.byKey(const ValueKey('ai-create-offer')), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Có'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('ai-decline-cv')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ai-create-offer')), findsNothing);
+
+    await tester.enterText(find.byKey(const ValueKey('ai-chat-input')), 'd');
+    await tester.tap(find.byKey(const ValueKey('ai-chat-send')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ai-create-offer')), findsOneWidget);
   });
 }
