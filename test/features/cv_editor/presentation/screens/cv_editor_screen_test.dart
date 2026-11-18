@@ -128,8 +128,9 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 20));
 
-    expect(find.text('Xem trước A4 trực tiếp'), findsOneWidget);
-    expect(find.byIcon(Icons.description_outlined), findsOneWidget);
+    // Tabs sit in the top bar and the page has a button to open the full
+    // preview instead of a separate header row.
+    expect(find.byKey(const Key('a4-expand')), findsOneWidget);
     expect(find.byType(PdfPreview), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

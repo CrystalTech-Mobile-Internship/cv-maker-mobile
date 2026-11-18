@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cv_maker_mobile/features/cv_editor/domain/models/cv_model.dart';
 import 'package:cv_maker_mobile/features/cv_editor/domain/repositories/cv_repository.dart';
+import 'package:cv_maker_mobile/features/cv_preview/domain/models/pdf_section_region.dart';
 import 'package:cv_maker_mobile/features/cv_preview/domain/services/pdf_export_service.dart';
 import 'package:cv_maker_mobile/features/cv_preview/presentation/controllers/offline_pdf_export_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,6 +60,7 @@ final class _FakePdfService implements PdfExportService {
     required CvModel cv,
     required String language,
     String templateId = 'harvard_ats',
+    List<PdfSectionRegion>? sectionRegions,
   }) async => Uint8List.fromList([1]);
 
   @override

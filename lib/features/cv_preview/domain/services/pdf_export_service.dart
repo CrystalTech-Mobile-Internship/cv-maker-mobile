@@ -1,14 +1,20 @@
 import 'dart:typed_data';
 
 import '../../../cv_editor/domain/models/cv_model.dart';
+import '../models/pdf_section_region.dart';
 
 /// Clean Architecture Domain Contract for PDF document generation & export.
 abstract class PdfExportService {
   /// Generates vector A4 PDF bytes based on CV data, language, and template.
+  ///
+  /// When [sectionRegions] is given it is filled with where each section was
+  /// drawn, so the preview can make sections clickable. Templates with a
+  /// side column leave it empty.
   Future<Uint8List> generateCvPdf({
     required CvModel cv,
     required String language,
     String templateId = 'harvard_ats',
+    List<PdfSectionRegion>? sectionRegions,
   });
 
   /// Saves the generated PDF bytes to the device's local file storage.

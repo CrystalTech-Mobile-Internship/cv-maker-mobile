@@ -5,6 +5,8 @@ import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../app/theme.dart';
+import '../../domain/models/pdf_section_region.dart';
+import 'clickable_pdf_pages.dart';
 
 /// Displays the exact PDF bytes that are later saved/shared by the app.
 ///
@@ -18,6 +20,10 @@ class A4PdfPreview extends StatefulWidget {
     required this.isEnglish,
     required this.onRetry,
     this.fitPage = false,
+    this.sectionRegions = const [],
+    this.selectedSection,
+    this.onSectionTap,
+    this.onExpand,
   });
 
   final Future<Uint8List> pdfBytes;
@@ -27,6 +33,15 @@ class A4PdfPreview extends StatefulWidget {
   /// Size the sheet so a whole A4 page fits the available height at 100%.
   /// Ctrl + mouse wheel (or the zoom buttons) changes the size from there.
   final bool fitPage;
+
+  /// Where each section sits on the pages; with [onSectionTap] set, the
+  /// sections become clickable.
+  final List<PdfSectionRegion> sectionRegions;
+  final String? selectedSection;
+  final ValueChanged<String>? onSectionTap;
+
+  /// Shows an "open full preview" button next to the zoom controls.
+  final VoidCallback? onExpand;
 
   static const minZoom = 0.5;
   static const maxZoom = 3.0;
@@ -109,6 +124,7 @@ class _A4PdfPreviewState extends State<A4PdfPreview> {
                   zoom: _zoom,
                   isEnglish: widget.isEnglish,
                   onZoom: _setZoom,
+                  onExpand: widget.onExpand,
                 ),
               ),
             ],
@@ -120,6 +136,19 @@ class _A4PdfPreviewState extends State<A4PdfPreview> {
 
   Widget _preview(BuildContext context, double pageWidth) {
     final isEnglish = widget.isEnglish;
+    final onSectionTap = widget.onSectionTap;
+    if (onSectionTap != null) {
+      return ClickablePdfPages(
+        pdfBytes: widget.pdfBytes,
+        pageWidth: pageWidth,
+        margin: _margin,
+        regions: widget.sectionRegions,
+        selectedSection: widget.selectedSection,
+        onSectionTap: onSectionTap,
+        isEnglish: isEnglish,
+        errorBuilder: (context, error) => _errorView(error),
+      );
+    }
 
     return PdfPreview(
       build: _buildDocument,
@@ -147,41 +176,46 @@ class _A4PdfPreviewState extends State<A4PdfPreview> {
         ],
       ),
       loadingWidget: const Center(child: CircularProgressIndicator()),
-      onError: (context, error) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.picture_as_pdf_outlined,
-                size: 48,
-                color: AppTheme.primarySlate,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                isEnglish
-                    ? 'The A4 preview could not be generated.'
-                    : 'Không thể tạo bản xem trước A4.',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                error.toString(),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-              ),
-              const SizedBox(height: 14),
-              OutlinedButton.icon(
-                onPressed: widget.onRetry,
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(isEnglish ? 'Try again' : 'Thử lại'),
-              ),
-            ],
-          ),
+      onError: (context, error) => _errorView(error),
+    );
+  }
+
+  Widget _errorView(Object error) {
+    final isEnglish = widget.isEnglish;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.picture_as_pdf_outlined,
+              size: 48,
+              color: AppTheme.primarySlate,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              isEnglish
+                  ? 'The A4 preview could not be generated.'
+                  : 'Không thể tạo bản xem trước A4.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              error.toString(),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+            const SizedBox(height: 14),
+            OutlinedButton.icon(
+              onPressed: widget.onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(isEnglish ? 'Try again' : 'Thử lại'),
+            ),
+          ],
         ),
       ),
     );
@@ -193,11 +227,13 @@ class _ZoomControls extends StatelessWidget {
     required this.zoom,
     required this.isEnglish,
     required this.onZoom,
+    this.onExpand,
   });
 
   final double zoom;
   final bool isEnglish;
   final ValueChanged<double> onZoom;
+  final VoidCallback? onExpand;
 
   @override
   Widget build(BuildContext context) {
@@ -252,6 +288,14 @@ class _ZoomControls extends StatelessWidget {
                   : null,
               icon: const Icon(Icons.add_rounded, size: 18),
             ),
+            if (onExpand != null)
+              IconButton(
+                key: const Key('a4-expand'),
+                tooltip: isEnglish ? 'Open full preview' : 'Mở trang xem trước',
+                visualDensity: VisualDensity.compact,
+                onPressed: onExpand,
+                icon: const Icon(Icons.open_in_full_rounded, size: 16),
+              ),
           ],
         ),
       ),

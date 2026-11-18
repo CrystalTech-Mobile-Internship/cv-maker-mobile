@@ -76,4 +76,19 @@ void main() {
     await tester.pump();
     expect(find.text('Nhờ sửa CV'), findsNothing);
   });
+
+  testWidgets('picking a section shows a chip that the x removes', (
+    tester,
+  ) async {
+    await pump(tester);
+    expect(find.byKey(const ValueKey('ai-edit-selected')), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('ai-edit-section-summary')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('ai-edit-selected')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('ai-edit-selected-remove')));
+    await tester.pump();
+    expect(find.byKey(const ValueKey('ai-edit-selected')), findsNothing);
+  });
 }
