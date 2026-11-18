@@ -4,7 +4,15 @@
 
 # Smart CV Maker
 
-Trang web: **https://smartcv-maker.vercel.app**
+<p align="center">
+  <a href="https://smartcv-maker.vercel.app">
+    <img src="https://img.shields.io/badge/🌐_Dùng_trực_tiếp_trên_Web-smartcv--maker.vercel.app-2563EB?style=for-the-badge" alt="Trang web Smart CV" />
+  </a>
+  &nbsp;
+  <a href="https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest">
+    <img src="https://img.shields.io/badge/📱_Tải_bản_Android_(APK)-Bản_mới_nhất-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Tải file APK Android" />
+  </a>
+</p>
 
 Ứng dụng tạo CV chuyên nghiệp cho sinh viên, fresher và người đi làm. Chạy trên
 **Android**, **iOS** và **Web** (có giao diện riêng cho máy tính). Dữ liệu được
@@ -27,6 +35,7 @@ lưu lên tài khoản và đồng bộ giữa các thiết bị.
 
 ## Mục lục
 
+- [Tải ứng dụng Android (APK)](#tải-ứng-dụng-android-apk)
 - [Hướng dẫn tạo CV từng bước](#hướng-dẫn-tạo-cv-từng-bước)
 - [Tính năng chính](#tính-năng-chính)
 - [Giao diện trên máy tính](#giao-diện-trên-máy-tính)
@@ -35,6 +44,27 @@ lưu lên tài khoản và đồng bộ giữa các thiết bị.
 - [Deploy bản web](#deploy-bản-web)
 - [Kiểm thử](#kiểm-thử)
 - [Tài liệu](#tài-liệu)
+
+---
+
+## Tải ứng dụng Android (APK)
+
+Bạn có thể tải và cài đặt trực tiếp ứng dụng Smart CV Maker lên thiết bị Android:
+
+<p align="center">
+  <a href="https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest">
+    <img src="https://img.shields.io/badge/Tải_ngay_file_APK-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Tải APK" />
+  </a>
+</p>
+
+- 📥 **Link tải trực tiếp bản mới nhất**: **[GitHub Releases - app-release.apk](https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases/latest)**
+- 📋 **Tất cả các bản phát hành**: [Danh sách Releases](https://github.com/CrystalTech-Mobile-Internship/cv-maker-mobile/releases)
+
+### Các bước cài đặt:
+1. Tải tệp `app-release.apk` từ liên kết trên về điện thoại Android.
+2. Mở tệp vừa tải và bấm **Cài đặt**.
+3. Nếu thiết bị xuất hiện thông báo bảo mật (do cài ứng dụng ngoài kho CH Play), chọn **Vẫn cài đặt / Cho phép cài đặt ứng dụng từ nguồn này**.
+4. Mở ứng dụng **Smart CV** và bắt đầu sử dụng.
 
 ---
 
