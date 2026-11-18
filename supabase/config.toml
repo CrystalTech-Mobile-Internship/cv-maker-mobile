@@ -5,3 +5,13 @@ verify_jwt = true
 
 [functions.mirror-sync]
 verify_jwt = false
+
+# Where sign-in (Google, password reset) may send people back to.
+# Keep the hosted project's Authentication > URL Configuration in sync.
+[auth]
+site_url = "https://smartcv-maker.vercel.app"
+additional_redirect_urls = [
+  "https://smartcv-maker.vercel.app/**",
+  "com.example.cv_maker_mobile://login-callback",
+  "http://localhost:*/**",
+]
