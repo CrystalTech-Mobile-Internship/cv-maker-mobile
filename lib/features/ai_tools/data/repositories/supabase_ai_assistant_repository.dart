@@ -219,6 +219,35 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
     );
   }
 
+  @override
+  Future<AiSectionEdit> editSection({
+    required String section,
+    required String instruction,
+    required List<AiEditBlock> blocks,
+    required String language,
+  }) async {
+    final result = await _result('edit_section', {
+      'section': section,
+      'instruction': instruction,
+      'language': language,
+      'blocks': [for (final b in blocks) b.toJson()],
+    });
+    final edited = <String, List<String>>{};
+    final raw = result['blocks'];
+    if (raw is List) {
+      for (final item in raw.whereType<Map>()) {
+        final id = item['id']?.toString() ?? '';
+        final lines = _strings(item['lines']);
+        if (id.isNotEmpty && lines.isNotEmpty) edited[id] = lines;
+      }
+    }
+    if (edited.isEmpty) throw _emptyResult();
+    return AiSectionEdit(
+      blocks: edited,
+      reply: (result['reply'] as String? ?? '').trim(),
+    );
+  }
+
   // ------------------------------------------------------------- internals
 
   /// Keeps the last 24 turns: enough context, bounded cost and payload.

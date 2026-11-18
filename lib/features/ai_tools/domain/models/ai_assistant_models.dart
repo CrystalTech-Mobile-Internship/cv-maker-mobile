@@ -70,6 +70,30 @@ abstract final class AiCreditCost {
   static const tailorCv = 3;
   static const interviewQuestions = 1;
   static const answerFeedback = 1;
+  static const editSection = 1;
+}
+
+/// One piece of a CV section sent to the AI for rewriting.
+class AiEditBlock {
+  const AiEditBlock({
+    required this.id,
+    required this.title,
+    required this.lines,
+  });
+
+  final String id;
+  final String title;
+  final List<String> lines;
+
+  Map<String, dynamic> toJson() => {'id': id, 'title': title, 'lines': lines};
+}
+
+/// Rewritten lines keyed by block id, plus a one-line note for the user.
+class AiSectionEdit {
+  const AiSectionEdit({required this.blocks, this.reply = ''});
+
+  final Map<String, List<String>> blocks;
+  final String reply;
 }
 
 /// AI proposal for tailoring a CV to one job description.

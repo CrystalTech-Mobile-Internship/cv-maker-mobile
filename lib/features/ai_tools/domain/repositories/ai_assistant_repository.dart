@@ -63,4 +63,12 @@ abstract interface class AiAssistantRepository {
     required String cvText,
     required String language,
   });
+
+  /// Rewrites one section following the user's own request.
+  Future<AiSectionEdit> editSection({
+    required String section,
+    required String instruction,
+    required List<AiEditBlock> blocks,
+    required String language,
+  });
 }
