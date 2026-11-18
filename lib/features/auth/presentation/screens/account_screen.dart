@@ -112,13 +112,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              Container(
+              _AccountCard(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
                 child: Column(
                   children: [
                     CircleAvatar(
@@ -146,82 +141,34 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: _displayNameController,
-                      enabled: !isLoading,
-                      decoration: const InputDecoration(
-                        labelText: 'Tên hiển thị',
-                        prefixIcon: Icon(Icons.badge_outlined),
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _displayNameController,
+                            enabled: !isLoading,
+                            decoration: const InputDecoration(
+                              labelText: 'Tên hiển thị',
+                              prefixIcon: Icon(Icons.badge_outlined),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          height: 56,
+                          child: FilledButton(
+                            onPressed: isLoading ? null : _saveProfile,
+                            child: const Text('Lưu'),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
-              if (reusableProfile != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.tealSurface,
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(
-                      color: AppTheme.accentTeal.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(
-                            Icons.contact_page_outlined,
-                            color: AppTheme.accentTeal,
-                          ),
-                          SizedBox(width: 9),
-                          Text(
-                            'Hồ sơ dùng lại',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.primaryNavy,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        reusableProfile.personalInfo.fullName.isEmpty
-                            ? reusableProfile.title
-                            : reusableProfile.personalInfo.fullName,
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                      if (reusableProfile.personalInfo.targetRole.isNotEmpty)
-                        Text(reusableProfile.personalInfo.targetRole),
-                      const SizedBox(height: 5),
-                      Text(
-                        '${reusableProfile.personalInfo.email}'
-                        '${reusableProfile.skills.isEmpty ? '' : ' • ${reusableProfile.skills.length} kỹ năng'}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.mutedText,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Dùng lại khi tạo CV mới.',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-              ],
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
+              const _AccountSectionTitle('Thông tin'),
+              _AccountCard(
                 child: Column(
                   children: [
                     _AccountInfoTile(
@@ -229,6 +176,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       label: 'Email',
                       value: user.email,
                     ),
+                    const Divider(height: 1, indent: 56),
                     _AccountInfoTile(
                       icon: Icons.verified_user_outlined,
                       label: 'Xác nhận email',
@@ -236,6 +184,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           ? 'Đã xác nhận'
                           : 'Chưa xác nhận',
                     ),
+                    const Divider(height: 1, indent: 56),
                     _AccountInfoTile(
                       icon: Icons.link_rounded,
                       label: 'Đăng nhập bằng',
@@ -243,56 +192,55 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           ? 'Google'
                           : 'Email và mật khẩu',
                     ),
+                    const Divider(height: 1, indent: 56),
+                    _AccountInfoTile(
+                      icon: Icons.contact_page_outlined,
+                      label: 'Hồ sơ dùng lại khi tạo CV mới',
+                      value: reusableProfile == null
+                          ? 'Chưa có'
+                          : [
+                              reusableProfile.personalInfo.fullName.isEmpty
+                                  ? reusableProfile.title
+                                  : reusableProfile.personalInfo.fullName,
+                              if (reusableProfile
+                                  .personalInfo
+                                  .targetRole
+                                  .isNotEmpty)
+                                reusableProfile.personalInfo.targetRole,
+                            ].join(' • '),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 14),
-              ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+              const _AccountSectionTitle('Tiện ích'),
+              _AccountCard(
+                child: Column(
+                  children: [
+                    _AccountLinkTile(
+                      icon: Icons.analytics_outlined,
+                      title: 'Chấm điểm CV',
+                      subtitle: 'So sánh CV với tin tuyển dụng',
+                      onTap: () => context.push('/ats-scorer'),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _AccountLinkTile(
+                      icon: Icons.workspace_premium_rounded,
+                      title: 'Nâng cấp Pro',
+                      subtitle: 'Thêm lượt dùng, mẫu CV cao cấp',
+                      onTap: () => context.push('/upgrade-pro'),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _AccountLinkTile(
+                      icon: Icons.password_rounded,
+                      title: 'Đổi mật khẩu',
+                      onTap: isLoading
+                          ? null
+                          : () => context.push('/reset-password'),
+                    ),
+                  ],
                 ),
-                tileColor: Colors.white,
-                leading: const Icon(
-                  Icons.analytics_outlined,
-                  color: AppTheme.primarySlate,
-                ),
-                title: const Text('Chấm điểm CV'),
-                subtitle: const Text('So sánh CV với tin tuyển dụng'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => context.push('/ats-scorer'),
               ),
-              const SizedBox(height: 8),
-              ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: const BorderSide(color: Color(0xFFE2E8F0)),
-                ),
-                tileColor: Colors.white,
-                leading: const Icon(
-                  Icons.workspace_premium_rounded,
-                  color: AppTheme.primarySlate,
-                ),
-                title: const Text('Nâng cấp Pro'),
-                subtitle: const Text('Thêm lượt dùng, mẫu CV cao cấp'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => context.push('/upgrade-pro'),
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: isLoading ? null : _saveProfile,
-                icon: const Icon(Icons.save_outlined),
-                label: const Text('Lưu thay đổi'),
-              ),
-              const SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed: isLoading
-                    ? null
-                    : () => context.push('/reset-password'),
-                icon: const Icon(Icons.password_rounded),
-                label: const Text('Đổi mật khẩu'),
-              ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               OutlinedButton.icon(
                 onPressed: isLoading ? null : _signOut,
                 style: AppTheme.logoutButton,
@@ -344,12 +292,89 @@ class _AccountInfoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon, color: AppTheme.primarySlate),
-      title: Text(label),
+      title: Text(label, style: const TextStyle(color: AppTheme.mutedText)),
       subtitle: Text(
         value,
         style: const TextStyle(
           fontWeight: FontWeight.w700,
           color: AppTheme.primaryNavy,
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountLinkTile extends StatelessWidget {
+  const _AccountLinkTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: AppTheme.primarySlate),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w700,
+          color: AppTheme.primaryNavy,
+        ),
+      ),
+      subtitle: subtitle == null ? null : Text(subtitle!),
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: onTap,
+    );
+  }
+}
+
+/// Every block on the account page uses this one card style.
+class _AccountCard extends StatelessWidget {
+  const _AccountCard({
+    required this.child,
+    this.padding = const EdgeInsets.symmetric(vertical: 4),
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: padding,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.softBorder),
+      ),
+      child: Material(type: MaterialType.transparency, child: child),
+    );
+  }
+}
+
+class _AccountSectionTitle extends StatelessWidget {
+  const _AccountSectionTitle(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          color: AppTheme.mutedText,
         ),
       ),
     );

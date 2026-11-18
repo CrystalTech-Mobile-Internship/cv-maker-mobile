@@ -94,7 +94,7 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                     ),
                     SizedBox(height: 6),
                     Text(
-                      'Mẫu CV cao cấp và 200 lượt dùng mỗi ngày.',
+                      '200 lượt dùng tính năng AI mỗi ngày và mẫu CV cao cấp.',
                       style: TextStyle(color: Color(0xFFDBEAFE), height: 1.4),
                     ),
                   ],
@@ -306,16 +306,27 @@ class _AuthenticatedPaymentSection extends StatelessWidget {
 class _ComparisonCard extends StatelessWidget {
   const _ComparisonCard();
 
+  // (label, free, pro): `true`/`false` draws a mark, a String is shown as is.
+  static const _basic = <(String, Object, Object)>[
+    ('Tạo, sửa CV và lưu trên mọi thiết bị', true, true),
+    ('Xuất CV ra PDF, Word', true, true),
+    ('Mẫu CV cao cấp', false, true),
+  ];
+
+  static const _ai = <(String, Object, Object)>[
+    ('Trò chuyện để tạo CV', true, true),
+    ('Đọc CV từ file PDF, Word, ảnh', true, true),
+    ('Viết lại tóm tắt và kinh nghiệm', true, true),
+    ('Viết thư xin việc', true, true),
+    ('Chấm điểm, chỉnh CV theo tin tuyển dụng', true, true),
+    ('Luyện phỏng vấn và nhận góp ý', true, true),
+    ('Lượt dùng mỗi ngày', '15', '200'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    const rows = [
-      ('Tạo và xuất CV PDF, Word', true, true),
-      ('Chấm điểm CV theo tin tuyển dụng', true, true),
-      ('15 lượt dùng mỗi ngày', true, true),
-      ('200 lượt dùng mỗi ngày', false, true),
-      ('Mẫu CV cao cấp', false, true),
-    ];
     return Container(
+      key: const Key('pro-comparison'),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -323,63 +334,84 @@ class _ComparisonCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Tính năng',
-                  style: TextStyle(fontWeight: FontWeight.w800),
-                ),
-              ),
-              SizedBox(
-                width: 48,
-                child: Text(
-                  'Free',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w800),
-                ),
-              ),
-              SizedBox(
-                width: 48,
-                child: Text(
-                  'Pro',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.w800),
-                ),
-              ),
-            ],
-          ),
+          const _ComparisonHeader('Tính năng'),
           const Divider(height: 20),
-          for (final row in rows)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(
-                children: [
-                  Expanded(child: Text(row.$1)),
-                  SizedBox(
-                    width: 48,
-                    child: Icon(
-                      row.$2 ? Icons.check_circle : Icons.remove_circle_outline,
-                      color: row.$2
-                          ? AppTheme.successGreen
-                          : const Color(0xFF94A3B8),
-                      size: 20,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 48,
-                    child: Icon(
-                      row.$3 ? Icons.check_circle : Icons.remove_circle_outline,
-                      color: row.$3
-                          ? AppTheme.createAction
-                          : const Color(0xFF94A3B8),
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
+          for (final row in _basic) _ComparisonRow(row),
+          const SizedBox(height: 6),
+          const _ComparisonHeader('Tính năng AI'),
+          const Divider(height: 20),
+          for (final row in _ai) _ComparisonRow(row),
+          const SizedBox(height: 4),
+          const Text(
+            'Mỗi lần dùng tốn 1 lượt; đọc CV từ file, viết thư xin việc tốn 2 lượt; tạo CV từ cuộc trò chuyện, chấm điểm theo tin tuyển dụng tốn 3 lượt. Lượt dùng được làm mới mỗi ngày.',
+            style: TextStyle(
+              color: AppTheme.mutedText,
+              fontSize: 12,
+              height: 1.4,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ComparisonHeader extends StatelessWidget {
+  const _ComparisonHeader(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    const style = TextStyle(fontWeight: FontWeight.w800);
+    return Row(
+      children: [
+        Expanded(child: Text(title, style: style)),
+        const SizedBox(
+          width: 52,
+          child: Text('Free', textAlign: TextAlign.center, style: style),
+        ),
+        const SizedBox(
+          width: 52,
+          child: Text('Pro', textAlign: TextAlign.center, style: style),
+        ),
+      ],
+    );
+  }
+}
+
+class _ComparisonRow extends StatelessWidget {
+  const _ComparisonRow(this.row);
+
+  final (String, Object, Object) row;
+
+  Widget _cell(Object value, Color color) {
+    if (value is String) {
+      return Text(
+        value,
+        textAlign: TextAlign.center,
+        style: TextStyle(fontWeight: FontWeight.w800, color: color),
+      );
+    }
+    final on = value == true;
+    return Icon(
+      on ? Icons.check_circle : Icons.remove_circle_outline,
+      color: on ? color : const Color(0xFF94A3B8),
+      size: 20,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Expanded(child: Text(row.$1)),
+          SizedBox(width: 52, child: _cell(row.$2, AppTheme.successGreen)),
+          SizedBox(width: 52, child: _cell(row.$3, AppTheme.createAction)),
         ],
       ),
     );
