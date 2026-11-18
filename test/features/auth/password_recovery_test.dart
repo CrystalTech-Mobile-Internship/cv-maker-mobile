@@ -27,6 +27,30 @@ void main() {
     test('ignores ordinary app routes', () {
       expect(parseAuthCallback(Uri.parse('/home')).isCallback, isFalse);
     });
+
+    test('identifies OAuth callback redirect URLs', () {
+      final googleCallback = Uri.parse(
+        'https://smartcv-maker.vercel.app/#access_token=token123&refresh_token=refresh123&token_type=bearer',
+      );
+      expect(isOAuthCallbackUri(googleCallback), isTrue);
+
+      final pkceCallback = Uri.parse(
+        'https://smartcv-maker.vercel.app/?code=auth_code_123',
+      );
+      expect(isOAuthCallbackUri(pkceCallback), isTrue);
+
+      final recoveryRedirect = Uri.parse(
+        'https://smartcv-maker.vercel.app/#access_token=token123&type=recovery',
+      );
+      expect(isOAuthCallbackUri(recoveryRedirect), isFalse);
+
+      expect(
+        isOAuthCallbackUri(
+          Uri.parse('https://smartcv-maker.vercel.app/#/login'),
+        ),
+        isFalse,
+      );
+    });
   });
 
   group('redirectForAppUri', () {

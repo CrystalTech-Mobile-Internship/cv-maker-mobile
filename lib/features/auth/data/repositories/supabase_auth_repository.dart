@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthUser;
 
+import '../../../../core/constants/auth_callback_parser.dart';
 import '../../domain/models/auth_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/supabase_auth_data_source.dart';
@@ -20,7 +21,13 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Stream<AuthSessionChange> watchSession() async* {
-    yield AuthSessionChange(event: AuthSessionEvent.initial, user: currentUser);
+    final isOAuthSignIn = isInitialOAuthCallback && currentUser != null;
+    yield AuthSessionChange(
+      event: isOAuthSignIn
+          ? AuthSessionEvent.signedIn
+          : AuthSessionEvent.initial,
+      user: currentUser,
+    );
     await for (final state in _dataSource.watchAuthState()) {
       yield AuthSessionChange(
         event: _mapEvent(state.event),
@@ -152,6 +159,7 @@ class SupabaseAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     try {
+      markInitialOAuthCallbackHandled();
       await _dataSource.signOut();
     } catch (error) {
       throw _mapFailure(error);
@@ -191,6 +199,9 @@ class SupabaseAuthRepository implements AuthRepository {
       return AuthSessionEvent.userUpdated;
     }
     if (event == AuthChangeEvent.initialSession) {
+      if (isInitialOAuthCallback && currentUser != null) {
+        return AuthSessionEvent.signedIn;
+      }
       return AuthSessionEvent.initial;
     }
     return AuthSessionEvent.other;

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/constants/auth_callback_parser.dart';
 import '../../../../core/network/supabase_client.dart';
 import '../../domain/repositories/device_session_repository.dart';
 
@@ -49,6 +50,7 @@ class SupabaseDeviceSessionRepository implements DeviceSessionRepository {
         'p_device_label': kIsWeb ? 'web' : defaultTargetPlatform.name,
       },
     );
+    markInitialOAuthCallbackHandled();
   }
 
   @override
@@ -56,6 +58,10 @@ class SupabaseDeviceSessionRepository implements DeviceSessionRepository {
     final client = _client;
     final mine = _sessionId;
     if (client == null || mine == null) return DeviceSessionStatus.unknown;
+    if (isInitialOAuthCallback) {
+      await claim();
+      return DeviceSessionStatus.current;
+    }
     try {
       final rows = await client
           .from('user_device_sessions')

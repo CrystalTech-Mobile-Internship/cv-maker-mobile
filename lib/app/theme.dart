@@ -73,6 +73,8 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         foregroundColor: primarySlate,
         titleTextStyle: GoogleFonts.inter(
           fontSize: 18,
