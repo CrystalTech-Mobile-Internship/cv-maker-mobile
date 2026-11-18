@@ -49,10 +49,26 @@ void main() {
   setUp(() {
     repository = _FakeRepository();
     signOuts = 0;
-    guard = DeviceSessionGuard(repository, onReplaced: () async => signOuts++);
+    guard = DeviceSessionGuard(
+      repository,
+      onReplaced: () async => signOuts++,
+      enabled: true,
+    );
   });
 
   tearDown(() => guard.stop());
+
+  test('does nothing when disabled by default', () async {
+    final disabledGuard = DeviceSessionGuard(
+      repository,
+      onReplaced: () async => signOuts++,
+    );
+    await disabledGuard.handle(
+      const AuthSessionChange(event: AuthSessionEvent.signedIn, user: _user),
+    );
+    expect(repository.claims, 0);
+    expect(signOuts, 0);
+  });
 
   test('a fresh sign-in takes over the session for this device kind', () async {
     await guard.handle(
