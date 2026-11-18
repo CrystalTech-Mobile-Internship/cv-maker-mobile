@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Parameters Supabase appends when it redirects back from an email link
 /// (password recovery, sign-up confirmation) or OAuth.
 class AuthCallbackInfo {
@@ -63,4 +65,27 @@ String describeAuthLinkError(String? code) {
       return 'Không mở được liên kết khôi phục. Hãy mở liên kết trên chính '
           'thiết bị và trình duyệt đã gửi yêu cầu, hoặc gửi lại liên kết mới.';
   }
+}
+
+/// True when [uri] carries access/PKCE tokens from an OAuth callback
+/// (and is not a password recovery redirect).
+bool isOAuthCallbackUri(Uri uri) {
+  final callback = parseAuthCallback(uri);
+  return callback.hasTokens && !callback.isRecovery;
+}
+
+bool _initialOAuthCallback = isOAuthCallbackUri(Uri.base);
+
+/// True when the current launch originated from an OAuth redirect callback.
+bool get isInitialOAuthCallback => _initialOAuthCallback;
+
+/// Marks the initial OAuth callback as handled so subsequent checks
+/// do not treat restored sessions as fresh sign-ins.
+void markInitialOAuthCallbackHandled() {
+  _initialOAuthCallback = false;
+}
+
+@visibleForTesting
+void setInitialOAuthCallbackForTest(bool value) {
+  _initialOAuthCallback = value;
 }
