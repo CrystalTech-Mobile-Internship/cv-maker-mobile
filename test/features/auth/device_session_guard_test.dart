@@ -19,6 +19,7 @@ const _user = AuthUser(
 class _FakeRepository implements DeviceSessionRepository {
   DeviceSessionStatus status = DeviceSessionStatus.current;
   int claims = 0;
+  int releases = 0;
   bool failClaim = false;
   final replaced = StreamController<void>.broadcast();
 
@@ -26,6 +27,11 @@ class _FakeRepository implements DeviceSessionRepository {
   Future<void> claim() async {
     claims++;
     if (failClaim) throw Exception('offline');
+  }
+
+  @override
+  Future<void> release() async {
+    releases++;
   }
 
   @override
@@ -56,13 +62,14 @@ void main() {
     expect(signOuts, 0);
   });
 
-  test('signs out when another device of the same kind signs in', () async {
+  test('signs out when another device of the same kind signs in without releasing', () async {
     await guard.handle(
       const AuthSessionChange(event: AuthSessionEvent.signedIn, user: _user),
     );
     repository.replaced.add(null);
     await Future<void>.delayed(Duration.zero);
     expect(signOuts, 1);
+    expect(repository.releases, 0);
   });
 
   test('a restored session that was replaced signs out on start', () async {
@@ -86,13 +93,14 @@ void main() {
     expect(signOuts, 0);
   });
 
-  test('stops watching after sign-out', () async {
+  test('stops watching and releases session after sign-out', () async {
     await guard.handle(
       const AuthSessionChange(event: AuthSessionEvent.signedIn, user: _user),
     );
     await guard.handle(
       const AuthSessionChange(event: AuthSessionEvent.signedOut, user: null),
     );
+    expect(repository.releases, 1);
     repository.replaced.add(null);
     await Future<void>.delayed(Duration.zero);
     expect(signOuts, 0);

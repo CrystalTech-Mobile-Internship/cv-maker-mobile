@@ -18,6 +18,9 @@ abstract interface class DeviceSessionRepository {
   /// Checks a restored session; claims it when nothing is recorded yet.
   Future<DeviceSessionStatus> check();
 
+  /// Releases the session record for this device on intentional sign-out.
+  Future<void> release();
+
   /// Emits when another device of the same kind takes over the account.
   Stream<void> watchReplaced(String userId);
 }

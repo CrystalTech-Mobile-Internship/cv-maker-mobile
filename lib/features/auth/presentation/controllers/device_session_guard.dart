@@ -23,6 +23,11 @@ class DeviceSessionGuard {
     switch (change.event) {
       case AuthSessionEvent.signedOut:
         await stop();
+        if (!_signingOut) {
+          try {
+            await _repository.release();
+          } catch (_) {}
+        }
       case AuthSessionEvent.signedIn:
         if (user == null) return;
         try {

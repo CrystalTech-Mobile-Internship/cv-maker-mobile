@@ -33,6 +33,7 @@ class SupabaseDeviceSessionRepository implements DeviceSessionRepository {
     : _provided = client;
 
   final SupabaseClient? _provided;
+  String? _lastClaimedSessionId;
 
   SupabaseClient? get _client => _provided ?? SupabaseService.client;
 
@@ -42,7 +43,9 @@ class SupabaseDeviceSessionRepository implements DeviceSessionRepository {
   @override
   Future<void> claim() async {
     final client = _client;
-    if (client == null || client.auth.currentSession == null) return;
+    final session = client?.auth.currentSession;
+    if (client == null || session == null) return;
+    _lastClaimedSessionId = sessionIdFromAccessToken(session.accessToken);
     await client.rpc(
       'claim_device_session',
       params: {
@@ -54,11 +57,39 @@ class SupabaseDeviceSessionRepository implements DeviceSessionRepository {
   }
 
   @override
+  Future<void> release() async {
+    final client = _client;
+    final mine = _sessionId ?? _lastClaimedSessionId;
+    _lastClaimedSessionId = null;
+    if (client == null) return;
+    try {
+      await client.rpc(
+        'release_device_session',
+        params: {
+          'p_platform': currentDevicePlatform,
+          if (mine != null) 'p_session_id': mine,
+        },
+      );
+    } catch (_) {
+      try {
+        var query = client
+            .from('user_device_sessions')
+            .delete()
+            .eq('platform', currentDevicePlatform);
+        if (mine != null) {
+          query = query.eq('session_id', mine);
+        }
+        await query;
+      } catch (_) {}
+    }
+  }
+
+  @override
   Future<DeviceSessionStatus> check() async {
     final client = _client;
     final mine = _sessionId;
     if (client == null || mine == null) return DeviceSessionStatus.unknown;
-    if (isInitialOAuthCallback) {
+    if (isInitialOAuthCallback || isOAuthCallbackUri(Uri.base)) {
       await claim();
       return DeviceSessionStatus.current;
     }
@@ -74,9 +105,10 @@ class SupabaseDeviceSessionRepository implements DeviceSessionRepository {
         return DeviceSessionStatus.current;
       }
       final active = '${(list.first as Map)['session_id']}';
-      return active == mine
-          ? DeviceSessionStatus.current
-          : DeviceSessionStatus.replaced;
+      if (active == mine || active == _lastClaimedSessionId) {
+        return DeviceSessionStatus.current;
+      }
+      return DeviceSessionStatus.replaced;
     } catch (_) {
       return DeviceSessionStatus.unknown;
     }
@@ -106,8 +138,11 @@ class SupabaseDeviceSessionRepository implements DeviceSessionRepository {
                 final row = payload.newRecord;
                 if (row['platform'] != currentDevicePlatform) return;
                 final active = row['session_id'];
-                final mine = _sessionId;
-                if (active is String && mine != null && active != mine) {
+                final mine = _sessionId ?? _lastClaimedSessionId;
+                if (active is String &&
+                    active != _lastClaimedSessionId &&
+                    mine != null &&
+                    active != mine) {
                   if (!controller.isClosed) controller.add(null);
                 }
               },
