@@ -148,7 +148,7 @@ class _ClickablePdfPagesState extends State<ClickablePdfPages> {
                         left: (region.left - 6) * scale,
                         top: (region.top - 3) * scale,
                         width: (region.width + 12) * scale,
-                        height: (region.height + 3) * scale,
+                        height: (region.height - 1) * scale,
                         child: _SectionHitBox(
                           key: ValueKey(
                             'a4-section-${region.section}-${region.page}',
