@@ -453,6 +453,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _ => const AccountScreen(embedded: true),
         }),
       ),
+      floatingActionButton: FloatingActionButton(
+        key: const Key('home-chat-fab'),
+        heroTag: 'home-chat-fab',
+        tooltip: 'Trò chuyện để tạo CV',
+        onPressed: () => context.push('/ai-interview'),
+        child: const Icon(Icons.smart_toy_outlined),
+      ),
       bottomNavigationBar: _isWide(context)
           ? null
           : NavigationBar(

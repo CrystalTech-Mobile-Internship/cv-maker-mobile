@@ -1,3 +1,4 @@
+import '../widgets/google_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -165,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               onPressed: isLoading || !isConfigured
                                   ? null
                                   : _signInWithGoogle,
-                              icon: const Icon(Icons.account_circle_outlined),
+                              icon: const GoogleLogo(),
                               label: const Text('Tiếp tục với Google'),
                             ),
                             TextButton(

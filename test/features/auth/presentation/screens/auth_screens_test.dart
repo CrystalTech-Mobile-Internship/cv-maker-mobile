@@ -125,6 +125,7 @@ void main() {
 
     expect(find.text('owner@example.com'), findsOneWidget);
     expect(find.text('Đã xác nhận'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Lưu'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Chấm điểm CV'),
@@ -142,13 +143,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
 
-    await tester.scrollUntilVisible(
-      find.text('Lưu thay đổi'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Lưu thay đổi'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Đăng xuất'),

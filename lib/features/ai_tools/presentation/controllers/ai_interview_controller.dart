@@ -15,6 +15,7 @@ class AiInterviewState {
     this.isGenerating = false,
     this.progress = 0,
     this.readyToGenerate = false,
+    this.offerDeclinedAtTurn,
     this.errorMessage,
     this.errorCode,
   });
@@ -37,6 +38,10 @@ class AiInterviewState {
   final bool isGenerating;
   final int progress;
   final bool readyToGenerate;
+
+  /// The user said "no" to creating the CV after this many answers; the
+  /// offer comes back once they share something new.
+  final int? offerDeclinedAtTurn;
   final String? errorMessage;
   final AiWritingFailureCode? errorCode;
 
@@ -48,6 +53,12 @@ class AiInterviewState {
   /// Users may generate early once they have shared a few answers.
   bool get canGenerate => !isBusy && (readyToGenerate || userTurns >= 3);
 
+  /// Whether the chat should ask "create the CV now?" under the last reply.
+  bool get showCreateOffer =>
+      (canGenerate || isGenerating) &&
+      !isSending &&
+      (offerDeclinedAtTurn == null || userTurns > offerDeclinedAtTurn!);
+
   AiInterviewState copyWith({
     String? language,
     List<AiChatMessage>? messages,
@@ -55,6 +66,7 @@ class AiInterviewState {
     bool? isGenerating,
     int? progress,
     bool? readyToGenerate,
+    int? offerDeclinedAtTurn,
     String? errorMessage,
     AiWritingFailureCode? errorCode,
     bool clearError = false,
@@ -66,6 +78,7 @@ class AiInterviewState {
       isGenerating: isGenerating ?? this.isGenerating,
       progress: progress ?? this.progress,
       readyToGenerate: readyToGenerate ?? this.readyToGenerate,
+      offerDeclinedAtTurn: offerDeclinedAtTurn ?? this.offerDeclinedAtTurn,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
       errorCode: clearError ? null : errorCode ?? this.errorCode,
     );
@@ -142,6 +155,23 @@ class AiInterviewController extends StateNotifier<AiInterviewState> {
       }
       return null;
     }
+  }
+
+  /// The user wants to keep chatting before creating the CV.
+  void declineOffer() {
+    if (state.isBusy) return;
+    state = state.copyWith(
+      offerDeclinedAtTurn: state.userTurns,
+      messages: [
+        ...state.messages,
+        AiChatMessage(
+          role: AiChatRole.assistant,
+          content: state.language == 'en'
+              ? 'Sure. Tell me anything else you want on your CV.'
+              : 'Được, bạn cứ kể thêm điều muốn có trong CV nhé.',
+        ),
+      ],
+    );
   }
 
   void switchLanguage(String language) {

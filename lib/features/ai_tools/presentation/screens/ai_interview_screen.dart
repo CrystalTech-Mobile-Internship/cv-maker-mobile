@@ -112,6 +112,7 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
             tooltip: 'Tùy chọn',
             onSelected: (value) {
               if (value == 'restart') controller.restart();
+              if (value == 'generate') _generate();
               if (value == 'vi' || value == 'en') {
                 controller.switchLanguage(value);
               }
@@ -128,6 +129,11 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
                 child: const Text('CV tiếng Anh'),
               ),
               const PopupMenuDivider(),
+              PopupMenuItem(
+                value: 'generate',
+                enabled: state.canGenerate,
+                child: const Text('Tạo CV ngay'),
+              ),
               const PopupMenuItem(value: 'restart', child: Text('Bắt đầu lại')),
             ],
           ),
@@ -150,10 +156,18 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
                 child: ListView.builder(
                   controller: _scroll,
                   padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                  itemCount: state.messages.length + (state.isSending ? 1 : 0),
+                  itemCount:
+                      state.messages.length +
+                      (state.isSending || state.showCreateOffer ? 1 : 0),
                   itemBuilder: (context, index) {
                     if (index >= state.messages.length) {
-                      return const _TypingBubble();
+                      if (state.isSending) return const _TypingBubble();
+                      return _CreateCvOffer(
+                        english: state.language == 'en',
+                        isGenerating: state.isGenerating,
+                        onYes: _generate,
+                        onNo: controller.declineOffer,
+                      );
                     }
                     return _MessageBubble(message: state.messages[index]);
                   },
@@ -165,53 +179,43 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
                   code: state.errorCode,
                   onDismiss: controller.dismissError,
                 ),
-              if (state.userTurns == 0)
-                SizedBox(
-                  height: 44,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    itemCount: _quickReplies.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) => ActionChip(
-                      label: Text(_quickReplies[index]),
-                      onPressed: state.isBusy
-                          ? null
-                          : () => _send(_quickReplies[index]),
+              SizedBox(
+                height: 44,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  children: [
+                    ActionChip(
+                      key: const ValueKey('ai-chat-ats'),
+                      avatar: const Icon(Icons.analytics_outlined, size: 18),
+                      label: const Text('Chấm điểm CV'),
+                      onPressed: () => context.push('/ats-scorer'),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    ActionChip(
+                      key: const ValueKey('ai-chat-practice'),
+                      avatar: const Icon(
+                        Icons.record_voice_over_outlined,
+                        size: 18,
+                      ),
+                      label: const Text('Luyện phỏng vấn'),
+                      onPressed: () => context.push('/interview-practice'),
+                    ),
+                    if (state.userTurns == 0)
+                      for (final reply in _quickReplies) ...[
+                        const SizedBox(width: 8),
+                        ActionChip(
+                          label: Text(reply),
+                          onPressed: state.isBusy ? null : () => _send(reply),
+                        ),
+                      ],
+                  ],
                 ),
+              ),
               _Composer(
                 controller: _input,
                 enabled: !state.isBusy,
                 onSend: _send,
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    key: const ValueKey('ai-generate-cv'),
-                    onPressed: state.canGenerate ? _generate : null,
-                    icon: state.isGenerating
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.description_outlined),
-                    label: Text(
-                      state.isGenerating
-                          ? 'Đang soạn CV...'
-                          : state.canGenerate
-                          ? 'Tạo CV từ cuộc trò chuyện (${AiCreditCost.generateCv} lượt)'
-                          : 'Trả lời thêm vài câu để tạo CV',
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
@@ -255,6 +259,79 @@ class _MessageBubble extends StatelessWidget {
               height: 1.4,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "Create the CV now?" with yes / no answers, shown under the last reply
+/// once the conversation has enough to work with.
+class _CreateCvOffer extends StatelessWidget {
+  const _CreateCvOffer({
+    required this.english,
+    required this.isGenerating,
+    required this.onYes,
+    required this.onNo,
+  });
+
+  final bool english;
+  final bool isGenerating;
+  final VoidCallback onYes;
+  final VoidCallback onNo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        key: const ValueKey('ai-create-offer'),
+        constraints: const BoxConstraints(maxWidth: 420),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceCard,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
+            bottomLeft: Radius.circular(4),
+            bottomRight: Radius.circular(16),
+          ),
+          border: Border.all(color: AppTheme.softBorder),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              english
+                  ? 'I have enough to draft your CV. Create it now? '
+                        '(${AiCreditCost.generateCv} uses)'
+                  : 'Mình đã có đủ thông tin. Bạn có muốn tạo CV ngay không? '
+                        '(${AiCreditCost.generateCv} lượt)',
+              style: const TextStyle(color: AppTheme.primaryNavy, height: 1.4),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FilledButton(
+                  key: const ValueKey('ai-generate-cv'),
+                  onPressed: isGenerating ? null : onYes,
+                  child: Text(
+                    isGenerating
+                        ? (english ? 'Creating...' : 'Đang soạn CV...')
+                        : (english ? 'Yes' : 'Có'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton(
+                  key: const ValueKey('ai-decline-cv'),
+                  onPressed: isGenerating ? null : onNo,
+                  child: Text(english ? 'No' : 'Không'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

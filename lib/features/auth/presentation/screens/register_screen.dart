@@ -1,3 +1,4 @@
+import '../widgets/google_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -219,7 +220,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         onPressed: isLoading || !isConfigured
                             ? null
                             : _signInWithGoogle,
-                        icon: const Icon(Icons.g_mobiledata_rounded, size: 28),
+                        icon: const GoogleLogo(),
                         label: const Text('Tiếp tục với Google'),
                       ),
                       const SizedBox(height: 8),

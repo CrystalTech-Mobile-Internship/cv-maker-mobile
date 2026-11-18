@@ -4,6 +4,7 @@
 import type { ChatMessage, CompletionOptions } from "./openrouter.ts";
 import {
   answerFeedback,
+  editSection,
   interviewQuestions,
   tailorCv,
 } from "./career_actions.ts";
@@ -495,4 +496,5 @@ export const actions: Record<string, ActionDefinition<any>> = {
   tailor_cv: tailorCv,
   interview_questions: interviewQuestions,
   answer_feedback: answerFeedback,
+  edit_section: editSection,
 };

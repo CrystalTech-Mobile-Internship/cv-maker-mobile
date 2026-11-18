@@ -142,4 +142,23 @@ class FakeAiAssistantRepository implements AiAssistantRepository {
       improvements: ['Thêm số liệu'],
     );
   }
+
+  final editSectionCalls = <String>[];
+
+  @override
+  Future<AiSectionEdit> editSection({
+    required String section,
+    required String instruction,
+    required List<AiEditBlock> blocks,
+    required String language,
+  }) async {
+    _maybeFail();
+    editSectionCalls.add('$section:$instruction');
+    return AiSectionEdit(
+      blocks: {
+        for (final b in blocks) b.id: [for (final l in b.lines) '$l (sửa)'],
+      },
+      reply: 'Đã sửa ${blocks.length} phần.',
+    );
+  }
 }
