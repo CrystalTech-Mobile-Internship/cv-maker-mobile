@@ -6,6 +6,13 @@ verify_jwt = true
 [functions.mirror-sync]
 verify_jwt = false
 
+# SePay calls this with its own API key, not a user token.
+[functions.sepay-webhook]
+verify_jwt = false
+
+[functions.support-notify]
+verify_jwt = true
+
 # Where sign-in (Google, password reset) may send people back to.
 # Keep the hosted project's Authentication > URL Configuration in sync.
 [auth]
