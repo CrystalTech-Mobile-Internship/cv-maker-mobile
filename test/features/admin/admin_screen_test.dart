@@ -5,6 +5,7 @@ import 'package:cv_maker_mobile/features/admin/domain/admin_models.dart';
 import 'package:cv_maker_mobile/features/admin/presentation/admin_providers.dart';
 import 'package:cv_maker_mobile/features/admin/presentation/admin_screen.dart';
 import 'package:cv_maker_mobile/features/support/domain/support_models.dart';
+import 'package:cv_maker_mobile/core/widgets/desktop_frame_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -100,6 +101,7 @@ Future<void> _pump(
   required bool admin,
   required AdminRepository repository,
   Size size = const Size(1200, 900),
+  Widget home = const AdminScreen(),
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -110,7 +112,7 @@ Future<void> _pump(
         isAdminProvider.overrideWith((ref) async => admin),
         adminRepositoryProvider.overrideWithValue(repository),
       ],
-      child: const MaterialApp(home: AdminScreen()),
+      child: MaterialApp(home: home),
     ),
   );
   await tester.pumpAndSettle();
@@ -182,6 +184,40 @@ void main() {
     await tester.pumpAndSettle();
     expect(repository.reviews, isEmpty);
 
+    await tester.tap(find.byKey(const Key('admin-review-confirm')));
+    await tester.pumpAndSettle();
+    expect(repository.reviews, [('r1', true)]);
+  });
+
+  testWidgets('on a computer payments is its own page with tables', (
+    tester,
+  ) async {
+    final repository = _FakeAdminRepository();
+    await _pump(
+      tester,
+      admin: true,
+      repository: repository,
+      size: const Size(1000, 900),
+      home: const DesktopFrameScope(
+        child: AdminScreen(section: AdminSection.payments),
+      ),
+    );
+
+    expect(find.byKey(const Key('admin-tab-payments')), findsNothing);
+    expect(find.byType(DataTable), findsNWidgets(2));
+    expect(find.text('Mã chuyển khoản'), findsOneWidget);
+    expect(find.text('Không khớp'), findsOneWidget);
+    // The table fits a laptop screen, so nothing hides off to the side.
+    for (final position
+        in tester
+            .stateList<ScrollableState>(find.byType(Scrollable))
+            .map((state) => state.position)
+            .where((p) => p.axis == Axis.horizontal)) {
+      expect(position.maxScrollExtent, 0);
+    }
+
+    await tester.tap(find.byKey(const Key('admin-approve-r1')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('admin-review-confirm')));
     await tester.pumpAndSettle();
     expect(repository.reviews, [('r1', true)]);

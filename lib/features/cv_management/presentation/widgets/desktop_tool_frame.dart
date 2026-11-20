@@ -42,7 +42,14 @@ class DesktopToolFrame extends ConsumerWidget {
             ? tr('Đăng nhập để sao lưu CV', 'Sign in to back up CVs')
             : user.email,
         onAccount: () => context.go('/home?tab=3'),
-        tools: desktopToolLinks(context, isAdmin: isAdmin, current: route),
+        tools: desktopToolLinks(
+          context,
+          isAdmin: isAdmin,
+          adminWaiting: isAdmin
+              ? ref.watch(adminStatsProvider).valueOrNull?.waitingThreads ?? 0
+              : 0,
+          current: route,
+        ),
         child: DesktopFrameScope(child: child),
       ),
     );

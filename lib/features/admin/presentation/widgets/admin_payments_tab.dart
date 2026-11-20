@@ -24,7 +24,7 @@ class AdminPaymentsTab extends ConsumerWidget {
       children: [
         Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 860),
+            constraints: const BoxConstraints(maxWidth: 1120),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -46,13 +46,16 @@ class AdminPaymentsTab extends ConsumerWidget {
                               'No transfers yet.',
                             ),
                           )
-                        : Column(
-                            children: [
-                              for (var i = 0; i < items.length; i++) ...[
-                                if (i > 0) const Divider(height: 1),
-                                _EventRow(items[i]),
+                        : _WideOrList(
+                            table: () => _EventTable(items),
+                            list: () => Column(
+                              children: [
+                                for (var i = 0; i < items.length; i++) ...[
+                                  if (i > 0) const Divider(height: 1),
+                                  _EventRow(items[i]),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                   ),
                 ),
@@ -70,13 +73,16 @@ class AdminPaymentsTab extends ConsumerWidget {
                     error: (error, _) => _Note(_errorText(error)),
                     data: (items) => items.isEmpty
                         ? _Note(tr('Chưa có yêu cầu nào.', 'No requests yet.'))
-                        : Column(
-                            children: [
-                              for (var i = 0; i < items.length; i++) ...[
-                                if (i > 0) const Divider(height: 1),
-                                _RequestRow(items[i]),
+                        : _WideOrList(
+                            table: () => _RequestTable(items),
+                            list: () => Column(
+                              children: [
+                                for (var i = 0; i < items.length; i++) ...[
+                                  if (i > 0) const Divider(height: 1),
+                                  _RequestRow(items[i]),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                   ),
                 ),
@@ -214,12 +220,7 @@ class _EventRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, tone) = switch (event.status) {
-      'matched' => (tr('Đã bật Pro', 'Pro activated'), _Tone.good),
-      'unmatched' => (tr('Không khớp', 'Not matched'), _Tone.warn),
-      'ignored' => (tr('Bỏ qua', 'Ignored'), _Tone.neutral),
-      _ => (tr('Đang xử lý', 'Processing'), _Tone.neutral),
-    };
+    final (label, tone) = _eventStatus(event);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Row(
@@ -262,16 +263,17 @@ class _EventRow extends StatelessWidget {
   }
 }
 
-class _RequestRow extends ConsumerStatefulWidget {
-  const _RequestRow(this.request);
+class _ReviewButtons extends ConsumerStatefulWidget {
+  const _ReviewButtons(this.request, {this.dense = false});
 
   final AdminProRequest request;
+  final bool dense;
 
   @override
-  ConsumerState<_RequestRow> createState() => _RequestRowState();
+  ConsumerState<_ReviewButtons> createState() => _ReviewButtonsState();
 }
 
-class _RequestRowState extends ConsumerState<_RequestRow> {
+class _ReviewButtonsState extends ConsumerState<_ReviewButtons> {
   bool _busy = false;
 
   Future<void> _review({required bool approve}) async {
@@ -348,18 +350,65 @@ class _RequestRowState extends ConsumerState<_RequestRow> {
   @override
   Widget build(BuildContext context) {
     final request = widget.request;
-    final plan = ProPlan.fromValue(request.plan);
-    final planLabel = request.plan == 'lifetime'
-        ? tr('Trọn đời', 'Lifetime')
-        : plan == ProPlan.quarterly
-        ? tr('3 tháng', '3 months')
-        : tr('1 tháng', '1 month');
-    final (label, tone) = switch (request.status) {
+    final style = widget.dense
+        ? const ButtonStyle(
+            visualDensity: VisualDensity.compact,
+            padding: WidgetStatePropertyAll(
+              EdgeInsets.symmetric(horizontal: 12),
+            ),
+          )
+        : null;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        FilledButton(
+          key: Key('admin-approve-${request.id}'),
+          style: style,
+          onPressed: _busy ? null : () => _review(approve: true),
+          child: Text(tr('Duyệt', 'Approve')),
+        ),
+        OutlinedButton(
+          key: Key('admin-reject-${request.id}'),
+          style: style,
+          onPressed: _busy ? null : () => _review(approve: false),
+          child: Text(tr('Từ chối', 'Reject')),
+        ),
+      ],
+    );
+  }
+}
+
+String _planLabel(AdminProRequest request) {
+  if (request.plan == 'lifetime') return tr('Trọn đời', 'Lifetime');
+  return ProPlan.fromValue(request.plan) == ProPlan.quarterly
+      ? tr('3 tháng', '3 months')
+      : tr('1 tháng', '1 month');
+}
+
+(String, _Tone) _requestStatus(AdminProRequest request) =>
+    switch (request.status) {
       'pending' => (tr('Chờ thanh toán', 'Awaiting payment'), _Tone.warn),
       'approved' => (tr('Đã duyệt', 'Approved'), _Tone.good),
       'rejected' => (tr('Từ chối', 'Rejected'), _Tone.bad),
       _ => (tr('Hết hạn', 'Expired'), _Tone.neutral),
     };
+
+(String, _Tone) _eventStatus(AdminPaymentEvent event) => switch (event.status) {
+  'matched' => (tr('Đã bật Pro', 'Pro activated'), _Tone.good),
+  'unmatched' => (tr('Không khớp', 'Not matched'), _Tone.warn),
+  'ignored' => (tr('Bỏ qua', 'Ignored'), _Tone.neutral),
+  _ => (tr('Đang xử lý', 'Processing'), _Tone.neutral),
+};
+
+class _RequestRow extends StatelessWidget {
+  const _RequestRow(this.request);
+
+  final AdminProRequest request;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, tone) = _requestStatus(request);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
@@ -373,9 +422,7 @@ class _RequestRowState extends ConsumerState<_RequestRow> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      request.email.isEmpty
-                          ? tr('(tài khoản đã xóa)', '(deleted account)')
-                          : request.email,
+                      _accountLabel(request),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -385,7 +432,7 @@ class _RequestRowState extends ConsumerState<_RequestRow> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '$planLabel · ${formatVnd(request.amount)} · ${adminStamp(request.createdAt)}',
+                      '${_planLabel(request)} · ${formatVnd(request.amount)} · ${adminStamp(request.createdAt)}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppTheme.mutedText,
@@ -409,25 +456,194 @@ class _RequestRowState extends ConsumerState<_RequestRow> {
           ),
           if (request.isPending) ...[
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                FilledButton(
-                  key: Key('admin-approve-${request.id}'),
-                  onPressed: _busy ? null : () => _review(approve: true),
-                  child: Text(tr('Duyệt', 'Approve')),
-                ),
-                OutlinedButton(
-                  key: Key('admin-reject-${request.id}'),
-                  onPressed: _busy ? null : () => _review(approve: false),
-                  child: Text(tr('Từ chối', 'Reject')),
-                ),
-              ],
-            ),
+            _ReviewButtons(request),
           ],
         ],
       ),
+    );
+  }
+}
+
+String _accountLabel(AdminProRequest request) => request.email.isEmpty
+    ? tr('(tài khoản đã xóa)', '(deleted account)')
+    : request.email;
+
+/// Tables on wide screens, simple rows on phones.
+class _WideOrList extends StatelessWidget {
+  const _WideOrList({required this.table, required this.list});
+
+  final Widget Function() table;
+  final Widget Function() list;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) =>
+        constraints.maxWidth >= 720 ? table() : list(),
+  );
+}
+
+class _Table extends StatelessWidget {
+  const _Table({required this.columns, required this.rows});
+
+  final List<String> columns;
+  final List<DataRow> rows;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: constraints.maxWidth),
+          child: DataTable(
+            headingRowColor: const WidgetStatePropertyAll(
+              AppTheme.surfaceLight,
+            ),
+            headingRowHeight: 44,
+            dataRowMinHeight: 52,
+            dataRowMaxHeight: 68,
+            horizontalMargin: 16,
+            columnSpacing: 20,
+            dividerThickness: 1,
+            headingTextStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.mutedText,
+            ),
+            dataTextStyle: const TextStyle(
+              fontSize: 13,
+              color: AppTheme.primaryNavy,
+            ),
+            columns: [for (final c in columns) DataColumn(label: Text(c))],
+            rows: rows,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EventTable extends StatelessWidget {
+  const _EventTable(this.items);
+
+  final List<AdminPaymentEvent> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Table(
+      columns: [
+        tr('Thời gian', 'Time'),
+        tr('Số tiền', 'Amount'),
+        tr('Nội dung chuyển khoản', 'Transfer note'),
+        tr('Trạng thái', 'Status'),
+      ],
+      rows: [
+        for (final event in items)
+          DataRow(
+            cells: [
+              DataCell(Text(adminStamp(event.createdAt))),
+              DataCell(
+                Text(
+                  formatVnd(event.amount),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+              DataCell(
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Text(
+                    event.content.isEmpty
+                        ? tr('(không có nội dung)', '(no note)')
+                        : event.content,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              DataCell(
+                Builder(
+                  builder: (context) {
+                    final (label, tone) = _eventStatus(event);
+                    return _StatusChip(label, tone);
+                  },
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _RequestTable extends StatelessWidget {
+  const _RequestTable(this.items);
+
+  final List<AdminProRequest> items;
+
+  @override
+  Widget build(BuildContext context) {
+    const muted = TextStyle(fontSize: 12, color: AppTheme.mutedText);
+    return _Table(
+      columns: [
+        tr('Tài khoản', 'Account'),
+        tr('Gói', 'Plan'),
+        tr('Mã chuyển khoản', 'Transfer code'),
+        tr('Trạng thái', 'Status'),
+      ],
+      rows: [
+        for (final request in items)
+          DataRow(
+            cells: [
+              DataCell(
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 240),
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: _accountLabel(request),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        TextSpan(
+                          text: '\n${adminStamp(request.createdAt)}',
+                          style: muted,
+                        ),
+                      ],
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              DataCell(
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: formatVnd(request.amount),
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      TextSpan(text: '\n${_planLabel(request)}', style: muted),
+                    ],
+                  ),
+                ),
+              ),
+              DataCell(SelectableText(request.transferCode)),
+              // Waiting requests show the actions; the rest show where they
+              // ended up.
+              DataCell(
+                request.isPending
+                    ? _ReviewButtons(request, dense: true)
+                    : Builder(
+                        builder: (context) {
+                          final (label, tone) = _requestStatus(request);
+                          return _StatusChip(label, tone);
+                        },
+                      ),
+              ),
+            ],
+          ),
+      ],
     );
   }
 }

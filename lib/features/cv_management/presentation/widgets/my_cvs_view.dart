@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -192,17 +193,21 @@ class MyCvsView extends StatelessWidget {
         onOpenPro: onOpenPro,
         onPractice: () => context.push('/interview-practice'),
       ),
-      const SizedBox(height: 12),
-      CloudSyncCard(
-        isSignedIn: isSignedIn,
-        localCount: cvs.length,
-        pendingCount: cvs.where((cv) => !cv.isSynced).length,
-        backendLabel: backendLabel,
-        isSyncing: isSyncing,
-        lastSyncedAt: lastSyncedAt,
-        onSync: onSync,
-        onLogin: onLogin,
-      ),
+      // On the web every save goes straight to the account and a full sync
+      // runs at sign-in, so the manual button is only kept on phones.
+      if (!kIsWeb) ...[
+        const SizedBox(height: 12),
+        CloudSyncCard(
+          isSignedIn: isSignedIn,
+          localCount: cvs.length,
+          pendingCount: cvs.where((cv) => !cv.isSynced).length,
+          backendLabel: backendLabel,
+          isSyncing: isSyncing,
+          lastSyncedAt: lastSyncedAt,
+          onSync: onSync,
+          onLogin: onLogin,
+        ),
+      ],
       const SizedBox(height: 12),
       LocalDataToolsCard(onExport: onExportAll, onRestore: onRestoreBackup),
     ];

@@ -91,6 +91,7 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
       title: AppConstants.appName,
       scaffoldMessengerKey: _messengerKey,
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const _QuietScrollBehavior(),
       theme: AppTheme.lightTheme,
       routerConfig: _router,
       locale: Locale(language.code),
@@ -194,4 +195,17 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
       }
     });
   }
+}
+
+/// Pages still scroll with the wheel, touch and keyboard, but no scroll bar
+/// is drawn: the default bars on the web are wide and distracting.
+class _QuietScrollBehavior extends MaterialScrollBehavior {
+  const _QuietScrollBehavior();
+
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) => child;
 }
