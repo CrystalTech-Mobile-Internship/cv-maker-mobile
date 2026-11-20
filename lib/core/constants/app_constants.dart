@@ -32,4 +32,7 @@ class AppConstants {
   static const String templateHealthcareCalm = 'healthcare_calm';
   static const String templateSalesImpact = 'sales_impact';
   static const String templateInternationalCompact = 'international_compact';
+  static const String templateTechTimeline = 'tech_timeline';
+  static const String templateStartupBold = 'startup_bold';
+  static const String templateMinimalMono = 'minimal_mono';
 }

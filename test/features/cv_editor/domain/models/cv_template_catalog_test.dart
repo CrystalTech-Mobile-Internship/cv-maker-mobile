@@ -2,12 +2,14 @@ import 'package:cv_maker_mobile/features/cv_editor/domain/models/cv_template.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('catalog keeps eight free templates and the rest for Pro', () {
+  test('free keeps simple one-column designs and Pro gets the rest', () {
     final free = CvTemplateCatalog.freeTemplates;
+    final pro = CvTemplateCatalog.premiumTemplates;
     final all = CvTemplateCatalog.allTemplates;
 
-    expect(free, hasLength(8));
-    expect(free.where((item) => item.hasPhoto), hasLength(3));
+    expect(free, hasLength(6));
+    expect(pro.length, greaterThan(free.length));
+    expect(free.where((item) => item.hasPhoto), hasLength(1));
     expect(free.every((item) => !item.isPremium), isTrue);
     expect(
       CvTemplateCatalog.premiumTemplates.every((t) => t.isPremium),
@@ -22,9 +24,27 @@ void main() {
         CvTemplateLayout.classic,
         CvTemplateLayout.modern,
         CvTemplateLayout.sidebar,
-        CvTemplateLayout.executive,
+        CvTemplateLayout.banner,
+        CvTemplateLayout.timeline,
+        CvTemplateLayout.accent,
       ]),
     );
+    // Designs with their own structure are Pro only.
+    const proLayouts = {
+      CvTemplateLayout.sidebar,
+      CvTemplateLayout.banner,
+      CvTemplateLayout.timeline,
+      CvTemplateLayout.accent,
+    };
+    expect(free.any((t) => proLayouts.contains(t.layout)), isFalse);
+  });
+
+  test('templates moved to Pro still resolve for existing CVs', () {
+    for (final id in ['professional_sidebar', 'fresh_profile']) {
+      final template = CvTemplateCatalog.byId(id);
+      expect(template.id, id);
+      expect(template.isPremium, isTrue);
+    }
   });
 
   test('only Pro accounts can pick every template', () {

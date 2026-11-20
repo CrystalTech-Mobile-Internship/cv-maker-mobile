@@ -45,6 +45,12 @@ class TemplateThumbnail extends StatelessWidget {
               height: 198,
               child: switch (template.layout) {
                 CvTemplateLayout.sidebar => _SidebarPreview(accent: accent),
+                CvTemplateLayout.banner => _BannerPreview(
+                  accent: accent,
+                  photo: template.hasPhoto,
+                ),
+                CvTemplateLayout.timeline => _TimelinePreview(accent: accent),
+                CvTemplateLayout.accent => _AccentPreview(accent: accent),
                 CvTemplateLayout.creative => _CreativePreview(accent: accent),
                 CvTemplateLayout.cleanPhoto ||
                 CvTemplateLayout.freshPhoto => _PhotoPreview(
@@ -285,6 +291,136 @@ class _AcademicPreview extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           ..._sections(accent, count: 4),
+        ],
+      ),
+    );
+  }
+}
+
+class _BannerPreview extends StatelessWidget {
+  const _BannerPreview({required this.accent, required this.photo});
+
+  final Color accent;
+  final bool photo;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Color.lerp(accent, Colors.black, 0.45)!;
+    return Padding(
+      padding: const EdgeInsets.all(7),
+      child: Column(
+        children: [
+          Container(
+            height: 44,
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: dark,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      _MiniLine(width: 62, height: 6, color: Colors.white),
+                      SizedBox(height: 4),
+                      _MiniLine(width: 40, height: 3, color: Color(0xCCFFFFFF)),
+                    ],
+                  ),
+                ),
+                if (photo) const _AvatarDot(color: Colors.white),
+              ],
+            ),
+          ),
+          const SizedBox(height: 7),
+          Expanded(child: Column(children: _sections(accent, count: 3))),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimelinePreview extends StatelessWidget {
+  const _TimelinePreview({required this.accent});
+
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _MiniLine(width: 76, height: 7, color: accent),
+          const SizedBox(height: 4),
+          const _MiniLine(width: 52, height: 3),
+          const SizedBox(height: 9),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.only(left: 7),
+              decoration: BoxDecoration(
+                border: Border(left: BorderSide(color: accent, width: 1.6)),
+              ),
+              child: Column(children: _sections(accent, count: 3)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccentPreview extends StatelessWidget {
+  const _AccentPreview({required this.accent});
+
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget heading(double width) => Row(
+      children: [
+        Container(width: 3, height: 8, color: accent),
+        const SizedBox(width: 4),
+        _MiniLine(width: width, height: 4, color: accent),
+      ],
+    );
+    Widget tag(double width) => Container(
+      width: width,
+      height: 7,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: accent, width: 0.8),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _MiniLine(width: 80, height: 7, color: accent),
+          const SizedBox(height: 4),
+          const _MiniLine(width: 50, height: 3),
+          const SizedBox(height: 10),
+          heading(40),
+          const SizedBox(height: 5),
+          const _MiniLine(width: double.infinity, height: 2.5),
+          const SizedBox(height: 3),
+          const _MiniLine(width: 80, height: 2.5),
+          const SizedBox(height: 9),
+          heading(30),
+          const SizedBox(height: 5),
+          Wrap(
+            spacing: 3,
+            runSpacing: 3,
+            children: [tag(20), tag(26), tag(16), tag(22), tag(18)],
+          ),
+          const SizedBox(height: 9),
+          heading(36),
+          const SizedBox(height: 5),
+          const _MiniLine(width: double.infinity, height: 2.5),
         ],
       ),
     );

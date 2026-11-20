@@ -42,9 +42,19 @@ enum CvTemplateLayout {
   executive,
   academic,
   freshPhoto,
+
+  /// Dark block header with white text.
+  banner,
+
+  /// Entries hang off a vertical line.
+  timeline,
+
+  /// Bar headings and skill tags.
+  accent,
 }
 
 abstract final class CvTemplateCatalog {
+  /// Free: one clear column that every hiring system can read.
   static const freeTemplates = <CvTemplate>[
     CvTemplate(
       id: AppConstants.templateHarvardAts,
@@ -78,7 +88,6 @@ abstract final class CvTemplateCatalog {
       description: 'Dòng thời gian rõ, phù hợp hồ sơ có lịch sử ổn định.',
       accentHex: '#334155',
       layout: CvTemplateLayout.classic,
-      isNew: true,
     ),
     CvTemplate(
       id: AppConstants.templateGraduateSkills,
@@ -87,7 +96,6 @@ abstract final class CvTemplateCatalog {
       description: 'Ưu tiên năng lực, học vấn và dự án nổi bật.',
       accentHex: '#0369A1',
       layout: CvTemplateLayout.modern,
-      isNew: true,
     ),
     CvTemplate(
       id: AppConstants.templateInternationalCompact,
@@ -96,111 +104,143 @@ abstract final class CvTemplateCatalog {
       description: 'Một cột gọn, ít màu và tối ưu khả năng quét nhanh.',
       accentHex: '#111827',
       layout: CvTemplateLayout.academic,
-      isNew: true,
     ),
+  ];
+
+  /// Pro: each design has its own structure, not just another colour.
+  static const premiumTemplates = <CvTemplate>[
     CvTemplate(
       id: AppConstants.templateProfessionalSidebar,
       name: 'Professional Sidebar',
       audience: 'Sinh viên • Có ảnh',
-      description: 'Sidebar kỹ năng và nội dung chính cân đối.',
+      description: 'Cột bên màu đậm cho liên hệ và kỹ năng.',
       accentHex: '#18A999',
       layout: CvTemplateLayout.sidebar,
       hasPhoto: true,
+      isPremium: true,
     ),
     CvTemplate(
-      id: AppConstants.templateFreshProfile,
-      name: 'Fresh Profile',
-      audience: 'Marketing • Dịch vụ • Có ảnh',
-      description: 'Ảnh nổi bật cùng mảng màu xanh tươi trẻ.',
-      accentHex: '#047857',
-      layout: CvTemplateLayout.freshPhoto,
-      hasPhoto: true,
+      id: AppConstants.templateTechTimeline,
+      name: 'Tech Timeline',
+      audience: 'Công nghệ • Kỹ sư',
+      description: 'Đầu trang khối tối, dòng thời gian và thẻ kỹ năng.',
+      accentHex: '#0EA5E9',
+      layout: CvTemplateLayout.banner,
+      isPremium: true,
+      isNew: true,
     ),
-  ];
-
-  static const premiumTemplates = <CvTemplate>[
+    CvTemplate(
+      id: AppConstants.templateExecutiveNavy,
+      name: 'Executive Navy',
+      audience: 'Quản lý',
+      description: 'Khối tên xanh đậm, kinh nghiệm theo dòng thời gian.',
+      accentHex: '#1E3A8A',
+      layout: CvTemplateLayout.banner,
+      isPremium: true,
+    ),
     CvTemplate(
       id: 'premium_elegant_photo',
       name: 'Elegant Portrait',
-      audience: 'Có ảnh',
-      description: 'Phong cách thanh lịch dành cho hồ sơ cấp cao.',
+      audience: 'Cấp cao • Có ảnh',
+      description: 'Khối tên màu nâu ấm, ảnh tròn và dòng thời gian.',
       accentHex: '#B45309',
-      layout: CvTemplateLayout.cleanPhoto,
+      layout: CvTemplateLayout.banner,
       hasPhoto: true,
       isPremium: true,
     ),
     CvTemplate(
       id: 'premium_creative_portfolio',
       name: 'Creative Portfolio',
-      audience: 'Thiết kế',
-      description: 'Bố cục giàu hình ảnh cho ngành sáng tạo.',
+      audience: 'Thiết kế • Có ảnh',
+      description: 'Khối tên hồng đậm, tiêu đề dạng nhãn, thẻ kỹ năng.',
       accentHex: '#DB2777',
-      layout: CvTemplateLayout.creative,
+      layout: CvTemplateLayout.banner,
       hasPhoto: true,
-      isPremium: true,
-    ),
-    CvTemplate(
-      id: 'premium_ai_focus',
-      name: 'Modern Focus',
-      audience: 'Gọn, hiện đại',
-      description: 'Gợi ý nội dung và từ khóa theo vị trí ứng tuyển.',
-      accentHex: '#4F46E5',
-      layout: CvTemplateLayout.executive,
-      isPremium: true,
-    ),
-    CvTemplate(
-      id: AppConstants.templateCreativeTech,
-      name: 'Creative Tech',
-      audience: 'Công nghệ',
-      description: 'Header nổi bật cho hồ sơ công nghệ sáng tạo.',
-      accentHex: '#7C3AED',
-      layout: CvTemplateLayout.creative,
-      hasPhoto: true,
-      isPremium: true,
-    ),
-    CvTemplate(
-      id: AppConstants.templateExecutiveNavy,
-      name: 'Executive Navy',
-      audience: 'Quản lý',
-      description: 'Phong cách doanh nghiệp, ưu tiên thành tích.',
-      accentHex: '#1E3A8A',
-      layout: CvTemplateLayout.executive,
-      isPremium: true,
-    ),
-    CvTemplate(
-      id: AppConstants.templateAcademicClassic,
-      name: 'Academic Classic',
-      audience: 'Giáo dục',
-      description: 'Bố cục cổ điển cho học thuật và chứng chỉ.',
-      accentHex: '#9A3412',
-      layout: CvTemplateLayout.academic,
-      isPremium: true,
-    ),
-    CvTemplate(
-      id: AppConstants.templateFinancePrecision,
-      name: 'Finance Precision',
-      audience: 'Tài chính',
-      description: 'Bố cục nghiêm túc, nhấn mạnh số liệu và thành tích.',
-      accentHex: '#1E3A5F',
-      layout: CvTemplateLayout.executive,
-      isPremium: true,
-    ),
-    CvTemplate(
-      id: AppConstants.templateHealthcareCalm,
-      name: 'Healthcare Calm',
-      audience: 'Y tế',
-      description: 'Màu xanh dịu, khoảng trắng tốt và dễ kiểm tra.',
-      accentHex: '#0F766E',
-      layout: CvTemplateLayout.modern,
       isPremium: true,
     ),
     CvTemplate(
       id: AppConstants.templateSalesImpact,
       name: 'Sales Impact',
       audience: 'Kinh doanh',
-      description: 'Tiêu đề mạnh, tập trung KPI và kết quả đo lường.',
+      description: 'Khối tên nổi bật, tiêu đề dạng nhãn, tập trung KPI.',
       accentHex: '#B45309',
-      layout: CvTemplateLayout.executive,
+      layout: CvTemplateLayout.banner,
+      isPremium: true,
+    ),
+    CvTemplate(
+      id: AppConstants.templateFinancePrecision,
+      name: 'Finance Precision',
+      audience: 'Tài chính',
+      description: 'Tiêu đề thanh dọc, kinh nghiệm theo dòng thời gian.',
+      accentHex: '#1E3A5F',
+      layout: CvTemplateLayout.timeline,
+      isPremium: true,
+    ),
+    CvTemplate(
+      id: AppConstants.templateAcademicClassic,
+      name: 'Academic Classic',
+      audience: 'Giáo dục • Nghiên cứu',
+      description: 'Tên căn giữa, học vấn và công trình theo dòng thời gian.',
+      accentHex: '#9A3412',
+      layout: CvTemplateLayout.timeline,
+      isPremium: true,
+    ),
+    CvTemplate(
+      id: AppConstants.templateStartupBold,
+      name: 'Startup Bold',
+      audience: 'Startup • Sản phẩm',
+      description: 'Đầu trang nền xanh, tiêu đề dạng nhãn, dòng thời gian.',
+      accentHex: '#059669',
+      layout: CvTemplateLayout.timeline,
+      isPremium: true,
+      isNew: true,
+    ),
+    CvTemplate(
+      id: 'premium_ai_focus',
+      name: 'Modern Focus',
+      audience: 'Gọn, hiện đại',
+      description: 'Tiêu đề thanh dọc và kỹ năng dạng thẻ dễ quét.',
+      accentHex: '#4F46E5',
+      layout: CvTemplateLayout.accent,
+      isPremium: true,
+    ),
+    CvTemplate(
+      id: AppConstants.templateMinimalMono,
+      name: 'Minimal Mono',
+      audience: 'Mọi ngành • Đen trắng',
+      description: 'Đen trắng tinh gọn, tiêu đề thanh dọc, thẻ kỹ năng.',
+      accentHex: '#111827',
+      layout: CvTemplateLayout.accent,
+      isPremium: true,
+      isNew: true,
+    ),
+    CvTemplate(
+      id: AppConstants.templateHealthcareCalm,
+      name: 'Healthcare Calm',
+      audience: 'Y tế',
+      description: 'Đầu trang nền dịu, tiêu đề thanh dọc, thẻ kỹ năng.',
+      accentHex: '#0F766E',
+      layout: CvTemplateLayout.accent,
+      isPremium: true,
+    ),
+    CvTemplate(
+      id: AppConstants.templateCreativeTech,
+      name: 'Creative Tech',
+      audience: 'Công nghệ • Có ảnh',
+      description: 'Đầu trang tím nhạt, tiêu đề dạng nhãn, thẻ kỹ năng.',
+      accentHex: '#7C3AED',
+      layout: CvTemplateLayout.creative,
+      hasPhoto: true,
+      isPremium: true,
+    ),
+    CvTemplate(
+      id: AppConstants.templateFreshProfile,
+      name: 'Fresh Profile',
+      audience: 'Marketing • Dịch vụ • Có ảnh',
+      description: 'Ảnh nổi bật, đầu trang xanh tươi và thẻ kỹ năng.',
+      accentHex: '#047857',
+      layout: CvTemplateLayout.freshPhoto,
+      hasPhoto: true,
       isPremium: true,
     ),
   ];
@@ -221,6 +261,41 @@ abstract final class CvTemplateCatalog {
 }
 
 const _templateEn = <String, String>{
+  'Cột bên màu đậm cho liên hệ và kỹ năng.':
+      'Dark side column for contact details and skills.',
+  'Công nghệ • Kỹ sư': 'Technology • Engineers',
+  'Đầu trang khối tối, dòng thời gian và thẻ kỹ năng.':
+      'Dark header block, timeline and skill tags.',
+  'Khối tên xanh đậm, kinh nghiệm theo dòng thời gian.':
+      'Navy name block with a timeline of experience.',
+  'Cấp cao • Có ảnh': 'Senior • Photo',
+  'Khối tên màu nâu ấm, ảnh tròn và dòng thời gian.':
+      'Warm brown name block, round photo and timeline.',
+  'Thiết kế • Có ảnh': 'Design • Photo',
+  'Khối tên hồng đậm, tiêu đề dạng nhãn, thẻ kỹ năng.':
+      'Deep pink name block, label headings, skill tags.',
+  'Khối tên nổi bật, tiêu đề dạng nhãn, tập trung KPI.':
+      'Bold name block and label headings focused on KPIs.',
+  'Tiêu đề thanh dọc, kinh nghiệm theo dòng thời gian.':
+      'Bar headings and a timeline of experience.',
+  'Giáo dục • Nghiên cứu': 'Education • Research',
+  'Tên căn giữa, học vấn và công trình theo dòng thời gian.':
+      'Centred name, education and work on a timeline.',
+  'Startup • Sản phẩm': 'Startups • Product',
+  'Đầu trang nền xanh, tiêu đề dạng nhãn, dòng thời gian.':
+      'Green header, label headings and a timeline.',
+  'Tiêu đề thanh dọc và kỹ năng dạng thẻ dễ quét.':
+      'Bar headings and skill tags that are quick to scan.',
+  'Mọi ngành • Đen trắng': 'Any field • Black and white',
+  'Đen trắng tinh gọn, tiêu đề thanh dọc, thẻ kỹ năng.':
+      'Clean black and white, bar headings, skill tags.',
+  'Đầu trang nền dịu, tiêu đề thanh dọc, thẻ kỹ năng.':
+      'Soft header, bar headings and skill tags.',
+  'Công nghệ • Có ảnh': 'Technology • Photo',
+  'Đầu trang tím nhạt, tiêu đề dạng nhãn, thẻ kỹ năng.':
+      'Light purple header, label headings, skill tags.',
+  'Ảnh nổi bật, đầu trang xanh tươi và thẻ kỹ năng.':
+      'Prominent photo, fresh green header and skill tags.',
   'Mọi ngành • Bố cục chuẩn tuyển dụng': 'Any field • Standard hiring layout',
   'Một cột rõ ràng, tối ưu hệ thống tuyển dụng.':
       'One clear column, easy for hiring systems to read.',
