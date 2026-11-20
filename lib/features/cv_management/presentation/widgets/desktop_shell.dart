@@ -20,6 +20,7 @@ class DesktopToolLink {
     required this.onTap,
     this.badge,
     this.key,
+    this.selected = false,
   });
 
   final IconData icon;
@@ -29,7 +30,34 @@ class DesktopToolLink {
   /// Short tag such as "Miễn phí" or "AI".
   final String? badge;
   final Key? key;
+
+  /// True for the tool whose page is open.
+  final bool selected;
 }
+
+/// The four main sections, shared by the home screen and tool pages.
+List<DesktopNavItem> get desktopDestinations => [
+  DesktopNavItem(
+    Icons.folder_copy_outlined,
+    Icons.folder_copy_rounded,
+    tr('CV của tôi', 'My CVs'),
+  ),
+  DesktopNavItem(
+    Icons.palette_outlined,
+    Icons.palette_rounded,
+    tr('Mẫu CV', 'Templates'),
+  ),
+  DesktopNavItem(
+    Icons.forum_outlined,
+    Icons.forum_rounded,
+    tr('Cộng đồng', 'Community'),
+  ),
+  DesktopNavItem(
+    Icons.account_circle_outlined,
+    Icons.account_circle_rounded,
+    tr('Tài khoản', 'Account'),
+  ),
+];
 
 /// Computer layout: fixed sidebar on the left, page header on top and the
 /// page content below. Phones keep the bottom navigation instead.
@@ -47,8 +75,11 @@ class DesktopShell extends StatelessWidget {
     this.accountDetail,
     this.onAccount,
     this.tools = const [],
+    this.showHeader = true,
   });
 
+  /// Tool pages bring their own app bar, so they hide the shell header.
+  final bool showHeader;
   final List<DesktopNavItem> items;
   final List<DesktopToolLink> tools;
   final int selectedIndex;
@@ -79,34 +110,35 @@ class DesktopShell extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              Container(
-                key: const Key('desktop-page-header'),
-                height: 68,
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    bottom: BorderSide(color: AppTheme.softBorder),
+              if (showHeader)
+                Container(
+                  key: const Key('desktop-page-header'),
+                  height: 68,
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(color: AppTheme.softBorder),
+                    ),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.primaryNavy,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.primaryNavy,
+                          ),
                         ),
                       ),
-                    ),
-                    ...actions,
-                  ],
+                      ...actions,
+                    ],
+                  ),
                 ),
-              ),
               Expanded(child: child),
             ],
           ),
@@ -282,10 +314,11 @@ class _ToolTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ai = tool.badge == 'AI';
+    final selected = tool.selected;
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Material(
-        color: Colors.transparent,
+        color: selected ? AppTheme.indigoSurface : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
@@ -295,17 +328,23 @@ class _ToolTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             child: Row(
               children: [
-                Icon(tool.icon, size: 19, color: AppTheme.mutedText),
+                Icon(
+                  tool.icon,
+                  size: 19,
+                  color: selected ? AppTheme.brandIndigo : AppTheme.mutedText,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     tool.label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.primarySlate,
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                      color: selected
+                          ? AppTheme.brandIndigo
+                          : AppTheme.primarySlate,
                     ),
                   ),
                 ),
