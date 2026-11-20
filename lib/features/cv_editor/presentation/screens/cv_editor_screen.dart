@@ -37,6 +37,7 @@ import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/utils/cv_id.dart';
 import '../../../../core/widgets/responsive_action_bar.dart';
 import '../../domain/services/cv_skill_grouper.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class CvEditorScreen extends ConsumerStatefulWidget {
   const CvEditorScreen({super.key, this.initialCv});
@@ -80,7 +81,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   Timer? _debounceTimer;
   Timer? _previewDebounceTimer;
   Future<Uint8List>? _desktopPdfBytes;
-  String _syncStatusText = 'Đã lưu trên thiết bị';
+  String _syncStatusText = tr('Đã lưu trên thiết bị', 'Saved on this device');
 
   bool get _isEn => _selectedLanguage == 'en';
 
@@ -144,8 +145,8 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
   void _onFieldChanged([String? _]) {
     _debounceTimer?.cancel();
     _scheduleDesktopPreview();
-    if (_syncStatusText != 'Đang tự động lưu...') {
-      setState(() => _syncStatusText = 'Đang tự động lưu...');
+    if (_syncStatusText != tr('Đang tự động lưu...', 'Saving...')) {
+      setState(() => _syncStatusText = tr('Đang tự động lưu...', 'Saving...'));
     }
     _debounceTimer = Timer(const Duration(milliseconds: 600), () async {
       try {
@@ -562,7 +563,10 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                 if (instCtrl.text.trim().isEmpty ||
                     degreeCtrl.text.trim().isEmpty) {
                   _showInputValidationError(
-                    'Vui lòng nhập tên trường và bằng cấp.',
+                    tr(
+                      'Vui lòng nhập tên trường và bằng cấp.',
+                      'Please enter the school and degree.',
+                    ),
                     'Enter an institution and degree.',
                   );
                   return;
@@ -577,14 +581,20 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                             endYear < 1900 ||
                             endYear > 2100))) {
                   _showInputValidationError(
-                    'Năm học phải là số từ 1900 đến 2100.',
+                    tr(
+                      'Năm học phải là số từ 1900 đến 2100.',
+                      'Years must be numbers from 1900 to 2100.',
+                    ),
                     'Enter study years between 1900 and 2100.',
                   );
                   return;
                 }
                 if (!isCurrent && endYear! < startYear) {
                   _showInputValidationError(
-                    'Năm tốt nghiệp không thể trước năm bắt đầu.',
+                    tr(
+                      'Năm tốt nghiệp không thể trước năm bắt đầu.',
+                      'End year cannot be before start year.',
+                    ),
                     'The graduation year cannot precede the start year.',
                   );
                   return;
@@ -791,7 +801,10 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                 if (roleCtrl.text.trim().isEmpty ||
                     compCtrl.text.trim().isEmpty) {
                   _showInputValidationError(
-                    'Vui lòng nhập vị trí và tên công ty.',
+                    tr(
+                      'Vui lòng nhập vị trí và tên công ty.',
+                      'Please enter the job title and company.',
+                    ),
                     'Enter a job title and company.',
                   );
                   return;
@@ -814,7 +827,10 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                             endYear < 1900 ||
                             endYear > 2100))) {
                   _showInputValidationError(
-                    'Nhập tháng từ 1 đến 12 và năm từ 1900 đến 2100.',
+                    tr(
+                      'Nhập tháng từ 1 đến 12 và năm từ 1900 đến 2100.',
+                      'Enter a month from 1 to 12 and a year from 1900 to 2100.',
+                    ),
                     'Enter months from 1 to 12 and years from 1900 to 2100.',
                   );
                   return;
@@ -825,7 +841,10 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                       endMonth!,
                     ).isBefore(DateTime(startYear, startMonth))) {
                   _showInputValidationError(
-                    'Thời gian kết thúc không thể trước thời gian bắt đầu.',
+                    tr(
+                      'Thời gian kết thúc không thể trước thời gian bắt đầu.',
+                      'End date cannot be before start date.',
+                    ),
                     'The end date cannot precede the start date.',
                   );
                   return;
@@ -885,7 +904,9 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
     try {
       final suggestion = await runWithAiProgress(
         context,
-        _selectedLanguage == 'en' ? 'Rewriting...' : 'Đang viết lại...',
+        _selectedLanguage == 'en'
+            ? 'Rewriting...'
+            : tr('Đang viết lại...', 'Rewriting...'),
         () => ref
             .read(aiAssistantRepositoryProvider)
             .improveBullets(
@@ -1048,7 +1069,10 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
               onPressed: () {
                 if (nameCtrl.text.trim().isEmpty) {
                   _showInputValidationError(
-                    'Vui lòng nhập tên kỹ năng.',
+                    tr(
+                      'Vui lòng nhập tên kỹ năng.',
+                      'Please enter a skill name.',
+                    ),
                     'Enter a skill name.',
                   );
                   return;
@@ -1823,7 +1847,7 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                             ? (isSignedIn ? 'Back up' : 'Save Locally')
                             : (isSignedIn
                                   ? 'Lưu vào tài khoản'
-                                  : 'Lưu vào máy'),
+                                  : tr('Lưu vào máy', 'Save on device')),
                       ),
               ),
               ElevatedButton.icon(

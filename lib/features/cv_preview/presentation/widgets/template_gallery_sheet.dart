@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Modal bottom sheet showcasing available CV templates with visual tags and 1-tap switching.
 class TemplateGallerySheet extends StatelessWidget {
@@ -194,8 +195,8 @@ class TemplateGallerySheet extends StatelessWidget {
                                         color: Colors.blue.shade50,
                                         borderRadius: BorderRadius.circular(6),
                                       ),
-                                      child: const Text(
-                                        'Ảnh',
+                                      child: Text(
+                                        tr('Ảnh', 'Photo'),
                                         style: TextStyle(
                                           fontSize: 10,
                                           fontWeight: FontWeight.bold,

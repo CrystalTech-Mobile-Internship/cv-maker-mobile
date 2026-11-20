@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Editable AI cover letter with a copy action.
 Future<void> showCoverLetterSheet(BuildContext context, String letter) {
@@ -23,8 +24,8 @@ Future<void> showCoverLetterSheet(BuildContext context, String letter) {
           16 + MediaQuery.viewInsetsOf(context).bottom,
         ),
         children: [
-          const Text(
-            'Thư xin việc',
+          Text(
+            tr('Thư xin việc', 'Cover letter'),
             style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 18,
@@ -32,8 +33,11 @@ Future<void> showCoverLetterSheet(BuildContext context, String letter) {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Đọc lại, sửa tên người nhận và thông tin chưa chính xác trước khi gửi.',
+          Text(
+            tr(
+              'Đọc lại, sửa tên người nhận và thông tin chưa chính xác trước khi gửi.',
+              'Read it through and fix the recipient name and any wrong details before sending.',
+            ),
             style: TextStyle(color: AppTheme.mutedText),
           ),
           const SizedBox(height: 12),
@@ -44,12 +48,16 @@ Future<void> showCoverLetterSheet(BuildContext context, String letter) {
               await Clipboard.setData(ClipboardData(text: controller.text));
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Đã sao chép thư xin việc.')),
+                  SnackBar(
+                    content: Text(
+                      tr('Đã sao chép thư xin việc.', 'Cover letter copied.'),
+                    ),
+                  ),
                 );
               }
             },
             icon: const Icon(Icons.copy_rounded),
-            label: const Text('Sao chép'),
+            label: Text(tr('Sao chép', 'Copy')),
           ),
         ],
       ),

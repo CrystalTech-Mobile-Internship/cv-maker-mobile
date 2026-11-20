@@ -15,19 +15,14 @@ void main() {
     await tester.pumpWidget(_appWithUser(null));
 
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Đăng nhập để nâng cấp'),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
     expect(find.text('Đăng nhập để nâng cấp'), findsOneWidget);
-    expect(find.text('Quét VietQR để nâng cấp'), findsNothing);
-    expect(find.text('Tôi đã chuyển khoản'), findsNothing);
+    expect(find.byKey(const ValueKey('pro-start-checkout')), findsNothing);
   });
 
-  testWidgets('authenticated user sees plans and transfer details', (
+  testWidgets('starting a checkout shows the transfer note, not the email', (
     tester,
   ) async {
+    final billing = _FakeBilling();
     await tester.pumpWidget(
       _appWithUser(
         const AuthUser(
@@ -37,50 +32,56 @@ void main() {
           provider: 'email',
           isEmailConfirmed: true,
         ),
+        billing: billing,
       ),
     );
 
-    expect(find.text('Nâng cấp Pro'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('99.000đ'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
     expect(find.text('49.000đ'), findsOneWidget);
-    expect(find.text('99.000đ'), findsOneWidget);
-    await tester.scrollUntilVisible(
-      find.text('Theo tháng'),
-      250,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Theo tháng'));
+    expect(find.text('119.000đ'), findsOneWidget);
+    expect(find.text('Tiết kiệm 19%'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('pro-plan-monthly')));
     await tester.pump();
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('pro-transfer-code')),
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    final code = tester.widget<SelectableText>(
-      find.byKey(const ValueKey('pro-transfer-code')),
-    );
-    expect(code.data, 'Nội dung CK: CVPRO-MONTHLY-USER1');
-    expect(find.text('Quét mã để chuyển khoản'), findsOneWidget);
-    // Without a configured receiving account the request button stays off.
+    await tester.tap(find.byKey(const ValueKey('pro-start-checkout')));
+    await tester.pump();
+    await tester.pump();
+
+    expect(billing.started, [ProPlan.monthly]);
+    expect(find.byKey(const ValueKey('pro-checkout')), findsOneWidget);
+    // No receiving account in tests: payment shows as paused.
     expect(
       find.byKey(const ValueKey('bank-transfer-unavailable')),
       findsOneWidget,
     );
-    expect(find.text('owner@example.com'), findsOneWidget);
-    expect(find.text('Tôi đã chuyển khoản'), findsOneWidget);
+    expect(find.text('owner@example.com'), findsNothing);
+    // Stop the payment check timer before the test ends.
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('Pro accounts see their plan instead of prices', (tester) async {
+    await tester.pumpWidget(
+      _appWithUser(
+        const AuthUser(
+          id: 'user-1',
+          email: 'owner@example.com',
+          displayName: 'Owner',
+          provider: 'email',
+          isEmailConfirmed: true,
+        ),
+        billing: _FakeBilling(isPro: true),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('pro-active')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pro-start-checkout')), findsNothing);
   });
 }
 
-Widget _appWithUser(AuthUser? user) {
+Widget _appWithUser(AuthUser? user, {_FakeBilling? billing}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(_FakeAuthRepository(user)),
-      billingRepositoryProvider.overrideWithValue(_FakeBilling()),
+      billingRepositoryProvider.overrideWithValue(billing ?? _FakeBilling()),
     ],
     child: const MaterialApp(home: ProUpgradeScreen()),
   );
@@ -139,11 +140,24 @@ class _FakeAuthRepository implements AuthRepository {
 }
 
 class _FakeBilling implements BillingRepository {
-  @override
-  Future<BillingStatus> fetchStatus() async =>
-      const BillingStatus(isPro: false);
+  _FakeBilling({this.isPro = false});
+
+  final bool isPro;
+  final started = <ProPlan>[];
 
   @override
-  Future<ProUpgradeRequest> submitRequest(ProPlan plan) =>
-      throw UnimplementedError();
+  Future<BillingStatus> fetchStatus() async => BillingStatus(isPro: isPro);
+
+  @override
+  Future<ProUpgradeRequest> startCheckout(ProPlan plan) async {
+    started.add(plan);
+    return ProUpgradeRequest(
+      id: 'r1',
+      plan: plan,
+      transferCode: 'CVPROMUSER1234',
+      status: ProRequestStatus.pending,
+      createdAt: DateTime.utc(2026, 11, 20),
+      amount: plan.amount,
+    );
+  }
 }

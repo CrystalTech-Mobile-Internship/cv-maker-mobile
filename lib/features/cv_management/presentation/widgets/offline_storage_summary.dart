@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class OfflineStorageSummary extends StatelessWidget {
   const OfflineStorageSummary({
@@ -29,8 +30,11 @@ class OfflineStorageSummary extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '$localCount CV trên máy • '
-              '$pendingSyncCount chưa sao lưu',
+              tr(
+                '$localCount CV trên máy • '
+                    '$pendingSyncCount chưa sao lưu',
+                '$localCount CVs on device • $pendingSyncCount not backed up',
+              ),
               style: const TextStyle(
                 color: Color(0xFF92400E),
                 fontSize: 12,

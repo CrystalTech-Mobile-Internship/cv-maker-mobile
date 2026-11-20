@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../i18n/app_language.dart';
 
 /// Parameters Supabase appends when it redirects back from an email link
 /// (password recovery, sign-up confirmation) or OAuth.
@@ -58,12 +59,21 @@ AuthCallbackInfo parseAuthCallback(Uri uri) {
 String describeAuthLinkError(String? code) {
   switch (code) {
     case 'otp_expired':
-      return 'Liên kết đã hết hạn hoặc đã được dùng. Hãy gửi lại liên kết mới.';
+      return tr(
+        'Liên kết đã hết hạn hoặc đã được dùng. Hãy gửi lại liên kết mới.',
+        'This link has expired or was already used. Please request a new one.',
+      );
     case 'access_denied':
-      return 'Liên kết không hợp lệ. Hãy gửi lại liên kết mới.';
+      return tr(
+        'Liên kết không hợp lệ. Hãy gửi lại liên kết mới.',
+        'This link is not valid. Please request a new one.',
+      );
     default:
-      return 'Không mở được liên kết khôi phục. Hãy mở liên kết trên chính '
-          'thiết bị và trình duyệt đã gửi yêu cầu, hoặc gửi lại liên kết mới.';
+      return tr(
+        'Không mở được liên kết khôi phục. Hãy mở liên kết trên chính '
+            'thiết bị và trình duyệt đã gửi yêu cầu, hoặc gửi lại liên kết mới.',
+        'Could not open the reset link. Open it on the same device and browser you used to ask for it, or request a new one.',
+      );
   }
 }
 

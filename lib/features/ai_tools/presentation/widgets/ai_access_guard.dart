@@ -7,6 +7,7 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/models/ai_assistant_models.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 import '../controllers/ai_assistant_providers.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Ensures a signed-in user who accepted the AI data notice. Returns false
 /// (after explaining why) when the AI call must not happen.
@@ -20,16 +21,21 @@ Future<bool> ensureAiAccess(
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.lock_person_rounded),
-        title: const Text('Cần đăng nhập'),
-        content: const Text('Tài khoản miễn phí có 15 lượt dùng mỗi ngày.'),
+        title: Text(tr('Cần đăng nhập', 'Sign in needed')),
+        content: Text(
+          tr(
+            'Tài khoản miễn phí có 15 lượt dùng mỗi ngày.',
+            'Free accounts get 15 uses a day.',
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Để sau'),
+            child: Text(tr('Để sau', 'Later')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Đăng nhập'),
+            child: Text(tr('Đăng nhập', 'Sign in')),
           ),
         ],
       ),
@@ -47,20 +53,23 @@ Future<bool> ensureAiAccess(
     context: context,
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.privacy_tip_outlined),
-      title: const Text('Quyền riêng tư'),
-      content: const Text(
-        'Nội dung bạn nhập được gửi đi để xử lý và không được lưu lại. '
-        'Đừng nhập mật khẩu hay số giấy tờ tùy thân.',
+      title: Text(tr('Quyền riêng tư', 'Privacy')),
+      content: Text(
+        tr(
+          'Nội dung bạn nhập được gửi đi để xử lý và không được lưu lại. '
+              'Đừng nhập mật khẩu hay số giấy tờ tùy thân.',
+          'What you type is sent for processing and is not stored. Do not enter passwords or ID numbers.',
+        ),
         style: TextStyle(height: 1.45),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Không đồng ý'),
+          child: Text(tr('Không đồng ý', 'Decline')),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Đồng ý'),
+          child: Text(tr('Đồng ý', 'Agree')),
         ),
       ],
     ),
@@ -126,12 +135,17 @@ class AiQuotaChip extends ConsumerWidget {
     if (quota == null) return const SizedBox.shrink();
     final low = quota.remaining <= 2;
     return Tooltip(
-      message:
-          'Gói ${quota.isPro ? 'Pro' : 'Free'}: đã dùng ${quota.used}/${quota.limit} lượt hôm nay',
+      message: tr(
+        'Gói ${quota.isPro ? 'Pro' : 'Free'}: đã dùng ${quota.used}/${quota.limit} lượt hôm nay',
+        '${quota.isPro ? 'Pro' : 'Free'} plan: ${quota.used}/${quota.limit} uses today',
+      ),
       child: Chip(
         key: const ValueKey('ai-quota-chip'),
         label: Text(
-          '${quota.remaining}/${quota.limit} lượt',
+          tr(
+            '${quota.remaining}/${quota.limit} lượt',
+            '${quota.remaining}/${quota.limit} uses',
+          ),
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,

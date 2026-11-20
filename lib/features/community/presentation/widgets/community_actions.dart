@@ -8,6 +8,7 @@ import '../controllers/community_feed_controller.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import 'community_post_card.dart';
 import 'create_post_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 void _toast(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
@@ -29,16 +30,21 @@ Future<bool> handleCommunityPostAction(
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Xóa bài viết?'),
-          content: const Text('Bài viết và bình luận sẽ bị xóa vĩnh viễn.'),
+          title: Text(tr('Xóa bài viết?', 'Delete post?')),
+          content: Text(
+            tr(
+              'Bài viết và bình luận sẽ bị xóa vĩnh viễn.',
+              'The post and its comments will be deleted for good.',
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Hủy'),
+              child: Text(tr('Hủy', 'Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Xóa'),
+              child: Text(tr('Xóa', 'Delete')),
             ),
           ],
         ),
@@ -46,20 +52,22 @@ Future<bool> handleCommunityPostAction(
       if (confirm != true) return false;
       await repository.deletePost(post.id);
       ref.read(communityFeedControllerProvider.notifier).remove(post.id);
-      if (context.mounted) _toast(context, 'Đã xóa bài viết.');
+      if (context.mounted) {
+        _toast(context, tr('Đã xóa bài viết.', 'Post deleted.'));
+      }
       return true;
     }
 
     final reason = await showDialog<String>(
       context: context,
       builder: (context) => SimpleDialog(
-        title: const Text('Báo cáo bài viết'),
+        title: Text(tr('Báo cáo bài viết', 'Report post')),
         children: [
-          for (final option in const [
-            'Spam hoặc quảng cáo',
-            'Tin tuyển dụng lừa đảo',
-            'Nội dung xúc phạm',
-            'Lộ thông tin cá nhân',
+          for (final option in [
+            tr('Spam hoặc quảng cáo', 'Spam or advertising'),
+            tr('Tin tuyển dụng lừa đảo', 'Fake job posting'),
+            tr('Nội dung xúc phạm', 'Offensive content'),
+            tr('Lộ thông tin cá nhân', 'Personal information exposed'),
           ])
             SimpleDialogOption(
               onPressed: () => Navigator.pop(context, option),
@@ -71,7 +79,13 @@ Future<bool> handleCommunityPostAction(
     if (reason == null) return false;
     await repository.report(post.id, reason);
     if (context.mounted) {
-      _toast(context, 'Cảm ơn bạn đã báo cáo. Bài viết sẽ được xem xét.');
+      _toast(
+        context,
+        tr(
+          'Cảm ơn bạn đã báo cáo. Bài viết sẽ được xem xét.',
+          'Thanks for reporting. We will review the post.',
+        ),
+      );
     }
   } on CommunityFailure catch (failure) {
     if (context.mounted) _toast(context, failure.message);
@@ -89,7 +103,7 @@ Future<void> createCommunityPost(BuildContext context, WidgetRef ref) async {
         .read(communityRepositoryProvider)
         .createPost(draft, authorName: user?.displayName ?? '');
     ref.read(communityFeedControllerProvider.notifier).prepend(post);
-    if (context.mounted) _toast(context, 'Đã đăng bài.');
+    if (context.mounted) _toast(context, tr('Đã đăng bài.', 'Posted.'));
   } on CommunityFailure catch (failure) {
     if (context.mounted) _toast(context, failure.message);
   }

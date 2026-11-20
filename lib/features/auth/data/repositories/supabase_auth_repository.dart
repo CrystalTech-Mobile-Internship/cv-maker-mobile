@@ -4,6 +4,7 @@ import '../../../../core/constants/auth_callback_parser.dart';
 import '../../domain/models/auth_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/supabase_auth_data_source.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class SupabaseAuthRepository implements AuthRepository {
   SupabaseAuthRepository(this._dataSource);
@@ -50,8 +51,11 @@ class SupabaseAuthRepository implements AuthRepository {
       );
       final user = _mapUser(response.user);
       if (user == null || response.session == null) {
-        throw const AuthFailure(
-          'Không tạo được phiên đăng nhập. Hãy kiểm tra email xác nhận.',
+        throw AuthFailure(
+          tr(
+            'Không tạo được phiên đăng nhập. Hãy kiểm tra email xác nhận.',
+            'Could not sign you in. Please check your confirmation email.',
+          ),
         );
       }
       return user;
@@ -111,7 +115,12 @@ class SupabaseAuthRepository implements AuthRepository {
       );
       final user = _mapUser(response.user);
       if (user == null) {
-        throw const AuthFailure('Mã khôi phục không đúng hoặc đã hết hạn.');
+        throw AuthFailure(
+          tr(
+            'Mã khôi phục không đúng hoặc đã hết hạn.',
+            'The reset code is wrong or has expired.',
+          ),
+        );
       }
       return user;
     } on AuthException catch (error) {
@@ -120,7 +129,10 @@ class SupabaseAuthRepository implements AuthRepository {
           message.contains('invalid') ||
           message.contains('token')) {
         throw AuthFailure(
-          'Mã khôi phục không đúng hoặc đã hết hạn.',
+          tr(
+            'Mã khôi phục không đúng hoặc đã hết hạn.',
+            'The reset code is wrong or has expired.',
+          ),
           cause: error,
         );
       }
@@ -136,7 +148,9 @@ class SupabaseAuthRepository implements AuthRepository {
       final response = await _dataSource.updatePassword(password);
       final user = _mapUser(response.user);
       if (user == null) {
-        throw const AuthFailure('Không thể cập nhật mật khẩu.');
+        throw AuthFailure(
+          tr('Không thể cập nhật mật khẩu.', 'Could not update the password.'),
+        );
       }
       return user;
     } catch (error) {
@@ -150,7 +164,12 @@ class SupabaseAuthRepository implements AuthRepository {
       final response = await _dataSource.updateDisplayName(displayName);
       final user = _mapUser(response.user);
       if (user == null) {
-        throw const AuthFailure('Không thể cập nhật hồ sơ tài khoản.');
+        throw AuthFailure(
+          tr(
+            'Không thể cập nhật hồ sơ tài khoản.',
+            'Could not update your profile.',
+          ),
+        );
       }
       return user;
     } catch (error) {
@@ -219,36 +238,54 @@ class SupabaseAuthRepository implements AuthRepository {
           message.contains('rate limit') ||
           message.contains('security purposes')) {
         return AuthFailure(
-          'Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi ít phút rồi thử lại, '
-          'hoặc đăng nhập bằng Google.',
+          tr(
+            'Bạn đã gửi quá nhiều yêu cầu. Vui lòng đợi ít phút rồi thử lại, '
+                'hoặc đăng nhập bằng Google.',
+            'Too many requests. Please wait a few minutes and try again, or sign in with Google.',
+          ),
           cause: error,
         );
       }
       if (message.contains('invalid login credentials')) {
-        return AuthFailure('Email hoặc mật khẩu không đúng.', cause: error);
+        return AuthFailure(
+          tr('Email hoặc mật khẩu không đúng.', 'Wrong email or password.'),
+          cause: error,
+        );
       }
       if (message.contains('email not confirmed')) {
         return AuthFailure(
-          'Email chưa được xác nhận. Hãy kiểm tra hộp thư.',
+          tr(
+            'Email chưa được xác nhận. Hãy kiểm tra hộp thư.',
+            'Your email is not confirmed yet. Please check your inbox.',
+          ),
           cause: error,
         );
       }
       if (message.contains('user already registered')) {
         return AuthFailure(
-          'Email này đã được đăng ký. Hãy chuyển sang đăng nhập.',
+          tr(
+            'Email này đã được đăng ký. Hãy chuyển sang đăng nhập.',
+            'This email is already registered. Please sign in instead.',
+          ),
           cause: error,
         );
       }
       if (message.contains('password')) {
         return AuthFailure(
-          'Mật khẩu chưa đáp ứng yêu cầu bảo mật.',
+          tr(
+            'Mật khẩu chưa đáp ứng yêu cầu bảo mật.',
+            'The password is not strong enough.',
+          ),
           cause: error,
         );
       }
       return AuthFailure(error.message, cause: error);
     }
     return AuthFailure(
-      'Không thể kết nối dịch vụ tài khoản. Hãy kiểm tra mạng và thử lại.',
+      tr(
+        'Không thể kết nối dịch vụ tài khoản. Hãy kiểm tra mạng và thử lại.',
+        'Could not reach the account service. Check your network and try again.',
+      ),
       cause: error,
     );
   }

@@ -9,6 +9,8 @@ import '../../../../core/constants/auth_callback_parser.dart';
 import '../../../../core/constants/env_constants.dart';
 import '../providers/auth_providers.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/i18n/language_menu_button.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({
@@ -93,8 +95,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         widget.showRecoveryCode ?? EnvConstants.recoveryCodeInEmail;
     return Scaffold(
       appBar: AppBar(
+        actions: const [LanguageMenuButton(), SizedBox(width: 8)],
         leading: homeFallbackLeading(context, fallback: '/login'),
-        title: const Text('Quên mật khẩu'),
+        title: Text(tr('Quên mật khẩu', 'Forgot password')),
       ),
       body: SafeArea(
         child: Center(
@@ -127,8 +130,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       const SizedBox(height: 16),
                       Text(
                         _sent
-                            ? 'Kiểm tra hộp thư của bạn'
-                            : 'Nhận liên kết đặt lại mật khẩu',
+                            ? tr('Kiểm tra hộp thư của bạn', 'Check your inbox')
+                            : tr(
+                                'Nhận liên kết đặt lại mật khẩu',
+                                'Get a password reset link',
+                              ),
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
@@ -136,11 +142,20 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       Text(
                         _sent
                             ? (showCode
-                                  ? 'Mở liên kết trong email trên chính thiết bị và trình duyệt này, '
-                                        'hoặc nhập mã khôi phục trong email ở bên dưới.'
-                                  : 'Mở liên kết trong email trên chính thiết bị và trình duyệt này '
-                                        'để đặt mật khẩu mới.')
-                            : 'Nhập email tài khoản. CV lưu trên thiết bị sẽ không bị thay đổi.',
+                                  ? tr(
+                                      'Mở liên kết trong email trên chính thiết bị và trình duyệt này, '
+                                          'hoặc nhập mã khôi phục trong email ở bên dưới.',
+                                      'Open the link in the email on this same device and browser, or enter the reset code from the email below.',
+                                    )
+                                  : tr(
+                                      'Mở liên kết trong email trên chính thiết bị và trình duyệt này '
+                                          'để đặt mật khẩu mới.',
+                                      'Open the link in the email on this same device and browser to set a new password.',
+                                    ))
+                            : tr(
+                                'Nhập email tài khoản. CV lưu trên thiết bị sẽ không bị thay đổi.',
+                                'Enter your account email. CVs on this device will not change.',
+                              ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
@@ -171,18 +186,24 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             : const Icon(Icons.send_rounded),
                         label: Text(
                           _cooldown > 0
-                              ? 'Gửi lại sau ${_cooldown}s'
+                              ? tr(
+                                  'Gửi lại sau ${_cooldown}s',
+                                  'Resend in ${_cooldown}s',
+                                )
                               : _sent
-                              ? 'Gửi lại liên kết'
-                              : 'Gửi liên kết',
+                              ? tr('Gửi lại liên kết', 'Resend link')
+                              : tr('Gửi liên kết', 'Send link'),
                         ),
                       ),
                       if (showCode) ...[
                         const SizedBox(height: 20),
                         const Divider(),
                         const SizedBox(height: 12),
-                        const Text(
-                          'Đã có mã khôi phục trong email?',
+                        Text(
+                          tr(
+                            'Đã có mã khôi phục trong email?',
+                            'Got a reset code in the email?',
+                          ),
                           style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 8),
@@ -192,9 +213,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                           enabled: !isLoading,
                           keyboardType: TextInputType.number,
                           maxLength: 10,
-                          decoration: const InputDecoration(
-                            labelText: 'Mã khôi phục',
-                            hintText: 'Ví dụ: 123456',
+                          decoration: InputDecoration(
+                            labelText: tr('Mã khôi phục', 'Reset code'),
+                            hintText: tr('Ví dụ: 123456', 'e.g. 123456'),
                             counterText: '',
                           ),
                         ),
@@ -202,12 +223,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         OutlinedButton(
                           key: const ValueKey('reset-verify-code'),
                           onPressed: isLoading ? null : _verifyCode,
-                          child: const Text('Xác nhận mã'),
+                          child: Text(tr('Xác nhận mã', 'Confirm code')),
                         ),
                       ],
                       TextButton(
                         onPressed: () => context.go('/login'),
-                        child: const Text('Quay lại đăng nhập'),
+                        child: Text(
+                          tr('Quay lại đăng nhập', 'Back to sign in'),
+                        ),
                       ),
                     ],
                   ),

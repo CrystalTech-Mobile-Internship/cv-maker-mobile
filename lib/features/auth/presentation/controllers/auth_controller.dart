@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/guest_session_service.dart';
 import '../../domain/models/auth_user.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class AuthActionState {
   const AuthActionState({this.isLoading = false});
@@ -65,7 +66,7 @@ class AuthController extends StateNotifier<AuthActionState> {
       );
       await _guestSessionService.setGuestMode(false);
       return AuthActionResult.success(
-        message: 'Đăng nhập thành công.',
+        message: tr('Đăng nhập thành công.', 'Signed in.'),
         user: user,
       );
     });
@@ -80,15 +81,27 @@ class AuthController extends StateNotifier<AuthActionState> {
     return _run(() async {
       final normalizedName = displayName.trim();
       if (normalizedName.length < 2 || normalizedName.length > 100) {
-        throw const AuthFailure('Họ và tên phải có từ 2 đến 100 ký tự.');
+        throw AuthFailure(
+          tr(
+            'Họ và tên phải có từ 2 đến 100 ký tự.',
+            'Full name must be 2 to 100 characters.',
+          ),
+        );
       }
       final validation = _validateCredentials(email, password);
       if (validation != null) throw AuthFailure(validation);
       if (password.length < 8) {
-        throw const AuthFailure('Mật khẩu phải có ít nhất 8 ký tự.');
+        throw AuthFailure(
+          tr(
+            'Mật khẩu phải có ít nhất 8 ký tự.',
+            'Password must be at least 8 characters.',
+          ),
+        );
       }
       if (password != confirmation) {
-        throw const AuthFailure('Mật khẩu xác nhận không khớp.');
+        throw AuthFailure(
+          tr('Mật khẩu xác nhận không khớp.', 'Passwords do not match.'),
+        );
       }
       final result = await _repository.signUp(
         displayName: normalizedName,
@@ -100,8 +113,14 @@ class AuthController extends StateNotifier<AuthActionState> {
       }
       return AuthActionResult.success(
         message: result.requiresEmailConfirmation
-            ? 'Đăng ký thành công. Hãy mở email để xác nhận tài khoản.'
-            : 'Tạo tài khoản và đăng nhập thành công.',
+            ? tr(
+                'Đăng ký thành công. Hãy mở email để xác nhận tài khoản.',
+                'Account created. Open your email to confirm it.',
+              )
+            : tr(
+                'Tạo tài khoản và đăng nhập thành công.',
+                'Account created and signed in.',
+              ),
         user: result.user,
         requiresEmailConfirmation: result.requiresEmailConfirmation,
       );
@@ -112,9 +131,16 @@ class AuthController extends StateNotifier<AuthActionState> {
     return _run(() async {
       final launched = await _repository.signInWithGoogle();
       if (!launched) {
-        throw const AuthFailure('Không thể mở trang đăng nhập Google.');
+        throw AuthFailure(
+          tr(
+            'Không thể mở trang đăng nhập Google.',
+            'Could not open Google sign-in.',
+          ),
+        );
       }
-      return AuthActionResult.success(message: 'Đã mở trang đăng nhập Google.');
+      return AuthActionResult.success(
+        message: tr('Đã mở trang đăng nhập Google.', 'Google sign-in opened.'),
+      );
     });
   }
 
@@ -135,8 +161,10 @@ class AuthController extends StateNotifier<AuthActionState> {
     return _run(() async {
       await _guestSessionService.setGuestMode(true);
       return AuthActionResult.success(
-        message:
-            'Bạn đang dùng ứng dụng không cần tài khoản; dữ liệu lưu trên máy.',
+        message: tr(
+          'Bạn đang dùng ứng dụng không cần tài khoản; dữ liệu lưu trên máy.',
+          'You are using the app without an account; your data stays on this device.',
+        ),
       );
     });
   }
@@ -145,11 +173,19 @@ class AuthController extends StateNotifier<AuthActionState> {
     return _run(() async {
       final normalizedEmail = email.trim();
       if (!_isValidEmail(normalizedEmail)) {
-        throw const AuthFailure('Vui lòng nhập địa chỉ email hợp lệ.');
+        throw AuthFailure(
+          tr(
+            'Vui lòng nhập địa chỉ email hợp lệ.',
+            'Please enter a valid email address.',
+          ),
+        );
       }
       await _repository.requestPasswordReset(normalizedEmail);
       return AuthActionResult.success(
-        message: 'Đã gửi liên kết đặt lại mật khẩu. Hãy kiểm tra email.',
+        message: tr(
+          'Đã gửi liên kết đặt lại mật khẩu. Hãy kiểm tra email.',
+          'Reset link sent. Please check your email.',
+        ),
       );
     });
   }
@@ -162,17 +198,30 @@ class AuthController extends StateNotifier<AuthActionState> {
       final normalizedEmail = email.trim();
       final normalizedCode = code.replaceAll(RegExp(r'\s'), '');
       if (!_isValidEmail(normalizedEmail)) {
-        throw const AuthFailure('Vui lòng nhập địa chỉ email hợp lệ.');
+        throw AuthFailure(
+          tr(
+            'Vui lòng nhập địa chỉ email hợp lệ.',
+            'Please enter a valid email address.',
+          ),
+        );
       }
       if (!RegExp(r'^\d{6,10}$').hasMatch(normalizedCode)) {
-        throw const AuthFailure('Mã khôi phục gồm 6–10 chữ số trong email.');
+        throw AuthFailure(
+          tr(
+            'Mã khôi phục gồm 6–10 chữ số trong email.',
+            'The reset code is the 6–10 digits in the email.',
+          ),
+        );
       }
       final user = await _repository.verifyRecoveryCode(
         email: normalizedEmail,
         code: normalizedCode,
       );
       return AuthActionResult.success(
-        message: 'Mã hợp lệ. Hãy đặt mật khẩu mới.',
+        message: tr(
+          'Mã hợp lệ. Hãy đặt mật khẩu mới.',
+          'Code accepted. Set a new password.',
+        ),
         user: user,
       );
     });
@@ -184,14 +233,21 @@ class AuthController extends StateNotifier<AuthActionState> {
   }) {
     return _run(() async {
       if (password.length < 8) {
-        throw const AuthFailure('Mật khẩu mới phải có ít nhất 8 ký tự.');
+        throw AuthFailure(
+          tr(
+            'Mật khẩu mới phải có ít nhất 8 ký tự.',
+            'New password must be at least 8 characters.',
+          ),
+        );
       }
       if (password != confirmation) {
-        throw const AuthFailure('Mật khẩu xác nhận không khớp.');
+        throw AuthFailure(
+          tr('Mật khẩu xác nhận không khớp.', 'Passwords do not match.'),
+        );
       }
       final user = await _repository.updatePassword(password);
       return AuthActionResult.success(
-        message: 'Đã cập nhật mật khẩu thành công.',
+        message: tr('Đã cập nhật mật khẩu thành công.', 'Password updated.'),
         user: user,
       );
     });
@@ -201,11 +257,16 @@ class AuthController extends StateNotifier<AuthActionState> {
     return _run(() async {
       final normalizedName = displayName.trim();
       if (normalizedName.length < 2 || normalizedName.length > 100) {
-        throw const AuthFailure('Tên hiển thị phải có từ 2 đến 100 ký tự.');
+        throw AuthFailure(
+          tr(
+            'Tên hiển thị phải có từ 2 đến 100 ký tự.',
+            'Display name must be 2 to 100 characters.',
+          ),
+        );
       }
       final user = await _repository.updateDisplayName(normalizedName);
       return AuthActionResult.success(
-        message: 'Đã cập nhật hồ sơ tài khoản.',
+        message: tr('Đã cập nhật hồ sơ tài khoản.', 'Profile updated.'),
         user: user,
       );
     });
@@ -215,7 +276,9 @@ class AuthController extends StateNotifier<AuthActionState> {
     return _run(() async {
       await _repository.signOut();
       await _guestSessionService.setGuestMode(false);
-      return AuthActionResult.success(message: 'Đã đăng xuất.');
+      return AuthActionResult.success(
+        message: tr('Đã đăng xuất.', 'Signed out.'),
+      );
     });
   }
 
@@ -223,7 +286,9 @@ class AuthController extends StateNotifier<AuthActionState> {
     Future<AuthActionResult> Function() action,
   ) async {
     if (state.isLoading) {
-      return AuthActionResult.failure('Đang xử lý, vui lòng đợi.');
+      return AuthActionResult.failure(
+        tr('Đang xử lý, vui lòng đợi.', 'Working on it, please wait.'),
+      );
     }
     state = state.copyWith(isLoading: true);
     try {
@@ -232,7 +297,10 @@ class AuthController extends StateNotifier<AuthActionState> {
       return AuthActionResult.failure(error.message);
     } catch (_) {
       return AuthActionResult.failure(
-        'Đã xảy ra lỗi không mong muốn. Hãy thử lại.',
+        tr(
+          'Đã xảy ra lỗi không mong muốn. Hãy thử lại.',
+          'Something unexpected went wrong. Please try again.',
+        ),
       );
     } finally {
       state = state.copyWith(isLoading: false);
@@ -240,8 +308,15 @@ class AuthController extends StateNotifier<AuthActionState> {
   }
 
   String? _validateCredentials(String email, String password) {
-    if (!_isValidEmail(email.trim())) return 'Email không hợp lệ.';
-    if (password.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự.';
+    if (!_isValidEmail(email.trim())) {
+      return tr('Email không hợp lệ.', 'Invalid email.');
+    }
+    if (password.length < 6) {
+      return tr(
+        'Mật khẩu phải có ít nhất 6 ký tự.',
+        'Password must be at least 6 characters.',
+      );
+    }
     return null;
   }
 

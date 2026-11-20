@@ -71,7 +71,7 @@ class EducationTab extends StatelessWidget {
                 FilledButton.tonalIcon(
                   key: const Key('use-starter-education-btn'),
                   onPressed: onUseStarterEducation,
-                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  icon: const Icon(Icons.post_add_rounded, size: 18),
                   label: Text(
                     _isEn
                         ? 'Use Starter Sample ("Fill-in")'

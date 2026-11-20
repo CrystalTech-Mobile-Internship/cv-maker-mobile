@@ -20,6 +20,8 @@ import '../features/cv_management/presentation/screens/home_screen.dart';
 import '../features/cv_editor/presentation/screens/cv_editor_screen.dart';
 import '../features/cv_editor/domain/models/cv_model.dart';
 import '../features/cv_preview/presentation/screens/cv_preview_screen.dart';
+import '../features/job_tracker/presentation/job_tracker_screen.dart';
+import '../features/support/presentation/support_chat_screen.dart';
 
 String? redirectForAppUri(Uri uri) {
   final callback = parseAuthCallback(uri);
@@ -161,6 +163,16 @@ GoRouter createAppRouter({
       path: '/upgrade-pro',
       name: 'upgrade-pro',
       builder: (context, state) => const ProUpgradeScreen(),
+    ),
+    GoRoute(
+      path: '/support',
+      name: 'support',
+      builder: (context, state) => const SupportChatScreen(),
+    ),
+    GoRoute(
+      path: '/job-tracker',
+      name: 'job-tracker',
+      builder: (context, state) => const JobTrackerScreen(),
     ),
   ],
 );

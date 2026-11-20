@@ -9,6 +9,7 @@ import 'package:xml/xml.dart';
 import '../../domain/models/resume_import_draft.dart';
 import '../../domain/repositories/resume_import_repository.dart';
 import '../services/resume_text_parser.dart';
+import '../../../../core/i18n/app_language.dart';
 
 final class LocalResumeImportRepository implements ResumeImportRepository {
   LocalResumeImportRepository({
@@ -31,7 +32,7 @@ final class LocalResumeImportRepository implements ResumeImportRepository {
   @override
   Future<ResumeTextSource?> pickAndExtractText() async {
     final file = await FilePicker.pickFile(
-      dialogTitle: 'Chọn CV Word hoặc PDF',
+      dialogTitle: tr('Chọn CV Word hoặc PDF', 'Choose a Word or PDF CV'),
       type: FileType.custom,
       allowedExtensions: const ['docx', 'pdf'],
     );
@@ -39,7 +40,9 @@ final class LocalResumeImportRepository implements ResumeImportRepository {
 
     final length = file.lengthSync() ?? await file.length() ?? 0;
     if (length > _maxFileBytes) {
-      throw const ResumeImportException('Tệp CV phải nhỏ hơn 8 MB.');
+      throw ResumeImportException(
+        tr('Tệp CV phải nhỏ hơn 8 MB.', 'The CV file must be under 8 MB.'),
+      );
     }
     final text = await extractText(
       fileName: file.name,
@@ -62,17 +65,27 @@ final class LocalResumeImportRepository implements ResumeImportRepository {
     required Uint8List bytes,
   }) async {
     if (bytes.length > _maxFileBytes) {
-      throw const ResumeImportException('Tệp CV phải nhỏ hơn 8 MB.');
+      throw ResumeImportException(
+        tr('Tệp CV phải nhỏ hơn 8 MB.', 'The CV file must be under 8 MB.'),
+      );
     }
     final extension = fileName.split('.').last.toLowerCase();
     final text = switch (extension) {
       'docx' => _extractDocx(bytes),
       'pdf' => await _extractPdf(bytes, fileName),
-      _ => throw const ResumeImportException('Chỉ hỗ trợ tệp .docx và .pdf.'),
+      _ => throw ResumeImportException(
+        tr(
+          'Chỉ hỗ trợ tệp .docx và .pdf.',
+          'Only .docx and .pdf files are supported.',
+        ),
+      ),
     };
     if (text.trim().isEmpty) {
-      throw const ResumeImportException(
-        'Không tìm thấy lớp chữ. CV scan/ảnh cần OCR và chưa được hỗ trợ.',
+      throw ResumeImportException(
+        tr(
+          'Không tìm thấy lớp chữ. CV scan/ảnh cần OCR và chưa được hỗ trợ.',
+          'No text found. Scanned or image CVs are not supported yet.',
+        ),
       );
     }
     return text;
@@ -98,8 +111,11 @@ final class LocalResumeImportRepository implements ResumeImportRepository {
           .where((line) => line.trim().isNotEmpty)
           .join('\n');
     } catch (_) {
-      throw const ResumeImportException(
-        'Không đọc được tệp Word. Hãy lưu lại dưới định dạng .docx.',
+      throw ResumeImportException(
+        tr(
+          'Không đọc được tệp Word. Hãy lưu lại dưới định dạng .docx.',
+          'Could not read the Word file. Save it as .docx and try again.',
+        ),
       );
     }
   }
@@ -117,8 +133,11 @@ final class LocalResumeImportRepository implements ResumeImportRepository {
       }
       return output.toString();
     } catch (_) {
-      throw const ResumeImportException(
-        'Không đọc được PDF. Tệp có thể bị khóa hoặc chỉ chứa ảnh scan.',
+      throw ResumeImportException(
+        tr(
+          'Không đọc được PDF. Tệp có thể bị khóa hoặc chỉ chứa ảnh scan.',
+          'Could not read the PDF. It may be locked or contain only scanned images.',
+        ),
       );
     } finally {
       await document?.dispose();

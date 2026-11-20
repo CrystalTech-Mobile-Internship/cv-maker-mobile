@@ -71,6 +71,8 @@ void main() {
       ),
     );
 
+    await tester.ensureVisible(find.text('Tiếp tục với Google'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Tiếp tục với Google'));
     await tester.pump();
 
@@ -142,7 +144,6 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Nâng cấp Pro'), findsOneWidget);
-
 
     await tester.scrollUntilVisible(
       find.text('Đăng xuất'),

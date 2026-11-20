@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../domain/models/community_models.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Collects a validated [CommunityPostDraft]. Returns null when cancelled.
 Future<CommunityPostDraft?> showCreatePostSheet(BuildContext context) {
@@ -49,13 +50,19 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
   }
 
   String get _bodyHint => switch (_kind) {
-    CommunityPostKind.job =>
+    CommunityPostKind.job => tr(
       'Mô tả vị trí, yêu cầu chính, hình thức làm việc, cách ứng tuyển...',
-    CommunityPostKind.cvReview =>
+      'Describe the role, main requirements, work type, how to apply...',
+    ),
+    CommunityPostKind.cvReview => tr(
       'Bạn ứng tuyển vị trí nào? Muốn được góp ý phần nào của CV? '
           '(Không đăng số điện thoại, email, địa chỉ.)',
-    CommunityPostKind.discussion =>
+      'What role are you applying for? Which part of your CV needs feedback? (Do not post phone numbers, emails or addresses.)',
+    ),
+    CommunityPostKind.discussion => tr(
       'Chia sẻ kinh nghiệm phỏng vấn, học tập, câu hỏi nghề nghiệp...',
+      'Share interview tips, learning, career questions...',
+    ),
   };
 
   Future<void> _submit() async {
@@ -84,19 +91,24 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
       final proceed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Bài viết có thông tin liên hệ'),
-          content: const Text(
-            'Nội dung có vẻ chứa email hoặc số điện thoại. Mọi thành viên đều '
-            'xem được bài viết. Bạn vẫn muốn đăng?',
+          title: Text(
+            tr('Bài viết có thông tin liên hệ', 'Post has contact details'),
+          ),
+          content: Text(
+            tr(
+              'Nội dung có vẻ chứa email hoặc số điện thoại. Mọi thành viên đều '
+                  'xem được bài viết. Bạn vẫn muốn đăng?',
+              'The text seems to contain an email or phone number. Every member can see the post. Post anyway?',
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Sửa lại'),
+              child: Text(tr('Sửa lại', 'Edit')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Vẫn đăng'),
+              child: Text(tr('Vẫn đăng', 'Post anyway')),
             ),
           ],
         ),
@@ -116,8 +128,8 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Đăng bài',
+            Text(
+              tr('Đăng bài', 'Post'),
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 17,
@@ -141,7 +153,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
               controller: _title,
               maxLength: 140,
               decoration: InputDecoration(
-                labelText: isJob ? 'Vị trí tuyển dụng' : 'Tiêu đề',
+                labelText: isJob
+                    ? tr('Vị trí tuyển dụng', 'Job title')
+                    : tr('Tiêu đề', 'Title'),
               ),
             ),
             if (isJob) ...[
@@ -149,7 +163,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                 key: const ValueKey('post-company'),
                 controller: _company,
                 maxLength: 120,
-                decoration: const InputDecoration(labelText: 'Công ty'),
+                decoration: InputDecoration(
+                  labelText: tr('Công ty', 'Company'),
+                ),
               ),
               Row(
                 children: [
@@ -157,7 +173,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     child: TextField(
                       controller: _location,
                       maxLength: 120,
-                      decoration: const InputDecoration(labelText: 'Địa điểm'),
+                      decoration: InputDecoration(
+                        labelText: tr('Địa điểm', 'Location'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -165,7 +183,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     child: TextField(
                       controller: _salary,
                       maxLength: 60,
-                      decoration: const InputDecoration(labelText: 'Mức lương'),
+                      decoration: InputDecoration(
+                        labelText: tr('Mức lương', 'Salary'),
+                      ),
                     ),
                   ),
                 ],
@@ -174,8 +194,11 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                 controller: _url,
                 maxLength: 500,
                 keyboardType: TextInputType.url,
-                decoration: const InputDecoration(
-                  labelText: 'Link ứng tuyển (https://...)',
+                decoration: InputDecoration(
+                  labelText: tr(
+                    'Link ứng tuyển (https://...)',
+                    'Apply link (https://...)',
+                  ),
                 ),
               ),
             ],
@@ -186,15 +209,18 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
               maxLines: 10,
               maxLength: 4000,
               decoration: InputDecoration(
-                labelText: 'Nội dung',
+                labelText: tr('Nội dung', 'Text'),
                 hintText: _bodyHint,
                 alignLabelWithHint: true,
               ),
             ),
             TextField(
               controller: _tags,
-              decoration: const InputDecoration(
-                labelText: 'Thẻ (tối đa 5, cách nhau bởi dấu phẩy)',
+              decoration: InputDecoration(
+                labelText: tr(
+                  'Thẻ (tối đa 5, cách nhau bởi dấu phẩy)',
+                  'Tags (up to 5, separated by commas)',
+                ),
                 hintText: 'flutter, intern, hanoi',
               ),
             ),
@@ -206,11 +232,14 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
             FilledButton(
               key: const ValueKey('post-submit'),
               onPressed: _submit,
-              child: const Text('Đăng bài'),
+              child: Text(tr('Đăng bài', 'Post')),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Bài bị báo cáo nhiều lần sẽ tự ẩn.',
+            Text(
+              tr(
+                'Bài bị báo cáo nhiều lần sẽ tự ẩn.',
+                'Posts reported many times are hidden automatically.',
+              ),
               style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
             ),
           ],

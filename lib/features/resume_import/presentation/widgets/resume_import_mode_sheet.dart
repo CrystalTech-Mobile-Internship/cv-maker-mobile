@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
+import '../../../ai_tools/presentation/widgets/ai_cost.dart';
 
 enum ResumeImportMode { onDevice, ai }
 
@@ -26,7 +28,7 @@ Future<ResumeImportMode?> showResumeImportModeSheet(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Đã đọc "$fileName"',
+              tr('Đã đọc "$fileName"', 'Read "$fileName"'),
               style: const TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 17,
@@ -35,23 +37,25 @@ Future<ResumeImportMode?> showResumeImportModeSheet(
             ),
             const SizedBox(height: 4),
             Text(
-              'Chọn cách đọc CV:',
+              tr('Chọn cách đọc CV:', 'How should we read your CV?'),
               style: const TextStyle(color: AppTheme.mutedText),
             ),
             const SizedBox(height: 14),
             _ModeTile(
               key: const ValueKey('import-mode-ai'),
               icon: Icons.auto_awesome_outlined,
-              title: 'Đọc chính xác',
-              subtitle: isSignedIn ? 'Dùng $aiCost lượt.' : 'Cần đăng nhập.',
+              title: tr('Đọc chính xác', 'Careful read'),
+              subtitle: isSignedIn
+                  ? '${aiCostText(aiCost)}.'
+                  : tr('Cần đăng nhập.', 'Sign in needed.'),
               onTap: () => Navigator.pop(context, ResumeImportMode.ai),
             ),
             const SizedBox(height: 10),
             _ModeTile(
               key: const ValueKey('import-mode-local'),
               icon: Icons.phone_android_outlined,
-              title: 'Đọc nhanh trên máy',
-              subtitle: 'Miễn phí, không cần mạng.',
+              title: tr('Đọc nhanh trên máy', 'Quick read on device'),
+              subtitle: tr('Miễn phí, không cần mạng.', 'Free, works offline.'),
               onTap: () => Navigator.pop(context, ResumeImportMode.onDevice),
             ),
           ],

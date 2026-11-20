@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../domain/repositories/cv_backup_repository.dart';
+import '../../../../core/i18n/app_language.dart';
 
 final class JsonCvBackupRepository implements CvBackupRepository {
   static const int formatVersion = 1;
@@ -20,21 +21,32 @@ final class JsonCvBackupRepository implements CvBackupRepository {
       fileName: 'smart-cv-backup-$stamp.json',
       bytes: encodeBackup(cvs, exportedAt: now),
       mimeType: 'application/json',
-      dialogTitle: 'Lưu bản sao Smart CV Maker',
+      dialogTitle: tr(
+        'Lưu bản sao Smart CV Maker',
+        'Save Smart CV Maker backup',
+      ),
     );
   }
 
   @override
   Future<List<CvModel>?> importBackup() async {
     final file = await FilePicker.pickFile(
-      dialogTitle: 'Chọn bản sao Smart CV Maker',
+      dialogTitle: tr(
+        'Chọn bản sao Smart CV Maker',
+        'Choose Smart CV Maker backup',
+      ),
       type: FileType.custom,
       allowedExtensions: const ['json'],
     );
     if (file == null) return null;
     final length = file.lengthSync() ?? await file.length() ?? 0;
     if (length > maxBytes) {
-      throw const CvBackupException('Tệp sao lưu vượt quá giới hạn 8 MB.');
+      throw CvBackupException(
+        tr(
+          'Tệp sao lưu vượt quá giới hạn 8 MB.',
+          'The backup file is over 8 MB.',
+        ),
+      );
     }
     return decodeBackup(await file.readAsBytes());
   }
@@ -58,8 +70,11 @@ final class JsonCvBackupRepository implements CvBackupRepository {
           decoded['app'] != 'Smart CV Maker' ||
           decoded['version'] != formatVersion ||
           decoded['cvs'] is! List<dynamic>) {
-        throw const CvBackupException(
-          'Tệp không đúng định dạng sao lưu Smart CV Maker.',
+        throw CvBackupException(
+          tr(
+            'Tệp không đúng định dạng sao lưu Smart CV Maker.',
+            'This is not a Smart CV Maker backup file.',
+          ),
         );
       }
       final cvs = (decoded['cvs'] as List<dynamic>)
@@ -70,14 +85,19 @@ final class JsonCvBackupRepository implements CvBackupRepository {
           )
           .toList(growable: false);
       if (cvs.isEmpty) {
-        throw const CvBackupException('Tệp sao lưu không chứa CV nào.');
+        throw CvBackupException(
+          tr('Tệp sao lưu không chứa CV nào.', 'The backup file has no CVs.'),
+        );
       }
       return cvs;
     } on CvBackupException {
       rethrow;
     } catch (_) {
-      throw const CvBackupException(
-        'Tệp sao lưu bị hỏng hoặc không thể đọc được.',
+      throw CvBackupException(
+        tr(
+          'Tệp sao lưu bị hỏng hoặc không thể đọc được.',
+          'The backup file is damaged or cannot be read.',
+        ),
       );
     }
   }

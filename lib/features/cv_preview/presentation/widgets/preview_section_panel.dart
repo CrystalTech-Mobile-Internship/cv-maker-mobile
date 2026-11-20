@@ -4,6 +4,7 @@ import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/cv_section_definition.dart';
 import '../../../cv_editor/domain/services/cv_item_order_service.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Desktop side panel next to the print view: drag sections to reorder,
 /// show or hide them, and pick one to work on.
@@ -42,10 +43,13 @@ class PreviewSectionPanel extends StatelessWidget {
         slivers: [
           SliverToBoxAdapter(
             child: _Heading(
-              _en ? 'On the page' : 'Trên trang',
+              _en ? 'On the page' : tr('Trên trang', 'On page'),
               hint: _en
                   ? 'Drag to reorder · Alt + ↑/↓'
-                  : 'Kéo để đổi thứ tự · Alt + ↑/↓',
+                  : tr(
+                      'Kéo để đổi thứ tự · Alt + ↑/↓',
+                      'Drag to reorder · Alt + ↑/↓',
+                    ),
             ),
           ),
           SliverReorderableList(
@@ -76,8 +80,8 @@ class PreviewSectionPanel extends StatelessWidget {
           if (hidden.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: _Heading(
-                _en ? 'Hidden' : 'Đang ẩn',
-                hint: _en ? 'Not printed' : 'Không in ra',
+                _en ? 'Hidden' : tr('Đang ẩn', 'Hidden'),
+                hint: _en ? 'Not printed' : tr('Không in ra', 'Not printed'),
               ),
             ),
             SliverList.list(

@@ -11,6 +11,8 @@ import '../controllers/interview_practice_controller.dart';
 import '../widgets/ai_access_guard.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
+import '../../../../core/i18n/app_language.dart';
+import '../widgets/ai_cost.dart';
 
 /// Arguments when opened from a screen that already knows the CV/JD.
 class InterviewPracticeArgs {
@@ -88,7 +90,7 @@ class _InterviewPracticeScreenState
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
         leading: homeFallbackLeading(context),
-        title: const Text('Luyện phỏng vấn'),
+        title: Text(tr('Luyện phỏng vấn', 'Interview practice')),
         actions: const [AiQuotaChip(), SizedBox(width: 8)],
       ),
       body: WebConstrainedWidth(
@@ -101,16 +103,19 @@ class _InterviewPracticeScreenState
                 const _Intro(),
                 const SizedBox(height: 16),
                 if (cvs.isEmpty)
-                  const Text(
-                    'Bạn chưa có CV trên máy. Hãy tạo hoặc nhập CV trước.',
+                  Text(
+                    tr(
+                      'Bạn chưa có CV trên máy. Hãy tạo hoặc nhập CV trước.',
+                      'You have no CVs on this device. Create or import one first.',
+                    ),
                     style: TextStyle(color: AppTheme.mutedText),
                   )
                 else
                   DropdownButtonFormField<String>(
                     initialValue: cv?.id,
                     isExpanded: true,
-                    decoration: const InputDecoration(
-                      labelText: 'CV dùng để luyện',
+                    decoration: InputDecoration(
+                      labelText: tr('CV dùng để luyện', 'CV to practice with'),
                     ),
                     items: [
                       for (final item in cvs)
@@ -130,10 +135,15 @@ class _InterviewPracticeScreenState
                   minLines: 3,
                   maxLines: 6,
                   maxLength: 6000,
-                  decoration: const InputDecoration(
-                    labelText: 'Tin tuyển dụng (không bắt buộc)',
-                    hintText:
-                        'Dán tin tuyển dụng để câu hỏi sát với vị trí ứng tuyển hơn',
+                  decoration: InputDecoration(
+                    labelText: tr(
+                      'Tin tuyển dụng (không bắt buộc)',
+                      'Job posting (optional)',
+                    ),
+                    hintText: tr(
+                      'Dán tin tuyển dụng để câu hỏi sát với vị trí ứng tuyển hơn',
+                      'Paste a job posting to get questions closer to the role',
+                    ),
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -145,8 +155,11 @@ class _InterviewPracticeScreenState
                       : () => _start(cv),
                   child: Text(
                     state.isLoadingQuestions
-                        ? 'Đang soạn câu hỏi...'
-                        : 'Bắt đầu (${AiCreditCost.interviewQuestions} lượt)',
+                        ? tr('Đang soạn câu hỏi...', 'Preparing questions...')
+                        : withAiCost(
+                            tr('Bắt đầu', 'Start'),
+                            AiCreditCost.interviewQuestions,
+                          ),
                   ),
                 ),
               ] else ...[
@@ -169,10 +182,12 @@ class _InterviewPracticeScreenState
                   maxLines: 10,
                   maxLength: 3000,
                   onChanged: controller.updateAnswer,
-                  decoration: const InputDecoration(
-                    labelText: 'Câu trả lời của bạn',
-                    hintText:
-                        'Gợi ý: kể theo trình tự Tình huống → Việc cần làm → Hành động → Kết quả',
+                  decoration: InputDecoration(
+                    labelText: tr('Câu trả lời của bạn', 'Your answer'),
+                    hintText: tr(
+                      'Gợi ý: kể theo trình tự Tình huống → Việc cần làm → Hành động → Kết quả',
+                      'Tip: tell it as Situation → Task → Action → Result',
+                    ),
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -183,7 +198,7 @@ class _InterviewPracticeScreenState
                       onPressed: state.index == 0 || state.isBusy
                           ? null
                           : () => _goTo(state.index - 1),
-                      child: const Text('Câu trước'),
+                      child: Text(tr('Câu trước', 'Previous')),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -194,8 +209,11 @@ class _InterviewPracticeScreenState
                             : () => controller.evaluate(cv),
                         child: Text(
                           state.isEvaluating
-                              ? 'Đang chấm...'
-                              : 'Nhận xét (${AiCreditCost.answerFeedback} lượt)',
+                              ? tr('Đang chấm...', 'Scoring...')
+                              : withAiCost(
+                                  tr('Nhận xét', 'Get feedback'),
+                                  AiCreditCost.answerFeedback,
+                                ),
                         ),
                       ),
                     ),
@@ -206,7 +224,7 @@ class _InterviewPracticeScreenState
                               state.isBusy
                           ? null
                           : () => _goTo(state.index + 1),
-                      child: const Text('Câu sau'),
+                      child: Text(tr('Câu sau', 'Next')),
                     ),
                   ],
                 ),
@@ -217,8 +235,11 @@ class _InterviewPracticeScreenState
                 if (state.averageScore != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                    'Điểm trung bình: ${state.averageScore!.toStringAsFixed(1)}/10 '
-                    '(${state.feedback.length}/${state.questions.length} câu)',
+                    tr(
+                      'Điểm trung bình: ${state.averageScore!.toStringAsFixed(1)}/10 '
+                          '(${state.feedback.length}/${state.questions.length} câu)',
+                      'Average score: ${state.averageScore!.toStringAsFixed(1)}/10 (${state.feedback.length}/${state.questions.length} questions)',
+                    ),
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       color: AppTheme.primaryNavy,
@@ -230,7 +251,7 @@ class _InterviewPracticeScreenState
                   onPressed: state.isBusy || cv == null
                       ? null
                       : () => _start(cv),
-                  child: const Text('Tạo bộ câu hỏi mới'),
+                  child: Text(tr('Tạo bộ câu hỏi mới', 'New set of questions')),
                 ),
               ],
               if (state.errorMessage != null) ...[
@@ -249,10 +270,10 @@ class _InterviewPracticeScreenState
                       if (state.errorCode == AiWritingFailureCode.quotaExceeded)
                         TextButton(
                           onPressed: () => context.push('/upgrade-pro'),
-                          child: const Text('Nâng cấp'),
+                          child: Text(tr('Nâng cấp', 'Upgrade')),
                         ),
                       IconButton(
-                        tooltip: 'Đóng',
+                        tooltip: tr('Đóng', 'Close'),
                         onPressed: controller.dismissError,
                         icon: const Icon(Icons.close, size: 18),
                       ),
@@ -280,8 +301,11 @@ class _Intro extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.softBorder),
       ),
-      child: const Text(
-        'Trả lời 6 câu hỏi dựa trên CV của bạn và nhận góp ý cho từng câu.',
+      child: Text(
+        tr(
+          'Trả lời 6 câu hỏi dựa trên CV của bạn và nhận góp ý cho từng câu.',
+          'Answer 6 questions based on your CV and get feedback on each one.',
+        ),
         style: TextStyle(height: 1.45, color: AppTheme.primarySlate),
       ),
     );
@@ -338,7 +362,7 @@ class _QuestionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Câu hỏi $number',
+            tr('Câu hỏi $number', 'Question $number'),
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -358,14 +382,17 @@ class _QuestionCard extends StatelessWidget {
           if (question.focus.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              'Nhà tuyển dụng đánh giá: ${question.focus}',
+              tr(
+                'Nhà tuyển dụng đánh giá: ${question.focus}',
+                'What the employer looks for: ${question.focus}',
+              ),
               style: const TextStyle(fontSize: 12.5, color: AppTheme.mutedText),
             ),
           ],
           if (question.tip.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              'Gợi ý: ${question.tip}',
+              tr('Gợi ý: ${question.tip}', 'Tip: ${question.tip}'),
               style: const TextStyle(fontSize: 12.5, color: AppTheme.mutedText),
             ),
           ],
@@ -427,8 +454,8 @@ class _FeedbackCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'Nhận xét (thang 10)',
+              Text(
+                tr('Nhận xét (thang 10)', 'Feedback (out of 10)'),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   color: AppTheme.primaryNavy,
@@ -437,12 +464,12 @@ class _FeedbackCard extends StatelessWidget {
             ],
           ),
           if (feedback.strengths.isNotEmpty)
-            list('Điểm mạnh', feedback.strengths),
+            list(tr('Điểm mạnh', 'Strengths'), feedback.strengths),
           if (feedback.improvements.isNotEmpty)
-            list('Cần cải thiện', feedback.improvements),
+            list(tr('Cần cải thiện', 'To improve'), feedback.improvements),
           const SizedBox(height: 10),
-          const Text(
-            'Câu trả lời gợi ý',
+          Text(
+            tr('Câu trả lời gợi ý', 'Sample answer'),
             style: TextStyle(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),

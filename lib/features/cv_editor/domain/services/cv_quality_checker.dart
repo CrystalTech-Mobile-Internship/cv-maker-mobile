@@ -1,4 +1,5 @@
 import '../models/models.dart';
+import '../../../../core/i18n/app_language.dart';
 
 enum CvIssueSeverity { important, suggestion }
 
@@ -72,15 +73,26 @@ abstract final class CvQualityChecker {
     // Contact details
     final info = cv.personalInfo;
     if (info.fullName.trim().isEmpty) {
-      add('personal', CvIssueSeverity.important, 'Thiếu họ tên.');
+      add(
+        'personal',
+        CvIssueSeverity.important,
+        tr('Thiếu họ tên.', 'Full name is missing.'),
+      );
     }
     if (info.email.trim().isEmpty) {
-      add('personal', CvIssueSeverity.important, 'Thiếu email liên hệ.');
+      add(
+        'personal',
+        CvIssueSeverity.important,
+        tr('Thiếu email liên hệ.', 'Contact email is missing.'),
+      );
     } else if (!_email.hasMatch(info.email.trim())) {
       add(
         'personal',
         CvIssueSeverity.important,
-        'Email có vẻ chưa đúng định dạng.',
+        tr(
+          'Email có vẻ chưa đúng định dạng.',
+          'The email does not look right.',
+        ),
         info.email,
       );
     }
@@ -90,7 +102,10 @@ abstract final class CvQualityChecker {
       add(
         'personal',
         CvIssueSeverity.suggestion,
-        'Số điện thoại có vẻ thiếu hoặc thừa chữ số.',
+        tr(
+          'Số điện thoại có vẻ thiếu hoặc thừa chữ số.',
+          'The phone number seems to have too few or too many digits.',
+        ),
         info.phone,
       );
     }
@@ -101,20 +116,29 @@ abstract final class CvQualityChecker {
       add(
         'summary',
         CvIssueSeverity.important,
-        'Chưa có phần tóm tắt — nhà tuyển dụng đọc phần này đầu tiên.',
+        tr(
+          'Chưa có phần tóm tắt — nhà tuyển dụng đọc phần này đầu tiên.',
+          'No summary yet — employers read it first.',
+        ),
       );
     } else {
       if (summary.length < 120) {
         add(
           'summary',
           CvIssueSeverity.suggestion,
-          'Tóm tắt hơi ngắn; nên có 2–4 câu nêu vai trò, kỹ năng chính và mục tiêu.',
+          tr(
+            'Tóm tắt hơi ngắn; nên có 2–4 câu nêu vai trò, kỹ năng chính và mục tiêu.',
+            'The summary is short; aim for 2–4 sentences on your role, key skills and goal.',
+          ),
         );
       } else if (summary.length > 700) {
         add(
           'summary',
           CvIssueSeverity.suggestion,
-          'Tóm tắt dài hơn 700 ký tự; hãy rút gọn để dễ đọc.',
+          tr(
+            'Tóm tắt dài hơn 700 ký tự; hãy rút gọn để dễ đọc.',
+            'The summary is over 700 characters; shorten it so it is easy to read.',
+          ),
         );
       }
       if (_usesFirstPerson(summary, en)) {
@@ -136,7 +160,10 @@ abstract final class CvQualityChecker {
         add(
           'experience',
           CvIssueSeverity.important,
-          'Kinh nghiệm chưa có mô tả công việc/thành tích.',
+          tr(
+            'Kinh nghiệm chưa có mô tả công việc/thành tích.',
+            'Experience has no description of work or results.',
+          ),
           '${e.jobTitle} · ${e.company}',
         );
       }
@@ -149,7 +176,10 @@ abstract final class CvQualityChecker {
       add(
         'experience',
         CvIssueSeverity.suggestion,
-        'Chưa có con số nào trong kinh nghiệm; hãy định lượng kết quả (%, số người dùng, thời gian…).',
+        tr(
+          'Chưa có con số nào trong kinh nghiệm; hãy định lượng kết quả (%, số người dùng, thời gian…).',
+          'No numbers in your experience; add measurable results (%, users, time…).',
+        ),
       );
     }
     final repeated = _repeatedOpeners(allBullets);
@@ -157,7 +187,10 @@ abstract final class CvQualityChecker {
       add(
         'experience',
         CvIssueSeverity.suggestion,
-        'Nhiều gạch đầu dòng cùng mở đầu bằng "$repeated"; hãy đa dạng động từ hành động.',
+        tr(
+          'Nhiều gạch đầu dòng cùng mở đầu bằng "$repeated"; hãy đa dạng động từ hành động.',
+          'Many bullet points start with "$repeated"; vary your action verbs.',
+        ),
       );
     }
 
@@ -167,7 +200,10 @@ abstract final class CvQualityChecker {
         add(
           'projects',
           CvIssueSeverity.suggestion,
-          'Dự án chưa có mô tả vai trò và kết quả.',
+          tr(
+            'Dự án chưa có mô tả vai trò và kết quả.',
+            'Project has no description of your role and results.',
+          ),
           p.name,
         );
       }
@@ -175,7 +211,10 @@ abstract final class CvQualityChecker {
         add(
           'projects',
           CvIssueSeverity.suggestion,
-          'Dự án chưa liệt kê công nghệ sử dụng.',
+          tr(
+            'Dự án chưa liệt kê công nghệ sử dụng.',
+            'Project does not list the technologies used.',
+          ),
           p.name,
         );
       }
@@ -183,7 +222,10 @@ abstract final class CvQualityChecker {
         add(
           'projects',
           CvIssueSeverity.important,
-          'Mô tả dự án còn chỗ [điền] chưa thay bằng thông tin thật.',
+          tr(
+            'Mô tả dự án còn chỗ [điền] chưa thay bằng thông tin thật.',
+            'Project description still has [placeholders] to replace.',
+          ),
           p.description,
         );
       }
@@ -201,17 +243,27 @@ abstract final class CvQualityChecker {
       add(
         'skills',
         CvIssueSeverity.suggestion,
-        'Kỹ năng bị trùng: ${duplicates.join(', ')}.',
+        tr(
+          'Kỹ năng bị trùng: ${duplicates.join(', ')}.',
+          'Duplicate skills: ${duplicates.join(', ')}.',
+        ),
       );
     }
     if (cv.skills.length > 20) {
       add(
         'skills',
         CvIssueSeverity.suggestion,
-        'Có ${cv.skills.length} kỹ năng; nên giữ 8–15 kỹ năng liên quan nhất.',
+        tr(
+          'Có ${cv.skills.length} kỹ năng; nên giữ 8–15 kỹ năng liên quan nhất.',
+          '${cv.skills.length} skills; keep the 8–15 most relevant.',
+        ),
       );
     } else if (cv.skills.isEmpty) {
-      add('skills', CvIssueSeverity.important, 'Chưa có kỹ năng nào.');
+      add(
+        'skills',
+        CvIssueSeverity.important,
+        tr('Chưa có kỹ năng nào.', 'No skills yet.'),
+      );
     }
 
     // Education
@@ -220,7 +272,10 @@ abstract final class CvQualityChecker {
         add(
           'education',
           CvIssueSeverity.suggestion,
-          'Mục học vấn vừa đánh dấu "đang học" vừa có ngày kết thúc.',
+          tr(
+            'Mục học vấn vừa đánh dấu "đang học" vừa có ngày kết thúc.',
+            'An education entry is marked "current" but also has an end date.',
+          ),
           e.institution,
         );
       }
@@ -241,14 +296,20 @@ abstract final class CvQualityChecker {
       add(
         section,
         CvIssueSeverity.suggestion,
-        'Gạch đầu dòng quá dài (>220 ký tự); nên tách hoặc rút gọn.',
+        tr(
+          'Gạch đầu dòng quá dài (>220 ký tự); nên tách hoặc rút gọn.',
+          'Bullet point is too long (>220 characters); split or shorten it.',
+        ),
         text,
       );
     } else if (text.length < 20) {
       add(
         section,
         CvIssueSeverity.suggestion,
-        'Gạch đầu dòng quá ngắn; hãy nêu rõ việc đã làm và kết quả.',
+        tr(
+          'Gạch đầu dòng quá ngắn; hãy nêu rõ việc đã làm và kết quả.',
+          'Bullet point is too short; say what you did and the result.',
+        ),
         text,
       );
     }
@@ -256,7 +317,10 @@ abstract final class CvQualityChecker {
       add(
         section,
         CvIssueSeverity.important,
-        'Còn chỗ [điền] chưa thay bằng số liệu thật.',
+        tr(
+          'Còn chỗ [điền] chưa thay bằng số liệu thật.',
+          'There are [placeholders] still to replace with real numbers.',
+        ),
         text,
       );
     }
@@ -274,7 +338,10 @@ abstract final class CvQualityChecker {
       add(
         section,
         CvIssueSeverity.suggestion,
-        'Nên viết hoa chữ cái đầu gạch đầu dòng.',
+        tr(
+          'Nên viết hoa chữ cái đầu gạch đầu dòng.',
+          'Start bullet points with a capital letter.',
+        ),
         text,
       );
     }

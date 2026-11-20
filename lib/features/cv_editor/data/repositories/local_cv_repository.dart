@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 import '../../domain/models/cv_model.dart';
 import '../../domain/repositories/cv_repository.dart';
+import '../../../../core/i18n/app_language.dart';
 
 final class LocalCvRepository implements CvRepository {
   LocalCvRepository(this._database);
@@ -77,7 +78,7 @@ final class LocalCvRepository implements CvRepository {
     final timestamp = (now ?? DateTime.now()).toUtc();
     final duplicate = source.copyWith(
       id: newId,
-      title: '${source.title} (Bản sao)',
+      title: tr('${source.title} (Bản sao)', '${source.title} (Copy)'),
       isSynced: false,
       createdAt: timestamp,
       updatedAt: timestamp,

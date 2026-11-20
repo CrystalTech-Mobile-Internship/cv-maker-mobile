@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/summary_polish_request.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Name of the single Edge Function that fronts every AI capability. The AI
 /// provider key lives only in that function's secrets.
@@ -44,15 +45,21 @@ class AiWritingRemoteDataSource {
     try {
       client = _client;
     } on StateError {
-      throw const AiWritingRemoteException(
-        'Chức năng này tạm thời chưa dùng được.',
+      throw AiWritingRemoteException(
+        tr(
+          'Chức năng này tạm thời chưa dùng được.',
+          'This feature is not available right now.',
+        ),
         statusCode: 503,
         code: 'not_configured',
       );
     }
     if (client.auth.currentSession == null) {
-      throw const AiWritingRemoteException(
-        'Bạn cần đăng nhập để dùng chức năng này.',
+      throw AiWritingRemoteException(
+        tr(
+          'Bạn cần đăng nhập để dùng chức năng này.',
+          'Please sign in to use this feature.',
+        ),
         statusCode: 401,
         code: 'unauthenticated',
       );
@@ -68,8 +75,11 @@ class AiWritingRemoteDataSource {
         throw _fromBody(data, response.status);
       }
       if (data is! Map) {
-        throw const AiWritingRemoteException(
-          'Có lỗi xảy ra. Hãy thử lại.',
+        throw AiWritingRemoteException(
+          tr(
+            'Có lỗi xảy ra. Hãy thử lại.',
+            'Something went wrong. Please try again.',
+          ),
           statusCode: 502,
         );
       }
@@ -80,7 +90,10 @@ class AiWritingRemoteDataSource {
       throw _fromBody(error.details, error.status, cause: error);
     } catch (error) {
       throw AiWritingRemoteException(
-        'Không có kết nối. Hãy kiểm tra mạng.',
+        tr(
+          'Không có kết nối. Hãy kiểm tra mạng.',
+          'No connection. Please check your network.',
+        ),
         statusCode: 503,
         cause: error,
       );
@@ -108,8 +121,14 @@ class AiWritingRemoteDataSource {
     final message = body['message'] is String
         ? body['message'] as String
         : status == 404
-        ? 'Chức năng này tạm thời chưa dùng được.'
-        : 'Hệ thống đang bận. Hãy thử lại sau.';
+        ? tr(
+            'Chức năng này tạm thời chưa dùng được.',
+            'This feature is not available right now.',
+          )
+        : tr(
+            'Hệ thống đang bận. Hãy thử lại sau.',
+            'The service is busy. Please try again later.',
+          );
     return AiWritingRemoteException(
       message,
       statusCode: status,

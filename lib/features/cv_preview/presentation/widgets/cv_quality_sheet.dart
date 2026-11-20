@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/services/cv_quality_checker.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
-const _sectionLabels = {
-  'personal': 'Thông tin cá nhân',
-  'summary': 'Tóm tắt',
-  'experience': 'Kinh nghiệm',
-  'projects': 'Dự án',
-  'education': 'Học vấn',
-  'skills': 'Kỹ năng',
-  'certifications': 'Chứng chỉ',
+final _sectionLabels = {
+  'personal': tr('Thông tin cá nhân', 'Personal details'),
+  'summary': tr('Tóm tắt', 'Summary'),
+  'experience': tr('Kinh nghiệm', 'Experience'),
+  'projects': tr('Dự án', 'Projects'),
+  'education': tr('Học vấn', 'Education'),
+  'skills': tr('Kỹ năng', 'Skills'),
+  'certifications': tr('Chứng chỉ', 'Certifications'),
 };
 
 /// Lists writing-quality issues found by [CvQualityChecker].
@@ -59,8 +60,8 @@ Future<void> showCvQualitySheet(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Kiểm tra chất lượng CV',
+                    Text(
+                      tr('Kiểm tra chất lượng CV', 'CV quality check'),
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 17,
@@ -70,9 +71,15 @@ Future<void> showCvQualitySheet(
                     const SizedBox(height: 2),
                     Text(
                       report.issues.isEmpty
-                          ? 'Không phát hiện vấn đề nào. CV đã sẵn sàng.'
-                          : '${report.importantCount} vấn đề quan trọng · '
-                                '${report.issues.length - report.importantCount} gợi ý',
+                          ? tr(
+                              'Không phát hiện vấn đề nào. CV đã sẵn sàng.',
+                              'No problems found. Your CV is ready.',
+                            )
+                          : tr(
+                              '${report.importantCount} vấn đề quan trọng · '
+                                  '${report.issues.length - report.importantCount} gợi ý',
+                              '${report.importantCount} important · ${report.issues.length - report.importantCount} suggestions',
+                            ),
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppTheme.mutedText,
@@ -94,8 +101,8 @@ Future<void> showCvQualitySheet(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Có thể sửa nhanh',
+                  Text(
+                    tr('Có thể sửa nhanh', 'Quick fixes available'),
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       color: AppTheme.primaryNavy,
@@ -114,7 +121,7 @@ Future<void> showCvQualitySheet(
                       Navigator.pop(context);
                       onAutoFix();
                     },
-                    child: const Text('Sửa nhanh 1 chạm'),
+                    child: Text(tr('Sửa nhanh 1 chạm', 'Fix in one tap')),
                   ),
                 ],
               ),
@@ -184,7 +191,7 @@ Future<void> showCvQualitySheet(
                 Navigator.pop(context);
                 onEdit();
               },
-              child: const Text('Mở trình chỉnh sửa để sửa'),
+              child: Text(tr('Mở trình chỉnh sửa để sửa', 'Fix in the editor')),
             ),
           ],
         ],

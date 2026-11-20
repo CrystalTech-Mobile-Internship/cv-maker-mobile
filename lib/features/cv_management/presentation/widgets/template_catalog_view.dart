@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
 import 'template_thumbnail.dart';
+import '../../../../core/i18n/app_language.dart';
 
 enum TemplateFilter { all, photo, noPhoto, premium }
 
@@ -105,7 +106,7 @@ class _CatalogHeader extends StatelessWidget {
     return Row(
       children: [
         Text(
-          'Chọn mẫu CV',
+          tr('Chọn mẫu CV', 'Choose a template'),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w800,
             color: AppTheme.primaryNavy,
@@ -113,7 +114,7 @@ class _CatalogHeader extends StatelessWidget {
         ),
         const Spacer(),
         Text(
-          '$templateCount mẫu',
+          tr('$templateCount mẫu', '$templateCount templates'),
           style: const TextStyle(
             fontSize: 13,
             color: AppTheme.mutedText,
@@ -133,10 +134,10 @@ class _TemplateFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const filters = [
-      (TemplateFilter.all, 'Tất cả'),
-      (TemplateFilter.photo, 'Có ảnh'),
-      (TemplateFilter.noPhoto, 'Không ảnh'),
+    final filters = [
+      (TemplateFilter.all, tr('Tất cả', 'All')),
+      (TemplateFilter.photo, tr('Có ảnh', 'With photo')),
+      (TemplateFilter.noPhoto, tr('Không ảnh', 'No photo')),
       (TemplateFilter.premium, 'Pro'),
     ];
     return Container(
@@ -299,10 +300,10 @@ class _TemplateCard extends StatelessWidget {
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
-                              child: const FittedBox(
+                              child: FittedBox(
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  'Gói Pro',
+                                  tr('Gói Pro', 'Pro'),
                                   maxLines: 1,
                                   softWrap: false,
                                 ),
@@ -341,9 +342,11 @@ class _TemplateCard extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    child: const FittedBox(
+                                    child: FittedBox(
                                       fit: BoxFit.scaleDown,
-                                      child: Text('Dùng mẫu'),
+                                      child: Text(
+                                        tr('Dùng mẫu', 'Use template'),
+                                      ),
                                     ),
                                   ),
                                 ),

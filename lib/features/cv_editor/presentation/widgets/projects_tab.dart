@@ -70,7 +70,7 @@ class ProjectsTab extends StatelessWidget {
                 FilledButton.tonalIcon(
                   key: const Key('use-starter-projects-btn'),
                   onPressed: onUseStarterProjects,
-                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  icon: const Icon(Icons.post_add_rounded, size: 18),
                   label: Text(
                     isEn
                         ? 'Use Starter Project ("Fill-in")'

@@ -4,6 +4,7 @@ import '../../domain/models/summary_polish_request.dart';
 import '../../domain/models/summary_polish_result.dart';
 import '../../domain/repositories/ai_writing_repository.dart';
 import '../datasources/ai_writing_remote_data_source.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class SupabaseAiWritingRepository implements AiWritingRepository {
   SupabaseAiWritingRepository(
@@ -24,8 +25,11 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
           .timeout(_timeout);
       final suggested = data['suggestedSummary']?.toString().trim() ?? '';
       if (suggested.isEmpty) {
-        throw const AiWritingFailure(
-          'Chưa tạo được nội dung. Hãy thử lại.',
+        throw AiWritingFailure(
+          tr(
+            'Chưa tạo được nội dung. Hãy thử lại.',
+            'Could not write the content. Please try again.',
+          ),
           code: AiWritingFailureCode.unavailable,
         );
       }
@@ -38,7 +42,10 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
     } on AiWritingRemoteException catch (error) {
       if (error.statusCode == 404) {
         throw AiWritingFailure(
-          'Chức năng này tạm thời chưa dùng được.',
+          tr(
+            'Chức năng này tạm thời chưa dùng được.',
+            'This feature is not available right now.',
+          ),
           code: AiWritingFailureCode.unavailable,
           cause: error,
         );
@@ -50,7 +57,10 @@ class SupabaseAiWritingRepository implements AiWritingRepository {
       );
     } on TimeoutException catch (error) {
       throw AiWritingFailure(
-        'Phản hồi quá lâu. Hãy thử lại.',
+        tr(
+          'Phản hồi quá lâu. Hãy thử lại.',
+          'That took too long. Please try again.',
+        ),
         code: AiWritingFailureCode.unavailable,
         cause: error,
       );

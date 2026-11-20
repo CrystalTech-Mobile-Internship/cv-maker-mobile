@@ -125,7 +125,7 @@ Tham chiếu: `wireframes/08-ui-states.png`.
 - **Paywall BottomSheet / Modal Dialog:**
   - Tiêu đề: `Mở Khóa Toàn Bộ Sức Mạnh Của Smart CV Maker PRO 💎`.
   - Danh sách tính năng so sánh (Free vs Pro) kèm icon tích xanh: Không giới hạn CV, xuất PDF không watermark, trọn bộ Template cao cấp, Trợ lý AI và ATS Matcher không giới hạn.
-  - Tùy chọn gói: `49.000đ / Tháng` hoặc `99.000đ Trọn đời (Tiết kiệm 60%)`.
+  - Tùy chọn gói: `49.000đ / 1 tháng` hoặc `119.000đ / 3 tháng (Tiết kiệm 19%)`.
   - Nút bấm chính (CTA): `Thanh toán nhanh qua VietQR`.
 - **Hộp thoại Quét mã VietQR (VietQR Payment Dialog):**
   - Hiển thị ảnh mã QR tạo động theo chuẩn NAPAS 247 (tích hợp qua PayOS hoặc SePay).

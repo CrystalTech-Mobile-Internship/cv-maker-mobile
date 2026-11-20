@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/services/cv_item_order_service.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Drag-and-drop ordering of the entries inside one CV section. Returns the
 /// new id order, or null when cancelled.
@@ -89,7 +90,10 @@ class _CvItemReorderSheetState extends State<_CvItemReorderSheet> {
                         Text(
                           _en
                               ? 'Drag to change the order on your CV.'
-                              : 'Kéo thả để đổi thứ tự hiển thị trên CV.',
+                              : tr(
+                                  'Kéo thả để đổi thứ tự hiển thị trên CV.',
+                                  'Drag to change the order on the CV.',
+                                ),
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppTheme.mutedText,
@@ -102,7 +106,11 @@ class _CvItemReorderSheetState extends State<_CvItemReorderSheet> {
                     TextButton(
                       key: const ValueKey('item-sort-newest'),
                       onPressed: _sortNewestFirst,
-                      child: Text(_en ? 'Newest first' : 'Mới nhất lên đầu'),
+                      child: Text(
+                        _en
+                            ? 'Newest first'
+                            : tr('Mới nhất lên đầu', 'Newest first'),
+                      ),
                     ),
                 ],
               ),
@@ -183,7 +191,7 @@ class _CvItemReorderSheetState extends State<_CvItemReorderSheet> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(_en ? 'Cancel' : 'Hủy'),
+                      child: Text(_en ? 'Cancel' : tr('Hủy', 'Cancel')),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -195,7 +203,7 @@ class _CvItemReorderSheetState extends State<_CvItemReorderSheet> {
                               for (final item in _items) item.id,
                             ])
                           : null,
-                      child: Text(_en ? 'Apply' : 'Áp dụng'),
+                      child: Text(_en ? 'Apply' : tr('Áp dụng', 'Apply')),
                     ),
                   ),
                 ],

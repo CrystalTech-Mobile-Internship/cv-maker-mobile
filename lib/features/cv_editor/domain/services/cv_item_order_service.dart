@@ -1,4 +1,5 @@
 import '../models/models.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Lightweight description of one entry inside a CV section, used by the
 /// drag-and-drop item ordering UI.
@@ -45,7 +46,9 @@ abstract final class CvItemOrderService {
           for (final e in cv.experiences)
             CvItemSummary(
               id: e.id,
-              title: e.jobTitle.isEmpty ? '(Chưa có chức danh)' : e.jobTitle,
+              title: e.jobTitle.isEmpty
+                  ? tr('(Chưa có chức danh)', '(No job title)')
+                  : e.jobTitle,
               subtitle: [
                 e.company,
                 _period(e.startDate, e.endDate, e.isCurrent),
@@ -58,7 +61,9 @@ abstract final class CvItemOrderService {
           for (final p in cv.projects)
             CvItemSummary(
               id: p.id,
-              title: p.name.isEmpty ? '(Chưa có tên dự án)' : p.name,
+              title: p.name.isEmpty
+                  ? tr('(Chưa có tên dự án)', '(No project name)')
+                  : p.name,
               subtitle: [
                 p.role,
                 _period(p.startDate, p.endDate, false),
@@ -71,7 +76,9 @@ abstract final class CvItemOrderService {
           for (final e in cv.educations)
             CvItemSummary(
               id: e.id,
-              title: e.institution.isEmpty ? '(Chưa có trường)' : e.institution,
+              title: e.institution.isEmpty
+                  ? tr('(Chưa có trường)', '(No school)')
+                  : e.institution,
               subtitle: [
                 '${e.degree} ${e.fieldOfStudy}'.trim(),
                 _period(e.startDate, e.endDate, e.isCurrent),
@@ -86,8 +93,8 @@ abstract final class CvItemOrderService {
               id: s.id,
               title: s.name,
               subtitle: s.category == SkillCategory.soft
-                  ? 'Kỹ năng mềm'
-                  : 'Kỹ năng chuyên môn',
+                  ? tr('Kỹ năng mềm', 'Soft skill')
+                  : tr('Kỹ năng chuyên môn', 'Technical skill'),
             ),
         ];
       case 'certifications':

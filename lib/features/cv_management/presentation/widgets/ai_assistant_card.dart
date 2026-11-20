@@ -1,93 +1,77 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
+import '../../../../core/i18n/app_language.dart';
+import '../../../ai_tools/domain/models/ai_assistant_models.dart';
+import 'side_panel_card.dart';
 
-/// Entry point for AI-assisted CV creation on the dashboard.
+/// Quick ways to start a CV: chat, or read an existing file.
 class AiAssistantCard extends StatelessWidget {
   const AiAssistantCard({
     super.key,
     required this.onChat,
     required this.onImport,
-    this.onPractice,
   });
 
   final VoidCallback onChat;
   final VoidCallback onImport;
-  final VoidCallback? onPractice;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceCard,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.softBorder),
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    );
+    return SidePanelCard(
+      title: tr('Tạo CV nhanh', 'Quick start'),
+      subtitle: tr(
+        'Trả lời vài câu hỏi hoặc dùng CV có sẵn.',
+        'Answer a few questions or use a CV you have.',
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppTheme.indigoSurface,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.auto_awesome_outlined,
-                  color: AppTheme.brandIndigo,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Tạo CV nhanh',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
-                        color: AppTheme.primaryNavy,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Trả lời vài câu hỏi hoặc tải CV cũ lên.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.mutedText,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          FilledButton(
+          FilledButton.icon(
             key: const ValueKey('open-ai-interview'),
             onPressed: onChat,
-            child: const Text('Trò chuyện tạo CV'),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.brandIndigo,
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(44),
+              shape: shape,
+            ),
+            icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+            label: Text(tr('Trò chuyện tạo CV', 'Chat to build a CV')),
           ),
           const SizedBox(height: 8),
-          OutlinedButton(
+          OutlinedButton.icon(
             onPressed: onImport,
-            child: const Text('Tải CV PDF/Word'),
-          ),
-          if (onPractice != null)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                key: const ValueKey('open-interview-practice'),
-                onPressed: onPractice,
-                child: const Text('Luyện phỏng vấn'),
-              ),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(44),
+              shape: shape,
             ),
+            icon: const Icon(Icons.upload_file_rounded, size: 18),
+            label: Text(
+              tr('Dùng CV có sẵn (PDF, Word)', 'Use my CV (PDF, Word)'),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            tr(
+              'Trò chuyện: ${AiCreditCost.interview} lượt AI mỗi tin, '
+                  '${AiCreditCost.generateCv} lượt khi tạo CV. '
+                  'Đọc CV có sẵn: miễn phí hoặc ${AiCreditCost.parseResume} lượt '
+                  'nếu đọc kỹ.',
+              'Chat: ${AiCreditCost.interview} AI use per message, '
+                  '${AiCreditCost.generateCv} to create the CV. '
+                  'Reading your CV: free, or ${AiCreditCost.parseResume} uses '
+                  'for a careful read.',
+            ),
+            style: const TextStyle(
+              fontSize: 12,
+              height: 1.4,
+              color: AppTheme.mutedText,
+            ),
+          ),
         ],
       ),
     );

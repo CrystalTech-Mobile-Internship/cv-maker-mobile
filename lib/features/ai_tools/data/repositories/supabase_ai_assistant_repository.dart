@@ -7,6 +7,7 @@ import '../../domain/repositories/ai_assistant_repository.dart';
 import '../datasources/ai_writing_remote_data_source.dart';
 import '../mappers/ai_cv_draft_mapper.dart';
 import 'supabase_ai_writing_repository.dart' show aiFailureCodeForStatus;
+import '../../../../core/i18n/app_language.dart';
 
 class SupabaseAiAssistantRepository implements AiAssistantRepository {
   SupabaseAiAssistantRepository(
@@ -29,8 +30,11 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
     await _call('quota', const {});
     final quota = _lastQuota;
     if (quota == null) {
-      throw const AiWritingFailure(
-        'Chưa xem được số lượt còn lại.',
+      throw AiWritingFailure(
+        tr(
+          'Chưa xem được số lượt còn lại.',
+          'Could not load your remaining uses.',
+        ),
         code: AiWritingFailureCode.unavailable,
       );
     }
@@ -72,7 +76,7 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
       'language': language,
       'messages': _trim(messages),
     });
-    return _draft(result, sourceName: 'Trò chuyện', rawText: '');
+    return _draft(result, sourceName: tr('Trò chuyện', 'Chat'), rawText: '');
   }
 
   @override
@@ -297,7 +301,10 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
       );
     } on TimeoutException catch (error) {
       throw AiWritingFailure(
-        'Phản hồi quá lâu. Hãy thử lại.',
+        tr(
+          'Phản hồi quá lâu. Hãy thử lại.',
+          'That took too long. Please try again.',
+        ),
         code: AiWritingFailureCode.unavailable,
         cause: error,
       );
@@ -319,8 +326,11 @@ class SupabaseAiAssistantRepository implements AiAssistantRepository {
             .toList(growable: false)
       : const [];
 
-  static AiWritingFailure _emptyResult() => const AiWritingFailure(
-    'Chưa tạo được nội dung. Hãy thử lại.',
+  static AiWritingFailure _emptyResult() => AiWritingFailure(
+    tr(
+      'Chưa tạo được nội dung. Hãy thử lại.',
+      'Could not write the content. Please try again.',
+    ),
     code: AiWritingFailureCode.unavailable,
   );
 }

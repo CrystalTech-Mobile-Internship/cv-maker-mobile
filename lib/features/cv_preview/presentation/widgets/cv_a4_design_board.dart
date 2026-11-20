@@ -4,6 +4,7 @@ import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/cv_section_definition.dart';
 import '../../../cv_editor/domain/services/cv_bullet_cleaner.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Computer-only layout designer: a palette of CV sections on the left and
 /// an A4 sheet in the middle. Sections are dragged onto the sheet, moved
@@ -109,8 +110,8 @@ class _CvA4DesignBoardState extends State<CvA4DesignBoard> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
           children: [
-            const Text(
-              'Khối nội dung',
+            Text(
+              tr('Khối nội dung', 'Sections'),
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
@@ -118,21 +119,29 @@ class _CvA4DesignBoardState extends State<CvA4DesignBoard> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Kéo khối vào trang A4. Kéo ra đây để gỡ khỏi CV.',
+            Text(
+              tr(
+                'Kéo khối vào trang A4. Kéo ra đây để gỡ khỏi CV.',
+                'Drag sections onto the A4 page. Drag back here to remove.',
+              ),
               style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
             ),
             const SizedBox(height: 14),
             if (_offPage.isEmpty)
-              _hintBox('Tất cả các khối đang có trên trang.')
+              _hintBox(
+                tr(
+                  'Tất cả các khối đang có trên trang.',
+                  'All sections are on the page.',
+                ),
+              )
             else
               for (final id in _offPage) ...[
                 _paletteTile(id),
                 const SizedBox(height: 8),
               ],
             const SizedBox(height: 14),
-            const Text(
-              'Trên trang',
+            Text(
+              tr('Trên trang', 'On page'),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
@@ -315,7 +324,12 @@ class _CvA4DesignBoardState extends State<CvA4DesignBoard> {
                 if (page.isEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: _hintBox('Kéo các khối từ bên trái vào đây.'),
+                    child: _hintBox(
+                      tr(
+                        'Kéo các khối từ bên trái vào đây.',
+                        'Drag sections here from the left.',
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -350,7 +364,7 @@ class _CvA4DesignBoardState extends State<CvA4DesignBoard> {
       children: [
         Text(
           info.fullName.trim().isEmpty
-              ? 'HỌ VÀ TÊN'
+              ? tr('HỌ VÀ TÊN', 'FULL NAME')
               : info.fullName.toUpperCase(),
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -458,7 +472,9 @@ class _CvA4DesignBoardState extends State<CvA4DesignBoard> {
 
   String _range(DateTime? start, DateTime? end, {bool current = false}) {
     final from = _date(start);
-    final to = current ? (_lang == 'en' ? 'Present' : 'Hiện tại') : _date(end);
+    final to = current
+        ? (_lang == 'en' ? 'Present' : tr('Hiện tại', 'Present'))
+        : _date(end);
     if (from.isEmpty && to.isEmpty) return '';
     return [from, to].where((v) => v.isNotEmpty).join(' - ');
   }
@@ -466,7 +482,10 @@ class _CvA4DesignBoardState extends State<CvA4DesignBoard> {
   Widget _empty() => Text(
     _lang == 'en'
         ? 'No content yet — add it in the editor.'
-        : 'Chưa có nội dung — thêm trong phần Chỉnh sửa.',
+        : tr(
+            'Chưa có nội dung — thêm trong phần Chỉnh sửa.',
+            'Empty — add it in the editor.',
+          ),
     style: _muted.copyWith(fontStyle: FontStyle.italic),
   );
 
@@ -492,7 +511,13 @@ class _CvA4DesignBoardState extends State<CvA4DesignBoard> {
           for (final line in lines.take(3))
             Text('•  ${CvBulletCleaner.line(line)}', style: _text),
           if (lines.length > 3)
-            Text('+ ${lines.length - 3} dòng nữa', style: _muted),
+            Text(
+              tr(
+                '+ ${lines.length - 3} dòng nữa',
+                '+ ${lines.length - 3} more lines',
+              ),
+              style: _muted,
+            ),
         ],
       ),
     );
@@ -653,10 +678,10 @@ class _BlockShellState extends State<_BlockShell> {
                   InkWell(
                     onTap: widget.onRemove,
                     borderRadius: BorderRadius.circular(10),
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.all(2),
                       child: Tooltip(
-                        message: 'Gỡ khỏi trang',
+                        message: tr('Gỡ khỏi trang', 'Remove from page'),
                         child: Icon(
                           Icons.close_rounded,
                           size: 14,

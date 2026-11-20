@@ -7,6 +7,8 @@ import '../../../cv_management/presentation/controllers/reusable_profile_provide
 import '../../../legal/presentation/legal_document_screen.dart';
 import '../providers/auth_providers.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/i18n/language_menu_button.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key, this.embedded = false});
@@ -74,15 +76,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 color: AppTheme.primarySlate,
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Đăng nhập để sao lưu CV và dùng trên nhiều thiết bị',
+              Text(
+                tr(
+                  'Đăng nhập để sao lưu CV và dùng trên nhiều thiết bị',
+                  'Sign in to back up your CVs and use them on any device',
+                ),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => context.go('/login'),
-                child: const Text('Đăng nhập'),
+                child: Text(tr('Đăng nhập', 'Sign in')),
               ),
               const SizedBox(height: 20),
               const LegalLinksText(textAlign: TextAlign.center),
@@ -94,7 +99,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       return Scaffold(
         appBar: AppBar(
           leading: homeFallbackLeading(context),
-          title: const Text('Tài khoản'),
+          title: Text(tr('Tài khoản', 'Account')),
+          actions: const [LanguageMenuButton(), SizedBox(width: 8)],
         ),
         body: guestContent,
       );
@@ -148,8 +154,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           child: TextField(
                             controller: _displayNameController,
                             enabled: !isLoading,
-                            decoration: const InputDecoration(
-                              labelText: 'Tên hiển thị',
+                            decoration: InputDecoration(
+                              labelText: tr('Tên hiển thị', 'Display name'),
                               prefixIcon: Icon(Icons.badge_outlined),
                             ),
                           ),
@@ -159,7 +165,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           height: 56,
                           child: FilledButton(
                             onPressed: isLoading ? null : _saveProfile,
-                            child: const Text('Lưu'),
+                            child: Text(tr('Lưu', 'Save')),
                           ),
                         ),
                       ],
@@ -167,7 +173,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   ],
                 ),
               ),
-              const _AccountSectionTitle('Thông tin'),
+              _AccountSectionTitle(tr('Thông tin', 'Details')),
               _AccountCard(
                 child: Column(
                   children: [
@@ -179,25 +185,28 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     const Divider(height: 1, indent: 56),
                     _AccountInfoTile(
                       icon: Icons.verified_user_outlined,
-                      label: 'Xác nhận email',
+                      label: tr('Xác nhận email', 'Email confirmed'),
                       value: user.isEmailConfirmed
-                          ? 'Đã xác nhận'
-                          : 'Chưa xác nhận',
+                          ? tr('Đã xác nhận', 'Confirmed')
+                          : tr('Chưa xác nhận', 'Not confirmed'),
                     ),
                     const Divider(height: 1, indent: 56),
                     _AccountInfoTile(
                       icon: Icons.link_rounded,
-                      label: 'Đăng nhập bằng',
+                      label: tr('Đăng nhập bằng', 'Signed in with'),
                       value: user.provider == 'google'
                           ? 'Google'
-                          : 'Email và mật khẩu',
+                          : tr('Email và mật khẩu', 'Email and password'),
                     ),
                     const Divider(height: 1, indent: 56),
                     _AccountInfoTile(
                       icon: Icons.contact_page_outlined,
-                      label: 'Hồ sơ dùng lại khi tạo CV mới',
+                      label: tr(
+                        'Hồ sơ dùng lại khi tạo CV mới',
+                        'Used to fill in new CVs',
+                      ),
                       value: reusableProfile == null
-                          ? 'Chưa có'
+                          ? tr('Chưa có', 'Missing')
                           : [
                               reusableProfile.personalInfo.fullName.isEmpty
                                   ? reusableProfile.title
@@ -212,27 +221,54 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                   ],
                 ),
               ),
-              const _AccountSectionTitle('Tiện ích'),
+              _AccountSectionTitle(tr('Tiện ích', 'Tools')),
               _AccountCard(
                 child: Column(
                   children: [
                     _AccountLinkTile(
                       icon: Icons.analytics_outlined,
-                      title: 'Chấm điểm CV',
-                      subtitle: 'So sánh CV với tin tuyển dụng',
+                      title: tr('Chấm điểm CV', 'Score my CV'),
+                      subtitle: tr(
+                        'So sánh CV với tin tuyển dụng',
+                        'Compare your CV with a job posting',
+                      ),
                       onTap: () => context.push('/ats-scorer'),
                     ),
                     const Divider(height: 1, indent: 56),
                     _AccountLinkTile(
                       icon: Icons.workspace_premium_rounded,
-                      title: 'Nâng cấp Pro',
-                      subtitle: 'Thêm lượt dùng, mẫu CV cao cấp',
+                      title: tr('Nâng cấp Pro', 'Upgrade to Pro'),
+                      subtitle: tr(
+                        'Thêm lượt dùng, mẫu CV cao cấp',
+                        'More uses and premium templates',
+                      ),
                       onTap: () => context.push('/upgrade-pro'),
                     ),
                     const Divider(height: 1, indent: 56),
                     _AccountLinkTile(
+                      icon: Icons.work_history_outlined,
+                      title: tr('Theo dõi ứng tuyển', 'Job tracker'),
+                      subtitle: tr(
+                        'Việc đã nộp, lịch phỏng vấn',
+                        'Applications and interviews',
+                      ),
+                      onTap: () => context.push('/job-tracker'),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _AccountLinkTile(
+                      key: const Key('account-support'),
+                      icon: Icons.support_agent_rounded,
+                      title: tr('Nhắn hỗ trợ', 'Contact support'),
+                      subtitle: tr(
+                        'Hỏi đáp, báo lỗi, thanh toán',
+                        'Questions, bugs, payments',
+                      ),
+                      onTap: () => context.push('/support'),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _AccountLinkTile(
                       icon: Icons.password_rounded,
-                      title: 'Đổi mật khẩu',
+                      title: tr('Đổi mật khẩu', 'Change password'),
                       onTap: isLoading
                           ? null
                           : () => context.push('/reset-password'),
@@ -245,13 +281,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                 onPressed: isLoading ? null : _signOut,
                 style: AppTheme.logoutButton,
                 icon: const Icon(Icons.logout_rounded),
-                label: const Text('Đăng xuất'),
+                label: Text(tr('Đăng xuất', 'Sign out')),
               ),
               const SizedBox(height: 12),
               const LegalLinksText(textAlign: TextAlign.center),
               const SizedBox(height: 8),
               Text(
-                'Đăng xuất không xóa CV trên máy.',
+                tr(
+                  'Đăng xuất không xóa CV trên máy.',
+                  'Signing out does not delete CVs on this device.',
+                ),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppTheme.mutedText,
@@ -270,7 +309,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
         leading: homeFallbackLeading(context),
-        title: const Text('Tài khoản'),
+        title: Text(tr('Tài khoản', 'Account')),
+        actions: const [LanguageMenuButton(), SizedBox(width: 8)],
       ),
       body: content,
     );
@@ -306,6 +346,7 @@ class _AccountInfoTile extends StatelessWidget {
 
 class _AccountLinkTile extends StatelessWidget {
   const _AccountLinkTile({
+    super.key,
     required this.icon,
     required this.title,
     required this.onTap,

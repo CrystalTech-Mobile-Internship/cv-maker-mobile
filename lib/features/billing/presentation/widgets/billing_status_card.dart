@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme.dart';
+import '../../../../core/i18n/app_language.dart';
 import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
 import '../../data/supabase_billing_repository.dart';
 import '../../domain/billing_models.dart';
@@ -16,22 +17,29 @@ class BillingStatusCard extends ConsumerWidget {
     final quota = ref.watch(aiQuotaProvider);
 
     String planLine(BillingStatus value) {
-      if (!value.isPro) return 'Gói hiện tại: Free';
+      if (!value.isPro) return tr('Gói hiện tại: Free', 'Current plan: Free');
       final until = value.proUntil;
-      if (until == null) return 'Gói hiện tại: Pro trọn đời';
+      if (until == null) {
+        return tr('Gói hiện tại: Pro trọn đời', 'Current plan: Lifetime Pro');
+      }
       final local = until.toLocal();
-      return 'Gói hiện tại: Pro đến ${local.day}/${local.month}/${local.year}';
+      final date = '${local.day}/${local.month}/${local.year}';
+      return tr('Gói hiện tại: Pro đến $date', 'Current plan: Pro until $date');
     }
 
     String? requestLine(BillingStatus value) {
       final request = value.latestRequest;
       if (request == null) return null;
       return switch (request.status) {
-        ProRequestStatus.pending =>
-          'Yêu cầu ${request.plan.label} đang chờ xác nhận (${request.transferCode}).',
-        ProRequestStatus.rejected =>
-          'Yêu cầu gần nhất chưa được duyệt${request.adminNote == null ? '' : ': ${request.adminNote}'}.',
-        ProRequestStatus.approved => null,
+        ProRequestStatus.pending => tr(
+          'Đang chờ thanh toán gói ${request.plan.label}.',
+          'Waiting for payment for ${request.plan.label}.',
+        ),
+        ProRequestStatus.rejected => tr(
+          'Thanh toán gần nhất chưa được xác nhận.',
+          'Your last payment was not confirmed.',
+        ),
+        ProRequestStatus.approved || ProRequestStatus.expired => null,
       };
     }
 
@@ -46,7 +54,9 @@ class BillingStatusCard extends ConsumerWidget {
       child: status.when(
         loading: () => const LinearProgressIndicator(),
         error: (error, _) => Text(
-          error is BillingFailure ? error.message : 'Chưa tải được gói.',
+          error is BillingFailure
+              ? error.message
+              : tr('Chưa tải được gói.', 'Could not load your plan.'),
           style: const TextStyle(color: AppTheme.mutedText),
         ),
         data: (value) => Column(
@@ -62,7 +72,10 @@ class BillingStatusCard extends ConsumerWidget {
             if (quota != null) ...[
               const SizedBox(height: 4),
               Text(
-                'Đã dùng hôm nay: ${quota.used}/${quota.limit} lượt',
+                tr(
+                  'Đã dùng hôm nay: ${quota.used}/${quota.limit} lượt',
+                  'Used today: ${quota.used}/${quota.limit}',
+                ),
                 style: const TextStyle(color: AppTheme.mutedText),
               ),
             ],

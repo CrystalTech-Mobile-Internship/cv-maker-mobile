@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
+import 'core/i18n/app_language.dart';
 import 'core/network/supabase_client.dart';
 import 'features/auth/data/guest_session_service.dart';
 
@@ -16,6 +17,9 @@ Future<void> main() async {
       'ℹ️ [Main] Không tìm thấy file .env hoặc đang dùng cấu hình mặc định: $e',
     );
   }
+
+  // Interface language: saved choice, else the device language.
+  await AppI18n.load();
 
   // Initialize Supabase if keys are provided
   await SupabaseService.initialize();

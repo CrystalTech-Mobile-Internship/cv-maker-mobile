@@ -118,21 +118,64 @@ class AppTheme {
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: brandIndigo,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: const Color(0xFFCBD5E1),
-          disabledForegroundColor: const Color(0xFF64748B),
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: GoogleFonts.inter(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        style:
+            FilledButton.styleFrom(
+              backgroundColor: brandIndigo,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFFCBD5E1),
+              disabledForegroundColor: const Color(0xFF64748B),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+              animationDuration: const Duration(milliseconds: 160),
+            ).copyWith(
+              elevation: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.disabled)
+                    ? 0
+                    : states.contains(WidgetState.pressed)
+                    ? 0
+                    : states.contains(WidgetState.hovered)
+                    ? 3
+                    : 0,
+              ),
+              shadowColor: WidgetStatePropertyAll(
+                brandIndigo.withValues(alpha: 0.35),
+              ),
+              overlayColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.pressed)
+                    ? Colors.black.withValues(alpha: 0.14)
+                    : states.contains(WidgetState.hovered)
+                    ? Colors.black.withValues(alpha: 0.08)
+                    : null,
+              ),
+            ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style:
+            TextButton.styleFrom(
+              foregroundColor: brandIndigo,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              textStyle: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ).copyWith(
+              overlayColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.pressed)
+                    ? brandIndigo.withValues(alpha: 0.16)
+                    : states.contains(WidgetState.hovered)
+                    ? indigoSurface
+                    : null,
+              ),
+            ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -150,19 +193,47 @@ class AppTheme {
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: primarySlate,
-          backgroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          side: const BorderSide(color: Color(0xFF94A3B8), width: 1.4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        style:
+            OutlinedButton.styleFrom(
+              foregroundColor: primarySlate,
+              backgroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              side: const BorderSide(color: Color(0xFF94A3B8), width: 1.4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+              animationDuration: const Duration(milliseconds: 160),
+            ).copyWith(
+              side: WidgetStateProperty.resolveWith(
+                (states) => BorderSide(
+                  color: states.contains(WidgetState.disabled)
+                      ? softBorder
+                      : states.contains(WidgetState.hovered) ||
+                            states.contains(WidgetState.focused)
+                      ? brandIndigo
+                      : const Color(0xFF94A3B8),
+                  width: 1.4,
+                ),
+              ),
+              foregroundColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.disabled)
+                    ? const Color(0xFF94A3B8)
+                    : states.contains(WidgetState.hovered)
+                    ? brandIndigo
+                    : primarySlate,
+              ),
+              overlayColor: WidgetStateProperty.resolveWith(
+                (states) => states.contains(WidgetState.pressed)
+                    ? brandIndigo.withValues(alpha: 0.14)
+                    : states.contains(WidgetState.hovered)
+                    ? indigoSurface
+                    : null,
+              ),
+            ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: createAction,

@@ -200,7 +200,7 @@ Nhằm chứng minh tính khả thi thương mại và bài toán sản phẩm t
 
 | Tiêu chí | Gói Miễn Phí (FREE) | Gói Chuyên Nghiệp (PRO / VIP) |
 | :--- | :--- | :--- |
-| **Giá thành** | **0 VNĐ** | **49.000 VNĐ / tháng** hoặc **99.000 VNĐ vĩnh viễn** |
+| **Giá thành** | **0 VNĐ** | **49.000 VNĐ / 1 tháng** hoặc **119.000 VNĐ / 3 tháng** |
 | **Số lượng bản CV** | Tối đa 2 bản CV | **Không giới hạn** |
 | **Kho mẫu Template** | 6 mẫu Free | 11 mẫu Pro (mở khi nâng cấp gói Pro) |
 | **Độ nét PDF** | Xuất PDF tiêu chuẩn | **Xuất PDF Vector A4 sắc nét tối đa** |

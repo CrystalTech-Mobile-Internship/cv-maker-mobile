@@ -4,6 +4,7 @@ import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/models.dart';
 import '../../domain/models/ai_assistant_models.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Builds the tailored copy of [cv]. The original CV is never modified.
 CvModel applyTailoring(
@@ -89,23 +90,32 @@ class _TailorSheetState extends State<_TailorSheet> {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         children: [
           Text(
-            'Đề xuất chỉnh CV theo tin tuyển dụng',
+            tr(
+              'Đề xuất chỉnh CV theo tin tuyển dụng',
+              'Suggested changes for this job',
+            ),
             style: label().copyWith(fontSize: 17),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Ứng dụng sẽ tạo một bản CV mới; CV gốc giữ nguyên.',
+          Text(
+            tr(
+              'Ứng dụng sẽ tạo một bản CV mới; CV gốc giữ nguyên.',
+              'A new copy will be created; your original CV stays the same.',
+            ),
             style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
           ),
           const SizedBox(height: 16),
           if (result.summary.isNotEmpty) ...[
-            Text('Tóm tắt mới', style: label()),
+            Text(tr('Tóm tắt mới', 'New summary'), style: label()),
             const SizedBox(height: 6),
             Text(result.summary, style: const TextStyle(height: 1.45)),
             const SizedBox(height: 16),
           ],
           if (result.skillsOrder.isNotEmpty) ...[
-            Text('Thứ tự kỹ năng ưu tiên', style: label()),
+            Text(
+              tr('Thứ tự kỹ năng ưu tiên', 'Suggested skill order'),
+              style: label(),
+            ),
             const SizedBox(height: 6),
             Text(
               result.skillsOrder.join(' · '),
@@ -115,12 +125,18 @@ class _TailorSheetState extends State<_TailorSheet> {
           ],
           if (result.missingSkills.isNotEmpty) ...[
             Text(
-              'Kỹ năng tin tuyển dụng yêu cầu mà CV chưa có',
+              tr(
+                'Kỹ năng tin tuyển dụng yêu cầu mà CV chưa có',
+                'Skills the job asks for that your CV lacks',
+              ),
               style: label(),
             ),
             const SizedBox(height: 2),
-            const Text(
-              'Chỉ chọn những kỹ năng bạn thật sự có.',
+            Text(
+              tr(
+                'Chỉ chọn những kỹ năng bạn thật sự có.',
+                'Only pick skills you really have.',
+              ),
               style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
             ),
             for (final skill in result.missingSkills)
@@ -166,7 +182,7 @@ class _TailorSheetState extends State<_TailorSheet> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Hủy'),
+                  child: Text(tr('Hủy', 'Cancel')),
                 ),
               ),
               const SizedBox(width: 10),
@@ -174,7 +190,7 @@ class _TailorSheetState extends State<_TailorSheet> {
                 child: FilledButton(
                   key: const ValueKey('tailor-create-copy'),
                   onPressed: () => Navigator.pop(context, {..._confirmed}),
-                  child: const Text('Tạo bản CV tối ưu'),
+                  child: Text(tr('Tạo bản CV tối ưu', 'Create tailored copy')),
                 ),
               ),
             ],

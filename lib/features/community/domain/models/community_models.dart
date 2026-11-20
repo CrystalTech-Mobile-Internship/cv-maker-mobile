@@ -1,12 +1,17 @@
-enum CommunityPostKind {
-  discussion('discussion', 'Thảo luận'),
-  job('job', 'Việc làm'),
-  cvReview('cv_review', 'Góp ý CV');
+import '../../../../core/i18n/app_language.dart';
 
-  const CommunityPostKind(this.value, this.label);
+enum CommunityPostKind {
+  discussion('discussion', 'Thảo luận', 'Discussion'),
+  job('job', 'Việc làm', 'Jobs'),
+  cvReview('cv_review', 'Góp ý CV', 'CV feedback');
+
+  const CommunityPostKind(this.value, this._labelVi, this._labelEn);
 
   final String value;
-  final String label;
+  final String _labelVi;
+  final String _labelEn;
+
+  String get label => tr(_labelVi, _labelEn);
 
   static CommunityPostKind fromValue(String? value) =>
       CommunityPostKind.values.firstWhere(
@@ -116,18 +121,30 @@ class CommunityPostDraft {
     final t = title.trim();
     final b = body.trim();
     if (t.length < 5 || t.length > 140) {
-      return 'Tiêu đề cần từ 5 đến 140 ký tự.';
+      return tr(
+        'Tiêu đề cần từ 5 đến 140 ký tự.',
+        'Title must be 5 to 140 characters.',
+      );
     }
     if (b.length < 10 || b.length > 4000) {
-      return 'Nội dung cần từ 10 đến 4000 ký tự.';
+      return tr(
+        'Nội dung cần từ 10 đến 4000 ký tự.',
+        'Text must be 10 to 4000 characters.',
+      );
     }
-    if (tags.length > 5) return 'Tối đa 5 thẻ.';
+    if (tags.length > 5) return tr('Tối đa 5 thẻ.', 'Up to 5 tags.');
     final url = jobUrl?.trim() ?? '';
     if (url.isNotEmpty && !RegExp(r'^https?://\S+$').hasMatch(url)) {
-      return 'Đường dẫn ứng tuyển phải bắt đầu bằng http:// hoặc https://';
+      return tr(
+        'Đường dẫn ứng tuyển phải bắt đầu bằng http:// hoặc https://',
+        'The apply link must start with http:// or https://',
+      );
     }
     if (kind == CommunityPostKind.job && (jobCompany?.trim() ?? '').isEmpty) {
-      return 'Bài chia sẻ việc làm cần tên công ty.';
+      return tr(
+        'Bài chia sẻ việc làm cần tên công ty.',
+        'Job posts need a company name.',
+      );
     }
     return null;
   }

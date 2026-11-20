@@ -1,4 +1,5 @@
 import '../models/models.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class CvAutoFixResult {
   const CvAutoFixResult({required this.cv, required this.changes});
@@ -85,11 +86,27 @@ abstract final class CvQualityAutoFixer {
 
     final changes = <String>[
       if (bulletFixes > 0)
-        'Chuẩn hóa $bulletFixes gạch đầu dòng (viết hoa, bỏ ký hiệu thừa, khoảng trắng).',
-      if (removedBullets > 0) 'Xóa $removedBullets gạch đầu dòng trống.',
-      if (duplicateSkills > 0) 'Gộp $duplicateSkills kỹ năng bị trùng.',
-      if (summary != cv.summary) 'Dọn khoảng trắng thừa trong tóm tắt.',
-      if (infoChanged) 'Chuẩn hóa thông tin liên hệ.',
+        tr(
+          'Chuẩn hóa $bulletFixes gạch đầu dòng (viết hoa, bỏ ký hiệu thừa, khoảng trắng).',
+          'Tidied $bulletFixes bullet points (capitals, extra symbols, spaces).',
+        ),
+      if (removedBullets > 0)
+        tr(
+          'Xóa $removedBullets gạch đầu dòng trống.',
+          'Removed $removedBullets empty bullet points.',
+        ),
+      if (duplicateSkills > 0)
+        tr(
+          'Gộp $duplicateSkills kỹ năng bị trùng.',
+          'Merged $duplicateSkills duplicate skills.',
+        ),
+      if (summary != cv.summary)
+        tr(
+          'Dọn khoảng trắng thừa trong tóm tắt.',
+          'Removed extra spaces in the summary.',
+        ),
+      if (infoChanged)
+        tr('Chuẩn hóa thông tin liên hệ.', 'Tidied contact details.'),
     ];
     if (changes.isEmpty) return CvAutoFixResult(cv: cv, changes: const []);
 

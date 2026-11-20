@@ -38,7 +38,7 @@ Kết quả AI luôn là **gợi ý**: người dùng xem lại/chỉnh sửa tr
 select id, user_id, plan, transfer_code, created_at
 from public.pro_upgrade_requests where status = 'pending' order by created_at;
 
-select public.approve_pro_request('<request-id>');            -- monthly: +30 ngày, lifetime: vĩnh viễn
+select public.approve_pro_request('<request-id>');            -- monthly: +30 ngày, quarterly: +90 ngày
 select public.reject_pro_request('<request-id>', 'Chưa nhận được chuyển khoản');
 ```
 

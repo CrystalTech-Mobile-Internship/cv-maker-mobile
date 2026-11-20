@@ -5,6 +5,7 @@ import '../../domain/models/ai_assistant_models.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 import '../../domain/services/cv_plain_text.dart';
 import 'ai_assistant_providers.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class InterviewPracticeState {
   const InterviewPracticeState({
@@ -102,7 +103,10 @@ class InterviewPracticeController
     if (question == null || state.isBusy) return;
     if (answer.length < 15) {
       state = state.copyWith(
-        errorMessage: 'Hãy trả lời chi tiết hơn (ít nhất 15 ký tự).',
+        errorMessage: tr(
+          'Hãy trả lời chi tiết hơn (ít nhất 15 ký tự).',
+          'Please answer in more detail (at least 15 characters).',
+        ),
         errorCode: AiWritingFailureCode.invalidInput,
       );
       return;

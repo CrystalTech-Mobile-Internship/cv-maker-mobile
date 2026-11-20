@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../domain/models/experience_model.dart';
+import '../../../ai_tools/domain/models/ai_assistant_models.dart';
 
 /// Tab for displaying and managing Work Experiences & Projects.
 class ExperienceTab extends StatelessWidget {
@@ -75,7 +76,7 @@ class ExperienceTab extends StatelessWidget {
                 FilledButton.tonalIcon(
                   key: const Key('use-starter-experience-btn'),
                   onPressed: onUseStarterExperience,
-                  icon: const Icon(Icons.auto_awesome, size: 18),
+                  icon: const Icon(Icons.post_add_rounded, size: 18),
                   label: Text(
                     _isEn
                         ? 'Use Starter Sample ("Fill-in")'
@@ -228,7 +229,12 @@ class ExperienceTab extends StatelessWidget {
                         key: ValueKey('improve-bullets-${item.id}'),
                         onPressed: () => onImproveWithAi!(item),
                         icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                        label: Text(_isEn ? 'Rewrite' : 'Viết lại cho hay hơn'),
+                        label: Text(
+                          _isEn
+                              ? 'Rewrite · ${AiCreditCost.improveBullets} AI use'
+                              : 'Viết lại cho hay hơn · '
+                                    '${AiCreditCost.improveBullets} lượt AI',
+                        ),
                       ),
                     ),
                   ],

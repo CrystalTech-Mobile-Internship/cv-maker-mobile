@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../domain/legal_documents.dart';
+import '../../../core/i18n/app_language.dart';
 
 class LegalDocumentScreen extends StatelessWidget {
   const LegalDocumentScreen({super.key, required this.type});
@@ -21,7 +22,7 @@ class LegalDocumentScreen extends StatelessWidget {
         leading: context.canPop()
             ? null
             : IconButton(
-                tooltip: 'Về trang chính',
+                tooltip: tr('Về trang chính', 'Home'),
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => context.go('/home'),
               ),
@@ -34,7 +35,10 @@ class LegalDocumentScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
                 Text(
-                  'Cập nhật ngày ${document.updatedOn}',
+                  tr(
+                    'Cập nhật ngày ${document.updatedOn}',
+                    'Updated ${document.updatedOn}',
+                  ),
                   style: const TextStyle(
                     fontSize: 12,
                     color: AppTheme.mutedText,
@@ -65,8 +69,14 @@ class LegalDocumentScreen extends StatelessWidget {
                 const SizedBox(height: 20),
                 Text(
                   AppConstants.supportEmail.isEmpty
-                      ? 'Liên hệ: dùng email hỗ trợ ghi trên trang tải ứng dụng.'
-                      : 'Liên hệ: ${AppConstants.supportEmail}',
+                      ? tr(
+                          'Liên hệ: dùng email hỗ trợ ghi trên trang tải ứng dụng.',
+                          'Contact: use the support email on the app download page.',
+                        )
+                      : tr(
+                          'Liên hệ: ${AppConstants.supportEmail}',
+                          'Contact: ${AppConstants.supportEmail}',
+                        ),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ],
@@ -101,14 +111,14 @@ class LegalLinksText extends StatelessWidget {
         children: [
           if (prefix.isNotEmpty) TextSpan(text: prefix),
           TextSpan(
-            text: 'Điều khoản sử dụng',
+            text: tr('Điều khoản sử dụng', 'Terms of use'),
             style: linkStyle,
             recognizer: TapGestureRecognizer()
               ..onTap = () => context.push('/terms'),
           ),
-          const TextSpan(text: ' và '),
+          TextSpan(text: tr(' và ', ' and ')),
           TextSpan(
-            text: 'Chính sách bảo mật',
+            text: tr('Chính sách bảo mật', 'Privacy policy'),
             style: linkStyle,
             recognizer: TapGestureRecognizer()
               ..onTap = () => context.push('/privacy'),

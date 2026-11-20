@@ -1,4 +1,5 @@
 import '../models/cv_model.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// One user-facing requirement used to estimate whether a CV is ready.
 class CvCompletionItem {
@@ -36,44 +37,44 @@ abstract final class CvCompletionService {
       items: List.unmodifiable([
         CvCompletionItem(
           id: 'full-name',
-          label: 'Họ và tên',
+          label: tr('Họ và tên', 'Full name'),
           isCompleted: personal.fullName.trim().isNotEmpty,
         ),
         CvCompletionItem(
           id: 'target-role',
-          label: 'Vị trí ứng tuyển',
+          label: tr('Vị trí ứng tuyển', 'Target role'),
           isCompleted: personal.targetRole.trim().isNotEmpty,
         ),
         CvCompletionItem(
           id: 'contact',
-          label: 'Email và số điện thoại',
+          label: tr('Email và số điện thoại', 'Email and phone'),
           isCompleted:
               personal.email.trim().isNotEmpty &&
               personal.phone.trim().isNotEmpty,
         ),
         CvCompletionItem(
           id: 'summary',
-          label: 'Tóm tắt nghề nghiệp',
+          label: tr('Tóm tắt nghề nghiệp', 'Professional summary'),
           isCompleted: cv.summary.trim().isNotEmpty,
         ),
         CvCompletionItem(
           id: 'education',
-          label: 'Học vấn',
+          label: tr('Học vấn', 'Education'),
           isCompleted: cv.educations.isNotEmpty,
         ),
         CvCompletionItem(
           id: 'experience',
-          label: 'Kinh nghiệm',
+          label: tr('Kinh nghiệm', 'Experience'),
           isCompleted: cv.experiences.isNotEmpty,
         ),
         CvCompletionItem(
           id: 'skills',
-          label: 'Kỹ năng',
+          label: tr('Kỹ năng', 'Skills'),
           isCompleted: cv.skills.isNotEmpty,
         ),
         CvCompletionItem(
           id: 'projects',
-          label: 'Dự án',
+          label: tr('Dự án', 'Projects'),
           isCompleted: cv.projects.isNotEmpty,
         ),
       ]),

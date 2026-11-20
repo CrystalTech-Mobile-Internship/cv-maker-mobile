@@ -12,6 +12,7 @@ import '../controllers/community_feed_controller.dart';
 import '../widgets/community_actions.dart';
 import '../widgets/community_post_card.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Community tab: discussions, shared jobs and CV review requests.
 class CommunityView extends ConsumerStatefulWidget {
@@ -63,7 +64,7 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
     final controller = ref.read(communityFeedControllerProvider.notifier);
     final current = ref.read(communityFeedControllerProvider).kind;
     final options = <(CommunityPostKind?, String)>[
-      (null, 'Tất cả'),
+      (null, tr('Tất cả', 'All')),
       for (final kind in CommunityPostKind.values) (kind, kind.label),
     ];
     await showAppSheet<void>(
@@ -77,8 +78,8 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Loại bài viết',
+              Text(
+                tr('Loại bài viết', 'Post type'),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
                   color: AppTheme.primaryNavy,
@@ -132,12 +133,18 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               hintText: state.kind == null
-                  ? 'Tìm bài viết, vị trí, công ty...'
-                  : 'Tìm trong ${state.kind!.label}',
+                  ? tr(
+                      'Tìm bài viết, vị trí, công ty...',
+                      'Search posts, roles, companies...',
+                    )
+                  : tr(
+                      'Tìm trong ${state.kind!.label}',
+                      'Search in ${state.kind!.label}',
+                    ),
               prefixIcon: const Icon(Icons.search, size: 20),
               suffixIcon: IconButton(
                 key: const ValueKey('community-filter-button'),
-                tooltip: 'Lọc',
+                tooltip: tr('Lọc', 'Filter'),
                 onPressed: _openFilters,
                 icon: Icon(
                   Icons.tune_rounded,
@@ -165,7 +172,7 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
                 Expanded(child: Text(state.errorMessage!)),
                 TextButton(
                   onPressed: controller.refresh,
-                  child: const Text('Thử lại'),
+                  child: Text(tr('Thử lại', 'Try again')),
                 ),
               ],
             ),
@@ -184,11 +191,14 @@ class _CommunityViewState extends ConsumerState<CommunityView> {
                   ? const Center(child: CircularProgressIndicator())
                   : state.posts.isEmpty
                   ? ListView(
-                      children: const [
+                      children: [
                         SizedBox(height: 80),
                         Center(
                           child: Text(
-                            'Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ!',
+                            tr(
+                              'Chưa có bài viết nào. Hãy là người đầu tiên chia sẻ!',
+                              'No posts yet. Be the first to share!',
+                            ),
                             style: TextStyle(color: AppTheme.mutedText),
                           ),
                         ),
@@ -256,8 +266,8 @@ class _SignInPrompt extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Cộng đồng việc làm',
+            Text(
+              tr('Cộng đồng việc làm', 'Job community'),
               style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 17,
@@ -265,15 +275,18 @@ class _SignInPrompt extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Đăng nhập để xem việc làm được chia sẻ, thảo luận kinh nghiệm và nhờ góp ý CV.',
+            Text(
+              tr(
+                'Đăng nhập để xem việc làm được chia sẻ, thảo luận kinh nghiệm và nhờ góp ý CV.',
+                'Sign in to see shared jobs, discuss experience and get CV feedback.',
+              ),
               textAlign: TextAlign.center,
               style: TextStyle(color: AppTheme.mutedText, height: 1.4),
             ),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => context.push('/login?redirect=%2Fhome'),
-              child: const Text('Đăng nhập'),
+              child: Text(tr('Đăng nhập', 'Sign in')),
             ),
           ],
         ),

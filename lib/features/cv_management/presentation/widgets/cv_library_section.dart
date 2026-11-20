@@ -4,6 +4,7 @@ import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/services/cv_completion_service.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 enum CvLibraryFilter { all, cloud, local, incomplete }
 
@@ -80,18 +81,18 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
   bool get _isCustomized =>
       _filter != CvLibraryFilter.all || _sort != CvLibrarySort.recentlyUpdated;
 
-  static const _filterLabels = {
-    CvLibraryFilter.all: 'Tất cả',
-    CvLibraryFilter.cloud: 'Đã sao lưu',
-    CvLibraryFilter.local: 'Trên máy',
-    CvLibraryFilter.incomplete: 'Cần hoàn thiện',
+  static Map<CvLibraryFilter, String> get _filterLabels => {
+    CvLibraryFilter.all: tr('Tất cả', 'All'),
+    CvLibraryFilter.cloud: tr('Đã sao lưu', 'Backed up'),
+    CvLibraryFilter.local: tr('Trên máy', 'On device'),
+    CvLibraryFilter.incomplete: tr('Cần hoàn thiện', 'Needs work'),
   };
 
-  static const _sortLabels = {
-    CvLibrarySort.recentlyUpdated: 'Mới cập nhật',
-    CvLibrarySort.oldestUpdated: 'Cũ nhất',
-    CvLibrarySort.title: 'Tên A–Z',
-    CvLibrarySort.completion: 'Hoàn thiện nhất',
+  static Map<CvLibrarySort, String> get _sortLabels => {
+    CvLibrarySort.recentlyUpdated: tr('Mới cập nhật', 'Recently updated'),
+    CvLibrarySort.oldestUpdated: tr('Cũ nhất', 'Oldest'),
+    CvLibrarySort.title: tr('Tên A–Z', 'Name A–Z'),
+    CvLibrarySort.completion: tr('Hoàn thiện nhất', 'Most complete'),
   };
 
   Future<void> _openOptions() async {
@@ -132,8 +133,8 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Lọc',
+                  Text(
+                    tr('Lọc', 'Filter'),
                     style: TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 8),
@@ -143,8 +144,8 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
                     (value) => setState(() => _filter = value),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Sắp xếp',
+                  Text(
+                    tr('Sắp xếp', 'Sort'),
                     style: TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 8),
@@ -177,14 +178,14 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
             onChanged: (value) => setState(() => _query = value),
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
-              hintText: 'Tìm CV',
+              hintText: tr('Tìm CV', 'Search CVs'),
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (_query.isNotEmpty)
                     IconButton(
-                      tooltip: 'Xoá',
+                      tooltip: tr('Xoá', 'Delete'),
                       onPressed: () {
                         _searchController.clear();
                         setState(() => _query = '');
@@ -193,7 +194,7 @@ class _CvLibrarySectionState extends State<CvLibrarySection> {
                     ),
                   IconButton(
                     key: const Key('cv-library-options'),
-                    tooltip: 'Lọc và sắp xếp',
+                    tooltip: tr('Lọc và sắp xếp', 'Filter and sort'),
                     onPressed: _openOptions,
                     icon: Icon(
                       Icons.tune_rounded,
@@ -270,12 +271,15 @@ class _NoLibraryResult extends StatelessWidget {
             color: AppTheme.primarySlate,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Không tìm thấy CV phù hợp',
+          Text(
+            tr('Không tìm thấy CV phù hợp', 'No matching CVs'),
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 10),
-          TextButton(onPressed: onReset, child: const Text('Xoá bộ lọc')),
+          TextButton(
+            onPressed: onReset,
+            child: Text(tr('Xoá bộ lọc', 'Clear filters')),
+          ),
         ],
       ),
     );
