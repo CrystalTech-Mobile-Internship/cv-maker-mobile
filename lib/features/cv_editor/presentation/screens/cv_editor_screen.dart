@@ -1639,16 +1639,10 @@ class _CvEditorScreenState extends ConsumerState<CvEditorScreen>
                         setState(() => _avatarPosition = position);
                         _onFieldChanged();
                       },
-                      supportsProfilePhoto:
-                          const {
-                            AppConstants.templateMinimalistClean,
-                            AppConstants.templateCreativeTech,
-                            AppConstants.templateProfessionalSidebar,
-                            AppConstants.templateFreshProfile,
-                          }.contains(
-                            widget.initialCv?.templateId ??
-                                AppConstants.templateHarvardAts,
-                          ),
+                      supportsProfilePhoto: CvTemplateCatalog.byId(
+                        widget.initialCv?.templateId ??
+                            AppConstants.templateHarvardAts,
+                      ).hasPhoto,
                     ),
 
                     // Tab 2: Education

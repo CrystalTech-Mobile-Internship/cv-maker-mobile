@@ -42,11 +42,14 @@ void main() {
     expect(header, '%PDF-');
   });
 
-  test('all free templates generate valid offline PDF documents', () async {
+  test('every template generates a valid PDF with a full CV', () async {
     final service = PdfExportServiceImpl();
-    final cv = CvModel.empty(id: 'all-free-templates');
+    final source = File(
+      'test/fixtures/cvs/fullstack_cv.json',
+    ).readAsStringSync();
+    final cv = CvModel.fromJson(jsonDecode(source) as Map<String, dynamic>);
 
-    for (final template in CvTemplateCatalog.freeTemplates) {
+    for (final template in CvTemplateCatalog.allTemplates) {
       final bytes = await service.generateCvPdf(
         cv: cv.copyWith(templateId: template.id),
         language: 'vi',

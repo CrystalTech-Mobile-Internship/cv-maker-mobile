@@ -21,6 +21,7 @@ import '../features/cv_management/presentation/screens/home_screen.dart';
 import '../features/cv_editor/presentation/screens/cv_editor_screen.dart';
 import '../features/cv_editor/domain/models/cv_model.dart';
 import '../features/cv_preview/presentation/screens/cv_preview_screen.dart';
+import '../features/cv_management/presentation/widgets/desktop_tool_frame.dart';
 import '../features/job_tracker/presentation/job_tracker_screen.dart';
 import '../features/support/presentation/support_chat_screen.dart';
 
@@ -108,7 +109,10 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/home',
       name: 'home',
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) => HomeScreen(
+        initialTab: int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0,
+        createOnOpen: state.uri.queryParameters['create'] == '1',
+      ),
     ),
     GoRoute(
       path: '/editor',
@@ -127,12 +131,14 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/ats-scorer',
       name: 'ats-scorer',
-      builder: (context, state) => const AtsScorerScreen(),
+      builder: (context, state) =>
+          DesktopToolFrame(route: '/ats-scorer', child: AtsScorerScreen()),
     ),
     GoRoute(
       path: '/ai-interview',
       name: 'ai-interview',
-      builder: (context, state) => const AiInterviewScreen(),
+      builder: (context, state) =>
+          DesktopToolFrame(route: '/ai-interview', child: AiInterviewScreen()),
     ),
     GoRoute(
       path: '/community/post',
@@ -145,10 +151,13 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/interview-practice',
       name: 'interview-practice',
-      builder: (context, state) => InterviewPracticeScreen(
-        args: state.extra is InterviewPracticeArgs
-            ? state.extra as InterviewPracticeArgs
-            : null,
+      builder: (context, state) => DesktopToolFrame(
+        route: '/interview-practice',
+        child: InterviewPracticeScreen(
+          args: state.extra is InterviewPracticeArgs
+              ? state.extra as InterviewPracticeArgs
+              : null,
+        ),
       ),
     ),
     GoRoute(
@@ -166,22 +175,26 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/upgrade-pro',
       name: 'upgrade-pro',
-      builder: (context, state) => const ProUpgradeScreen(),
+      builder: (context, state) =>
+          DesktopToolFrame(route: '/upgrade-pro', child: ProUpgradeScreen()),
     ),
     GoRoute(
       path: '/support',
       name: 'support',
-      builder: (context, state) => const SupportChatScreen(),
+      builder: (context, state) =>
+          DesktopToolFrame(route: '/support', child: SupportChatScreen()),
     ),
     GoRoute(
       path: '/job-tracker',
       name: 'job-tracker',
-      builder: (context, state) => const JobTrackerScreen(),
+      builder: (context, state) =>
+          DesktopToolFrame(route: '/job-tracker', child: JobTrackerScreen()),
     ),
     GoRoute(
       path: '/admin',
       name: 'admin',
-      builder: (context, state) => const AdminScreen(),
+      builder: (context, state) =>
+          DesktopToolFrame(route: '/admin', child: AdminScreen()),
     ),
   ],
 );

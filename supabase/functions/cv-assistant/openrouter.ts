@@ -31,11 +31,17 @@ const defaultModels = [
   "nvidia/nemotron-3.5-lightning:free",
 ];
 
-/** Used when GEMINI_API_KEY is set but GEMINI_MODELS is not. */
+/** Used when GEMINI_API_KEY is set but GEMINI_MODELS is not. Fast models
+ * first; a model the key cannot use is skipped for a while. */
 const defaultGeminiModels = [
-  "gemini-2.5-flash",
+  "gemini-3.8-flash",
+  "gemini-3.6-flash",
+  "gemini-4-carbon",
+  "gemini-3-flash-preview",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-3.1-pro-preview",
   "gemini-2.5-flash-lite",
-  "gemini-2.0-flash",
 ];
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -176,10 +182,17 @@ export function createOpenRouterComplete(
         });
         if (!response.ok) {
           lastError = `HTTP_${response.status}`;
-          if (response.status === 429) {
+          // 429: out of quota for now. 403/404: this key cannot use the
+          // model (retired, not on the free tier). Skip it for a while.
+          const rest = response.status === 429
+            ? cooldownMs(response)
+            : response.status === 403 || response.status === 404
+            ? MAX_COOLDOWN_MS
+            : 0;
+          if (rest > 0) {
             coolingUntil.set(
               `${route.provider}:${route.model}`,
-              Date.now() + cooldownMs(response),
+              Date.now() + rest,
             );
           }
           await response.body?.cancel();

@@ -23,7 +23,7 @@ Vào <https://ai.google.dev/gemini-api/docs/models> để xem tên model và h�
 Chạy trong thư mục `cv-maker-mobile`:
 
 ```powershell
-npx supabase secrets set "GEMINI_API_KEY=key_vừa_copy" "GEMINI_MODELS=gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash" --project-ref woejrebdstgredslznye
+npx supabase secrets set "GEMINI_API_KEY=key_vừa_copy" "GEMINI_MODELS=gemini-3.8-flash,gemini-3.6-flash,gemini-4-carbon,gemini-3-flash-preview,gemini-3.5-flash-lite,gemini-3.1-flash-lite,gemini-3.1-pro-preview,gemini-2.5-flash-lite" --project-ref woejrebdstgredslznye
 ```
 
 Hoặc vào **Supabase → Edge Functions → Secrets** và thêm 2 dòng `GEMINI_API_KEY` và `GEMINI_MODELS`.

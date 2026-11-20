@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 export '../controllers/cv_list_provider.dart' show cvListStreamProvider;
 
+import '../widgets/desktop_tools.dart';
 import '../../../admin/presentation/admin_providers.dart';
 import '../../../../app/theme.dart';
 import '../../../auth/data/guest_session_service.dart';
@@ -44,14 +45,38 @@ import '../../../../core/i18n/app_language.dart';
 import '../../../support/presentation/support_chat_button.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.initialTab = 0, this.createOnOpen = false});
+
+  /// Section to open first (0 My CVs, 1 Templates, 2 Community, 3 Account).
+  final int initialTab;
+
+  /// Opens the new CV dialog right away (from a tool page's sidebar).
+  final bool createOnOpen;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _selectedIndex = 0;
+  late int _selectedIndex = widget.initialTab.clamp(0, 3);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.createOnOpen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _createCv();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialTab != widget.initialTab) {
+      _selectedIndex = widget.initialTab.clamp(0, 3);
+    }
+  }
 
   Future<void> _openEditor([CvModel? cv]) async {
     await context.push('/editor', extra: cv);
@@ -611,21 +636,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  static List<(IconData, IconData, String)> get _destinations => [
-    (
-      Icons.folder_copy_outlined,
-      Icons.folder_copy_rounded,
-      tr('CV của tôi', 'My CVs'),
-    ),
-    (Icons.palette_outlined, Icons.palette_rounded, tr('Mẫu CV', 'Templates')),
-    (Icons.forum_outlined, Icons.forum_rounded, tr('Cộng đồng', 'Community')),
-    (
-      Icons.account_circle_outlined,
-      Icons.account_circle_rounded,
-      tr('Tài khoản', 'Account'),
-    ),
-  ];
-
   bool _isWide(BuildContext context) => MediaQuery.sizeOf(context).width >= 900;
 
   /// Computer layout designed for wide screens (sidebar + page header).
@@ -649,10 +659,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     };
     return DesktopShell(
-      items: [
-        for (final item in _destinations)
-          DesktopNavItem(item.$1, item.$2, item.$3),
-      ],
+      items: desktopDestinations,
       selectedIndex: _selectedIndex,
       onSelect: (index) => setState(() => _selectedIndex = index),
       onCreate: _createCv,
@@ -664,56 +671,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? tr('Đăng nhập để sao lưu CV', 'Sign in to back up CVs')
           : user.email,
       onAccount: () => setState(() => _selectedIndex = 3),
-      tools: [
-        DesktopToolLink(
-          key: const Key('tool-ats'),
-          icon: Icons.analytics_outlined,
-          label: tr('Chấm điểm CV', 'Score my CV'),
-          badge: tr('Miễn phí', 'Free'),
-          onTap: () => context.push('/ats-scorer'),
-        ),
-        DesktopToolLink(
-          key: const Key('tool-job-tracker'),
-          icon: Icons.work_history_outlined,
-          label: tr('Theo dõi ứng tuyển', 'Job tracker'),
-          badge: tr('Miễn phí', 'Free'),
-          onTap: () => context.push('/job-tracker'),
-        ),
-        DesktopToolLink(
-          key: const Key('tool-interview'),
-          icon: Icons.record_voice_over_outlined,
-          label: tr('Luyện phỏng vấn', 'Interview practice'),
-          badge: 'AI',
-          onTap: () => context.push('/interview-practice'),
-        ),
-        DesktopToolLink(
-          key: const Key('tool-chat-cv'),
-          icon: Icons.chat_bubble_outline_rounded,
-          label: tr('Trò chuyện tạo CV', 'Chat to build a CV'),
-          badge: 'AI',
-          onTap: () => context.push('/ai-interview'),
-        ),
-        DesktopToolLink(
-          key: const Key('tool-pro'),
-          icon: Icons.workspace_premium_outlined,
-          label: tr('Nâng cấp Pro', 'Upgrade to Pro'),
-          onTap: () => context.push('/upgrade-pro'),
-        ),
-        if (!isAdmin)
-          DesktopToolLink(
-            key: const Key('tool-support'),
-            icon: Icons.headset_mic_outlined,
-            label: tr('Hỗ trợ', 'Support'),
-            onTap: () => context.push('/support'),
-          ),
-        if (isAdmin)
-          DesktopToolLink(
-            key: const Key('tool-admin'),
-            icon: Icons.admin_panel_settings_outlined,
-            label: tr('Quản trị', 'Admin'),
-            onTap: () => context.push('/admin'),
-          ),
-      ],
+      tools: desktopToolLinks(context, isAdmin: isAdmin),
       actions: [
         if (_selectedIndex == 2 && user != null)
           FilledButton.icon(

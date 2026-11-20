@@ -120,40 +120,44 @@ class PdfExportServiceImpl implements PdfExportService {
                     : (edu.endDate?.year.toString() ?? '');
                 final period = '$startYear - $endYear';
 
-                return pw.Padding(
-                  padding: pw.EdgeInsets.only(bottom: 6 * scale),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                    children: [
-                      pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: [
-                          pw.Expanded(
-                            child: pw.Text(
-                              edu.institution.toUpperCase(),
-                              style: pw.TextStyle(
-                                fontSize: 10.5 * scale,
-                                fontWeight: pw.FontWeight.bold,
+                return _timelineEntry(
+                  templateStyle,
+                  scale,
+                  pw.Padding(
+                    padding: pw.EdgeInsets.only(bottom: 6 * scale),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                      children: [
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Expanded(
+                              child: pw.Text(
+                                edu.institution.toUpperCase(),
+                                style: pw.TextStyle(
+                                  fontSize: 10.5 * scale,
+                                  fontWeight: pw.FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          pw.Text(
-                            period,
-                            style: pw.TextStyle(
-                              fontSize: 9.5 * scale,
-                              fontStyle: pw.FontStyle.italic,
+                            pw.Text(
+                              period,
+                              style: pw.TextStyle(
+                                fontSize: 9.5 * scale,
+                                fontStyle: pw.FontStyle.italic,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      pw.Text(
-                        '${edu.degree} — ${edu.fieldOfStudy}${edu.gpa != null ? " (GPA: ${edu.gpa})" : ""}',
-                        style: pw.TextStyle(
-                          fontSize: 9.5 * scale,
-                          color: PdfColors.grey800,
+                          ],
                         ),
-                      ),
-                    ],
+                        pw.Text(
+                          '${edu.degree} — ${edu.fieldOfStudy}${edu.gpa != null ? " (GPA: ${edu.gpa})" : ""}',
+                          style: pw.TextStyle(
+                            fontSize: 9.5 * scale,
+                            color: PdfColors.grey800,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }),
@@ -179,71 +183,75 @@ class PdfExportServiceImpl implements PdfExportService {
                           : '');
                 final period = '$startStr - $endStr';
 
-                return pw.Padding(
-                  padding: pw.EdgeInsets.only(bottom: 8 * scale),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                    children: [
-                      pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: [
-                          pw.Expanded(
-                            child: pw.Text(
-                              exp.company.toUpperCase(),
-                              style: pw.TextStyle(
-                                fontSize: 10.5 * scale,
-                                fontWeight: pw.FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          pw.Text(
-                            period,
-                            style: pw.TextStyle(
-                              fontSize: 9.5 * scale,
-                              fontStyle: pw.FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                      pw.Text(
-                        exp.location.isNotEmpty
-                            ? '${exp.jobTitle} • ${exp.location}'
-                            : exp.jobTitle,
-                        style: pw.TextStyle(
-                          fontSize: 9.5 * scale,
-                          fontStyle: pw.FontStyle.italic,
-                          color: PdfColor.fromHex('#334155'),
-                        ),
-                      ),
-                      pw.SizedBox(height: 2 * scale),
-                      ...exp.bulletPoints.map(
-                        (b) => pw.Padding(
-                          padding: pw.EdgeInsets.only(bottom: 2 * scale),
-                          child: pw.Row(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              pw.Text(
-                                '• ',
+                return _timelineEntry(
+                  templateStyle,
+                  scale,
+                  pw.Padding(
+                    padding: pw.EdgeInsets.only(bottom: 8 * scale),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                      children: [
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Expanded(
+                              child: pw.Text(
+                                exp.company.toUpperCase(),
                                 style: pw.TextStyle(
-                                  fontSize: 9.5 * scale,
+                                  fontSize: 10.5 * scale,
                                   fontWeight: pw.FontWeight.bold,
                                 ),
                               ),
-                              pw.Expanded(
-                                child: pw.Text(
-                                  b,
-                                  style: pw.TextStyle(
-                                    fontSize: 9.5 * scale,
-                                    lineSpacing: 1.5 * scale,
-                                    color: PdfColors.grey900,
-                                  ),
-                                ),
+                            ),
+                            pw.Text(
+                              period,
+                              style: pw.TextStyle(
+                                fontSize: 9.5 * scale,
+                                fontStyle: pw.FontStyle.italic,
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        pw.Text(
+                          exp.location.isNotEmpty
+                              ? '${exp.jobTitle} • ${exp.location}'
+                              : exp.jobTitle,
+                          style: pw.TextStyle(
+                            fontSize: 9.5 * scale,
+                            fontStyle: pw.FontStyle.italic,
+                            color: PdfColor.fromHex('#334155'),
                           ),
                         ),
-                      ),
-                    ],
+                        pw.SizedBox(height: 2 * scale),
+                        ...exp.bulletPoints.map(
+                          (b) => pw.Padding(
+                            padding: pw.EdgeInsets.only(bottom: 2 * scale),
+                            child: pw.Row(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text(
+                                  '• ',
+                                  style: pw.TextStyle(
+                                    fontSize: 9.5 * scale,
+                                    fontWeight: pw.FontWeight.bold,
+                                  ),
+                                ),
+                                pw.Expanded(
+                                  child: pw.Text(
+                                    b,
+                                    style: pw.TextStyle(
+                                      fontSize: 9.5 * scale,
+                                      lineSpacing: 1.5 * scale,
+                                      color: PdfColors.grey900,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }),
@@ -264,75 +272,81 @@ class PdfExportServiceImpl implements PdfExportService {
                     ? '${proj.startDate!.month.toString().padLeft(2, '0')}/${proj.startDate!.year} - '
                           '${proj.endDate != null ? "${proj.endDate!.month.toString().padLeft(2, '0')}/${proj.endDate!.year}" : (isEn ? "Present" : "Hiện tại")}'
                     : '';
-                return pw.Padding(
-                  padding: pw.EdgeInsets.only(bottom: 8 * scale),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                    children: [
-                      pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: [
-                          pw.Expanded(
-                            child: pw.Text(
-                              proj.name,
-                              style: pw.TextStyle(
-                                fontSize: 10.5 * scale,
-                                fontWeight: pw.FontWeight.bold,
+                return _timelineEntry(
+                  templateStyle,
+                  scale,
+                  pw.Padding(
+                    padding: pw.EdgeInsets.only(bottom: 8 * scale),
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                      children: [
+                        pw.Row(
+                          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                          children: [
+                            pw.Expanded(
+                              child: pw.Text(
+                                proj.name,
+                                style: pw.TextStyle(
+                                  fontSize: 10.5 * scale,
+                                  fontWeight: pw.FontWeight.bold,
+                                ),
                               ),
+                            ),
+                            if (dateStr.isNotEmpty)
+                              pw.Text(
+                                dateStr,
+                                style: pw.TextStyle(
+                                  fontSize: 9.5 * scale,
+                                  fontStyle: pw.FontStyle.italic,
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (proj.role.isNotEmpty ||
+                            proj.technologies.isNotEmpty)
+                          pw.Text(
+                            [
+                              if (proj.role.isNotEmpty) proj.role,
+                              if (proj.teamSize != null)
+                                isEn
+                                    ? 'Team of ${proj.teamSize}'
+                                    : 'Nhóm ${proj.teamSize} người',
+                              if (proj.technologies.isNotEmpty)
+                                proj.technologies.join(', '),
+                            ].join(' | '),
+                            style: pw.TextStyle(
+                              fontSize: 9.5 * scale,
+                              fontStyle: pw.FontStyle.italic,
+                              color: PdfColor.fromHex('#334155'),
                             ),
                           ),
-                          if (dateStr.isNotEmpty)
-                            pw.Text(
-                              dateStr,
-                              style: pw.TextStyle(
-                                fontSize: 9.5 * scale,
-                                fontStyle: pw.FontStyle.italic,
-                              ),
+                        if (proj.sourceUrl != null &&
+                            proj.sourceUrl!.isNotEmpty)
+                          pw.Text(
+                            proj.sourceUrl!,
+                            style: pw.TextStyle(
+                              fontSize: 9 * scale,
+                              color: PdfColor.fromHex('#2563EB'),
                             ),
+                          ),
+                        if (proj.demoUrl != null && proj.demoUrl!.isNotEmpty)
+                          pw.Text(
+                            proj.demoUrl!,
+                            style: pw.TextStyle(
+                              fontSize: 9 * scale,
+                              color: PdfColor.fromHex('#2563EB'),
+                            ),
+                          ),
+                        if (proj.description.isNotEmpty) ...[
+                          pw.SizedBox(height: 2 * scale),
+                          ...proj.description
+                              .split('\n')
+                              .map((line) => line.trim())
+                              .where((line) => line.isNotEmpty)
+                              .map((line) => _buildPdfBulletPoint(line, scale)),
                         ],
-                      ),
-                      if (proj.role.isNotEmpty || proj.technologies.isNotEmpty)
-                        pw.Text(
-                          [
-                            if (proj.role.isNotEmpty) proj.role,
-                            if (proj.teamSize != null)
-                              isEn
-                                  ? 'Team of ${proj.teamSize}'
-                                  : 'Nhóm ${proj.teamSize} người',
-                            if (proj.technologies.isNotEmpty)
-                              proj.technologies.join(', '),
-                          ].join(' | '),
-                          style: pw.TextStyle(
-                            fontSize: 9.5 * scale,
-                            fontStyle: pw.FontStyle.italic,
-                            color: PdfColor.fromHex('#334155'),
-                          ),
-                        ),
-                      if (proj.sourceUrl != null && proj.sourceUrl!.isNotEmpty)
-                        pw.Text(
-                          proj.sourceUrl!,
-                          style: pw.TextStyle(
-                            fontSize: 9 * scale,
-                            color: PdfColor.fromHex('#2563EB'),
-                          ),
-                        ),
-                      if (proj.demoUrl != null && proj.demoUrl!.isNotEmpty)
-                        pw.Text(
-                          proj.demoUrl!,
-                          style: pw.TextStyle(
-                            fontSize: 9 * scale,
-                            color: PdfColor.fromHex('#2563EB'),
-                          ),
-                        ),
-                      if (proj.description.isNotEmpty) ...[
-                        pw.SizedBox(height: 2 * scale),
-                        ...proj.description
-                            .split('\n')
-                            .map((line) => line.trim())
-                            .where((line) => line.isNotEmpty)
-                            .map((line) => _buildPdfBulletPoint(line, scale)),
                       ],
-                    ],
+                    ),
                   ),
                 );
               }),
@@ -348,7 +362,7 @@ class PdfExportServiceImpl implements PdfExportService {
                 templateStyle,
               ),
               pw.SizedBox(height: 4 * scale),
-              _buildSkillsSection(cv.skills, isEn, scale),
+              _buildSkillsSection(cv.skills, isEn, scale, templateStyle),
               pw.SizedBox(height: 14 * scale),
             ],
           ];
@@ -779,6 +793,7 @@ class PdfExportServiceImpl implements PdfExportService {
     pw.MemoryImage? avatarImage,
     String avatarPosition = 'right',
   }) {
+    final onBand = style.band;
     final content = pw.Column(
       crossAxisAlignment: style.centerHeader
           ? pw.CrossAxisAlignment.center
@@ -790,7 +805,7 @@ class PdfExportServiceImpl implements PdfExportService {
             fontSize: style.nameSize * scale,
             fontWeight: pw.FontWeight.bold,
             letterSpacing: style.letterSpacing,
-            color: style.primary,
+            color: onBand ? PdfColors.white : style.primary,
           ),
         ),
         pw.SizedBox(height: 3 * scale),
@@ -799,7 +814,7 @@ class PdfExportServiceImpl implements PdfExportService {
           style: pw.TextStyle(
             fontSize: 12.5 * scale,
             fontWeight: pw.FontWeight.bold,
-            color: style.accent,
+            color: onBand ? PdfColor.fromHex('#E2E8F0') : style.accent,
           ),
         ),
         pw.SizedBox(height: 5 * scale),
@@ -810,7 +825,9 @@ class PdfExportServiceImpl implements PdfExportService {
               : pw.TextAlign.left,
           style: pw.TextStyle(
             fontSize: 9.5 * scale,
-            color: PdfColor.fromHex('#64748B'),
+            color: onBand
+                ? PdfColor.fromHex('#F1F5F9')
+                : PdfColor.fromHex('#64748B'),
           ),
         ),
       ],
@@ -845,7 +862,19 @@ class PdfExportServiceImpl implements PdfExportService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
-        if (style.headerFill != null)
+        if (onBand)
+          pw.Container(
+            padding: pw.EdgeInsets.symmetric(
+              horizontal: 16 * scale,
+              vertical: 14 * scale,
+            ),
+            decoration: pw.BoxDecoration(
+              color: style.primary,
+              borderRadius: pw.BorderRadius.circular(6),
+            ),
+            child: headerContent,
+          )
+        else if (style.headerFill != null)
           pw.Container(
             padding: pw.EdgeInsets.all(12 * scale),
             decoration: pw.BoxDecoration(
@@ -859,7 +888,7 @@ class PdfExportServiceImpl implements PdfExportService {
         else
           headerContent,
         pw.SizedBox(height: 10 * scale),
-        pw.Container(height: 2 * scale, color: style.accent),
+        if (!onBand) pw.Container(height: 2 * scale, color: style.accent),
       ],
     );
   }
@@ -869,6 +898,67 @@ class PdfExportServiceImpl implements PdfExportService {
     double scale,
     _TemplateStyle style,
   ) {
+    switch (style.heading) {
+      case _Heading.bar:
+        return pw.Padding(
+          padding: pw.EdgeInsets.only(bottom: 3 * scale),
+          child: pw.Row(
+            children: [
+              pw.Container(
+                width: 3.5 * scale,
+                height: 13 * scale,
+                color: style.accent,
+              ),
+              pw.SizedBox(width: 7 * scale),
+              pw.Text(
+                title,
+                style: pw.TextStyle(
+                  fontSize: 11.5 * scale,
+                  fontWeight: pw.FontWeight.bold,
+                  letterSpacing: 0.6,
+                  color: style.primary,
+                ),
+              ),
+            ],
+          ),
+        );
+      case _Heading.pill:
+        return pw.Padding(
+          padding: pw.EdgeInsets.only(bottom: 4 * scale),
+          child: pw.Row(
+            children: [
+              pw.Container(
+                padding: pw.EdgeInsets.symmetric(
+                  horizontal: 8 * scale,
+                  vertical: 3 * scale,
+                ),
+                decoration: pw.BoxDecoration(
+                  color: style.accent,
+                  borderRadius: pw.BorderRadius.circular(3),
+                ),
+                child: pw.Text(
+                  title,
+                  style: pw.TextStyle(
+                    fontSize: 10.5 * scale,
+                    fontWeight: pw.FontWeight.bold,
+                    letterSpacing: 0.6,
+                    color: PdfColors.white,
+                  ),
+                ),
+              ),
+              pw.Expanded(
+                child: pw.Container(
+                  margin: pw.EdgeInsets.only(left: 6 * scale),
+                  height: 0.8,
+                  color: style.accent,
+                ),
+              ),
+            ],
+          ),
+        );
+      case _Heading.underline:
+        break;
+    }
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
@@ -917,12 +1007,86 @@ class PdfExportServiceImpl implements PdfExportService {
     );
   }
 
+  /// Hangs an entry off a vertical line when the template uses a timeline.
+  static pw.Widget _timelineEntry(
+    _TemplateStyle style,
+    double scale,
+    pw.Widget entry,
+  ) {
+    if (!style.timeline) return entry;
+    return pw.Container(
+      padding: pw.EdgeInsets.only(left: 10 * scale),
+      decoration: pw.BoxDecoration(
+        border: pw.Border(
+          left: pw.BorderSide(color: style.accent, width: 1.6 * scale),
+        ),
+      ),
+      child: entry,
+    );
+  }
+
   static pw.Widget _buildSkillsSection(
     List<SkillModel> skills,
     bool isEn,
-    double scale,
-  ) {
+    double scale, [
+    _TemplateStyle? templateStyle,
+  ]) {
     final lines = CvSkillGrouper.lines(skills, isEn: isEn);
+    if (templateStyle != null && templateStyle.skillChips) {
+      return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          for (final line in lines)
+            pw.Padding(
+              padding: pw.EdgeInsets.only(bottom: 5 * scale),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    line.label,
+                    style: pw.TextStyle(
+                      fontSize: 9.5 * scale,
+                      fontWeight: pw.FontWeight.bold,
+                      color: templateStyle.primary,
+                    ),
+                  ),
+                  pw.SizedBox(height: 3 * scale),
+                  pw.Wrap(
+                    spacing: 4 * scale,
+                    runSpacing: 4 * scale,
+                    children: [
+                      for (final item in line.skills.expand(
+                        (s) => s.split(','),
+                      ))
+                        if (item.trim().isNotEmpty)
+                          pw.Container(
+                            padding: pw.EdgeInsets.symmetric(
+                              horizontal: 6 * scale,
+                              vertical: 2 * scale,
+                            ),
+                            decoration: pw.BoxDecoration(
+                              border: pw.Border.all(
+                                color: templateStyle.accent,
+                                width: 0.7,
+                              ),
+                              borderRadius: pw.BorderRadius.circular(8),
+                            ),
+                            child: pw.Text(
+                              item.trim(),
+                              style: pw.TextStyle(
+                                fontSize: 8.8 * scale,
+                                color: PdfColors.grey900,
+                              ),
+                            ),
+                          ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+        ],
+      );
+    }
     final style = pw.TextStyle(
       fontSize: 9.5 * scale,
       lineSpacing: 1.8 * scale,
@@ -997,6 +1161,8 @@ class PdfExportServiceImpl implements PdfExportService {
   }
 }
 
+enum _Heading { underline, bar, pill }
+
 final class _TemplateStyle {
   const _TemplateStyle({
     required this.primary,
@@ -1008,6 +1174,10 @@ final class _TemplateStyle {
     required this.dividerThickness,
     required this.showPhoto,
     this.headerFill,
+    this.band = false,
+    this.heading = _Heading.underline,
+    this.timeline = false,
+    this.skillChips = false,
   });
 
   final PdfColor primary;
@@ -1019,6 +1189,18 @@ final class _TemplateStyle {
   final double dividerThickness;
   final bool showPhoto;
   final PdfColor? headerFill;
+
+  /// Header on a dark block in the main colour, with white text.
+  final bool band;
+
+  /// How section titles are drawn.
+  final _Heading heading;
+
+  /// Experience, education and projects hang off a line in the accent colour.
+  final bool timeline;
+
+  /// Skills shown as small outlined tags instead of comma lists.
+  final bool skillChips;
 
   _TemplateStyle copyWith({
     PdfColor? primary,
@@ -1041,6 +1223,10 @@ final class _TemplateStyle {
       dividerThickness: dividerThickness ?? this.dividerThickness,
       showPhoto: showPhoto ?? this.showPhoto,
       headerFill: headerFill ?? this.headerFill,
+      band: band,
+      heading: heading,
+      timeline: timeline,
+      skillChips: skillChips,
     );
   }
 
@@ -1058,15 +1244,7 @@ final class _TemplateStyle {
     return base;
   }
 
-  /// Premium designs are built on an existing layout.
-  static const _premiumBases = {
-    'premium_elegant_photo': 'minimalist_clean',
-    'premium_creative_portfolio': 'creative_tech',
-    'premium_ai_focus': 'executive_navy',
-  };
-
-  static _TemplateStyle _resolveBaseStyle(String requestedId) {
-    final templateId = _premiumBases[requestedId] ?? requestedId;
+  static _TemplateStyle _resolveBaseStyle(String templateId) {
     switch (templateId) {
       case 'modern_minimalist':
         return _TemplateStyle(
@@ -1110,6 +1288,8 @@ final class _TemplateStyle {
           letterSpacing: 0.3,
           dividerThickness: 1.4,
           showPhoto: true,
+          heading: _Heading.pill,
+          skillChips: true,
         );
       case 'professional_sidebar':
         return _TemplateStyle(
@@ -1135,6 +1315,8 @@ final class _TemplateStyle {
           letterSpacing: 0.5,
           dividerThickness: 1.5,
           showPhoto: false,
+          band: true,
+          timeline: true,
         );
       case 'academic_classic':
         return _TemplateStyle(
@@ -1149,6 +1331,7 @@ final class _TemplateStyle {
           letterSpacing: 0.8,
           dividerThickness: 0.65,
           showPhoto: false,
+          timeline: true,
         );
       case 'fresh_profile':
         return _TemplateStyle(
@@ -1164,6 +1347,8 @@ final class _TemplateStyle {
           letterSpacing: 0.25,
           dividerThickness: 1.1,
           showPhoto: true,
+          heading: _Heading.bar,
+          skillChips: true,
         );
       case 'chronological_slate':
         return _TemplateStyle(
@@ -1207,6 +1392,8 @@ final class _TemplateStyle {
           letterSpacing: 0.7,
           dividerThickness: 1.35,
           showPhoto: false,
+          heading: _Heading.bar,
+          timeline: true,
         );
       case 'healthcare_calm':
         return _TemplateStyle(
@@ -1222,12 +1409,13 @@ final class _TemplateStyle {
           letterSpacing: 0.2,
           dividerThickness: 0.75,
           showPhoto: false,
+          heading: _Heading.bar,
+          skillChips: true,
         );
       case 'sales_impact':
         return _TemplateStyle(
           primary: PdfColor.fromHex('#451A03'),
           accent: PdfColor.fromHex('#B45309'),
-          headerFill: PdfColor.fromHex('#FFF7ED'),
           pageMargin: const pw.EdgeInsets.symmetric(
             horizontal: 36,
             vertical: 31,
@@ -1237,6 +1425,9 @@ final class _TemplateStyle {
           letterSpacing: 0.3,
           dividerThickness: 1.4,
           showPhoto: false,
+          band: true,
+          heading: _Heading.pill,
+          skillChips: true,
         );
       case 'international_compact':
         return _TemplateStyle(
@@ -1251,6 +1442,106 @@ final class _TemplateStyle {
           letterSpacing: 0.8,
           dividerThickness: 0.65,
           showPhoto: false,
+        );
+      case 'premium_elegant_photo':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#78350F'),
+          accent: PdfColor.fromHex('#B45309'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 40,
+            vertical: 34,
+          ),
+          centerHeader: false,
+          nameSize: 20,
+          letterSpacing: 0.4,
+          dividerThickness: 0.9,
+          showPhoto: true,
+          band: true,
+          timeline: true,
+        );
+      case 'premium_creative_portfolio':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#831843'),
+          accent: PdfColor.fromHex('#DB2777'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 34,
+            vertical: 30,
+          ),
+          centerHeader: false,
+          nameSize: 21,
+          letterSpacing: 0.3,
+          dividerThickness: 1.2,
+          showPhoto: true,
+          band: true,
+          heading: _Heading.pill,
+          skillChips: true,
+        );
+      case 'premium_ai_focus':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#1E1B4B'),
+          accent: PdfColor.fromHex('#4F46E5'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 38,
+            vertical: 32,
+          ),
+          centerHeader: false,
+          nameSize: 20,
+          letterSpacing: 0.4,
+          dividerThickness: 1.2,
+          showPhoto: false,
+          heading: _Heading.bar,
+          skillChips: true,
+        );
+      case 'tech_timeline':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#0F172A'),
+          accent: PdfColor.fromHex('#0EA5E9'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 36,
+            vertical: 30,
+          ),
+          centerHeader: false,
+          nameSize: 21,
+          letterSpacing: 0.3,
+          dividerThickness: 1.2,
+          showPhoto: false,
+          band: true,
+          heading: _Heading.bar,
+          timeline: true,
+          skillChips: true,
+        );
+      case 'startup_bold':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#064E3B'),
+          accent: PdfColor.fromHex('#059669'),
+          headerFill: PdfColor.fromHex('#ECFDF5'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 36,
+            vertical: 31,
+          ),
+          centerHeader: false,
+          nameSize: 21,
+          letterSpacing: 0.3,
+          dividerThickness: 1.2,
+          showPhoto: false,
+          heading: _Heading.pill,
+          timeline: true,
+        );
+      case 'minimal_mono':
+        return _TemplateStyle(
+          primary: PdfColor.fromHex('#111827'),
+          accent: PdfColor.fromHex('#111827'),
+          pageMargin: const pw.EdgeInsets.symmetric(
+            horizontal: 40,
+            vertical: 34,
+          ),
+          centerHeader: false,
+          nameSize: 20,
+          letterSpacing: 0.6,
+          dividerThickness: 1.0,
+          showPhoto: false,
+          heading: _Heading.bar,
+          skillChips: true,
         );
       default:
         return const _TemplateStyle(
