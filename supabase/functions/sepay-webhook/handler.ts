@@ -20,23 +20,25 @@ export type SepayPayload = {
   referenceCode?: string | null;
 };
 
-export type PendingRequest = { id: string; amount: number };
-
 export type PaymentStore = {
-  /** Records the event; returns false when this SePay id was seen before. */
+  /** Records the event; a repeat of the same SePay id is ignored. */
   record(event: {
     providerId: string;
     amount: number;
     content: string;
     payload: SepayPayload;
-  }): Promise<boolean>;
-  findPending(code: string): Promise<PendingRequest | null>;
-  approve(requestId: string, ref: string): Promise<void>;
-  mark(
+  }): Promise<void>;
+  /** Marks a money-out event so it is never matched. */
+  ignore(providerId: string): Promise<void>;
+  /**
+   * Matches the event to a Pro purchase in one database transaction.
+   * Safe to repeat: events already handled return their old status.
+   */
+  apply(
     providerId: string,
-    status: "matched" | "unmatched" | "ignored",
-    requestId?: string,
-  ): Promise<void>;
+    code: string | null,
+    ref: string,
+  ): Promise<"matched" | "unmatched" | "ignored" | string>;
 };
 
 const CODE = /CVPRO[MQL][0-9A-F]{8}/;
@@ -98,24 +100,17 @@ export function createSepayHandler(deps: {
     const amount = Math.round(Number(payload.transferAmount ?? 0));
     const content = `${payload.content ?? ""}`.slice(0, 500);
 
-    const isNew = await store.record({ providerId, amount, content, payload });
-    // SePay retries until it gets a success; a repeat is already handled.
-    if (!isNew) return json(200, { success: true });
+    // Recording is idempotent and matching only touches events that were
+    // not handled yet, so a retry after any failure finishes the job.
+    await store.record({ providerId, amount, content, payload });
 
     if (payload.transferType !== "in") {
-      await store.mark(providerId, "ignored");
+      await store.ignore(providerId);
       return json(200, { success: true });
     }
 
     const code = findCheckoutCode(payload.code, payload.content, payload.description);
-    const request = code ? await store.findPending(code) : null;
-    if (!request || amount < request.amount) {
-      await store.mark(providerId, "unmatched", request?.id);
-      return json(200, { success: true });
-    }
-
-    await store.approve(request.id, payload.referenceCode ?? providerId);
-    await store.mark(providerId, "matched", request.id);
+    await store.apply(providerId, code, payload.referenceCode ?? providerId);
     return json(200, { success: true });
   };
 }

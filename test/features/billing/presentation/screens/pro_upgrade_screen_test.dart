@@ -57,7 +57,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('Pro accounts see their plan instead of prices', (tester) async {
+  testWidgets('lifetime Pro accounts have nothing to buy', (tester) async {
     await tester.pumpWidget(
       _appWithUser(
         const AuthUser(
@@ -74,6 +74,34 @@ void main() {
 
     expect(find.byKey(const ValueKey('pro-active')), findsOneWidget);
     expect(find.byKey(const ValueKey('pro-start-checkout')), findsNothing);
+  });
+
+  testWidgets('timed Pro accounts can renew and see the new end date', (
+    tester,
+  ) async {
+    final until = DateTime.now().toUtc().add(const Duration(days: 10));
+    await tester.pumpWidget(
+      _appWithUser(
+        const AuthUser(
+          id: 'user-1',
+          email: 'owner@example.com',
+          displayName: 'Owner',
+          provider: 'email',
+          isEmailConfirmed: true,
+        ),
+        billing: _FakeBilling(isPro: true, proUntil: until),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('pro-active')), findsOneWidget);
+    expect(find.byKey(const ValueKey('pro-renew-note')), findsOneWidget);
+    final next = until.add(const Duration(days: 90)).toLocal();
+    expect(
+      find.textContaining('${next.day}/${next.month}/${next.year}'),
+      findsOneWidget,
+    );
+    expect(find.text('Gia hạn thêm 3 tháng · 119.000đ'), findsOneWidget);
   });
 }
 
@@ -140,13 +168,15 @@ class _FakeAuthRepository implements AuthRepository {
 }
 
 class _FakeBilling implements BillingRepository {
-  _FakeBilling({this.isPro = false});
+  _FakeBilling({this.isPro = false, this.proUntil});
 
   final bool isPro;
+  final DateTime? proUntil;
   final started = <ProPlan>[];
 
   @override
-  Future<BillingStatus> fetchStatus() async => BillingStatus(isPro: isPro);
+  Future<BillingStatus> fetchStatus() async =>
+      BillingStatus(isPro: isPro, proUntil: proUntil);
 
   @override
   Future<ProUpgradeRequest> startCheckout(ProPlan plan) async {

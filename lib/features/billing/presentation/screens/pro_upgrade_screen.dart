@@ -31,6 +31,10 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
   bool _starting = false;
   Timer? _poll;
 
+  /// Pro end date when the current checkout started, to notice a renewal.
+  DateTime? _untilAtCheckout;
+  bool _renewed = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +57,14 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
           .read(billingRepositoryProvider)
           .startCheckout(_plan);
       if (!mounted) return;
-      setState(() => _checkout = checkout);
+      setState(() {
+        _checkout = checkout;
+        _renewed = false;
+        _untilAtCheckout = ref
+            .read(billingStatusProvider)
+            .valueOrNull
+            ?.proUntil;
+      });
       _poll?.cancel();
       // The webhook upgrades the account; check every few seconds.
       _poll = Timer.periodic(
@@ -90,7 +101,27 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
         ? null
         : ref.watch(billingStatusProvider).valueOrNull;
     final isPro = status?.isPro ?? false;
-    if (isPro) _poll?.cancel();
+    final isLifetime = isPro && status!.proUntil == null;
+    // A first purchase is done once Pro is on; a renewal once the end date moves.
+    if (_checkout != null && isPro) {
+      final until = status!.proUntil;
+      final before = _untilAtCheckout;
+      final done = before == null || until == null || until.isAfter(before);
+      if (done) {
+        _poll?.cancel();
+        if (before != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted || _checkout == null) return;
+            setState(() {
+              _checkout = null;
+              _renewed = true;
+            });
+          });
+        }
+      }
+    }
+    // Lifetime members have nothing to buy; everyone else can buy or renew.
+    final showPurchase = !isLifetime;
 
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
@@ -107,9 +138,15 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
             children: [
               const _Header(),
               const SizedBox(height: 20),
-              if (isPro)
-                _ProActiveCard(status: status!)
-              else ...[
+              if (isPro) ...[
+                _ProActiveCard(status: status!, renewed: _renewed),
+                if (!isLifetime) ...[
+                  const SizedBox(height: 20),
+                  _RenewNote(until: status.proUntil!, plan: _plan),
+                  const SizedBox(height: 12),
+                ],
+              ],
+              if (showPurchase) ...[
                 _PlanPicker(selected: _plan, onSelected: _selectPlan),
                 const SizedBox(height: 16),
                 if (authUser == null)
@@ -136,6 +173,11 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
                     child: Text(
                       _starting
                           ? tr('Đang tạo mã...', 'Preparing...')
+                          : isPro
+                          ? tr(
+                              'Gia hạn thêm ${_plan.months} tháng · ${_plan.price}',
+                              'Add ${_plan.months} ${_plan.months == 1 ? 'month' : 'months'} · ${_plan.price}',
+                            )
                           : tr(
                               'Thanh toán ${_plan.price}',
                               'Pay ${_plan.price}',
@@ -425,10 +467,42 @@ class _CheckoutCard extends StatelessWidget {
   }
 }
 
+/// Tells a Pro member that buying again adds time after the current end.
+class _RenewNote extends StatelessWidget {
+  const _RenewNote({required this.until, required this.plan});
+
+  final DateTime until;
+  final ProPlan plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = until.isAfter(DateTime.now().toUtc())
+        ? until
+        : DateTime.now().toUtc();
+    final next = start.add(Duration(days: plan.days)).toLocal();
+    return Container(
+      key: const ValueKey('pro-renew-note'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppTheme.indigoSurface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        tr(
+          'Gia hạn sớm không mất ngày nào: thời gian mới được cộng nối tiếp. Nếu gia hạn ${plan.months} tháng, Pro sẽ dùng đến ${next.day}/${next.month}/${next.year}.',
+          'Renewing early loses no days: the new time is added after your current end date. With ${plan.months} more ${plan.months == 1 ? 'month' : 'months'}, Pro lasts until ${next.day}/${next.month}/${next.year}.',
+        ),
+        style: const TextStyle(height: 1.45, color: AppTheme.primaryNavy),
+      ),
+    );
+  }
+}
+
 class _ProActiveCard extends StatelessWidget {
-  const _ProActiveCard({required this.status});
+  const _ProActiveCard({required this.status, this.renewed = false});
 
   final BillingStatus status;
+  final bool renewed;
 
   @override
   Widget build(BuildContext context) {
@@ -454,7 +528,9 @@ class _ProActiveCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  tr('Bạn đang dùng Pro', 'You are on Pro'),
+                  renewed
+                      ? tr('Đã gia hạn Pro', 'Pro renewed')
+                      : tr('Bạn đang dùng Pro', 'You are on Pro'),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
