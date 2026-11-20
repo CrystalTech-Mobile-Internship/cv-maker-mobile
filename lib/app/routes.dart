@@ -64,6 +64,7 @@ const _appRoutes = {
   '/support',
   '/job-tracker',
   '/admin',
+  '/admin/payments',
 };
 
 /// Application Declarative Routing Configuration
@@ -195,6 +196,14 @@ GoRouter createAppRouter({
       name: 'admin',
       builder: (context, state) =>
           DesktopToolFrame(route: '/admin', child: AdminScreen()),
+    ),
+    GoRoute(
+      path: '/admin/payments',
+      name: 'admin-payments',
+      builder: (context, state) => DesktopToolFrame(
+        route: '/admin/payments',
+        child: AdminScreen(section: AdminSection.payments),
+      ),
     ),
   ],
 );

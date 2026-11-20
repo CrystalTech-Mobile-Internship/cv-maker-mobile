@@ -11,6 +11,7 @@ List<DesktopToolLink> desktopToolLinks(
   BuildContext context, {
   required bool isAdmin,
   String? current,
+  int adminWaiting = 0,
 }) {
   DesktopToolLink link(
     String key,
@@ -64,14 +65,21 @@ List<DesktopToolLink> desktopToolLinks(
       Icons.workspace_premium_outlined,
       tr('Nâng cấp Pro', 'Upgrade to Pro'),
     ),
-    if (isAdmin)
+    if (isAdmin) ...[
       link(
         'tool-admin',
         '/admin',
-        Icons.admin_panel_settings_outlined,
-        tr('Quản trị', 'Admin'),
-      )
-    else
+        Icons.support_agent_outlined,
+        tr('Hỗ trợ người dùng', 'User support'),
+        badge: adminWaiting > 0 ? '$adminWaiting' : null,
+      ),
+      link(
+        'tool-admin-payments',
+        '/admin/payments',
+        Icons.receipt_long_outlined,
+        tr('Thanh toán', 'Payments'),
+      ),
+    ] else
       link(
         'tool-support',
         '/support',

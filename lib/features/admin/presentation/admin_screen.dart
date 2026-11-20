@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/i18n/app_language.dart';
+import '../../../core/widgets/desktop_frame_scope.dart';
 import '../../../core/widgets/home_fallback_leading.dart';
 import '../../billing/domain/billing_models.dart';
 import 'admin_providers.dart';
@@ -12,7 +13,9 @@ import 'widgets/admin_support_tab.dart';
 /// Admin page: support inbox and Pro payments. Only accounts listed in
 /// `admin_users` see data; the server refuses everyone else.
 class AdminScreen extends ConsumerWidget {
-  const AdminScreen({super.key});
+  const AdminScreen({super.key, this.section = AdminSection.support});
+
+  final AdminSection section;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,7 +29,8 @@ class AdminScreen extends ConsumerWidget {
         body: const Center(child: CircularProgressIndicator()),
       ),
       error: (_, _) => const _NotAllowed(),
-      data: (allowed) => allowed ? const _AdminBody() : const _NotAllowed(),
+      data: (allowed) =>
+          allowed ? _AdminBody(section: section) : const _NotAllowed(),
     );
   }
 }
@@ -60,35 +64,67 @@ class _NotAllowed extends StatelessWidget {
   }
 }
 
+/// Which admin page is open. On computers each one has its own sidebar
+/// entry; phones switch between them with tabs.
+enum AdminSection { support, payments }
+
 class _AdminBody extends ConsumerWidget {
-  const _AdminBody();
+  const _AdminBody({required this.section});
+
+  final AdminSection section;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final refresh = IconButton(
+      key: const Key('admin-refresh'),
+      tooltip: tr('Tải lại', 'Refresh'),
+      onPressed: () {
+        ref.invalidate(adminStatsProvider);
+        ref.invalidate(adminThreadsProvider);
+        ref.invalidate(adminProRequestsProvider);
+        ref.invalidate(adminPaymentEventsProvider);
+      },
+      icon: const Icon(Icons.refresh_rounded),
+    );
+
+    if (DesktopFrameScope.of(context)) {
+      final isSupport = section == AdminSection.support;
+      return Scaffold(
+        backgroundColor: AppTheme.surfaceLight,
+        appBar: AppBar(
+          title: Text(
+            isSupport
+                ? tr('Hỗ trợ người dùng', 'User support')
+                : tr('Thanh toán', 'Payments'),
+          ),
+          actions: [refresh, const SizedBox(width: 4)],
+        ),
+        body: Column(
+          children: [
+            _StatsBar(section: section),
+            const Divider(height: 1),
+            Expanded(
+              child: isSupport
+                  ? const AdminSupportTab()
+                  : const AdminPaymentsTab(),
+            ),
+          ],
+        ),
+      );
+    }
+
     final stats = ref.watch(adminStatsProvider).valueOrNull;
     final waiting = stats?.waitingThreads ?? 0;
     final pending = stats?.pendingRequests ?? 0;
     return DefaultTabController(
       length: 2,
+      initialIndex: section.index,
       child: Scaffold(
         backgroundColor: AppTheme.surfaceLight,
         appBar: AppBar(
           leading: homeFallbackLeading(context),
           title: Text(tr('Quản trị', 'Admin')),
-          actions: [
-            IconButton(
-              key: const Key('admin-refresh'),
-              tooltip: tr('Tải lại', 'Refresh'),
-              onPressed: () {
-                ref.invalidate(adminStatsProvider);
-                ref.invalidate(adminThreadsProvider);
-                ref.invalidate(adminProRequestsProvider);
-                ref.invalidate(adminPaymentEventsProvider);
-              },
-              icon: const Icon(Icons.refresh_rounded),
-            ),
-            const SizedBox(width: 4),
-          ],
+          actions: [refresh, const SizedBox(width: 4)],
           bottom: TabBar(
             labelColor: AppTheme.brandIndigo,
             unselectedLabelColor: AppTheme.mutedText,
@@ -109,11 +145,11 @@ class _AdminBody extends ConsumerWidget {
             ],
           ),
         ),
-        body: Column(
+        body: const Column(
           children: [
-            const _StatsBar(),
-            const Divider(height: 1),
-            const Expanded(
+            _StatsBar(),
+            Divider(height: 1),
+            Expanded(
               child: TabBarView(
                 children: [AdminSupportTab(), AdminPaymentsTab()],
               ),
@@ -126,7 +162,10 @@ class _AdminBody extends ConsumerWidget {
 }
 
 class _StatsBar extends ConsumerWidget {
-  const _StatsBar();
+  const _StatsBar({this.section});
+
+  /// Shows only the numbers for this page; null shows them all.
+  final AdminSection? section;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -141,20 +180,30 @@ class _StatsBar extends ConsumerWidget {
         spacing: 8,
         runSpacing: 8,
         children: [
-          _Stat(label: tr('Người dùng', 'Users'), value: show(value?.users)),
-          _Stat(
-            label: tr('Đang dùng Pro', 'Pro now'),
-            value: show(value?.proUsers),
-          ),
-          _Stat(
-            label: tr('Doanh thu tháng này', 'Revenue this month'),
-            value: value == null ? '–' : formatVnd(value.monthRevenue),
-          ),
-          _Stat(
-            label: tr('Chờ trả lời', 'Awaiting reply'),
-            value: show(value?.waitingThreads),
-            highlight: (value?.waitingThreads ?? 0) > 0,
-          ),
+          if (section != AdminSection.payments)
+            _Stat(label: tr('Người dùng', 'Users'), value: show(value?.users)),
+          if (section != AdminSection.support) ...[
+            _Stat(
+              label: tr('Đang dùng Pro', 'Pro now'),
+              value: show(value?.proUsers),
+            ),
+            _Stat(
+              label: tr('Doanh thu tháng này', 'Revenue this month'),
+              value: value == null ? '–' : formatVnd(value.monthRevenue),
+            ),
+          ],
+          if (section == AdminSection.payments)
+            _Stat(
+              label: tr('Chờ thanh toán', 'Awaiting payment'),
+              value: show(value?.pendingRequests),
+              highlight: (value?.pendingRequests ?? 0) > 0,
+            ),
+          if (section != AdminSection.payments)
+            _Stat(
+              label: tr('Chờ trả lời', 'Awaiting reply'),
+              value: show(value?.waitingThreads),
+              highlight: (value?.waitingThreads ?? 0) > 0,
+            ),
         ],
       ),
     );

@@ -671,7 +671,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ? tr('Đăng nhập để sao lưu CV', 'Sign in to back up CVs')
           : user.email,
       onAccount: () => setState(() => _selectedIndex = 3),
-      tools: desktopToolLinks(context, isAdmin: isAdmin),
+      tools: desktopToolLinks(
+        context,
+        isAdmin: isAdmin,
+        adminWaiting: isAdmin
+            ? ref.watch(adminStatsProvider).valueOrNull?.waitingThreads ?? 0
+            : 0,
+      ),
       actions: [
         if (_selectedIndex == 2 && user != null)
           FilledButton.icon(
