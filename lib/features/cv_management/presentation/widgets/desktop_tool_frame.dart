@@ -55,3 +55,29 @@ class DesktopToolFrame extends ConsumerWidget {
     );
   }
 }
+
+/// Page for a route that shows the computer sidebar. The sidebar must stay
+/// still between these pages, so on computers the page draws no animation
+/// at all and only the content area fades in (see `DesktopShell`). The
+/// width is read while animating, so resizing the window is handled too.
+/// Phones keep the usual page animation.
+Page<void> sidebarPage(
+  BuildContext context,
+  GoRouterState state,
+  Widget child,
+) => CustomTransitionPage<void>(
+  key: state.pageKey,
+  child: child,
+  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    if (MediaQuery.sizeOf(context).width >= DesktopToolFrame.minWidth) {
+      return child;
+    }
+    return Theme.of(context).pageTransitionsTheme.buildTransitions(
+      ModalRoute.of(context)! as PageRoute<void>,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  },
+);
