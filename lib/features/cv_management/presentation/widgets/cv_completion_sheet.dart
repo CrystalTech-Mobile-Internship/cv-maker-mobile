@@ -4,6 +4,7 @@ import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/services/cv_completion_service.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 Future<void> showCvCompletionSheet(
   BuildContext context,
@@ -34,15 +35,18 @@ Future<void> showCvCompletionSheet(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Checklist hoàn thiện CV',
+                      Text(
+                        tr('Checklist hoàn thiện CV', 'CV checklist'),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                       Text(
-                        '${report.completedCount}/${report.items.length} mục • ${report.percentage}%',
+                        tr(
+                          '${report.completedCount}/${report.items.length} mục • ${report.percentage}%',
+                          '${report.completedCount}/${report.items.length} items • ${report.percentage}%',
+                        ),
                         style: const TextStyle(color: AppTheme.mutedText),
                       ),
                     ],
@@ -82,7 +86,9 @@ Future<void> showCvCompletionSheet(
                   ),
                 ),
                 trailing: Text(
-                  item.isCompleted ? 'Đã có' : 'Còn thiếu',
+                  item.isCompleted
+                      ? tr('Đã có', 'Done')
+                      : tr('Còn thiếu', 'Missing'),
                   style: TextStyle(
                     fontSize: 12,
                     color: item.isCompleted
@@ -102,8 +108,8 @@ Future<void> showCvCompletionSheet(
               icon: const Icon(Icons.edit_rounded),
               label: Text(
                 report.percentage == 100
-                    ? 'Xem lại nội dung'
-                    : 'Tiếp tục hoàn thiện',
+                    ? tr('Xem lại nội dung', 'Review content')
+                    : tr('Tiếp tục hoàn thiện', 'Keep going'),
               ),
             ),
           ],

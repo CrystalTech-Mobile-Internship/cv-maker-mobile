@@ -27,7 +27,8 @@ void main() {
       ),
     );
 
-    expect(find.text('Sao lưu vào: Máy chủ phụ'), findsOneWidget);
+    expect(find.text('5 CV • 2 chờ đồng bộ'), findsOneWidget);
+    expect(find.text('Sao lưu vào: Máy chủ phụ'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

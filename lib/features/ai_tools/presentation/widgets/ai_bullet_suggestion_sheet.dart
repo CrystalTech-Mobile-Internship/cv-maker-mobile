@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../domain/models/ai_assistant_models.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Before/after comparison for AI-rewritten bullets. Returns the bullets the
 /// user chose to keep, or null when cancelled.
@@ -67,8 +68,8 @@ class _AiBulletSuggestionSheetState extends State<_AiBulletSuggestionSheet> {
           16 + MediaQuery.viewInsetsOf(context).bottom,
         ),
         children: [
-          const Text(
-            'Gợi ý viết lại',
+          Text(
+            tr('Gợi ý viết lại', 'Suggested rewrite'),
             style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 18,
@@ -76,15 +77,18 @@ class _AiBulletSuggestionSheetState extends State<_AiBulletSuggestionSheet> {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Chọn và chỉnh lại từng dòng trước khi áp dụng. Bản cũ được giữ nếu bạn hủy.',
+          Text(
+            tr(
+              'Chọn và chỉnh lại từng dòng trước khi áp dụng. Bản cũ được giữ nếu bạn hủy.',
+              'Pick and edit each line before applying. Your old text stays if you cancel.',
+            ),
             style: TextStyle(color: AppTheme.mutedText),
           ),
           const SizedBox(height: 12),
           ExpansionTile(
             tilePadding: EdgeInsets.zero,
-            title: const Text(
-              'Bản hiện tại',
+            title: Text(
+              tr('Bản hiện tại', 'Current'),
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
             children: [
@@ -131,8 +135,11 @@ class _AiBulletSuggestionSheetState extends State<_AiBulletSuggestionSheet> {
                 color: AppTheme.amberSurface,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Text(
-                'Thay các chỗ trong [ngoặc vuông] bằng số liệu thật của bạn, hoặc xóa đi nếu không có.',
+              child: Text(
+                tr(
+                  'Thay các chỗ trong [ngoặc vuông] bằng số liệu thật của bạn, hoặc xóa đi nếu không có.',
+                  'Replace anything in [square brackets] with your real numbers, or remove it.',
+                ),
               ),
             ),
           for (final tip in widget.suggestion.tips)
@@ -162,7 +169,7 @@ class _AiBulletSuggestionSheetState extends State<_AiBulletSuggestionSheet> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Giữ bản cũ'),
+                  child: Text(tr('Giữ bản cũ', 'Keep old')),
                 ),
               ),
               const SizedBox(width: 10),
@@ -177,7 +184,7 @@ class _AiBulletSuggestionSheetState extends State<_AiBulletSuggestionSheet> {
                               _controllers[i].text.trim(),
                         ])
                       : null,
-                  child: const Text('Áp dụng'),
+                  child: Text(tr('Áp dụng', 'Apply')),
                 ),
               ),
             ],

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/auth_providers.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -54,7 +55,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: homeFallbackLeading(context, fallback: '/login'),
-        title: const Text('Đặt mật khẩu mới'),
+        title: Text(tr('Đặt mật khẩu mới', 'Set a new password')),
       ),
       body: SafeArea(
         child: Center(
@@ -72,13 +73,19 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                         const Icon(Icons.password_rounded, size: 48),
                         const SizedBox(height: 16),
                         Text(
-                          'Bảo vệ tài khoản của bạn',
+                          tr(
+                            'Bảo vệ tài khoản của bạn',
+                            'Keep your account safe',
+                          ),
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Mật khẩu mới cần ít nhất 8 ký tự.',
+                        Text(
+                          tr(
+                            'Mật khẩu mới cần ít nhất 8 ký tự.',
+                            'The new password needs at least 8 characters.',
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
@@ -89,7 +96,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           autofillHints: const [AutofillHints.newPassword],
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
-                            labelText: 'Mật khẩu mới',
+                            labelText: tr('Mật khẩu mới', 'New password'),
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
                               onPressed: () => setState(
@@ -111,8 +118,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           autofillHints: const [AutofillHints.newPassword],
                           textInputAction: TextInputAction.done,
                           onSubmitted: (_) => isLoading ? null : _submit(),
-                          decoration: const InputDecoration(
-                            labelText: 'Nhập lại mật khẩu mới',
+                          decoration: InputDecoration(
+                            labelText: tr(
+                              'Nhập lại mật khẩu mới',
+                              'Repeat new password',
+                            ),
                             prefixIcon: Icon(Icons.verified_user_outlined),
                           ),
                         ),
@@ -127,7 +137,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text('Cập nhật mật khẩu'),
+                              : Text(
+                                  tr('Cập nhật mật khẩu', 'Update password'),
+                                ),
                         ),
                       ],
                     ),
@@ -152,7 +164,7 @@ class _MissingRecoverySession extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: homeFallbackLeading(context, fallback: '/login'),
-        title: const Text('Đặt mật khẩu mới'),
+        title: Text(tr('Đặt mật khẩu mới', 'Set a new password')),
       ),
       body: SafeArea(
         child: Center(
@@ -165,22 +177,28 @@ class _MissingRecoverySession extends StatelessWidget {
                 children: [
                   const Icon(Icons.link_off_rounded, size: 44),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Liên kết không còn hiệu lực',
+                  Text(
+                    tr(
+                      'Liên kết không còn hiệu lực',
+                      'This link no longer works',
+                    ),
                     key: ValueKey('reset-missing-session'),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Liên kết có thể đã hết hạn hoặc được mở trên trình duyệt khác. '
-                    'Hãy gửi lại liên kết mới.',
+                  Text(
+                    tr(
+                      'Liên kết có thể đã hết hạn hoặc được mở trên trình duyệt khác. '
+                          'Hãy gửi lại liên kết mới.',
+                      'The link may have expired or been opened in another browser. Please request a new one.',
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => context.go('/forgot-password'),
-                    child: const Text('Gửi lại liên kết'),
+                    child: Text(tr('Gửi lại liên kết', 'Resend link')),
                   ),
                 ],
               ),

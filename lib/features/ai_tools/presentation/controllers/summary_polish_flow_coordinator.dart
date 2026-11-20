@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../domain/models/summary_polish_request.dart';
 import '../widgets/summary_polish_preview_sheet.dart';
 import 'summary_polish_controller.dart';
+import '../../../../core/i18n/app_language.dart';
 
 enum SummaryPolishFlowStatus { applied, cancelled, failed }
 
@@ -75,7 +76,11 @@ class SummaryPolishFlowCoordinator {
       if (state.status != SummaryPolishStatus.success || suggestion == null) {
         controller.reset();
         final message =
-            state.errorMessage ?? 'Không thể tối ưu lúc này. Hãy thử lại.';
+            state.errorMessage ??
+            tr(
+              'Không thể tối ưu lúc này. Hãy thử lại.',
+              'Could not improve it right now. Please try again.',
+            );
         return SummaryPolishFlowResult.failed(
           messageVi: message,
           messageEn: message,
@@ -103,8 +108,11 @@ class SummaryPolishFlowCoordinator {
         await persistSuggestion(suggestion);
         return SummaryPolishFlowResult.applied(suggestion);
       } catch (_) {
-        return const SummaryPolishFlowResult.failed(
-          messageVi: 'Chưa lưu được. Nội dung cũ vẫn giữ nguyên.',
+        return SummaryPolishFlowResult.failed(
+          messageVi: tr(
+            'Chưa lưu được. Nội dung cũ vẫn giữ nguyên.',
+            'Could not save. Your previous content is unchanged.',
+          ),
           messageEn: 'Could not save. Your original text is kept.',
         );
       }
@@ -119,20 +127,29 @@ class SummaryPolishFlowCoordinator {
     required String targetRole,
   }) {
     if (!isAuthenticated) {
-      return const SummaryPolishFlowResult.failed(
-        messageVi: 'Cần đăng nhập để dùng chức năng này.',
+      return SummaryPolishFlowResult.failed(
+        messageVi: tr(
+          'Cần đăng nhập để dùng chức năng này.',
+          'Please sign in to use this feature.',
+        ),
         messageEn: 'Sign in to use this feature.',
       );
     }
     if (targetRole.isEmpty) {
-      return const SummaryPolishFlowResult.failed(
-        messageVi: 'Hãy nhập vị trí ứng tuyển trước khi tối ưu.',
+      return SummaryPolishFlowResult.failed(
+        messageVi: tr(
+          'Hãy nhập vị trí ứng tuyển trước khi tối ưu.',
+          'Enter the role you are applying for first.',
+        ),
         messageEn: 'Enter a target role before optimizing.',
       );
     }
     if (original.length < 40) {
-      return const SummaryPolishFlowResult.failed(
-        messageVi: 'Hãy viết ít nhất 40 ký tự trước.',
+      return SummaryPolishFlowResult.failed(
+        messageVi: tr(
+          'Hãy viết ít nhất 40 ký tự trước.',
+          'Write at least 40 characters first.',
+        ),
         messageEn: 'The summary needs at least 40 characters.',
       );
     }

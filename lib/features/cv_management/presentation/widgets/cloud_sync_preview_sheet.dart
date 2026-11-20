@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cloud_sync_preview.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Modal bottom sheet presenting a pre-sync preview to the user.
 ///
@@ -79,7 +80,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Xem trước khi đồng bộ',
+                          tr('Xem trước khi đồng bộ', 'Preview sync'),
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
                             color: AppTheme.primaryNavy,
@@ -87,7 +88,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Những gì sẽ thay đổi',
+                          tr('Những gì sẽ thay đổi', 'What will change'),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade600,
@@ -99,7 +100,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     icon: const Icon(Icons.close_rounded),
-                    tooltip: 'Đóng',
+                    tooltip: tr('Đóng', 'Close'),
                   ),
                 ],
               ),
@@ -127,7 +128,7 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                         Expanded(
                           child: Text(
                             preview.userEmail.isEmpty
-                                ? 'Người dùng'
+                                ? tr('Người dùng', 'User')
                                 : preview.userEmail,
                             style: const TextStyle(
                               fontSize: 12,
@@ -202,9 +203,9 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       icon: Icons.upload_rounded,
                       color: Colors.blue.shade700,
                       bgColor: Colors.blue.shade50,
-                      label: 'Tải lên tài khoản',
+                      label: tr('Tải lên tài khoản', 'Upload to account'),
                       count: preview.pendingUploadCount,
-                      hint: 'Bản sửa trên máy',
+                      hint: tr('Bản sửa trên máy', 'Edited on this device'),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -213,9 +214,12 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       icon: Icons.download_rounded,
                       color: Colors.teal.shade700,
                       bgColor: Colors.teal.shade50,
-                      label: 'Tải về máy',
+                      label: tr('Tải về máy', 'Download to device'),
                       count: preview.pendingDownloadCount,
-                      hint: 'Bản trên tài khoản mới hơn',
+                      hint: tr(
+                        'Bản trên tài khoản mới hơn',
+                        'Account copy is newer',
+                      ),
                     ),
                   ),
                 ],
@@ -232,9 +236,12 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       bgColor: preview.conflictCount > 0
                           ? Colors.orange.shade50
                           : Colors.grey.shade100,
-                      label: 'Xung đột',
+                      label: tr('Xung đột', 'Conflict'),
                       count: preview.conflictCount,
-                      hint: 'Sửa ở cả hai nơi — giữ bản mới hơn',
+                      hint: tr(
+                        'Sửa ở cả hai nơi — giữ bản mới hơn',
+                        'Edited in both places — keep the newer one',
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -247,9 +254,9 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                       bgColor: preview.pendingDeletionCount > 0
                           ? Colors.red.shade50
                           : Colors.grey.shade100,
-                      label: 'Xóa trên tài khoản',
+                      label: tr('Xóa trên tài khoản', 'Delete from account'),
                       count: preview.pendingDeletionCount,
-                      hint: 'Theo lệnh đã xóa',
+                      hint: tr('Theo lệnh đã xóa', 'Deleted on this device'),
                     ),
                   ),
                 ],
@@ -277,7 +284,10 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'CV trên máy luôn được giữ an toàn, kể cả khi đồng bộ gặp lỗi.',
+                        tr(
+                          'CV trên máy luôn được giữ an toàn, kể cả khi đồng bộ gặp lỗi.',
+                          'CVs on this device stay safe even if syncing fails.',
+                        ),
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -294,7 +304,12 @@ class CloudSyncPreviewSheet extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onExportBackup,
                 icon: const Icon(Icons.backup_outlined, size: 18),
-                label: const Text('Lưu một bản sao ra máy trước'),
+                label: Text(
+                  tr(
+                    'Lưu một bản sao ra máy trước',
+                    'Save a copy to this device first',
+                  ),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.brandIndigo,
                   side: const BorderSide(color: AppTheme.brandIndigo),
@@ -312,8 +327,8 @@ class CloudSyncPreviewSheet extends StatelessWidget {
                 icon: const Icon(Icons.sync_rounded),
                 label: Text(
                   preview.hasDeletionsOrOverwrites
-                      ? 'Đồng bộ ngay'
-                      : 'Bắt đầu đồng bộ',
+                      ? tr('Đồng bộ ngay', 'Sync now')
+                      : tr('Bắt đầu đồng bộ', 'Start sync'),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 style: FilledButton.styleFrom(

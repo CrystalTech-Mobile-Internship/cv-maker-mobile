@@ -1,22 +1,31 @@
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/i18n/app_language.dart';
 
 final class CvTemplate {
   const CvTemplate({
     required this.id,
     required this.name,
-    required this.audience,
-    required this.description,
+    required String audience,
+    required String description,
     required this.accentHex,
     required this.layout,
     this.hasPhoto = false,
     this.isPremium = false,
     this.isNew = false,
-  });
+  }) : _audience = audience,
+       _description = description;
 
   final String id;
   final String name;
-  final String audience;
-  final String description;
+  final String _audience;
+  final String _description;
+
+  /// Who the template suits, in the app language.
+  String get audience => tr(_audience, _templateEn[_audience] ?? _audience);
+
+  /// One-line description, in the app language.
+  String get description =>
+      tr(_description, _templateEn[_description] ?? _description);
   final String accentHex;
   final CvTemplateLayout layout;
   final bool hasPhoto;
@@ -210,3 +219,58 @@ abstract final class CvTemplateCatalog {
     orElse: () => freeTemplates.first,
   );
 }
+
+const _templateEn = <String, String>{
+  'Mọi ngành • Bố cục chuẩn tuyển dụng': 'Any field • Standard hiring layout',
+  'Một cột rõ ràng, tối ưu hệ thống tuyển dụng.':
+      'One clear column, easy for hiring systems to read.',
+  'Văn phòng • Sinh viên': 'Office • Students',
+  'Khoảng trắng thoáng, điểm nhấn xanh hiện đại.':
+      'Airy spacing with a modern blue accent.',
+  'Giáo dục • Y tế • Có ảnh': 'Education • Healthcare • Photo',
+  'Ảnh hồ sơ gọn, tông teal nhẹ và dễ đọc.':
+      'Neat profile photo, soft teal tone, easy to read.',
+  'Người đi làm • Kinh nghiệm gần nhất trước':
+      'Professionals • Latest experience first',
+  'Dòng thời gian rõ, phù hợp hồ sơ có lịch sử ổn định.':
+      'Clear timeline for a steady work history.',
+  'Sinh viên • Fresher • Chuyển ngành': 'Students • Graduates • Career change',
+  'Ưu tiên năng lực, học vấn và dự án nổi bật.':
+      'Puts skills, education and key projects first.',
+  'Ứng tuyển quốc tế • Không ảnh': 'International jobs • No photo',
+  'Một cột gọn, ít màu và tối ưu khả năng quét nhanh.':
+      'Compact single column, little colour, quick to scan.',
+  'Sinh viên • Có ảnh': 'Students • Photo',
+  'Sidebar kỹ năng và nội dung chính cân đối.':
+      'Balanced skills sidebar and main content.',
+  'Marketing • Dịch vụ • Có ảnh': 'Marketing • Services • Photo',
+  'Ảnh nổi bật cùng mảng màu xanh tươi trẻ.':
+      'Prominent photo with a fresh green band.',
+  'Có ảnh': 'Photo',
+  'Phong cách thanh lịch dành cho hồ sơ cấp cao.':
+      'Elegant style for senior profiles.',
+  'Thiết kế': 'Design',
+  'Bố cục giàu hình ảnh cho ngành sáng tạo.':
+      'Visual layout for creative fields.',
+  'Gọn, hiện đại': 'Compact, modern',
+  'Gợi ý nội dung và từ khóa theo vị trí ứng tuyển.':
+      'Content and keyword hints for your target role.',
+  'Công nghệ': 'Technology',
+  'Header nổi bật cho hồ sơ công nghệ sáng tạo.':
+      'Bold header for creative tech profiles.',
+  'Quản lý': 'Management',
+  'Phong cách doanh nghiệp, ưu tiên thành tích.':
+      'Corporate style that puts achievements first.',
+  'Giáo dục': 'Education',
+  'Bố cục cổ điển cho học thuật và chứng chỉ.':
+      'Classic layout for academia and certificates.',
+  'Tài chính': 'Finance',
+  'Bố cục nghiêm túc, nhấn mạnh số liệu và thành tích.':
+      'Formal layout that highlights numbers and results.',
+  'Y tế': 'Healthcare',
+  'Màu xanh dịu, khoảng trắng tốt và dễ kiểm tra.':
+      'Soft blue, good spacing, easy to review.',
+  'Kinh doanh': 'Sales',
+  'Tiêu đề mạnh, tập trung KPI và kết quả đo lường.':
+      'Strong headings focused on KPIs and measurable results.',
+};

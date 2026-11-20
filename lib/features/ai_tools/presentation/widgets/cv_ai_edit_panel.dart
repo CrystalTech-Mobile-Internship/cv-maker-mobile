@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/cv_assistant_mark.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/cv_section_definition.dart';
@@ -10,6 +11,7 @@ import '../../domain/repositories/ai_assistant_repository.dart';
 import '../../domain/services/cv_section_edit_mapper.dart';
 import '../controllers/cv_ai_edit_controller.dart';
 import 'ai_access_guard.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Side chat on the preview page: pick a section, say how to change it,
 /// then apply or skip the rewritten text.
@@ -49,11 +51,11 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
           'More professional',
           'Fix spelling',
         ]
-      : const [
-          'Viết ngắn gọn hơn',
-          'Nhấn mạnh kết quả',
-          'Chuyên nghiệp hơn',
-          'Sửa lỗi chính tả',
+      : [
+          tr('Viết ngắn gọn hơn', 'Make it shorter'),
+          tr('Nhấn mạnh kết quả', 'Highlight results'),
+          tr('Chuyên nghiệp hơn', 'More professional'),
+          tr('Sửa lỗi chính tả', 'Fix spelling'),
         ];
 
   @override
@@ -75,10 +77,16 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
             section == null
                 ? (_en
                       ? 'Click a section on the page first.'
-                      : 'Hãy bấm chọn một mục trên trang trước.')
+                      : tr(
+                          'Hãy bấm chọn một mục trên trang trước.',
+                          'Click a part of the page first.',
+                        ))
                 : (_en
                       ? 'This section cannot be edited here yet.'
-                      : 'Mục này chưa sửa nhanh được ở đây.'),
+                      : tr(
+                          'Mục này chưa sửa nhanh được ở đây.',
+                          'This part cannot be quick-edited here yet.',
+                        )),
           ),
         ),
       );
@@ -97,7 +105,10 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
           content: Text(
             _en
                 ? 'This section is empty. Add content in the editor first.'
-                : 'Mục này chưa có nội dung. Hãy nhập ở trang chỉnh sửa trước.',
+                : tr(
+                    'Mục này chưa có nội dung. Hãy nhập ở trang chỉnh sửa trước.',
+                    'This part is empty. Fill it in the editor first.',
+                  ),
           ),
         ),
       );
@@ -148,15 +159,11 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
             padding: const EdgeInsets.fromLTRB(16, 8, 4, 4),
             child: Row(
               children: [
-                const Icon(
-                  Icons.smart_toy_outlined,
-                  size: 20,
-                  color: AppTheme.brandIndigo,
-                ),
+                const CvAssistantMark(size: 22, color: AppTheme.brandIndigo),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    _en ? 'Ask to edit' : 'Nhờ sửa CV',
+                    _en ? 'Ask to edit' : tr('Nhờ sửa CV', 'Edit help'),
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       color: AppTheme.primaryNavy,
@@ -166,7 +173,9 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
                 const AiQuotaChip(),
                 if (widget.onClose != null)
                   IconButton(
-                    tooltip: _en ? 'Close (Ctrl + K)' : 'Đóng (Ctrl + K)',
+                    tooltip: _en
+                        ? 'Close (Ctrl + K)'
+                        : tr('Đóng (Ctrl + K)', 'Close (Ctrl + K)'),
                     onPressed: widget.onClose,
                     icon: const Icon(Icons.close_rounded, size: 20),
                   ),
@@ -202,7 +211,9 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                _en ? 'Rewriting...' : 'Đang sửa...',
+                                _en
+                                    ? 'Rewriting...'
+                                    : tr('Đang sửa...', 'Editing...'),
                                 style: const TextStyle(
                                   color: AppTheme.mutedText,
                                 ),
@@ -249,10 +260,10 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
                   if (state.errorCode == AiWritingFailureCode.quotaExceeded)
                     TextButton(
                       onPressed: () => context.push('/upgrade-pro'),
-                      child: Text(_en ? 'Upgrade' : 'Nâng cấp'),
+                      child: Text(_en ? 'Upgrade' : tr('Nâng cấp', 'Upgrade')),
                     ),
                   IconButton(
-                    tooltip: _en ? 'Close' : 'Đóng',
+                    tooltip: _en ? 'Close' : tr('Đóng', 'Close'),
                     onPressed: controller.dismissError,
                     icon: const Icon(Icons.close, size: 18),
                   ),
@@ -284,7 +295,10 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
                     decoration: InputDecoration(
                       hintText: _en
                           ? 'How should it change?'
-                          : 'Bạn muốn sửa thế nào?',
+                          : tr(
+                              'Bạn muốn sửa thế nào?',
+                              'How should it change?',
+                            ),
                       counterText: '',
                     ),
                   ),
@@ -292,7 +306,7 @@ class _CvAiEditPanelState extends ConsumerState<CvAiEditPanel> {
                 const SizedBox(width: 8),
                 IconButton.filled(
                   key: const ValueKey('ai-edit-send'),
-                  tooltip: _en ? 'Send' : 'Gửi',
+                  tooltip: _en ? 'Send' : tr('Gửi', 'Send'),
                   onPressed: state.isBusy ? null : _send,
                   style: IconButton.styleFrom(
                     backgroundColor: AppTheme.brandIndigo,
@@ -338,13 +352,16 @@ class _EmptyHint extends StatelessWidget {
         Text(
           english
               ? 'Click a section on the A4 page, then say how to change it. You see the result before applying it. Each request uses ${AiCreditCost.editSection} credit.'
-              : 'Bấm vào một mục trên trang A4 rồi nói bạn muốn sửa thế nào. Bạn xem trước rồi mới áp dụng. Mỗi lần dùng ${AiCreditCost.editSection} lượt.',
+              : tr(
+                  'Bấm vào một mục trên trang A4 rồi nói bạn muốn sửa thế nào. Bạn xem trước rồi mới áp dụng. Mỗi lần dùng ${AiCreditCost.editSection} lượt.',
+                  'Click a part of the A4 page, then say how to change it. You see a preview before applying. Each edit uses ${AiCreditCost.editSection} credits.',
+                ),
           style: const TextStyle(color: AppTheme.mutedText, height: 1.4),
         ),
         const SizedBox(height: 14),
         if (!canEdit) ...[
           Text(
-            english ? 'Or pick one here' : 'Hoặc chọn nhanh',
+            english ? 'Or pick one here' : tr('Hoặc chọn nhanh', 'Or pick one'),
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
@@ -362,7 +379,7 @@ class _EmptyHint extends StatelessWidget {
           ),
         ] else ...[
           Text(
-            english ? 'Quick requests' : 'Gợi ý yêu cầu',
+            english ? 'Quick requests' : tr('Gợi ý yêu cầu', 'Suggestions'),
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
@@ -445,7 +462,10 @@ class _SelectedSectionChip extends StatelessWidget {
                           Text(
                             english
                                 ? 'Not editable here yet'
-                                : 'Chưa sửa nhanh được mục này',
+                                : tr(
+                                    'Chưa sửa nhanh được mục này',
+                                    'This part cannot be quick-edited yet',
+                                  ),
                             style: const TextStyle(
                               fontSize: 11,
                               color: AppTheme.mutedText,
@@ -470,7 +490,7 @@ class _SelectedSectionChip extends StatelessWidget {
                   customBorder: const CircleBorder(),
                   onTap: onRemove,
                   child: Tooltip(
-                    message: english ? 'Remove' : 'Bỏ chọn',
+                    message: english ? 'Remove' : tr('Bỏ chọn', 'Deselect'),
                     child: const Padding(
                       padding: EdgeInsets.all(3),
                       child: Icon(
@@ -578,14 +598,16 @@ class _ProposalCard extends StatelessWidget {
           const SizedBox(height: 8),
           switch (message.status) {
             CvAiProposalStatus.applied => Text(
-              english ? 'Applied to the CV.' : 'Đã áp dụng vào CV.',
+              english
+                  ? 'Applied to the CV.'
+                  : tr('Đã áp dụng vào CV.', 'Applied to your CV.'),
               style: const TextStyle(
                 color: AppTheme.successGreen,
                 fontWeight: FontWeight.w700,
               ),
             ),
             CvAiProposalStatus.dismissed => Text(
-              english ? 'Skipped.' : 'Đã bỏ qua.',
+              english ? 'Skipped.' : tr('Đã bỏ qua.', 'Skipped.'),
               style: const TextStyle(color: AppTheme.mutedText),
             ),
             _ => Row(
@@ -593,12 +615,12 @@ class _ProposalCard extends StatelessWidget {
                 FilledButton(
                   key: const ValueKey('ai-edit-apply'),
                   onPressed: onApply,
-                  child: Text(english ? 'Apply' : 'Áp dụng'),
+                  child: Text(english ? 'Apply' : tr('Áp dụng', 'Apply')),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: onDismiss,
-                  child: Text(english ? 'Skip' : 'Bỏ qua'),
+                  child: Text(english ? 'Skip' : tr('Bỏ qua', 'Skip')),
                 ),
               ],
             ),

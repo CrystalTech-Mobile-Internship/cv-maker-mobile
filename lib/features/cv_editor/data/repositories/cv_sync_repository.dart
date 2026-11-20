@@ -2,6 +2,7 @@ import '../../domain/models/cloud_sync_preview.dart';
 import '../../domain/models/cv_model.dart';
 import '../../domain/repositories/cv_repository.dart';
 import '../datasources/cv_remote_data_source.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Result object returned by [CvSyncRepository.saveAndSync].
 ///
@@ -93,7 +94,10 @@ class CvSyncRepository {
       return CvSaveResult(
         savedCv: savedLocal,
         isSynced: false,
-        errorMessage: 'Lỗi kết nối khi đồng bộ lên máy chủ đám mây.',
+        errorMessage: tr(
+          'Lỗi kết nối khi đồng bộ lên máy chủ đám mây.',
+          'Connection error while syncing.',
+        ),
       );
     }
   }
@@ -104,11 +108,14 @@ class CvSyncRepository {
   /// device. Pending offline deletions are handled with the same rule.
   Future<CvSyncResult> syncAccount(String userId) async {
     if (userId.isEmpty) {
-      return const CvSyncResult(
+      return CvSyncResult(
         uploadedCount: 0,
         downloadedCount: 0,
         failedCount: 1,
-        errorMessage: 'Cần đăng nhập trước khi đồng bộ.',
+        errorMessage: tr(
+          'Cần đăng nhập trước khi đồng bộ.',
+          'Sign in before syncing.',
+        ),
       );
     }
 
@@ -197,7 +204,10 @@ class CvSyncRepository {
         failedCount: failed,
         errorMessage: failed == 0
             ? null
-            : '$failed thao tác chưa thể đồng bộ. Dữ liệu trên máy vẫn an toàn.',
+            : tr(
+                '$failed thao tác chưa thể đồng bộ. Dữ liệu trên máy vẫn an toàn.',
+                '$failed changes could not sync. Your data on this device is safe.',
+              ),
       );
     } on CvRemoteDataSourceException catch (error) {
       return CvSyncResult(
@@ -211,8 +221,10 @@ class CvSyncRepository {
         uploadedCount: 0,
         downloadedCount: 0,
         failedCount: 1,
-        errorMessage:
-            'Không tải được dữ liệu từ tài khoản. CV trên máy vẫn an toàn.',
+        errorMessage: tr(
+          'Không tải được dữ liệu từ tài khoản. CV trên máy vẫn an toàn.',
+          'Could not load data from your account. CVs on this device are safe.',
+        ),
       );
     }
   }
@@ -241,7 +253,10 @@ class CvSyncRepository {
         pendingDeletionCount: 0,
         localCvCount: 0,
         remoteCvCount: 0,
-        errorMessage: 'Cần đăng nhập trước khi xem trước đồng bộ.',
+        errorMessage: tr(
+          'Cần đăng nhập trước khi xem trước đồng bộ.',
+          'Sign in to preview the sync.',
+        ),
       );
     }
 
@@ -332,7 +347,10 @@ class CvSyncRepository {
         pendingDeletionCount: 0,
         localCvCount: 0,
         remoteCvCount: 0,
-        errorMessage: 'Không thể kết nối máy chủ để xem trước thay đổi.',
+        errorMessage: tr(
+          'Không thể kết nối máy chủ để xem trước thay đổi.',
+          'Could not connect to preview the changes.',
+        ),
       );
     }
   }

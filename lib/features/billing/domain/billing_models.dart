@@ -1,18 +1,39 @@
-enum ProPlan {
-  monthly('monthly', 'Theo tháng', '49.000đ'),
-  lifetime('lifetime', 'Trọn đời', '99.000đ');
+import '../../../core/i18n/app_language.dart';
 
-  const ProPlan(this.value, this.label, this.price);
+enum ProPlan {
+  monthly('monthly', 49000),
+  lifetime('lifetime', 99000);
+
+  const ProPlan(this.value, this.amount);
 
   final String value;
-  final String label;
-  final String price;
+
+  /// Price in VND; the server checks the paid amount against its own table.
+  final int amount;
+
+  String get label => switch (this) {
+    ProPlan.monthly => tr('1 tháng', '1 month'),
+    ProPlan.lifetime => tr('Trọn đời', 'Lifetime'),
+  };
+
+  String get price => formatVnd(amount);
 
   static ProPlan fromValue(String? value) =>
       value == 'monthly' ? ProPlan.monthly : ProPlan.lifetime;
 }
 
-enum ProRequestStatus { pending, approved, rejected }
+/// `99000` → `99.000đ`.
+String formatVnd(int amount) {
+  final digits = amount.toString();
+  final buffer = StringBuffer();
+  for (var i = 0; i < digits.length; i++) {
+    if (i > 0 && (digits.length - i) % 3 == 0) buffer.write('.');
+    buffer.write(digits[i]);
+  }
+  return '$bufferđ';
+}
+
+enum ProRequestStatus { pending, approved, rejected, expired }
 
 class ProUpgradeRequest {
   const ProUpgradeRequest({
@@ -21,6 +42,7 @@ class ProUpgradeRequest {
     required this.transferCode,
     required this.status,
     required this.createdAt,
+    this.amount,
     this.adminNote,
   });
 
@@ -29,7 +51,12 @@ class ProUpgradeRequest {
   final String transferCode;
   final ProRequestStatus status;
   final DateTime createdAt;
+
+  /// Amount set by the server for this checkout.
+  final int? amount;
   final String? adminNote;
+
+  int get amountDue => amount ?? plan.amount;
 }
 
 class BillingStatus {
@@ -45,14 +72,6 @@ class BillingStatus {
       latestRequest?.status == ProRequestStatus.pending;
 }
 
-/// Bank transfer reference tied to the account so the administrator can
-/// match the payment, e.g. `CVPRO-LIFETIME-1A2B3C4D`.
-String proTransferCode(String userId, ProPlan plan) {
-  final compact = userId.replaceAll('-', '').toUpperCase();
-  final suffix = compact.length >= 8 ? compact.substring(0, 8) : compact;
-  return 'CVPRO-${plan.value.toUpperCase()}-$suffix';
-}
-
 class BillingFailure implements Exception {
   const BillingFailure(this.message);
 
@@ -65,5 +84,6 @@ class BillingFailure implements Exception {
 abstract interface class BillingRepository {
   Future<BillingStatus> fetchStatus();
 
-  Future<ProUpgradeRequest> submitRequest(ProPlan plan);
+  /// Creates (or reuses) the checkout for [plan] with its transfer code.
+  Future<ProUpgradeRequest> startCheckout(ProPlan plan);
 }

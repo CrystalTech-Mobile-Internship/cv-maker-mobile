@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/constants/auth_callback_constants.dart';
 import '../../../../core/network/supabase_client.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class SupabaseAuthDataSource {
   SupabaseAuthDataSource({SupabaseClient? client}) : _providedClient = client;
@@ -17,7 +18,12 @@ class SupabaseAuthDataSource {
   SupabaseClient get requiredClient {
     final client = optionalClient;
     if (client == null) {
-      throw StateError('Chưa kết nối được máy chủ tài khoản. Hãy thử lại sau.');
+      throw StateError(
+        tr(
+          'Chưa kết nối được máy chủ tài khoản. Hãy thử lại sau.',
+          'Could not reach the account service. Please try again later.',
+        ),
+      );
     }
     return client;
   }

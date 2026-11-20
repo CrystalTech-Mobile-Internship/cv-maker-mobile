@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import 'profile_avatar_image_provider.dart';
+import '../../../ai_tools/domain/models/ai_assistant_models.dart';
 
 /// Form tab for editing personal information and career summary.
 class PersonalInfoTab extends StatelessWidget {
@@ -177,7 +178,9 @@ class PersonalInfoTab extends StatelessWidget {
             label: Text(
               isAiLoading
                   ? (_isEn ? 'Optimizing...' : 'Đang tối ưu...')
-                  : (_isEn ? 'Rewrite' : 'Viết lại'),
+                  : (_isEn
+                        ? 'Rewrite · ${AiCreditCost.polishSummary} AI use'
+                        : 'Viết lại · ${AiCreditCost.polishSummary} lượt AI'),
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),

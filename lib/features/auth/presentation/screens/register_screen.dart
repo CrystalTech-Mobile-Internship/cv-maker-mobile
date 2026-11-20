@@ -7,6 +7,8 @@ import '../../../../app/theme.dart';
 import '../auth_redirect.dart';
 import '../../../legal/presentation/legal_document_screen.dart';
 import '../providers/auth_providers.dart';
+import '../../../../core/i18n/language_menu_button.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key, this.redirectPath});
@@ -40,7 +42,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (!_acceptedTerms) {
       _showMessage(
-        'Bạn cần đồng ý điều khoản để tạo tài khoản.',
+        tr(
+          'Bạn cần đồng ý điều khoản để tạo tài khoản.',
+          'Please accept the terms to create an account.',
+        ),
         isError: true,
       );
       return;
@@ -90,13 +95,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        actions: const [LanguageMenuButton(), SizedBox(width: 8)],
         leading: IconButton(
-          tooltip: 'Quay lại',
+          tooltip: tr('Quay lại', 'Back'),
           onPressed: () =>
               context.go(authEntryLocation('/login', widget.redirectPath)),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: const Text('Tạo tài khoản'),
+        title: Text(tr('Tạo tài khoản', 'Create account')),
       ),
       body: SafeArea(
         child: Center(
@@ -111,13 +117,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Bắt đầu tạo CV chuyên nghiệp',
+                        tr(
+                          'Bắt đầu tạo CV chuyên nghiệp',
+                          'Start making a professional CV',
+                        ),
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Lưu CV vào tài khoản và dùng trên mọi thiết bị.',
+                        tr(
+                          'Lưu CV vào tài khoản và dùng trên mọi thiết bị.',
+                          'Save CVs to your account and use them on any device.',
+                        ),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 16),
@@ -125,14 +137,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: 16),
                       _field(
                         controller: _nameController,
-                        label: 'Họ và tên',
+                        label: tr('Họ và tên', 'Full name'),
                         icon: Icons.person_outline_rounded,
                         autofillHints: const [AutofillHints.name],
                         textInputAction: TextInputAction.next,
                         validator: (value) {
                           final name = value?.trim() ?? '';
                           if (name.length < 2) {
-                            return 'Vui lòng nhập họ và tên.';
+                            return tr(
+                              'Vui lòng nhập họ và tên.',
+                              'Please enter your full name.',
+                            );
                           }
                           return null;
                         },
@@ -150,7 +165,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           if (!RegExp(
                             r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
                           ).hasMatch(email)) {
-                            return 'Email chưa đúng định dạng.';
+                            return tr(
+                              'Email chưa đúng định dạng.',
+                              'This email does not look right.',
+                            );
                           }
                           return null;
                         },
@@ -158,18 +176,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: 12),
                       _passwordField(
                         controller: _passwordController,
-                        label: 'Mật khẩu',
+                        label: tr('Mật khẩu', 'Password'),
                         obscureText: _obscurePassword,
                         onToggle: () => setState(
                           () => _obscurePassword = !_obscurePassword,
                         ),
                         validator: (value) => (value?.length ?? 0) < 8
-                            ? 'Tối thiểu 8 ký tự.'
+                            ? tr('Tối thiểu 8 ký tự.', 'At least 8 characters.')
                             : null,
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Nên có chữ hoa, chữ thường và số.',
+                      Text(
+                        tr(
+                          'Nên có chữ hoa, chữ thường và số.',
+                          'Use upper and lower case letters and numbers.',
+                        ),
                         style: TextStyle(
                           fontSize: 12,
                           color: Color(0xFF64748B),
@@ -178,13 +199,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: 12),
                       _passwordField(
                         controller: _confirmationController,
-                        label: 'Xác nhận mật khẩu',
+                        label: tr('Xác nhận mật khẩu', 'Confirm password'),
                         obscureText: _obscureConfirmation,
                         onToggle: () => setState(
                           () => _obscureConfirmation = !_obscureConfirmation,
                         ),
                         validator: (value) => value != _passwordController.text
-                            ? 'Mật khẩu xác nhận không khớp.'
+                            ? tr(
+                                'Mật khẩu xác nhận không khớp.',
+                                'Passwords do not match.',
+                              )
                             : null,
                         onSubmitted: (_) => isLoading ? null : _submit(),
                       ),
@@ -199,7 +223,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         contentPadding: EdgeInsets.zero,
                         controlAffinity: ListTileControlAffinity.leading,
                         dense: true,
-                        title: const LegalLinksText(prefix: 'Tôi đồng ý với '),
+                        title: LegalLinksText(
+                          prefix: tr('Tôi đồng ý với ', 'I agree to the '),
+                        ),
                       ),
                       const SizedBox(height: 8),
                       FilledButton.icon(
@@ -213,7 +239,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                               )
                             : const Icon(Icons.arrow_forward_rounded),
-                        label: const Text('Đăng ký'),
+                        label: Text(tr('Đăng ký', 'Sign up')),
                       ),
                       const _OrDivider(),
                       OutlinedButton.icon(
@@ -221,7 +247,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ? null
                             : _signInWithGoogle,
                         icon: const GoogleLogo(),
-                        label: const Text('Tiếp tục với Google'),
+                        label: Text(
+                          tr('Tiếp tục với Google', 'Continue with Google'),
+                        ),
                       ),
                       const SizedBox(height: 8),
                       TextButton(
@@ -233,7 +261,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   widget.redirectPath,
                                 ),
                               ),
-                        child: const Text('Đã có tài khoản? Đăng nhập'),
+                        child: Text(
+                          tr(
+                            'Đã có tài khoản? Đăng nhập',
+                            'Have an account? Sign in',
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -288,7 +321,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         labelText: label,
         prefixIcon: const Icon(Icons.lock_outline_rounded),
         suffixIcon: IconButton(
-          tooltip: obscureText ? 'Hiện mật khẩu' : 'Ẩn mật khẩu',
+          tooltip: obscureText
+              ? tr('Hiện mật khẩu', 'Show password')
+              : tr('Ẩn mật khẩu', 'Hide password'),
           onPressed: onToggle,
           icon: Icon(
             obscureText
@@ -312,13 +347,16 @@ class _LocalDataNotice extends StatelessWidget {
         color: const Color(0xFFEEF2FF),
         borderRadius: BorderRadius.circular(14),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Icon(Icons.cloud_sync_outlined, color: AppTheme.primarySlate),
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              'CV đang có trên máy vẫn được giữ nguyên.',
+              tr(
+                'CV đang có trên máy vẫn được giữ nguyên.',
+                'CVs on this device stay as they are.',
+              ),
               style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
             ),
           ),
@@ -333,14 +371,14 @@ class _OrDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Expanded(child: Divider()),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 12),
-            child: Text('HOẶC', style: TextStyle(fontSize: 11)),
+            child: Text(tr('HOẶC', 'OR'), style: TextStyle(fontSize: 11)),
           ),
           Expanded(child: Divider()),
         ],

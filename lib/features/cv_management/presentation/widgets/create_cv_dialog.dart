@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
 import 'cv_template_picker.dart';
+import '../../../../core/i18n/app_language.dart';
 
 final class CreateCvRequest {
   const CreateCvRequest({
@@ -66,11 +67,11 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Row(
+      title: Row(
         children: [
           Icon(Icons.post_add_rounded, color: AppTheme.primarySlate),
           SizedBox(width: 8),
-          Text('Tạo hồ sơ CV mới'),
+          Text(tr('Tạo hồ sơ CV mới', 'New CV')),
         ],
       ),
       content: SingleChildScrollView(
@@ -78,8 +79,8 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Tên hồ sơ',
+            Text(
+              tr('Tên hồ sơ', 'CV name'),
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
@@ -93,28 +94,31 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Dữ liệu ban đầu',
+            Text(
+              tr('Dữ liệu ban đầu', 'Start from'),
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String?>(
               initialValue: _sourceCvId,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 prefixIcon: Icon(Icons.content_copy_outlined),
-                helperText: 'Có thể chép từ CV đã có.',
+                helperText: tr(
+                  'Có thể chép từ CV đã có.',
+                  'You can copy from an existing CV.',
+                ),
                 helperMaxLines: 2,
               ),
               items: [
-                const DropdownMenuItem<String?>(
+                DropdownMenuItem<String?>(
                   value: null,
-                  child: Text('Bắt đầu với hồ sơ trống'),
+                  child: Text(tr('Bắt đầu với hồ sơ trống', 'Start blank')),
                 ),
                 for (final cv in widget.existingCvs)
                   DropdownMenuItem<String?>(
                     value: cv.id,
                     child: Text(
-                      'Dùng dữ liệu: ${cv.title}',
+                      tr('Dùng dữ liệu: ${cv.title}', 'Copy from: ${cv.title}'),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -122,7 +126,10 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
               onChanged: (value) => setState(() => _sourceCvId = value),
             ),
             const SizedBox(height: 16),
-            const Text('Mẫu CV', style: TextStyle(fontWeight: FontWeight.w700)),
+            Text(
+              tr('Mẫu CV', 'Templates'),
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 8),
             CvTemplatePicker(
               isPro: widget.isPro,
@@ -130,17 +137,17 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
               onChanged: (value) => setState(() => _selectedTemplate = value),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Ngôn ngữ mặc định',
+            Text(
+              tr('Ngôn ngữ mặc định', 'CV language'),
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
             SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: 'vi',
                   icon: Icon(Icons.translate_rounded, size: 17),
-                  label: Text('Tiếng Việt'),
+                  label: Text(tr('Tiếng Việt', 'Vietnamese')),
                 ),
                 ButtonSegment(
                   value: 'en',
@@ -159,7 +166,7 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Huỷ'),
+          child: Text(tr('Huỷ', 'Cancel')),
         ),
         FilledButton.icon(
           onPressed: _titleController.text.trim().isEmpty
@@ -175,7 +182,7 @@ class _CreateCvDialogState extends State<_CreateCvDialog> {
                   ),
                 ),
           icon: const Icon(Icons.check_rounded),
-          label: const Text('Tạo ngay'),
+          label: Text(tr('Tạo ngay', 'Create')),
         ),
       ],
     );

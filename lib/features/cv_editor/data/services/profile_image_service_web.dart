@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 
 import '../../domain/services/profile_image_service.dart';
+import '../../../../core/i18n/app_language.dart';
 
 ProfileImageService createProfileImageService() => WebProfileImageService();
 
@@ -26,8 +27,11 @@ final class WebProfileImageService implements ProfileImageService {
 
     final bytes = await selected.readAsBytes();
     if (bytes.length > _maximumAvatarBytes) {
-      throw const FormatException(
-        'Ảnh sau khi tối ưu vẫn lớn hơn 2 MB. Hãy chọn ảnh nhỏ hơn.',
+      throw FormatException(
+        tr(
+          'Ảnh sau khi tối ưu vẫn lớn hơn 2 MB. Hãy chọn ảnh nhỏ hơn.',
+          'The photo is still over 2 MB after resizing. Please pick a smaller one.',
+        ),
       );
     }
 

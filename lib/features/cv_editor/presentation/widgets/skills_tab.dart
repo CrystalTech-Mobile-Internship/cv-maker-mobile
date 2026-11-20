@@ -88,7 +88,7 @@ class SkillsTab extends StatelessWidget {
                   FilledButton.tonalIcon(
                     key: const Key('open-skill-bank-empty-btn'),
                     onPressed: () => _openSkillBank(context),
-                    icon: const Icon(Icons.auto_awesome, size: 18),
+                    icon: const Icon(Icons.library_add_outlined, size: 18),
                     label: Text(_isEn ? 'Skill Bank' : 'Kho kỹ năng'),
                   ),
                 ],
@@ -154,7 +154,7 @@ class SkillsTab extends StatelessWidget {
               TextButton.icon(
                 key: const Key('open-skill-bank-header-btn'),
                 onPressed: () => _openSkillBank(context),
-                icon: const Icon(Icons.auto_awesome, size: 16),
+                icon: const Icon(Icons.library_add_outlined, size: 16),
                 label: Text(_isEn ? 'Skill Bank' : 'Kho kỹ năng'),
                 style: TextButton.styleFrom(
                   foregroundColor: AppTheme.brandIndigo,

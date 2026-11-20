@@ -15,6 +15,7 @@ import '../widgets/community_post_card.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
 import '../../data/community_live_updates.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Post detail with comments.
 class CommunityPostScreen extends ConsumerStatefulWidget {
@@ -187,7 +188,10 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     ],
                     const SizedBox(height: 20),
                     Text(
-                      'Bình luận (${_comments?.length ?? post.commentCount})',
+                      tr(
+                        'Bình luận (${_comments?.length ?? post.commentCount})',
+                        'Comments (${_comments?.length ?? post.commentCount})',
+                      ),
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         color: AppTheme.primaryNavy,
@@ -205,8 +209,8 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         child: Center(child: CircularProgressIndicator()),
                       )
                     else if (_comments!.isEmpty)
-                      const Text(
-                        'Chưa có bình luận nào.',
+                      Text(
+                        tr('Chưa có bình luận nào.', 'No comments yet.'),
                         style: TextStyle(color: AppTheme.mutedText),
                       )
                     else
@@ -234,8 +238,11 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                         minLines: 1,
                         maxLines: 4,
                         maxLength: 1500,
-                        decoration: const InputDecoration(
-                          hintText: 'Viết bình luận...',
+                        decoration: InputDecoration(
+                          hintText: tr(
+                            'Viết bình luận...',
+                            'Write a comment...',
+                          ),
                           counterText: '',
                           isDense: true,
                         ),
@@ -244,7 +251,7 @@ class _CommunityPostScreenState extends ConsumerState<CommunityPostScreen> {
                     const SizedBox(width: 8),
                     IconButton.filled(
                       key: const ValueKey('comment-send'),
-                      tooltip: 'Gửi',
+                      tooltip: tr('Gửi', 'Send'),
                       onPressed: _sending ? null : _send,
                       icon: const Icon(Icons.send_rounded),
                     ),
@@ -282,8 +289,8 @@ class _ApplyLink extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Link ứng tuyển',
+                Text(
+                  tr('Link ứng tuyển', 'Apply link'),
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
                 Text(
@@ -301,15 +308,18 @@ class _ApplyLink extends StatelessWidget {
               await Clipboard.setData(ClipboardData(text: url));
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text(
-                      'Đã sao chép link. Hãy kiểm tra kỹ tên miền trước khi mở.',
+                      tr(
+                        'Đã sao chép link. Hãy kiểm tra kỹ tên miền trước khi mở.',
+                        'Link copied. Check the address carefully before opening it.',
+                      ),
                     ),
                   ),
                 );
               }
             },
-            child: const Text('Sao chép'),
+            child: Text(tr('Sao chép', 'Copy')),
           ),
         ],
       ),
@@ -359,7 +369,7 @@ class _CommentTile extends StatelessWidget {
           ),
           if (canDelete)
             IconButton(
-              tooltip: 'Xóa bình luận',
+              tooltip: tr('Xóa bình luận', 'Delete comment'),
               onPressed: onDelete,
               icon: const Icon(
                 Icons.delete_outline,

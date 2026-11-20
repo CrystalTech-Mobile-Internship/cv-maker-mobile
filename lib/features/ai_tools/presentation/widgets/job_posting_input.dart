@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 import '../controllers/ai_assistant_providers.dart';
 import 'ai_access_guard.dart';
+import '../../../../core/i18n/app_language.dart';
 
 final _urlPattern = RegExp(r'^https?://\S+$', caseSensitive: false);
 
@@ -25,7 +26,12 @@ Future<String?> resolveJobPostingInput(
   );
   if (!looksLikeJobLink(value)) {
     if (value.length < 20) {
-      toast('Hãy dán link hoặc nội dung tin tuyển dụng.');
+      toast(
+        tr(
+          'Hãy dán link hoặc nội dung tin tuyển dụng.',
+          'Paste a job posting link or text.',
+        ),
+      );
       return null;
     }
     return value;
@@ -37,7 +43,7 @@ Future<String?> resolveJobPostingInput(
   try {
     return await runWithAiProgress(
       context,
-      'Đang đọc tin tuyển dụng...',
+      tr('Đang đọc tin tuyển dụng...', 'Reading the job posting...'),
       () => ref.read(aiAssistantRepositoryProvider).fetchJobPosting(value),
     );
   } on AiWritingFailure catch (failure) {

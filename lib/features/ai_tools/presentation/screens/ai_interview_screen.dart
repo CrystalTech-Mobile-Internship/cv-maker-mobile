@@ -10,6 +10,7 @@ import '../controllers/ai_interview_controller.dart';
 import '../widgets/ai_access_guard.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Conversational CV builder: the AI interviews the user, then turns the
 /// conversation into a CV draft that goes through the normal review dialog.
@@ -25,11 +26,17 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
   final _scroll = ScrollController();
   bool _accessChecked = false;
 
-  static const _quickReplies = [
-    'Mình là sinh viên năm cuối ngành CNTT',
-    'Mình muốn ứng tuyển Flutter Developer',
-    'Mình chưa có kinh nghiệm đi làm, chỉ có dự án',
-    'Hãy hỏi mình về kỹ năng',
+  static List<String> get _quickReplies => [
+    tr('Mình là sinh viên năm cuối ngành CNTT', 'I am a final-year IT student'),
+    tr(
+      'Mình muốn ứng tuyển Flutter Developer',
+      'I want to apply as a Flutter Developer',
+    ),
+    tr(
+      'Mình chưa có kinh nghiệm đi làm, chỉ có dự án',
+      'I have no work experience yet, only projects',
+    ),
+    tr('Hãy hỏi mình về kỹ năng', 'Ask me about my skills'),
   ];
 
   @override
@@ -84,8 +91,13 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
     );
     if (cv == null || !mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã tạo CV từ cuộc trò chuyện và lưu trên thiết bị.'),
+      SnackBar(
+        content: Text(
+          tr(
+            'Đã tạo CV từ cuộc trò chuyện và lưu trên thiết bị.',
+            'Your CV was created from the chat and saved on this device.',
+          ),
+        ),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -105,11 +117,11 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
         leading: homeFallbackLeading(context),
-        title: const Text('Tạo CV'),
+        title: Text(tr('Tạo CV', 'Create CV')),
         actions: [
           const AiQuotaChip(),
           PopupMenuButton<String>(
-            tooltip: 'Tùy chọn',
+            tooltip: tr('Tùy chọn', 'Options'),
             onSelected: (value) {
               if (value == 'restart') controller.restart();
               if (value == 'generate') _generate();
@@ -121,20 +133,23 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
               CheckedPopupMenuItem(
                 value: 'vi',
                 checked: state.language == 'vi',
-                child: const Text('CV tiếng Việt'),
+                child: Text(tr('CV tiếng Việt', 'Vietnamese CV')),
               ),
               CheckedPopupMenuItem(
                 value: 'en',
                 checked: state.language == 'en',
-                child: const Text('CV tiếng Anh'),
+                child: Text(tr('CV tiếng Anh', 'English CV')),
               ),
               const PopupMenuDivider(),
               PopupMenuItem(
                 value: 'generate',
                 enabled: state.canGenerate,
-                child: const Text('Tạo CV ngay'),
+                child: Text(tr('Tạo CV ngay', 'Create CV now')),
               ),
-              const PopupMenuItem(value: 'restart', child: Text('Bắt đầu lại')),
+              PopupMenuItem(
+                value: 'restart',
+                child: Text(tr('Bắt đầu lại', 'Start over')),
+              ),
             ],
           ),
         ],
@@ -188,7 +203,7 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
                     ActionChip(
                       key: const ValueKey('ai-chat-ats'),
                       avatar: const Icon(Icons.analytics_outlined, size: 18),
-                      label: const Text('Chấm điểm CV'),
+                      label: Text(tr('Chấm điểm CV', 'Score my CV')),
                       onPressed: () => context.push('/ats-scorer'),
                     ),
                     const SizedBox(width: 8),
@@ -198,7 +213,7 @@ class _AiInterviewScreenState extends ConsumerState<AiInterviewScreen> {
                         Icons.record_voice_over_outlined,
                         size: 18,
                       ),
-                      label: const Text('Luyện phỏng vấn'),
+                      label: Text(tr('Luyện phỏng vấn', 'Interview practice')),
                       onPressed: () => context.push('/interview-practice'),
                     ),
                     if (state.userTurns == 0)
@@ -306,8 +321,11 @@ class _CreateCvOffer extends StatelessWidget {
               english
                   ? 'I have enough to draft your CV. Create it now? '
                         '(${AiCreditCost.generateCv} uses)'
-                  : 'Mình đã có đủ thông tin. Bạn có muốn tạo CV ngay không? '
-                        '(${AiCreditCost.generateCv} lượt)',
+                  : tr(
+                      'Mình đã có đủ thông tin. Bạn có muốn tạo CV ngay không? '
+                          '(${AiCreditCost.generateCv} lượt)',
+                      'I have enough information. Create your CV now? (${AiCreditCost.generateCv} uses)',
+                    ),
               style: const TextStyle(color: AppTheme.primaryNavy, height: 1.4),
             ),
             const SizedBox(height: 10),
@@ -319,15 +337,17 @@ class _CreateCvOffer extends StatelessWidget {
                   onPressed: isGenerating ? null : onYes,
                   child: Text(
                     isGenerating
-                        ? (english ? 'Creating...' : 'Đang soạn CV...')
-                        : (english ? 'Yes' : 'Có'),
+                        ? (english
+                              ? 'Creating...'
+                              : tr('Đang soạn CV...', 'Writing your CV...'))
+                        : (english ? 'Yes' : tr('Có', 'Yes')),
                   ),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
                   key: const ValueKey('ai-decline-cv'),
                   onPressed: isGenerating ? null : onNo,
-                  child: Text(english ? 'No' : 'Không'),
+                  child: Text(english ? 'No' : tr('Không', 'No')),
                 ),
               ],
             ),
@@ -343,7 +363,7 @@ class _TypingBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Align(
+    return Align(
       alignment: Alignment.centerLeft,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -357,7 +377,7 @@ class _TypingBubble extends StatelessWidget {
             ),
             SizedBox(width: 10),
             Text(
-              'Đang trả lời...',
+              tr('Đang trả lời...', 'Replying...'),
               style: TextStyle(color: AppTheme.mutedText),
             ),
           ],
@@ -401,10 +421,10 @@ class _ErrorBanner extends StatelessWidget {
           if (quota)
             TextButton(
               onPressed: () => context.push('/upgrade-pro'),
-              child: const Text('Nâng cấp'),
+              child: Text(tr('Nâng cấp', 'Upgrade')),
             ),
           IconButton(
-            tooltip: 'Đóng',
+            tooltip: tr('Đóng', 'Close'),
             onPressed: onDismiss,
             icon: const Icon(Icons.close, size: 18),
           ),
@@ -442,8 +462,11 @@ class _Composer extends StatelessWidget {
               maxLength: 1500,
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => onSend(),
-              decoration: const InputDecoration(
-                hintText: 'Nhập câu trả lời của bạn...',
+              decoration: InputDecoration(
+                hintText: tr(
+                  'Nhập câu trả lời (${AiCreditCost.interview} lượt AI mỗi tin)',
+                  'Type your answer (${AiCreditCost.interview} AI use per message)',
+                ),
                 counterText: '',
               ),
             ),
@@ -451,7 +474,7 @@ class _Composer extends StatelessWidget {
           const SizedBox(width: 8),
           IconButton.filled(
             key: const ValueKey('ai-chat-send'),
-            tooltip: 'Gửi',
+            tooltip: tr('Gửi', 'Send'),
             onPressed: enabled ? onSend : null,
             style: IconButton.styleFrom(
               backgroundColor: AppTheme.brandIndigo,

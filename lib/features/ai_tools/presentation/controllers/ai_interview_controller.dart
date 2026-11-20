@@ -4,6 +4,7 @@ import '../../../resume_import/domain/models/resume_import_draft.dart';
 import '../../domain/models/ai_assistant_models.dart';
 import '../../domain/repositories/ai_assistant_repository.dart';
 import 'ai_assistant_providers.dart';
+import '../../../../core/i18n/app_language.dart';
 
 const _maxUserMessageLength = 1500;
 
@@ -27,7 +28,10 @@ class AiInterviewState {
         role: AiChatRole.assistant,
         content: language == 'en'
             ? 'Hi! I will ask a few questions to build your CV. Which position are you applying for, and how much experience do you have?'
-            : 'Chào bạn! Mình sẽ hỏi vài câu để cùng bạn tạo CV. Bạn đang muốn ứng tuyển vị trí nào và đã có bao nhiêu kinh nghiệm?',
+            : tr(
+                'Chào bạn! Mình sẽ hỏi vài câu để cùng bạn tạo CV. Bạn đang muốn ứng tuyển vị trí nào và đã có bao nhiêu kinh nghiệm?',
+                'Hi! I will ask a few questions to build your CV with you. What role are you applying for, and how much experience do you have?',
+              ),
       ),
     ],
   );
@@ -168,7 +172,10 @@ class AiInterviewController extends StateNotifier<AiInterviewState> {
           role: AiChatRole.assistant,
           content: state.language == 'en'
               ? 'Sure. Tell me anything else you want on your CV.'
-              : 'Được, bạn cứ kể thêm điều muốn có trong CV nhé.',
+              : tr(
+                  'Được, bạn cứ kể thêm điều muốn có trong CV nhé.',
+                  'Sure, tell me more about what you want in your CV.',
+                ),
         ),
       ],
     );

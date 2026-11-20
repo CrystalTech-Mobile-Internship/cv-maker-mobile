@@ -1,127 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../../../../app/theme.dart';
+import '../../../../core/i18n/app_language.dart';
+import 'side_panel_card.dart';
 
+/// Other tools, listed as simple lines in one card.
 class UpcomingToolsRow extends StatelessWidget {
   const UpcomingToolsRow({
     super.key,
     required this.onOpenAts,
     required this.onOpenPro,
+    this.onPractice,
   });
 
   final VoidCallback onOpenAts;
   final VoidCallback onOpenPro;
+  final VoidCallback? onPractice;
 
   @override
   Widget build(BuildContext context) {
-    final ats = _ToolTile(
-      title: 'Chấm điểm CV',
-      subtitle: 'Theo tin tuyển dụng',
-      icon: Icons.analytics_outlined,
-      iconColor: AppTheme.brandIndigo,
-      iconBackground: AppTheme.indigoSurface,
-      onTap: onOpenAts,
-    );
-    final pro = _ToolTile(
-      title: 'Nâng cấp Pro',
-      subtitle: 'Thêm lượt dùng, mẫu Pro',
-      icon: Icons.workspace_premium_outlined,
-      iconColor: AppTheme.brandIndigo,
-      iconBackground: AppTheme.indigoSurface,
-      onTap: onOpenPro,
-    );
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Side panels on computers are narrow: stack the tiles there.
-        if (constraints.maxWidth < 380) {
-          return Column(children: [ats, const SizedBox(height: 10), pro]);
-        }
-        return Row(
-          children: [
-            Expanded(child: ats),
-            const SizedBox(width: 10),
-            Expanded(child: pro),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _ToolTile extends StatelessWidget {
-  const _ToolTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.iconColor,
-    required this.iconBackground,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBackground;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.softBorder),
+    return SidePanelCard(
+      title: tr('Công cụ', 'Tools'),
+      padding: const EdgeInsets.fromLTRB(16, 16, 12, 8),
+      child: Column(
+        children: [
+          SidePanelLink(
+            icon: Icons.analytics_outlined,
+            title: tr('Chấm điểm CV', 'Score my CV'),
+            subtitle: tr(
+              'So với tin tuyển dụng · miễn phí',
+              'Against a job posting · free',
+            ),
+            onTap: onOpenAts,
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: iconBackground,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: iconColor),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                        color: AppTheme.primaryNavy,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.mutedText,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          SidePanelLink(
+            key: const ValueKey('open-job-tracker'),
+            icon: Icons.work_history_outlined,
+            title: tr('Theo dõi ứng tuyển', 'Job tracker'),
+            subtitle: tr(
+              'Việc đã nộp, lịch phỏng vấn',
+              'Applications and interviews',
+            ),
+            onTap: () => GoRouter.of(context).push('/job-tracker'),
           ),
-        ),
+          if (onPractice != null)
+            SidePanelLink(
+              key: const ValueKey('open-interview-practice'),
+              icon: Icons.record_voice_over_outlined,
+              title: tr('Luyện phỏng vấn', 'Interview practice'),
+              subtitle: tr('Từ 1 lượt AI', 'From 1 AI use'),
+              onTap: onPractice!,
+            ),
+          SidePanelLink(
+            icon: Icons.workspace_premium_outlined,
+            title: tr('Nâng cấp Pro', 'Upgrade to Pro'),
+            subtitle: tr(
+              'Thêm mẫu, phông chữ và lượt AI',
+              'More templates, fonts and AI uses',
+            ),
+            onTap: onOpenPro,
+          ),
+        ],
       ),
     );
   }

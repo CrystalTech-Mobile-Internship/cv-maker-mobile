@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_client.dart';
 import '../../domain/models/community_models.dart';
 import '../../domain/repositories/community_repository.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class SupabaseCommunityRepository implements CommunityRepository {
   SupabaseCommunityRepository({SupabaseClient? client}) : _provided = client;
@@ -17,12 +18,20 @@ class SupabaseCommunityRepository implements CommunityRepository {
   SupabaseClient get _client {
     final client = _provided ?? SupabaseService.client;
     if (client == null) {
-      throw const CommunityFailure(
-        'Cộng đồng cần kết nối máy chủ. Hãy kiểm tra cấu hình và mạng.',
+      throw CommunityFailure(
+        tr(
+          'Cộng đồng cần kết nối máy chủ. Hãy kiểm tra cấu hình và mạng.',
+          'The community needs a connection. Please check your network.',
+        ),
       );
     }
     if (client.auth.currentUser == null) {
-      throw const CommunityFailure('Hãy đăng nhập để tham gia cộng đồng.');
+      throw CommunityFailure(
+        tr(
+          'Hãy đăng nhập để tham gia cộng đồng.',
+          'Sign in to join the community.',
+        ),
+      );
     }
     return client;
   }
@@ -35,20 +44,35 @@ class SupabaseCommunityRepository implements CommunityRepository {
     } on PostgrestException catch (error) {
       if (error.message.contains('community_rate_limited')) {
         throw CommunityFailure(
-          'Bạn đăng hơi nhanh. Hãy thử lại sau ít phút.',
+          tr(
+            'Bạn đăng hơi nhanh. Hãy thử lại sau ít phút.',
+            'You are posting too fast. Try again in a few minutes.',
+          ),
           cause: error,
         );
       }
       if (error.code == '23505') {
-        throw CommunityFailure('Bạn đã gửi báo cáo cho bài này.', cause: error);
+        throw CommunityFailure(
+          tr(
+            'Bạn đã gửi báo cáo cho bài này.',
+            'You already reported this post.',
+          ),
+          cause: error,
+        );
       }
       throw CommunityFailure(
-        'Máy chủ từ chối yêu cầu. Hãy thử lại sau.',
+        tr(
+          'Máy chủ từ chối yêu cầu. Hãy thử lại sau.',
+          'The request was refused. Please try again later.',
+        ),
         cause: error,
       );
     } catch (error) {
       throw CommunityFailure(
-        'Không kết nối được cộng đồng. Hãy kiểm tra mạng.',
+        tr(
+          'Không kết nối được cộng đồng. Hãy kiểm tra mạng.',
+          'Could not reach the community. Please check your network.',
+        ),
         cause: error,
       );
     }
@@ -213,7 +237,7 @@ class SupabaseCommunityRepository implements CommunityRepository {
     return CommunityPost(
       id: '${row['id']}',
       authorId: '${row['author_id']}',
-      authorName: text(row['author_name']) ?? 'Thành viên',
+      authorName: text(row['author_name']) ?? tr('Thành viên', 'Member'),
       kind: CommunityPostKind.fromValue(row['kind'] as String?),
       title: '${row['title'] ?? ''}',
       body: '${row['body'] ?? ''}',
@@ -235,7 +259,7 @@ class SupabaseCommunityRepository implements CommunityRepository {
       id: '${row['id']}',
       postId: '${row['post_id']}',
       authorId: '${row['author_id']}',
-      authorName: (row['author_name'] as String?) ?? 'Thành viên',
+      authorName: (row['author_name'] as String?) ?? tr('Thành viên', 'Member'),
       body: '${row['body'] ?? ''}',
       createdAt:
           DateTime.tryParse('${row['created_at']}')?.toUtc() ??

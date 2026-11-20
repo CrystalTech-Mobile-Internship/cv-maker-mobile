@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../cv_editor/domain/models/cv_template.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class CvTemplatePicker extends StatelessWidget {
   const CvTemplatePicker({
@@ -98,7 +99,7 @@ class CvTemplatePicker extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            isSelected ? 'ĐÃ CHỌN' : 'Pro',
+                            isSelected ? tr('ĐÃ CHỌN', 'SELECTED') : 'Pro',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,

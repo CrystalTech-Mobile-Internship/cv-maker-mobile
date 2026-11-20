@@ -36,6 +36,11 @@ import '../widgets/my_cvs_view.dart';
 import '../widgets/template_catalog_view.dart';
 import '../../../../core/utils/cv_id.dart';
 import '../../../resume_import/domain/services/resume_language.dart';
+import '../../../../core/i18n/language_menu_button.dart';
+import '../../../../core/widgets/cv_assistant_mark.dart';
+import '../../../../core/widgets/floating_launcher.dart';
+import '../../../../core/i18n/app_language.dart';
+import '../../../support/presentation/support_chat_button.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -88,10 +93,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await ref.read(cvRepositoryProvider).save(cv);
       if (!mounted) return;
       setState(() => _selectedIndex = 0);
-      _showMessage('Đã tạo CV mới thành công.');
+      _showMessage(tr('Đã tạo CV mới thành công.', 'New CV created.'));
       await _openEditor(cv);
     } catch (_) {
-      if (mounted) _showMessage('Không thể tạo CV. Hãy thử lại.');
+      if (mounted) {
+        _showMessage(
+          tr(
+            'Không thể tạo CV. Hãy thử lại.',
+            'Could not create the CV. Please try again.',
+          ),
+        );
+      }
     }
   }
 
@@ -119,12 +131,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (!mounted) return;
       final cv = await reviewAndSaveResumeDraft(context, ref, draft);
       if (cv == null || !mounted) return;
-      _showMessage('Đã nhập CV và lưu an toàn trên thiết bị.');
+      _showMessage(
+        tr(
+          'Đã nhập CV và lưu an toàn trên thiết bị.',
+          'CV imported and saved on this device.',
+        ),
+      );
       await _openEditor(cv);
     } on ResumeImportException catch (error) {
       if (mounted) _showMessage(error.message);
     } catch (_) {
-      if (mounted) _showMessage('Không thể nhập CV. Hãy kiểm tra lại tệp.');
+      if (mounted) {
+        _showMessage(
+          tr(
+            'Không thể nhập CV. Hãy kiểm tra lại tệp.',
+            'Could not import the CV. Please check the file.',
+          ),
+        );
+      }
     }
   }
 
@@ -136,7 +160,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       return await runWithAiProgress(
         context,
-        'Đang đọc CV...',
+        tr('Đang đọc CV...', 'Reading CV...'),
         () => ref
             .read(aiAssistantRepositoryProvider)
             .parseResume(
@@ -148,7 +172,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } on AiWritingFailure catch (failure) {
       if (!mounted) return null;
       _showMessage(
-        '${describeAiFailure(failure)} Đã chuyển sang đọc trên máy.',
+        tr(
+          '${describeAiFailure(failure)} Đã chuyển sang đọc trên máy.',
+          '${describeAiFailure(failure)} Switched to reading on this device.',
+        ),
       );
       return ref.read(resumeImportRepositoryProvider).parseText(source);
     }
@@ -157,15 +184,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _exportAllCvs() async {
     final cvs = ref.read(cvListStreamProvider).asData?.value ?? const [];
     if (cvs.isEmpty) {
-      _showMessage('Chưa có CV nào để sao lưu.');
+      _showMessage(tr('Chưa có CV nào để sao lưu.', 'No CVs to back up yet.'));
       return;
     }
     try {
       final uri = await ref.read(cvBackupRepositoryProvider).exportBackup(cvs);
       if (!mounted || uri == null) return;
-      _showMessage('Đã xuất bản sao của ${cvs.length} CV.');
+      _showMessage(
+        tr(
+          'Đã xuất bản sao của ${cvs.length} CV.',
+          'Exported a backup of ${cvs.length} CVs.',
+        ),
+      );
     } catch (_) {
-      if (mounted) _showMessage('Không thể xuất bản sao dữ liệu.');
+      if (mounted) {
+        _showMessage(
+          tr('Không thể xuất bản sao dữ liệu.', 'Could not export the backup.'),
+        );
+      }
     }
   }
 
@@ -186,7 +222,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               source.copyWith(
                 id: 'restored-${restoredAt.microsecondsSinceEpoch}-$index',
                 userId: userId,
-                title: '${source.title} — Khôi phục',
+                title: tr(
+                  '${source.title} — Khôi phục',
+                  '${source.title} — Restored',
+                ),
                 isSynced: false,
                 createdAt: restoredAt,
                 updatedAt: restoredAt,
@@ -195,13 +234,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
       if (mounted) {
         _showMessage(
-          'Đã khôi phục ${imported.length} CV thành bản mới trên thiết bị.',
+          tr(
+            'Đã khôi phục ${imported.length} CV thành bản mới trên thiết bị.',
+            'Restored ${imported.length} CVs as new copies on this device.',
+          ),
         );
       }
     } on CvBackupException catch (error) {
       if (mounted) _showMessage(error.message);
     } catch (_) {
-      if (mounted) _showMessage('Không thể khôi phục tệp sao lưu.');
+      if (mounted) {
+        _showMessage(
+          tr(
+            'Không thể khôi phục tệp sao lưu.',
+            'Could not restore the backup.',
+          ),
+        );
+      }
     }
   }
 
@@ -213,9 +262,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await ref
           .read(cvRepositoryProvider)
           .save(cv.copyWith(title: title, updatedAt: DateTime.now().toUtc()));
-      if (mounted) _showMessage('Đã đổi tên CV thành công.');
+      if (mounted) _showMessage(tr('Đã đổi tên CV thành công.', 'CV renamed.'));
     } catch (_) {
-      if (mounted) _showMessage('Không thể đổi tên CV.');
+      if (mounted) {
+        _showMessage(tr('Không thể đổi tên CV.', 'Could not rename the CV.'));
+      }
     }
   }
 
@@ -223,9 +274,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       final newId = newCvId();
       await ref.read(cvRepositoryProvider).duplicate(cv.id, newId: newId);
-      if (mounted) _showMessage('Đã nhân bản CV thành công.');
+      if (mounted) {
+        _showMessage(tr('Đã nhân bản CV thành công.', 'CV duplicated.'));
+      }
     } catch (_) {
-      if (mounted) _showMessage('Không thể nhân bản CV.');
+      if (mounted) {
+        _showMessage(
+          tr('Không thể nhân bản CV.', 'Could not duplicate the CV.'),
+        );
+      }
     }
   }
 
@@ -242,10 +299,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           '${now.minute.toString().padLeft(2, '0')}';
       await ref
           .read(cvRepositoryProvider)
-          .save(copy.copyWith(title: '${cv.title} — Sao lưu $stamp'));
-      if (mounted) _showMessage('Đã tạo bản sao dự phòng trên thiết bị.');
+          .save(
+            copy.copyWith(
+              title: tr(
+                '${cv.title} — Sao lưu $stamp',
+                '${cv.title} — Backup $stamp',
+              ),
+            ),
+          );
+      if (mounted) {
+        _showMessage(
+          tr(
+            'Đã tạo bản sao dự phòng trên thiết bị.',
+            'Backup copy created on this device.',
+          ),
+        );
+      }
     } catch (_) {
-      if (mounted) _showMessage('Không thể tạo bản sao dự phòng.');
+      if (mounted) {
+        _showMessage(
+          tr(
+            'Không thể tạo bản sao dự phòng.',
+            'Could not create a backup copy.',
+          ),
+        );
+      }
     }
   }
 
@@ -254,9 +332,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     try {
       await ref.read(cvRepositoryProvider).deleteById(cv.id);
-      if (mounted) _showMessage('Đã xoá CV thành công.');
+      if (mounted) _showMessage(tr('Đã xoá CV thành công.', 'CV deleted.'));
     } catch (_) {
-      if (mounted) _showMessage('Không thể xoá CV.');
+      if (mounted) {
+        _showMessage(tr('Không thể xoá CV.', 'Could not delete the CV.'));
+      }
     }
   }
 
@@ -283,8 +363,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (!mounted) return;
     _showMessage(
       result.isSuccess
-          ? 'Đã sao lưu ${guest.length} CV vào tài khoản.'
-          : 'CV đã được gắn vào tài khoản; sẽ sao lưu lại khi có mạng.',
+          ? tr(
+              'Đã sao lưu ${guest.length} CV vào tài khoản.',
+              'Backed up ${guest.length} CVs to your account.',
+            )
+          : tr(
+              'CV đã được gắn vào tài khoản; sẽ sao lưu lại khi có mạng.',
+              'CVs are linked to your account and will back up when you are online.',
+            ),
     );
   }
 
@@ -318,26 +404,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .synchronize(user.id);
     if (!mounted) return;
     if (!result.isSuccess) {
-      _showMessage(result.errorMessage ?? 'Một số CV chưa thể đồng bộ.');
+      _showMessage(
+        result.errorMessage ??
+            tr('Một số CV chưa thể đồng bộ.', 'Some CVs could not sync.'),
+      );
       return;
     }
     _showMessage(
       result.synchronizedCount == 0
-          ? 'Chưa có CV nào để đồng bộ.'
+          ? tr('Chưa có CV nào để đồng bộ.', 'No CVs to sync yet.')
           : _syncSuccessMessage(result),
     );
   }
 
   String _syncSuccessMessage(CvSyncResult result) {
     final actions = <String>[
-      if (result.uploadedCount > 0) '${result.uploadedCount} tải lên',
-      if (result.downloadedCount > 0) '${result.downloadedCount} tải về',
-      if (result.deletedCount > 0) '${result.deletedCount} xoá trên tài khoản',
+      if (result.uploadedCount > 0)
+        tr(
+          '${result.uploadedCount} tải lên',
+          '${result.uploadedCount} uploaded',
+        ),
+      if (result.downloadedCount > 0)
+        tr(
+          '${result.downloadedCount} tải về',
+          '${result.downloadedCount} downloaded',
+        ),
+      if (result.deletedCount > 0)
+        tr(
+          '${result.deletedCount} xoá trên tài khoản',
+          '${result.deletedCount} deleted from account',
+        ),
     ];
     final conflicts = result.conflictCount > 0
-        ? ' • ${result.conflictCount} CV sửa ở hai nơi, đã giữ bản mới nhất'
+        ? tr(
+            ' • ${result.conflictCount} CV sửa ở hai nơi, đã giữ bản mới nhất',
+            ' • ${result.conflictCount} CVs edited in two places, kept the newest',
+          )
         : '';
-    return 'Đồng bộ xong: ${actions.join(', ')}$conflicts.';
+    return tr(
+      'Đồng bộ xong: ${actions.join(', ')}$conflicts.',
+      'Sync done: ${actions.join(', ')}$conflicts.',
+    );
   }
 
   @override
@@ -347,10 +454,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final cvsAsync = ref.watch(cvListStreamProvider);
     final syncState = ref.watch(dashboardSyncControllerProvider);
     final title = switch (_selectedIndex) {
-      0 => 'CV của tôi',
-      1 => 'Mẫu CV',
-      2 => 'Cộng đồng',
-      _ => 'Tài khoản',
+      0 => tr('CV của tôi', 'My CVs'),
+      1 => tr('Mẫu CV', 'Templates'),
+      2 => tr('Cộng đồng', 'Community'),
+      _ => tr('Tài khoản', 'Account'),
     };
     final titleIcon = switch (_selectedIndex) {
       0 => Icons.description_rounded,
@@ -382,7 +489,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 if (_selectedIndex == 0)
                   IconButton(
                     key: const Key('home-create-cv'),
-                    tooltip: 'Tạo CV',
+                    tooltip: tr('Tạo CV', 'Create CV'),
                     onPressed: _createCv,
                     icon: const Icon(Icons.add_rounded),
                   ),
@@ -397,9 +504,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                       ),
                       icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: const Text('Đăng bài'),
+                      label: Text(tr('Đăng bài', 'Post')),
                     ),
                   ),
+                const LanguageMenuButton(),
                 const SizedBox(width: 4),
               ],
             ),
@@ -453,14 +561,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _ => const AccountScreen(embedded: true),
         }),
       ),
-      floatingActionButton: FloatingActionButton(
-        key: const Key('home-chat-fab'),
-        heroTag: 'home-chat-fab',
-        tooltip: 'Trò chuyện để tạo CV',
-        onPressed: () => context.push('/ai-interview'),
-        backgroundColor: AppTheme.brandIndigo,
-        foregroundColor: Colors.white,
-        child: const Icon(Icons.smart_toy_outlined, color: Colors.white),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!_isWide(context)) ...[
+            const SupportChatButton(small: true),
+            const SizedBox(height: 12),
+          ],
+          FloatingLauncher(
+            key: const Key('home-chat-fab'),
+            icon: const CvAssistantMark(size: 26),
+            label: tr('Trợ lý CV', 'CV assistant'),
+            onPressed: () => context.push('/ai-interview'),
+          ),
+        ],
       ),
       bottomNavigationBar: _isWide(context)
           ? null
@@ -469,37 +584,45 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onDestinationSelected: (index) {
                 setState(() => _selectedIndex = index);
               },
-              destinations: const [
+              destinations: [
                 NavigationDestination(
                   icon: Icon(Icons.folder_copy_outlined),
                   selectedIcon: Icon(Icons.folder_copy_rounded),
-                  label: 'CV của tôi',
+                  label: tr('CV của tôi', 'My CVs'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.palette_outlined),
                   selectedIcon: Icon(Icons.palette_rounded),
-                  label: 'Mẫu CV',
+                  label: tr('Mẫu CV', 'Templates'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.forum_outlined),
                   selectedIcon: Icon(Icons.forum_rounded),
-                  label: 'Cộng đồng',
+                  label: tr('Cộng đồng', 'Community'),
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.account_circle_outlined),
                   selectedIcon: Icon(Icons.account_circle_rounded),
-                  label: 'Tài khoản',
+                  label: tr('Tài khoản', 'Account'),
                 ),
               ],
             ),
     );
   }
 
-  static const _destinations = [
-    (Icons.folder_copy_outlined, Icons.folder_copy_rounded, 'CV của tôi'),
-    (Icons.palette_outlined, Icons.palette_rounded, 'Mẫu CV'),
-    (Icons.forum_outlined, Icons.forum_rounded, 'Cộng đồng'),
-    (Icons.account_circle_outlined, Icons.account_circle_rounded, 'Tài khoản'),
+  static List<(IconData, IconData, String)> get _destinations => [
+    (
+      Icons.folder_copy_outlined,
+      Icons.folder_copy_rounded,
+      tr('CV của tôi', 'My CVs'),
+    ),
+    (Icons.palette_outlined, Icons.palette_rounded, tr('Mẫu CV', 'Templates')),
+    (Icons.forum_outlined, Icons.forum_rounded, tr('Cộng đồng', 'Community')),
+    (
+      Icons.account_circle_outlined,
+      Icons.account_circle_rounded,
+      tr('Tài khoản', 'Account'),
+    ),
   ];
 
   bool _isWide(BuildContext context) => MediaQuery.sizeOf(context).width >= 900;
@@ -535,22 +658,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       accountName: user?.displayName.isNotEmpty == true
           ? user!.displayName
           : user?.email,
-      accountDetail: user == null ? 'Đăng nhập để sao lưu CV' : user.email,
+      accountDetail: user == null
+          ? tr('Đăng nhập để sao lưu CV', 'Sign in to back up CVs')
+          : user.email,
       onAccount: () => setState(() => _selectedIndex = 3),
+      tools: [
+        DesktopToolLink(
+          key: const Key('tool-ats'),
+          icon: Icons.analytics_outlined,
+          label: tr('Chấm điểm CV', 'Score my CV'),
+          badge: tr('Miễn phí', 'Free'),
+          onTap: () => context.push('/ats-scorer'),
+        ),
+        DesktopToolLink(
+          key: const Key('tool-job-tracker'),
+          icon: Icons.work_history_outlined,
+          label: tr('Theo dõi ứng tuyển', 'Job tracker'),
+          badge: tr('Miễn phí', 'Free'),
+          onTap: () => context.push('/job-tracker'),
+        ),
+        DesktopToolLink(
+          key: const Key('tool-interview'),
+          icon: Icons.record_voice_over_outlined,
+          label: tr('Luyện phỏng vấn', 'Interview practice'),
+          badge: 'AI',
+          onTap: () => context.push('/interview-practice'),
+        ),
+        DesktopToolLink(
+          key: const Key('tool-chat-cv'),
+          icon: Icons.chat_bubble_outline_rounded,
+          label: tr('Trò chuyện tạo CV', 'Chat to build a CV'),
+          badge: 'AI',
+          onTap: () => context.push('/ai-interview'),
+        ),
+        DesktopToolLink(
+          key: const Key('tool-pro'),
+          icon: Icons.workspace_premium_outlined,
+          label: tr('Nâng cấp Pro', 'Upgrade to Pro'),
+          onTap: () => context.push('/upgrade-pro'),
+        ),
+        DesktopToolLink(
+          key: const Key('tool-support'),
+          icon: Icons.headset_mic_outlined,
+          label: tr('Hỗ trợ', 'Support'),
+          onTap: () => context.push('/support'),
+        ),
+      ],
       actions: [
         if (_selectedIndex == 2 && user != null)
           FilledButton.icon(
             key: const ValueKey('community-create-post'),
             onPressed: () => createCommunityPost(context, ref),
             icon: const Icon(Icons.edit_outlined, size: 18),
-            label: const Text('Đăng bài'),
+            label: Text(tr('Đăng bài', 'Post')),
           ),
         if (_selectedIndex == 0)
           OutlinedButton.icon(
             onPressed: _importResume,
             icon: const Icon(Icons.upload_file_outlined, size: 18),
-            label: const Text('Tải CV lên'),
+            label: Text(tr('Tải CV lên', 'Upload CV')),
           ),
+        const LanguageMenuButton(),
       ],
       child: page,
     );

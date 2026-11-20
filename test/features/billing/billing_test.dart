@@ -16,29 +16,28 @@ class _FakeBilling implements BillingRepository {
   Future<BillingStatus> fetchStatus() async => status;
 
   @override
-  Future<ProUpgradeRequest> submitRequest(ProPlan plan) =>
+  Future<ProUpgradeRequest> startCheckout(ProPlan plan) =>
       throw UnimplementedError();
 }
 
 void main() {
-  test('builds a per-account transfer code accepted by the database', () {
-    final code = proTransferCode(
-      '1a2b3c4d-0000-4000-8000-000000000000',
-      ProPlan.lifetime,
-    );
-    expect(code, 'CVPRO-LIFETIME-1A2B3C4D');
-    expect(RegExp(r'^CVPRO-[A-Z0-9-]{4,40}$').hasMatch(code), isTrue);
+  test('formats prices in VND', () {
+    expect(formatVnd(99000), '99.000đ');
+    expect(formatVnd(1490000), '1.490.000đ');
+    expect(ProPlan.monthly.price, '49.000đ');
   });
 
   test('maps request rows', () {
     final request = SupabaseBillingRepository.mapRequest({
       'id': 'r1',
       'plan': 'monthly',
-      'transfer_code': 'CVPRO-MONTHLY-ABCD1234',
+      'transfer_code': 'CVPROMABCD1234',
       'status': 'pending',
       'created_at': '2026-11-12T00:00:00Z',
+      'amount': 49000,
     });
     expect(request.plan, ProPlan.monthly);
+    expect(request.amountDue, 49000);
     expect(request.status, ProRequestStatus.pending);
   });
 
@@ -72,6 +71,6 @@ void main() {
 
     expect(find.text('Gói hiện tại: Free'), findsOneWidget);
     expect(find.text('Đã dùng hôm nay: 4/15 lượt'), findsOneWidget);
-    expect(find.textContaining('đang chờ xác nhận'), findsOneWidget);
+    expect(find.textContaining('Đang chờ thanh toán'), findsOneWidget);
   });
 }

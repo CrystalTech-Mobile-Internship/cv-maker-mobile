@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme.dart';
+import '../../../../core/i18n/app_language.dart';
+import 'side_panel_card.dart';
 
+/// Save all CVs to a file on this device, or bring them back from one.
 class LocalDataToolsCard extends StatelessWidget {
   const LocalDataToolsCard({
     super.key,
@@ -14,57 +16,30 @@ class LocalDataToolsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.softBorder),
+    return SidePanelCard(
+      title: tr('Sao lưu ra tệp', 'Backup file'),
+      subtitle: tr(
+        'Lưu tất cả CV vào một tệp trên máy.',
+        'Save all CVs to a file on this device.',
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          const Row(
-            children: [
-              Icon(Icons.shield_outlined, color: AppTheme.brandIndigo),
-              SizedBox(width: 9),
-              Expanded(
-                child: Text(
-                  'Sao lưu dữ liệu trên máy',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.primaryNavy,
-                  ),
-                ),
-              ),
-            ],
+          Expanded(
+            child: OutlinedButton.icon(
+              key: const Key('export-all-cvs'),
+              onPressed: onExport,
+              icon: const Icon(Icons.download_rounded, size: 18),
+              label: Text(tr('Xuất tệp', 'Export')),
+            ),
           ),
-          const SizedBox(height: 5),
-          const Text(
-            'Xuất hoặc khôi phục CV bằng tệp sao lưu.',
-            style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const Key('export-all-cvs'),
-                  onPressed: onExport,
-                  icon: const Icon(Icons.download_outlined, size: 18),
-                  label: const Text('Xuất tệp', maxLines: 1),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  key: const Key('restore-cv-backup'),
-                  onPressed: onRestore,
-                  icon: const Icon(Icons.restore_page_outlined, size: 18),
-                  label: const Text('Khôi phục', maxLines: 1),
-                ),
-              ),
-            ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              key: const Key('restore-cv-backup'),
+              onPressed: onRestore,
+              icon: const Icon(Icons.restore_rounded, size: 18),
+              label: Text(tr('Khôi phục', 'Restore')),
+            ),
           ),
         ],
       ),

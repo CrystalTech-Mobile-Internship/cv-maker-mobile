@@ -1,18 +1,24 @@
+import '../../../../core/i18n/app_language.dart';
+
 /// A font bundled with the app for CV export. Every font here covers
 /// Vietnamese and ships as an asset, so PDFs render the same offline.
 final class CvFont {
   const CvFont({
     required this.id,
     required this.name,
-    required this.description,
+    required String description,
     required this.regularAsset,
     required this.boldAsset,
     this.isPremium = false,
-  });
+  }) : _description = description;
 
   final String id;
   final String name;
-  final String description;
+  final String _description;
+
+  /// Short look-and-feel note, in the app language.
+  String get description =>
+      tr(_description, _fontEn[_description] ?? _description);
   final String regularAsset;
   final String boldAsset;
   final bool isPremium;
@@ -76,3 +82,12 @@ abstract final class CvFontCatalog {
   static bool canUse(String id, {required bool isPro}) =>
       isPro || !byId(id).isPremium;
 }
+
+const _fontEn = <String, String>{
+  'Rõ ràng, dễ đọc': 'Clear and easy to read',
+  'Gọn, hiện đại': 'Compact and modern',
+  'Có chân, trang trọng': 'Serif, formal',
+  'Mềm mại, thân thiện': 'Soft and friendly',
+  'Đậm nét, nổi bật': 'Bold and striking',
+  'Cổ điển, học thuật': 'Classic, academic',
+};

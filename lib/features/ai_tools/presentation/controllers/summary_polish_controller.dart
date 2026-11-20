@@ -4,6 +4,7 @@ import '../../data/datasources/ai_writing_remote_data_source.dart';
 import '../../data/repositories/supabase_ai_writing_repository.dart';
 import '../../domain/models/summary_polish_request.dart';
 import '../../domain/repositories/ai_writing_repository.dart';
+import '../../../../core/i18n/app_language.dart';
 
 enum SummaryPolishStatus { idle, loading, success, failure }
 
@@ -62,9 +63,12 @@ class SummaryPolishController extends StateNotifier<SummaryPolishState> {
       if (mounted) state = nextState;
       return nextState;
     } catch (_) {
-      const nextState = SummaryPolishState(
+      final nextState = SummaryPolishState(
         status: SummaryPolishStatus.failure,
-        errorMessage: 'Chưa viết lại được. Hãy thử lại sau.',
+        errorMessage: tr(
+          'Chưa viết lại được. Hãy thử lại sau.',
+          'Could not rewrite it. Please try again later.',
+        ),
       );
       if (mounted) state = nextState;
       return nextState;

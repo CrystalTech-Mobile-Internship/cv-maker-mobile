@@ -1,18 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/theme.dart';
-import '../../../auth/presentation/auth_redirect.dart';
+import '../../../../core/i18n/app_language.dart';
+import '../../../../core/widgets/home_fallback_leading.dart';
+import '../../../../core/widgets/responsive_layout_builder.dart';
 import '../../../ai_tools/presentation/controllers/ai_assistant_providers.dart';
+import '../../../auth/presentation/auth_redirect.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../cv_editor/domain/models/cv_font.dart';
+import '../../../cv_editor/domain/models/cv_template.dart';
 import '../../data/supabase_billing_repository.dart';
 import '../../domain/billing_models.dart';
 import '../widgets/bank_transfer_box.dart';
-import '../widgets/billing_status_card.dart';
-import '../../../../core/constants/env_constants.dart';
-import '../../../../core/widgets/home_fallback_leading.dart';
-import '../../../../core/widgets/responsive_layout_builder.dart';
+import '../../../support/presentation/support_chat_button.dart';
 
 class ProUpgradeScreen extends ConsumerStatefulWidget {
   const ProUpgradeScreen({super.key});
@@ -22,34 +26,54 @@ class ProUpgradeScreen extends ConsumerStatefulWidget {
 }
 
 class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
-  String _plan = 'lifetime';
-  bool _submitting = false;
+  ProPlan _plan = ProPlan.lifetime;
+  ProUpgradeRequest? _checkout;
+  bool _starting = false;
+  Timer? _poll;
 
   @override
   void initState() {
     super.initState();
-    // Show today's AI usage even before the first AI call of the session.
     if (ref.read(currentAuthUserProvider) != null) {
       ref.read(aiAssistantRepositoryProvider).fetchQuota().ignore();
     }
   }
 
-  Future<void> _submitRequest() async {
-    if (_submitting) return;
-    setState(() => _submitting = true);
+  @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _startCheckout() async {
+    if (_starting) return;
+    setState(() => _starting = true);
     try {
-      await ref
+      final checkout = await ref
           .read(billingRepositoryProvider)
-          .submitRequest(ProPlan.fromValue(_plan));
-      ref.invalidate(billingStatusProvider);
-      _toast(
-        'Đã gửi yêu cầu. Tài khoản sẽ được nâng cấp khi nhận được chuyển khoản.',
+          .startCheckout(_plan);
+      if (!mounted) return;
+      setState(() => _checkout = checkout);
+      _poll?.cancel();
+      // The webhook upgrades the account; check every few seconds.
+      _poll = Timer.periodic(
+        const Duration(seconds: 4),
+        (_) => ref.invalidate(billingStatusProvider),
       );
     } on BillingFailure catch (failure) {
       _toast(failure.message);
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted) setState(() => _starting = false);
     }
+  }
+
+  void _selectPlan(ProPlan plan) {
+    if (plan == _plan) return;
+    _poll?.cancel();
+    setState(() {
+      _plan = plan;
+      _checkout = null;
+    });
   }
 
   void _toast(String message) {
@@ -61,97 +85,388 @@ class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLifetime = _plan == 'lifetime';
     final authUser = ref.watch(currentAuthUserProvider);
+    final status = authUser == null
+        ? null
+        : ref.watch(billingStatusProvider).valueOrNull;
+    final isPro = status?.isPro ?? false;
+    if (isPro) _poll?.cancel();
+
     return Scaffold(
       backgroundColor: AppTheme.surfaceLight,
+      floatingActionButton: const SupportChatButton(),
       appBar: AppBar(
         leading: homeFallbackLeading(context),
-        title: const Text('Nâng cấp Pro'),
+        title: Text(tr('Nâng cấp Pro', 'Upgrade to Pro')),
       ),
       body: WebConstrainedWidth(
-        maxWidth: 760,
+        maxWidth: 860,
         child: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
             children: [
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryNavy,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Smart CV Maker Pro',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
+              const _Header(),
+              const SizedBox(height: 20),
+              if (isPro)
+                _ProActiveCard(status: status!)
+              else ...[
+                _PlanPicker(selected: _plan, onSelected: _selectPlan),
+                const SizedBox(height: 16),
+                if (authUser == null)
+                  _LoginRequiredCard(
+                    onLogin: () => context.push(
+                      authEntryLocation('/login', '/upgrade-pro'),
+                    ),
+                    onRegister: () => context.push(
+                      authEntryLocation('/register', '/upgrade-pro'),
+                    ),
+                  )
+                else if (_checkout == null)
+                  FilledButton(
+                    key: const ValueKey('pro-start-checkout'),
+                    onPressed: _starting ? null : _startCheckout,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppTheme.brandIndigo,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      '200 lượt dùng tính năng AI mỗi ngày và mẫu CV cao cấp.',
-                      style: TextStyle(color: Color(0xFFDBEAFE), height: 1.4),
+                    child: Text(
+                      _starting
+                          ? tr('Đang tạo mã...', 'Preparing...')
+                          : tr(
+                              'Thanh toán ${_plan.price}',
+                              'Pay ${_plan.price}',
+                            ),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ],
-                ),
-              ),
-              if (authUser != null) ...[
-                const SizedBox(height: 16),
-                const BillingStatusCard(),
+                  )
+                else
+                  _CheckoutCard(checkout: _checkout!),
               ],
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               const _ComparisonCard(),
-              const SizedBox(height: 16),
-              _PlanCard(
-                selected: _plan == 'monthly',
-                title: 'Theo tháng',
-                price: '49.000đ',
-                detail: 'Dùng trong 30 ngày',
-                onTap: () => setState(() => _plan = 'monthly'),
-              ),
-              const SizedBox(height: 10),
-              _PlanCard(
-                selected: isLifetime,
-                title: 'Trọn đời',
-                price: '99.000đ',
-                detail: 'Thanh toán một lần • Tiết kiệm hơn',
-                badge: 'Khuyên dùng',
-                onTap: () => setState(() => _plan = 'lifetime'),
-              ),
-              const SizedBox(height: 18),
-              if (authUser == null)
-                _LoginRequiredCard(
-                  onLogin: () =>
-                      context.push(authEntryLocation('/login', '/upgrade-pro')),
-                  onRegister: () => context.push(
-                    authEntryLocation('/register', '/upgrade-pro'),
-                  ),
-                )
-              else
-                _AuthenticatedPaymentSection(
-                  isLifetime: isLifetime,
-                  accountEmail: authUser.email,
-                  transferCode: proTransferCode(
-                    authUser.id,
-                    ProPlan.fromValue(_plan),
-                  ),
-                  hasPendingRequest:
-                      ref
-                          .watch(billingStatusProvider)
-                          .valueOrNull
-                          ?.hasPendingRequest ??
-                      false,
-                  isSubmitting: _submitting,
-                  onConfirm: _submitRequest,
-                ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'Smart CV Pro',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: AppTheme.primaryNavy,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          tr(
+            'Thêm mẫu CV, phông chữ và lượt dùng AI để hoàn thiện CV nhanh hơn.',
+            'More templates, fonts and AI uses to finish your CV faster.',
+          ),
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: AppTheme.mutedText, height: 1.4),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlanPicker extends StatelessWidget {
+  const _PlanPicker({required this.selected, required this.onSelected});
+
+  final ProPlan selected;
+  final ValueChanged<ProPlan> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final monthly = _PlanCard(
+      key: const ValueKey('pro-plan-monthly'),
+      plan: ProPlan.monthly,
+      selected: selected == ProPlan.monthly,
+      period: tr('/ 30 ngày', '/ 30 days'),
+      note: tr('Dùng ngắn hạn khi đang tìm việc', 'For a short job search'),
+      onTap: () => onSelected(ProPlan.monthly),
+    );
+    final lifetime = _PlanCard(
+      key: const ValueKey('pro-plan-lifetime'),
+      plan: ProPlan.lifetime,
+      selected: selected == ProPlan.lifetime,
+      period: tr('một lần', 'one time'),
+      note: tr('Trả một lần, dùng mãi', 'Pay once, keep it'),
+      badge: tr('Tiết kiệm nhất', 'Best value'),
+      onTap: () => onSelected(ProPlan.lifetime),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 560) {
+          return Column(
+            children: [lifetime, const SizedBox(height: 12), monthly],
+          );
+        }
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: monthly),
+              const SizedBox(width: 12),
+              Expanded(child: lifetime),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({
+    super.key,
+    required this.plan,
+    required this.selected,
+    required this.period,
+    required this.note,
+    required this.onTap,
+    this.badge,
+  });
+
+  final ProPlan plan;
+  final bool selected;
+  final String period;
+  final String note;
+  final String? badge;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: selected ? AppTheme.brandIndigo : AppTheme.softBorder,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    plan.label,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primarySlate,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (badge != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.brandIndigo.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        badge!,
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.brandIndigo,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    selected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_off,
+                    size: 20,
+                    color: selected ? AppTheme.brandIndigo : AppTheme.mutedText,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    plan.price,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.primaryNavy,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    period,
+                    style: const TextStyle(color: AppTheme.mutedText),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                note,
+                style: const TextStyle(color: AppTheme.mutedText, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CheckoutCard extends StatelessWidget {
+  const _CheckoutCard({required this.checkout});
+
+  final ProUpgradeRequest checkout;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('pro-checkout'),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.softBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            tr('Quét mã bằng ứng dụng ngân hàng', 'Scan with your banking app'),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.primaryNavy,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            tr(
+              'Mã QR đã điền sẵn số tiền và nội dung. Giữ nguyên nội dung khi chuyển.',
+              'The QR code fills in the amount and note. Keep the note as is.',
+            ),
+            style: const TextStyle(color: AppTheme.mutedText, fontSize: 13),
+          ),
+          const SizedBox(height: 16),
+          BankTransferBox(
+            amount: checkout.amountDue,
+            transferCode: checkout.transferCode,
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceLight,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    tr(
+                      'Đang chờ thanh toán. Tài khoản sẽ tự nâng cấp ngay khi nhận được tiền.',
+                      'Waiting for payment. Your account upgrades as soon as it arrives.',
+                    ),
+                    style: const TextStyle(fontSize: 13, height: 1.35),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProActiveCard extends StatelessWidget {
+  const _ProActiveCard({required this.status});
+
+  final BillingStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    final until = status.proUntil?.toLocal();
+    return Container(
+      key: const ValueKey('pro-active'),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.successGreen),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.verified_rounded,
+            color: AppTheme.successGreen,
+            size: 32,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tr('Bạn đang dùng Pro', 'You are on Pro'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.primaryNavy,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  until == null
+                      ? tr('Trọn đời', 'Lifetime')
+                      : tr(
+                          'Đến ngày ${until.day}/${until.month}/${until.year}',
+                          'Until ${until.day}/${until.month}/${until.year}',
+                        ),
+                  style: const TextStyle(color: AppTheme.mutedText),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -168,137 +483,41 @@ class _LoginRequiredCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFEEF2FF),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFC7D2FE)),
+        border: Border.all(color: AppTheme.softBorder),
       ),
       child: Column(
         children: [
-          const Icon(
-            Icons.account_circle_outlined,
-            size: 38,
-            color: AppTheme.primarySlate,
+          Text(
+            tr('Đăng nhập để nâng cấp', 'Sign in to upgrade'),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
           ),
-          const SizedBox(height: 10),
-          const Text(
-            'Đăng nhập để nâng cấp',
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Gói Pro gắn với tài khoản để dùng trên mọi thiết bị.',
+          const SizedBox(height: 4),
+          Text(
+            tr(
+              'Gói Pro gắn với tài khoản, dùng được trên web và điện thoại.',
+              'Pro is tied to your account and works on web and phone.',
+            ),
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.mutedText, height: 1.35),
+            style: const TextStyle(color: AppTheme.mutedText, height: 1.35),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
               onPressed: onLogin,
-              child: const Text('Đăng nhập'),
+              child: Text(tr('Đăng nhập', 'Sign in')),
             ),
           ),
           TextButton(
             onPressed: onRegister,
-            child: const Text('Chưa có tài khoản? Đăng ký'),
+            child: Text(
+              tr('Chưa có tài khoản? Đăng ký', 'No account yet? Sign up'),
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AuthenticatedPaymentSection extends StatelessWidget {
-  const _AuthenticatedPaymentSection({
-    required this.isLifetime,
-    required this.accountEmail,
-    required this.transferCode,
-    required this.hasPendingRequest,
-    required this.isSubmitting,
-    required this.onConfirm,
-  });
-
-  final bool isLifetime;
-  final String accountEmail;
-  final String transferCode;
-  final bool hasPendingRequest;
-  final bool isSubmitting;
-  final VoidCallback onConfirm;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: Column(
-            children: [
-              const Text(
-                'Quét mã để chuyển khoản',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                accountEmail,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12, color: AppTheme.mutedText),
-              ),
-              const SizedBox(height: 12),
-              BankTransferBox(
-                amount: isLifetime ? 99000 : 49000,
-                transferCode: transferCode,
-              ),
-              const SizedBox(height: 10),
-              SelectableText(
-                'Nội dung CK: $transferCode',
-                key: const ValueKey('pro-transfer-code'),
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Ghi đúng nội dung để hệ thống nhận ra tài khoản của bạn.',
-                style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        FilledButton.icon(
-          key: const ValueKey('pro-confirm-transfer'),
-          onPressed:
-              hasPendingRequest ||
-                  isSubmitting ||
-                  EnvConstants.paymentAccount == null
-              ? null
-              : onConfirm,
-          style: AppTheme.createCvButton,
-          icon: const Icon(Icons.verified_outlined),
-          label: Text(
-            hasPendingRequest
-                ? 'Đang chờ xác nhận chuyển khoản'
-                : isSubmitting
-                ? 'Đang gửi...'
-                : 'Tôi đã chuyển khoản',
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Tài khoản được nâng lên Pro ngay khi nhận được chuyển khoản.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.mutedText,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -306,216 +525,107 @@ class _AuthenticatedPaymentSection extends StatelessWidget {
 class _ComparisonCard extends StatelessWidget {
   const _ComparisonCard();
 
-  // (label, free, pro): `true`/`false` draws a mark, a String is shown as is.
-  static const _basic = <(String, Object, Object)>[
-    ('Tạo, sửa CV và lưu trên mọi thiết bị', true, true),
-    ('Xuất CV ra PDF, Word', true, true),
-    ('Mẫu CV cao cấp', false, true),
-  ];
+  @override
+  Widget build(BuildContext context) {
+    final rows = <(String, Object, Object)>[
+      (
+        tr('Mẫu CV', 'CV templates'),
+        '${CvTemplateCatalog.freeTemplates.length}',
+        '${CvTemplateCatalog.allTemplates.length}',
+      ),
+      (
+        tr('Phông chữ', 'Fonts'),
+        '${CvFontCatalog.all.where((f) => !f.isPremium).length}',
+        '${CvFontCatalog.all.length}',
+      ),
+      (tr('Lượt dùng AI mỗi ngày', 'AI uses per day'), '15', '200'),
+      (tr('Tải PDF và Word', 'PDF and Word download'), true, true),
+      (
+        tr('Lưu và đồng bộ trên mọi thiết bị', 'Sync across devices'),
+        true,
+        true,
+      ),
+    ];
+    return Container(
+      key: const Key('pro-comparison'),
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.softBorder),
+      ),
+      child: Column(
+        children: [
+          _ComparisonLine(
+            label: tr('So sánh gói', 'Compare plans'),
+            free: 'Free',
+            pro: 'Pro',
+            header: true,
+          ),
+          for (final row in rows)
+            _ComparisonLine(label: row.$1, free: row.$2, pro: row.$3),
+        ],
+      ),
+    );
+  }
+}
 
-  static const _ai = <(String, Object, Object)>[
-    ('Trò chuyện để tạo CV', true, true),
-    ('Đọc CV từ file PDF, Word, ảnh', true, true),
-    ('Viết lại tóm tắt và kinh nghiệm', true, true),
-    ('Viết thư xin việc', true, true),
-    ('Chấm điểm, chỉnh CV theo tin tuyển dụng', true, true),
-    ('Luyện phỏng vấn và nhận góp ý', true, true),
-    ('Lượt dùng mỗi ngày', '15', '200'),
-  ];
+class _ComparisonLine extends StatelessWidget {
+  const _ComparisonLine({
+    required this.label,
+    required this.free,
+    required this.pro,
+    this.header = false,
+  });
+
+  final String label;
+  final Object free;
+  final Object pro;
+  final bool header;
+
+  Widget _cell(Object value, {required bool highlight}) {
+    if (value is bool) {
+      return Icon(
+        value ? Icons.check_rounded : Icons.remove_rounded,
+        size: 20,
+        color: value
+            ? (highlight ? AppTheme.brandIndigo : AppTheme.primarySlate)
+            : AppTheme.mutedText,
+      );
+    }
+    return Text(
+      '$value',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontWeight: FontWeight.w700,
+        color: highlight ? AppTheme.brandIndigo : AppTheme.primarySlate,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: const Key('pro-comparison'),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const _ComparisonHeader('Tính năng'),
-          const Divider(height: 20),
-          for (final row in _basic) _ComparisonRow(row),
-          const SizedBox(height: 6),
-          const _ComparisonHeader('Tính năng AI'),
-          const Divider(height: 20),
-          for (final row in _ai) _ComparisonRow(row),
-          const SizedBox(height: 4),
-          const Text(
-            'Mỗi lần dùng tốn 1 lượt; đọc CV từ file, viết thư xin việc tốn 2 lượt; tạo CV từ cuộc trò chuyện, chấm điểm theo tin tuyển dụng tốn 3 lượt. Lượt dùng được làm mới mỗi ngày.',
-            style: TextStyle(
-              color: AppTheme.mutedText,
-              fontSize: 12,
-              height: 1.4,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: header
+          ? null
+          : const BoxDecoration(
+              border: Border(top: BorderSide(color: AppTheme.softBorder)),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ComparisonHeader extends StatelessWidget {
-  const _ComparisonHeader(this.title);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    const style = TextStyle(fontWeight: FontWeight.w800);
-    return Row(
-      children: [
-        Expanded(child: Text(title, style: style)),
-        const SizedBox(
-          width: 52,
-          child: Text('Free', textAlign: TextAlign.center, style: style),
-        ),
-        const SizedBox(
-          width: 52,
-          child: Text('Pro', textAlign: TextAlign.center, style: style),
-        ),
-      ],
-    );
-  }
-}
-
-class _ComparisonRow extends StatelessWidget {
-  const _ComparisonRow(this.row);
-
-  final (String, Object, Object) row;
-
-  Widget _cell(Object value, Color color) {
-    if (value is String) {
-      return Text(
-        value,
-        textAlign: TextAlign.center,
-        style: TextStyle(fontWeight: FontWeight.w800, color: color),
-      );
-    }
-    final on = value == true;
-    return Icon(
-      on ? Icons.check_circle : Icons.remove_circle_outline,
-      color: on ? color : const Color(0xFF94A3B8),
-      size: 20,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
-          Expanded(child: Text(row.$1)),
-          SizedBox(width: 52, child: _cell(row.$2, AppTheme.successGreen)),
-          SizedBox(width: 52, child: _cell(row.$3, AppTheme.createAction)),
-        ],
-      ),
-    );
-  }
-}
-
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({
-    required this.selected,
-    required this.title,
-    required this.price,
-    required this.detail,
-    required this.onTap,
-    this.badge,
-  });
-
-  final bool selected;
-  final String title;
-  final String price;
-  final String detail;
-  final String? badge;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected ? const Color(0xFFECFDF5) : Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected ? AppTheme.createAction : const Color(0xFFE2E8F0),
-              width: selected ? 2 : 1,
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: header ? FontWeight.w800 : FontWeight.w500,
+                color: AppTheme.primaryNavy,
+              ),
             ),
           ),
-          child: Row(
-            children: [
-              Icon(
-                selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: selected ? AppTheme.createAction : AppTheme.mutedText,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: AppTheme.primaryNavy,
-                          ),
-                        ),
-                        if (badge != null) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD1FAE5),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              badge!,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: AppTheme.createActionDark,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    Text(
-                      detail,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.mutedText,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                price,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  color: AppTheme.primaryNavy,
-                ),
-              ),
-            ],
-          ),
-        ),
+          SizedBox(width: 64, child: _cell(free, highlight: false)),
+          SizedBox(width: 64, child: _cell(pro, highlight: true)),
+        ],
       ),
     );
   }

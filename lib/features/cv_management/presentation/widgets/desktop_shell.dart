@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// One entry of the desktop sidebar.
 class DesktopNavItem {
@@ -9,6 +10,25 @@ class DesktopNavItem {
   final IconData icon;
   final IconData selectedIcon;
   final String label;
+}
+
+/// A shortcut in the sidebar's tools list; opens another screen.
+class DesktopToolLink {
+  const DesktopToolLink({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.badge,
+    this.key,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  /// Short tag such as "Miễn phí" or "AI".
+  final String? badge;
+  final Key? key;
 }
 
 /// Computer layout: fixed sidebar on the left, page header on top and the
@@ -26,9 +46,11 @@ class DesktopShell extends StatelessWidget {
     this.accountName,
     this.accountDetail,
     this.onAccount,
+    this.tools = const [],
   });
 
   final List<DesktopNavItem> items;
+  final List<DesktopToolLink> tools;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
   final VoidCallback onCreate;
@@ -51,6 +73,7 @@ class DesktopShell extends StatelessWidget {
           accountName: accountName,
           accountDetail: accountDetail,
           onAccount: onAccount,
+          tools: tools,
         ),
         const VerticalDivider(width: 1, color: AppTheme.softBorder),
         Expanded(
@@ -102,9 +125,11 @@ class _Sidebar extends StatelessWidget {
     this.accountName,
     this.accountDetail,
     this.onAccount,
+    this.tools = const [],
   });
 
   final List<DesktopNavItem> items;
+  final List<DesktopToolLink> tools;
   final int selectedIndex;
   final ValueChanged<int> onSelect;
   final VoidCallback onCreate;
@@ -156,19 +181,41 @@ class _Sidebar extends StatelessWidget {
               minimumSize: const Size.fromHeight(44),
             ),
             icon: const Icon(Icons.add_rounded, size: 20),
-            label: const Text('Tạo CV mới'),
+            label: Text(tr('Tạo CV mới', 'New CV')),
           ),
           const SizedBox(height: 18),
-          for (var i = 0; i < items.length; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: _NavTile(
-                item: items[i],
-                selected: i == selectedIndex,
-                onTap: () => onSelect(i),
-              ),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                for (var i = 0; i < items.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: _NavTile(
+                      item: items[i],
+                      selected: i == selectedIndex,
+                      onTap: () => onSelect(i),
+                    ),
+                  ),
+                if (tools.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 18, 12, 8),
+                    child: Text(
+                      tr('CÔNG CỤ', 'TOOLS'),
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        letterSpacing: 0.8,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.mutedText,
+                      ),
+                    ),
+                  ),
+                  for (final tool in tools)
+                    _ToolTile(key: tool.key, tool: tool),
+                ],
+              ],
             ),
-          const Spacer(),
+          ),
           const Divider(height: 24, color: AppTheme.softBorder),
           InkWell(
             borderRadius: BorderRadius.circular(10),
@@ -196,7 +243,7 @@ class _Sidebar extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          accountName ?? 'Chưa đăng nhập',
+                          accountName ?? tr('Chưa đăng nhập', 'Not signed in'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -222,6 +269,71 @@ class _Sidebar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ToolTile extends StatelessWidget {
+  const _ToolTile({super.key, required this.tool});
+
+  final DesktopToolLink tool;
+
+  @override
+  Widget build(BuildContext context) {
+    final ai = tool.badge == 'AI';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          hoverColor: AppTheme.indigoSurface,
+          onTap: tool.onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            child: Row(
+              children: [
+                Icon(tool.icon, size: 19, color: AppTheme.mutedText),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    tool.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primarySlate,
+                    ),
+                  ),
+                ),
+                if (tool.badge != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ai ? AppTheme.indigoSurface : AppTheme.tealSurface,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      tool.badge!,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: ai
+                            ? AppTheme.brandIndigo
+                            : AppTheme.successGreen,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/cv_assistant_mark.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_editor/data/repositories/cv_repository_provider.dart';
 import '../../../cv_editor/domain/models/cv_model.dart';
@@ -1335,7 +1336,7 @@ class _DesktopToolbar extends StatelessWidget {
                     )
                   : null,
               onPressed: onToggleAi,
-              icon: const Icon(Icons.smart_toy_outlined, size: 18),
+              icon: const CvAssistantMark(size: 18),
               label: Text(en ? 'Ask to edit' : 'Nhờ sửa'),
             ),
           ),

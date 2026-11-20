@@ -7,6 +7,7 @@ import '../../../cv_editor/domain/models/cv_model.dart';
 import '../../../cv_editor/domain/models/skill_model.dart';
 import '../../domain/services/cv_jd_matcher_service.dart';
 import '../../../../core/widgets/app_sheet.dart';
+import '../../../../core/i18n/app_language.dart';
 
 /// Compares the CV with a job posting pasted as a link or as text.
 class CvJdMatcherSheet extends ConsumerStatefulWidget {
@@ -100,7 +101,9 @@ class _CvJdMatcherSheetState extends ConsumerState<CvJdMatcherSheet> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                _en ? 'Match a job posting' : 'So khớp tin tuyển dụng',
+                _en
+                    ? 'Match a job posting'
+                    : tr('So khớp tin tuyển dụng', 'Match a job posting'),
                 style: const TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 17,
@@ -116,14 +119,17 @@ class _CvJdMatcherSheetState extends ConsumerState<CvJdMatcherSheet> {
                 decoration: InputDecoration(
                   hintText: _en
                       ? 'Paste a job link or the job description'
-                      : 'Dán link hoặc nội dung tin tuyển dụng',
+                      : tr(
+                          'Dán link hoặc nội dung tin tuyển dụng',
+                          'Paste a job posting link or text',
+                        ),
                 ),
               ),
               const SizedBox(height: 10),
               FilledButton(
                 key: const Key('jd-matcher-submit'),
                 onPressed: _match,
-                child: Text(_en ? 'Compare' : 'So khớp'),
+                child: Text(_en ? 'Compare' : tr('So khớp', 'Match')),
               ),
               if (report != null) ...[
                 const SizedBox(height: 16),

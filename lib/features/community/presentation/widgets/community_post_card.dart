@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/theme.dart';
 import '../../domain/models/community_models.dart';
+import '../../../../core/i18n/app_language.dart';
 
 String communityTimeAgo(DateTime time, {DateTime? now}) {
   final diff = (now ?? DateTime.now().toUtc()).difference(time.toUtc());
-  if (diff.inMinutes < 1) return 'vừa xong';
-  if (diff.inMinutes < 60) return '${diff.inMinutes} phút trước';
-  if (diff.inHours < 24) return '${diff.inHours} giờ trước';
-  if (diff.inDays < 7) return '${diff.inDays} ngày trước';
+  if (diff.inMinutes < 1) return tr('vừa xong', 'just now');
+  if (diff.inMinutes < 60) {
+    return tr('${diff.inMinutes} phút trước', '${diff.inMinutes} min ago');
+  }
+  if (diff.inHours < 24) {
+    return tr('${diff.inHours} giờ trước', '${diff.inHours} h ago');
+  }
+  if (diff.inDays < 7) {
+    return tr('${diff.inDays} ngày trước', '${diff.inDays} d ago');
+  }
   final local = time.toLocal();
   return '${local.day.toString().padLeft(2, '0')}/'
       '${local.month.toString().padLeft(2, '0')}/${local.year}';
@@ -73,7 +80,7 @@ class CommunityPostCard extends StatelessWidget {
                     ),
                   ),
                   PopupMenuButton<CommunityPostAction>(
-                    tooltip: 'Tùy chọn',
+                    tooltip: tr('Tùy chọn', 'Options'),
                     icon: const Icon(
                       Icons.more_horiz,
                       size: 20,
@@ -82,14 +89,14 @@ class CommunityPostCard extends StatelessWidget {
                     onSelected: onAction,
                     itemBuilder: (context) => [
                       if (isMine)
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: CommunityPostAction.delete,
-                          child: Text('Xóa bài viết'),
+                          child: Text(tr('Xóa bài viết', 'Delete post')),
                         )
                       else
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: CommunityPostAction.report,
-                          child: Text('Báo cáo vi phạm'),
+                          child: Text(tr('Báo cáo vi phạm', 'Report')),
                         ),
                     ],
                   ),

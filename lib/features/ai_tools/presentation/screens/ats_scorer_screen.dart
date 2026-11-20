@@ -20,6 +20,9 @@ import 'interview_practice_screen.dart';
 import '../../../../core/widgets/home_fallback_leading.dart';
 import '../../../../core/utils/cv_id.dart';
 import '../../../../core/widgets/responsive_layout_builder.dart';
+import '../../../../core/i18n/app_language.dart';
+import '../widgets/ai_cost.dart';
+import '../../domain/models/ai_assistant_models.dart';
 
 /// Scores a saved CV against a pasted job description. Runs fully offline:
 /// keywords are extracted from the JD with [JdKeywordExtractor] and matched
@@ -54,7 +57,9 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _analyze(CvModel? cv) async {
     FocusScope.of(context).unfocus();
     if (cv == null) {
-      _toast('Hãy tạo hoặc nhập một CV trước.');
+      _toast(
+        tr('Hãy tạo hoặc nhập một CV trước.', 'Create or import a CV first.'),
+      );
       return;
     }
     final jd = await resolveJobPostingInput(
@@ -72,7 +77,10 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     );
     if (report.totalKeywords == 0) {
       _toast(
-        'Chưa nhận ra kỹ năng nào trong tin tuyển dụng. Hãy dán phần "Yêu cầu".',
+        tr(
+          'Chưa nhận ra kỹ năng nào trong tin tuyển dụng. Hãy dán phần "Yêu cầu".',
+          'No skills found in the job posting. Paste the "Requirements" part.',
+        ),
       );
     }
     setState(() {
@@ -101,7 +109,10 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
         .save(cv.copyWith(skills: [...cv.skills, ...additions]), now: now);
     if (!mounted) return;
     _toast(
-      'Đã thêm ${additions.length} kỹ năng. Chỉ giữ lại kỹ năng bạn thật sự có.',
+      tr(
+        'Đã thêm ${additions.length} kỹ năng. Chỉ giữ lại kỹ năng bạn thật sự có.',
+        'Added ${additions.length} skills. Keep only the ones you really have.',
+      ),
     );
     _analyze(saved);
   }
@@ -109,7 +120,12 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _writeCoverLetter(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast('Hãy dán tin tuyển dụng đầy đủ hơn.');
+      _toast(
+        tr(
+          'Hãy dán tin tuyển dụng đầy đủ hơn.',
+          'Please paste more of the job posting.',
+        ),
+      );
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -119,7 +135,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     try {
       final letter = await runWithAiProgress(
         context,
-        'Đang viết thư...',
+        tr('Đang viết thư...', 'Writing the letter...'),
         () => ref
             .read(aiAssistantRepositoryProvider)
             .coverLetter(
@@ -139,7 +155,12 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
   Future<void> _tailorWithAi(CvModel cv) async {
     final jd = _jdController.text.trim();
     if (jd.length < 40) {
-      _toast('Hãy dán tin tuyển dụng đầy đủ hơn.');
+      _toast(
+        tr(
+          'Hãy dán tin tuyển dụng đầy đủ hơn.',
+          'Please paste more of the job posting.',
+        ),
+      );
       return;
     }
     if (!await ensureAiAccess(context, ref, redirectPath: '/ats-scorer')) {
@@ -149,7 +170,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
     try {
       final result = await runWithAiProgress(
         context,
-        'Đang chỉnh CV...',
+        tr('Đang chỉnh CV...', 'Adjusting your CV...'),
         () => ref
             .read(aiAssistantRepositoryProvider)
             .tailorCv(cv: cv, jobDescription: jd),
@@ -166,13 +187,21 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
         cv,
         result,
         newId: newCvId(),
-        title: '${cv.title} (theo tin tuyển dụng)',
+        title: tr(
+          '${cv.title} (theo tin tuyển dụng)',
+          '${cv.title} (for this job)',
+        ),
         confirmedSkills: confirmed,
         now: now,
       );
       final saved = await ref.read(cvRepositoryProvider).save(copy, now: now);
       if (!mounted) return;
-      _toast('Đã tạo bản CV tối ưu. CV gốc được giữ nguyên.');
+      _toast(
+        tr(
+          'Đã tạo bản CV tối ưu. CV gốc được giữ nguyên.',
+          'A tailored copy was created. Your original CV is unchanged.',
+        ),
+      );
       context.push('/editor', extra: saved);
     } on AiWritingFailure catch (failure) {
       if (mounted) _toast(describeAiFailure(failure));
@@ -196,7 +225,7 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
       backgroundColor: AppTheme.surfaceLight,
       appBar: AppBar(
         leading: homeFallbackLeading(context),
-        title: const Text('Chấm điểm CV'),
+        title: Text(tr('Chấm điểm CV', 'Score my CV')),
         actions: const [AiQuotaChip(), SizedBox(width: 8)],
       ),
       body: WebConstrainedWidth(
@@ -216,7 +245,9 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                   key: const ValueKey('ats-cv-picker'),
                   initialValue: cv?.id,
                   isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'CV cần chấm'),
+                  decoration: InputDecoration(
+                    labelText: tr('CV cần chấm', 'CV to score'),
+                  ),
                   items: [
                     for (final item in cvs)
                       DropdownMenuItem(
@@ -236,17 +267,28 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                 minLines: 7,
                 maxLines: 12,
                 maxLength: 8000,
-                decoration: const InputDecoration(
-                  labelText: 'Link hoặc nội dung tin tuyển dụng',
+                decoration: InputDecoration(
+                  labelText: tr(
+                    'Link hoặc nội dung tin tuyển dụng',
+                    'Job posting link or text',
+                  ),
                   alignLabelWithHint: true,
-                  hintText: 'https://... hoặc dán nội dung tin',
+                  hintText: tr(
+                    'https://... hoặc dán nội dung tin',
+                    'https://... or paste the posting',
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
               FilledButton.icon(
                 onPressed: () => _analyze(cv),
                 icon: const Icon(Icons.analytics_outlined),
-                label: const Text('Chấm điểm CV theo tin tuyển dụng'),
+                label: Text(
+                  tr(
+                    'Chấm điểm CV theo tin tuyển dụng',
+                    'Score CV against the job',
+                  ),
+                ),
               ),
               if (report != null && cv != null) ...[
                 const SizedBox(height: 18),
@@ -263,7 +305,12 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                   key: const ValueKey('ats-tailor'),
                   onPressed: () => _tailorWithAi(cv),
                   icon: const Icon(Icons.auto_awesome_outlined),
-                  label: Text('Chỉnh CV theo tin này'),
+                  label: Text(
+                    withAiCost(
+                      tr('Chỉnh CV theo tin này', 'Tailor CV to this job'),
+                      AiCreditCost.tailorCv,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
@@ -276,14 +323,24 @@ class _AtsScorerScreenState extends ConsumerState<AtsScorerScreen> {
                     ),
                   ),
                   icon: const Icon(Icons.record_voice_over_outlined),
-                  label: const Text('Luyện phỏng vấn cho vị trí này'),
+                  label: Text(
+                    tr(
+                      'Luyện phỏng vấn cho vị trí này',
+                      'Practice for this role',
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
                   key: const ValueKey('ats-cover-letter'),
                   onPressed: () => _writeCoverLetter(cv),
                   icon: const Icon(Icons.mail_outline_rounded),
-                  label: Text('Viết thư xin việc'),
+                  label: Text(
+                    withAiCost(
+                      tr('Viết thư xin việc', 'Write a cover letter'),
+                      AiCreditCost.coverLetter,
+                    ),
+                  ),
                 ),
               ],
             ],
@@ -305,11 +362,14 @@ class _HeroCard extends StatelessWidget {
         color: const Color(0xFF312E81),
         borderRadius: BorderRadius.circular(18),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Đối chiếu CV với tin tuyển dụng',
+            tr(
+              'Đối chiếu CV với tin tuyển dụng',
+              'Compare your CV with a job posting',
+            ),
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w800,
@@ -318,7 +378,10 @@ class _HeroCard extends StatelessWidget {
           ),
           SizedBox(height: 6),
           Text(
-            'Xem CV đã đủ kỹ năng nhà tuyển dụng cần chưa.',
+            tr(
+              'Xem CV đã đủ kỹ năng nhà tuyển dụng cần chưa.',
+              'See whether your CV has the skills the employer wants.',
+            ),
             style: TextStyle(color: Color(0xFFC7D2FE), height: 1.4),
           ),
         ],
@@ -338,8 +401,11 @@ class _EmptyCvNotice extends StatelessWidget {
         color: AppTheme.amberSurface,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: const Text(
-        'Bạn chưa có CV nào trên máy. Hãy tạo CV mới hoặc nhập từ PDF/Word ở màn hình chính.',
+      child: Text(
+        tr(
+          'Bạn chưa có CV nào trên máy. Hãy tạo CV mới hoặc nhập từ PDF/Word ở màn hình chính.',
+          'You have no CVs on this device yet. Create one or import a PDF/Word file from the home screen.',
+        ),
         style: TextStyle(fontWeight: FontWeight.w600, height: 1.35),
       ),
     );
@@ -360,12 +426,21 @@ class _ScoreCard extends StatelessWidget {
         ? AppTheme.warningAmber
         : AppTheme.dangerRose;
     final verdict = report.totalKeywords == 0
-        ? 'Không đủ dữ liệu để chấm.'
+        ? tr('Không đủ dữ liệu để chấm.', 'Not enough information to score.')
         : score >= 75
-        ? 'CV khớp tốt với tin tuyển dụng. Hãy nêu các kỹ năng này trong phần kinh nghiệm.'
+        ? tr(
+            'CV khớp tốt với tin tuyển dụng. Hãy nêu các kỹ năng này trong phần kinh nghiệm.',
+            'Your CV matches the job well. Mention these skills in your experience too.',
+          )
         : score >= 50
-        ? 'Khá phù hợp. Bổ sung kỹ năng còn thiếu (nếu bạn thật sự có) để tăng điểm.'
-        : 'Độ khớp thấp. Cân nhắc điều chỉnh tóm tắt, kỹ năng và dự án theo tin tuyển dụng.';
+        ? tr(
+            'Khá phù hợp. Bổ sung kỹ năng còn thiếu (nếu bạn thật sự có) để tăng điểm.',
+            'A fair match. Add missing skills (if you really have them) to score higher.',
+          )
+        : tr(
+            'Độ khớp thấp. Cân nhắc điều chỉnh tóm tắt, kỹ năng và dự án theo tin tuyển dụng.',
+            'Low match. Consider adjusting your summary, skills and projects for this job.',
+          );
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -408,7 +483,10 @@ class _ScoreCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Có ${report.matchedKeywords.length}/${report.totalKeywords} kỹ năng được yêu cầu',
+                  tr(
+                    'Có ${report.matchedKeywords.length}/${report.totalKeywords} kỹ năng được yêu cầu',
+                    '${report.matchedKeywords.length}/${report.totalKeywords} required skills found',
+                  ),
                   style: const TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
@@ -455,22 +533,26 @@ class _KeywordCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Kỹ năng đã có',
+          Text(
+            tr('Kỹ năng đã có', 'Skills you have'),
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
-          _chips(report.matchedKeywords, const Color(0xFFD1FAE5), 'Chưa có'),
+          _chips(
+            report.matchedKeywords,
+            const Color(0xFFD1FAE5),
+            tr('Chưa có', 'Missing'),
+          ),
           const SizedBox(height: 14),
-          const Text(
-            'Nên bổ sung',
+          Text(
+            tr('Nên bổ sung', 'Worth adding'),
             style: TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           _chips(
             report.missingKeywords,
             const Color(0xFFFFEDD5),
-            'Không thiếu kỹ năng nào',
+            tr('Không thiếu kỹ năng nào', 'No missing skills'),
           ),
           const SizedBox(height: 14),
           Wrap(
@@ -481,12 +563,14 @@ class _KeywordCard extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onAddMissing,
                   icon: const Icon(Icons.add_task_rounded),
-                  label: const Text('Thêm kỹ năng còn thiếu'),
+                  label: Text(
+                    tr('Thêm kỹ năng còn thiếu', 'Add missing skills'),
+                  ),
                 ),
               TextButton.icon(
                 onPressed: onOpenEditor,
                 icon: const Icon(Icons.edit_note_rounded),
-                label: const Text('Mở trình chỉnh sửa'),
+                label: Text(tr('Mở trình chỉnh sửa', 'Open editor')),
               ),
             ],
           ),

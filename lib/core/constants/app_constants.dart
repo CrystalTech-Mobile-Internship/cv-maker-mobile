@@ -1,3 +1,5 @@
+import '../i18n/app_language.dart';
+
 /// Global application constants
 class AppConstants {
   static const String appName = 'Smart CV Maker';
@@ -6,8 +8,10 @@ class AppConstants {
   /// public support mailbox is ready.
   static const String supportEmail = '';
 
-  static const String appTagline =
-      'Tạo CV chuyên nghiệp, nổi bật với nhà tuyển dụng';
+  static String get appTagline => tr(
+    'Tạo CV chuyên nghiệp, nổi bật với nhà tuyển dụng',
+    'Make a professional CV that stands out',
+  );
 
   // Storage / Preferences keys
   static const String prefIsGuestMode = 'is_guest_mode';

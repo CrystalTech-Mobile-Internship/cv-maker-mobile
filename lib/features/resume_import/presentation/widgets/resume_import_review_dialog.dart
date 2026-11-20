@@ -4,6 +4,7 @@ import '../../../../app/theme.dart';
 import '../../../cv_editor/domain/models/cv_template.dart';
 import '../../domain/models/resume_import_draft.dart';
 import '../../domain/services/resume_language.dart';
+import '../../../../core/i18n/app_language.dart';
 
 final class ResumeImportReviewResult {
   const ResumeImportReviewResult({
@@ -52,7 +53,10 @@ class _ResumeImportReviewDialog extends StatefulWidget {
 class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
   late final _title = TextEditingController(
     text: widget.draft.targetRole.isEmpty
-        ? 'CV nhập từ ${widget.draft.sourceName}'
+        ? tr(
+            'CV nhập từ ${widget.draft.sourceName}',
+            'CV imported from ${widget.draft.sourceName}',
+          )
         : 'CV ${widget.draft.targetRole}',
   );
   late final _name = TextEditingController(text: widget.draft.fullName);
@@ -115,9 +119,9 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
                     color: AppTheme.brandIndigo,
                   ),
                   const SizedBox(width: 10),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Kiểm tra thông tin đã đọc',
+                      tr('Kiểm tra thông tin đã đọc', 'Check what was read'),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
@@ -125,7 +129,7 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Đóng',
+                    tooltip: tr('Đóng', 'Close'),
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close_rounded),
                   ),
@@ -167,12 +171,14 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Huỷ'),
+                    child: Text(tr('Huỷ', 'Cancel')),
                   ),
                   FilledButton.icon(
                     onPressed: _submit,
                     icon: const Icon(Icons.check_rounded),
-                    label: const Text('Lưu và chỉnh sửa tiếp'),
+                    label: Text(
+                      tr('Lưu và chỉnh sửa tiếp', 'Save and keep editing'),
+                    ),
                   ),
                 ],
               ),
@@ -216,30 +222,42 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
           ),
         ),
         const SizedBox(height: 16),
-        _field(_title, 'Tên hồ sơ', Icons.description_outlined),
-        _field(_name, 'Họ và tên', Icons.person_outline_rounded),
-        _field(_role, 'Vị trí ứng tuyển', Icons.work_outline_rounded),
+        _field(_title, tr('Tên hồ sơ', 'CV name'), Icons.description_outlined),
+        _field(
+          _name,
+          tr('Họ và tên', 'Full name'),
+          Icons.person_outline_rounded,
+        ),
+        _field(
+          _role,
+          tr('Vị trí ứng tuyển', 'Target role'),
+          Icons.work_outline_rounded,
+        ),
         if (wide)
           Row(
             children: [
               Expanded(child: _field(_email, 'Email', Icons.email_outlined)),
               const SizedBox(width: 12),
               Expanded(
-                child: _field(_phone, 'Số điện thoại', Icons.phone_outlined),
+                child: _field(
+                  _phone,
+                  tr('Số điện thoại', 'Phone'),
+                  Icons.phone_outlined,
+                ),
               ),
             ],
           )
         else ...[
           _field(_email, 'Email', Icons.email_outlined),
-          _field(_phone, 'Số điện thoại', Icons.phone_outlined),
+          _field(_phone, tr('Số điện thoại', 'Phone'), Icons.phone_outlined),
         ],
-        _field(_address, 'Địa chỉ', Icons.location_on_outlined),
+        _field(_address, tr('Địa chỉ', 'Address'), Icons.location_on_outlined),
         TextField(
           controller: _summary,
           minLines: wide ? 5 : 4,
           maxLines: 8,
-          decoration: const InputDecoration(
-            labelText: 'Tóm tắt',
+          decoration: InputDecoration(
+            labelText: tr('Tóm tắt', 'Summary'),
             alignLabelWithHint: true,
             prefixIcon: Icon(Icons.subject_rounded),
           ),
@@ -257,8 +275,8 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
         DropdownButtonFormField<String>(
           initialValue: _templateId,
           isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Mẫu CV',
+          decoration: InputDecoration(
+            labelText: tr('Mẫu CV', 'Templates'),
             prefixIcon: Icon(Icons.palette_outlined),
           ),
           items: [
@@ -279,8 +297,11 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
         const SizedBox(height: 12),
         SegmentedButton<String>(
           showSelectedIcon: false,
-          segments: const [
-            ButtonSegment(value: 'vi', label: Text('Tiếng Việt')),
+          segments: [
+            ButtonSegment(
+              value: 'vi',
+              label: Text(tr('Tiếng Việt', 'Vietnamese')),
+            ),
             ButtonSegment(value: 'en', label: Text('English')),
           ],
           selected: {_language},
@@ -291,7 +312,10 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
         if (_structuredItemCount > 0) ...[
           const SizedBox(height: 16),
           Text(
-            'Học vấn, kinh nghiệm, dự án ($_structuredItemCount)',
+            tr(
+              'Học vấn, kinh nghiệm, dự án ($_structuredItemCount)',
+              'Education, experience, projects ($_structuredItemCount)',
+            ),
             style: const TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
@@ -302,25 +326,25 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
               if (widget.draft.educations.isNotEmpty)
                 _countChip(
                   Icons.school_outlined,
-                  'Học vấn',
+                  tr('Học vấn', 'Education'),
                   widget.draft.educations.length,
                 ),
               if (widget.draft.experiences.isNotEmpty)
                 _countChip(
                   Icons.work_outline_rounded,
-                  'Kinh nghiệm',
+                  tr('Kinh nghiệm', 'Experience'),
                   widget.draft.experiences.length,
                 ),
               if (widget.draft.projects.isNotEmpty)
                 _countChip(
                   Icons.account_tree_outlined,
-                  'Dự án',
+                  tr('Dự án', 'Projects'),
                   widget.draft.projects.length,
                 ),
               if (widget.draft.certifications.isNotEmpty)
                 _countChip(
                   Icons.workspace_premium_outlined,
-                  'Chứng chỉ',
+                  tr('Chứng chỉ', 'Certifications'),
                   widget.draft.certifications.length,
                 ),
             ],
@@ -329,7 +353,10 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
         if (widget.draft.skills.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text(
-            'Kỹ năng tìm thấy (${widget.draft.skills.length})',
+            tr(
+              'Kỹ năng tìm thấy (${widget.draft.skills.length})',
+              'Skills found (${widget.draft.skills.length})',
+            ),
             style: const TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
@@ -361,8 +388,11 @@ class _ResumeImportReviewDialogState extends State<_ResumeImportReviewDialog> {
           ),
         ],
         const SizedBox(height: 10),
-        const Text(
-          'Các mục sẽ được đưa vào đúng phần để bạn chỉnh sửa tiếp.',
+        Text(
+          tr(
+            'Các mục sẽ được đưa vào đúng phần để bạn chỉnh sửa tiếp.',
+            'Each item goes into the right section so you can keep editing.',
+          ),
           style: TextStyle(fontSize: 12, color: AppTheme.mutedText),
         ),
       ],

@@ -300,7 +300,7 @@ void main() {
           )
           .first,
     );
-    expect(find.text('Tải CV PDF/Word'), findsOneWidget);
+    expect(find.text('Dùng CV có sẵn (PDF, Word)'), findsOneWidget);
 
     await tester.tap(find.text('Mẫu CV'));
     await tester.pumpAndSettle();

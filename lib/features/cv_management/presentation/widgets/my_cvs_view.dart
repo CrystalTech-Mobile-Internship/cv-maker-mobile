@@ -13,6 +13,7 @@ import 'ai_assistant_card.dart';
 import 'local_data_tools_card.dart';
 import 'template_thumbnail.dart';
 import 'upcoming_tools_row.dart';
+import '../../../../core/i18n/app_language.dart';
 
 class MyCvsView extends StatelessWidget {
   const MyCvsView({
@@ -106,7 +107,7 @@ class MyCvsView extends StatelessWidget {
             border: Border(left: BorderSide(color: AppTheme.softBorder)),
           ),
           child: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 24, 24, 48),
+            padding: const EdgeInsets.fromLTRB(20, 24, 24, 150),
             children: _tools(context, cvs),
           ),
         ),
@@ -122,7 +123,7 @@ class MyCvsView extends StatelessWidget {
         isDesktop ? 32 : 16,
         isDesktop ? 24 : 16,
         isDesktop ? 32 : 16,
-        104,
+        150,
       ),
       children: [
         _library(context, isDesktop: isDesktop),
@@ -140,19 +141,24 @@ class MyCvsView extends StatelessWidget {
       ),
       error: (error, _) => _MessageCard(
         icon: Icons.error_outline_rounded,
-        title: 'Không thể tải danh sách hồ sơ',
-        message:
-            'Không đọc được CV trên máy. Hãy tải lại trang hoặc mở lại ứng dụng.',
-        action: 'Thử lại',
+        title: tr('Không thể tải danh sách hồ sơ', 'Could not load your CVs'),
+        message: tr(
+          'Không đọc được CV trên máy. Hãy tải lại trang hoặc mở lại ứng dụng.',
+          'Could not read CVs on this device. Reload the page or reopen the app.',
+        ),
+        action: tr('Thử lại', 'Try again'),
         onPressed: onRetry,
       ),
       data: (items) {
         if (items.isEmpty) {
           return _MessageCard(
             icon: Icons.note_add_outlined,
-            title: 'Chưa có hồ sơ CV nào',
-            message: 'Chọn một mẫu phù hợp và bắt đầu hồ sơ đầu tiên.',
-            action: 'Tạo CV đầu tiên',
+            title: tr('Chưa có hồ sơ CV nào', 'No CVs yet'),
+            message: tr(
+              'Chọn một mẫu phù hợp và bắt đầu hồ sơ đầu tiên.',
+              'Pick a template and start your first CV.',
+            ),
+            action: tr('Tạo CV đầu tiên', 'Create first CV'),
             onPressed: onCreate,
           );
         }
@@ -179,13 +185,13 @@ class MyCvsView extends StatelessWidget {
 
   List<Widget> _tools(BuildContext context, List<CvModel> cvs) {
     return [
-      AiAssistantCard(
-        onChat: onOpenAiInterview,
-        onImport: onImport,
+      AiAssistantCard(onChat: onOpenAiInterview, onImport: onImport),
+      const SizedBox(height: 12),
+      UpcomingToolsRow(
+        onOpenAts: onOpenAts,
+        onOpenPro: onOpenPro,
         onPractice: () => context.push('/interview-practice'),
       ),
-      const SizedBox(height: 12),
-      LocalDataToolsCard(onExport: onExportAll, onRestore: onRestoreBackup),
       const SizedBox(height: 12),
       CloudSyncCard(
         isSignedIn: isSignedIn,
@@ -198,7 +204,7 @@ class MyCvsView extends StatelessWidget {
         onLogin: onLogin,
       ),
       const SizedBox(height: 12),
-      UpcomingToolsRow(onOpenAts: onOpenAts, onOpenPro: onOpenPro),
+      LocalDataToolsCard(onExport: onExportAll, onRestore: onRestoreBackup),
     ];
   }
 
@@ -299,19 +305,19 @@ class MyCvsView extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: () => onEdit(cv),
                     icon: const Icon(Icons.edit_rounded, size: 17),
-                    label: const Text('Chỉnh sửa'),
+                    label: Text(tr('Chỉnh sửa', 'Edit')),
                   ),
                 ),
                 const SizedBox(width: 8),
                 IconButton.outlined(
-                  tooltip: 'Xem trước PDF',
+                  tooltip: tr('Xem trước PDF', 'Preview PDF'),
                   onPressed: () => onPreview(cv),
                   icon: const Icon(Icons.visibility_outlined),
                 ),
                 const SizedBox(width: 6),
                 IconButton.outlined(
                   key: ValueKey('cv-checklist-${cv.id}'),
-                  tooltip: 'Checklist hoàn thiện',
+                  tooltip: tr('Checklist hoàn thiện', 'Checklist'),
                   onPressed: () => showCvCompletionSheet(
                     context,
                     cv,
@@ -346,7 +352,9 @@ class _SyncBadge extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          isSynced ? 'Đã sao lưu' : 'Trên máy',
+          isSynced
+              ? tr('Đã sao lưu', 'Backed up')
+              : tr('Trên máy', 'On device'),
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -380,7 +388,7 @@ class _CvActionsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      tooltip: 'Tùy chọn',
+      tooltip: tr('Tùy chọn', 'Options'),
       onSelected: (value) {
         switch (value) {
           case 'edit':
@@ -403,14 +411,26 @@ class _CvActionsMenu extends StatelessWidget {
             break;
         }
       },
-      itemBuilder: (context) => const [
-        PopupMenuItem(value: 'edit', child: Text('Chỉnh sửa')),
-        PopupMenuItem(value: 'preview', child: Text('Xem trước PDF')),
-        PopupMenuItem(value: 'rename', child: Text('Đổi tên')),
-        PopupMenuItem(value: 'duplicate', child: Text('Nhân bản')),
-        PopupMenuItem(value: 'backup', child: Text('Tạo bản sao dự phòng')),
+      itemBuilder: (context) => [
+        PopupMenuItem(value: 'edit', child: Text(tr('Chỉnh sửa', 'Edit'))),
+        PopupMenuItem(
+          value: 'preview',
+          child: Text(tr('Xem trước PDF', 'Preview PDF')),
+        ),
+        PopupMenuItem(value: 'rename', child: Text(tr('Đổi tên', 'Rename'))),
+        PopupMenuItem(
+          value: 'duplicate',
+          child: Text(tr('Nhân bản', 'Duplicate')),
+        ),
+        PopupMenuItem(
+          value: 'backup',
+          child: Text(tr('Tạo bản sao dự phòng', 'Make a backup copy')),
+        ),
         PopupMenuDivider(),
-        PopupMenuItem(value: 'delete', child: Text('Xoá hồ sơ')),
+        PopupMenuItem(
+          value: 'delete',
+          child: Text(tr('Xoá hồ sơ', 'Delete CV')),
+        ),
       ],
     );
   }
@@ -495,11 +515,17 @@ class _GuestBackupCard extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              '$count CV tạo khi chưa đăng nhập chưa được sao lưu vào tài khoản.',
+              tr(
+                '$count CV tạo khi chưa đăng nhập chưa được sao lưu vào tài khoản.',
+                '$count CVs made before signing in are not backed up to your account yet.',
+              ),
               style: const TextStyle(height: 1.35),
             ),
           ),
-          TextButton(onPressed: onBackup, child: const Text('Sao lưu ngay')),
+          TextButton(
+            onPressed: onBackup,
+            child: Text(tr('Sao lưu ngay', 'Back up now')),
+          ),
         ],
       ),
     );

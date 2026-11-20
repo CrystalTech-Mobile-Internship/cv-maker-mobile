@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
+import '../core/i18n/app_language.dart';
 import '../features/auth/data/repositories/supabase_device_session_repository.dart';
 import '../features/auth/domain/models/auth_user.dart';
 import '../features/auth/presentation/auth_redirect.dart';
@@ -58,8 +59,13 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
       // The session was already revoked on the server.
     }
     _messengerKey.currentState?.showSnackBar(
-      const SnackBar(
-        content: Text('Tài khoản vừa đăng nhập ở thiết bị khác.'),
+      SnackBar(
+        content: Text(
+          tr(
+            'Tài khoản vừa đăng nhập ở thiết bị khác.',
+            'This account just signed in on another device.',
+          ),
+        ),
         behavior: SnackBarBehavior.floating,
         duration: Duration(seconds: 6),
       ),
@@ -80,15 +86,19 @@ class _CvMakerAppState extends ConsumerState<CvMakerApp> {
       });
     });
 
+    final language = ref.watch(appLanguageProvider);
     return MaterialApp.router(
       title: AppConstants.appName,
       scaffoldMessengerKey: _messengerKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       routerConfig: _router,
-      locale: const Locale('vi'),
+      locale: Locale(language.code),
       supportedLocales: const [Locale('vi'), Locale('en')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      // Rebuild every screen when the language changes so all texts switch.
+      builder: (context, child) =>
+          KeyedSubtree(key: ValueKey(language), child: child!),
     );
   }
 
