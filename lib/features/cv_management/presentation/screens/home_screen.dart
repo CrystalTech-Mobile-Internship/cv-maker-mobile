@@ -699,12 +699,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           label: tr('Nâng cấp Pro', 'Upgrade to Pro'),
           onTap: () => context.push('/upgrade-pro'),
         ),
-        DesktopToolLink(
-          key: const Key('tool-support'),
-          icon: Icons.headset_mic_outlined,
-          label: tr('Hỗ trợ', 'Support'),
-          onTap: () => context.push('/support'),
-        ),
+        if (!isAdmin)
+          DesktopToolLink(
+            key: const Key('tool-support'),
+            icon: Icons.headset_mic_outlined,
+            label: tr('Hỗ trợ', 'Support'),
+            onTap: () => context.push('/support'),
+          ),
         if (isAdmin)
           DesktopToolLink(
             key: const Key('tool-admin'),

@@ -256,17 +256,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       ),
                       onTap: () => context.push('/job-tracker'),
                     ),
-                    const Divider(height: 1, indent: 56),
-                    _AccountLinkTile(
-                      key: const Key('account-support'),
-                      icon: Icons.support_agent_rounded,
-                      title: tr('Nhắn hỗ trợ', 'Contact support'),
-                      subtitle: tr(
-                        'Hỏi đáp, báo lỗi, thanh toán',
-                        'Questions, bugs, payments',
+                    if (!isAdmin) ...[
+                      const Divider(height: 1, indent: 56),
+                      _AccountLinkTile(
+                        key: const Key('account-support'),
+                        icon: Icons.support_agent_rounded,
+                        title: tr('Nhắn hỗ trợ', 'Contact support'),
+                        subtitle: tr(
+                          'Hỏi đáp, báo lỗi, thanh toán',
+                          'Questions, bugs, payments',
+                        ),
+                        onTap: () => context.push('/support'),
                       ),
-                      onTap: () => context.push('/support'),
-                    ),
+                    ],
                     if (isAdmin) ...[
                       const Divider(height: 1, indent: 56),
                       _AccountLinkTile(
