@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../admin/presentation/admin_providers.dart';
 import '../../../../app/theme.dart';
 import '../../../cv_management/presentation/controllers/reusable_profile_provider.dart';
 import '../../../legal/presentation/legal_document_screen.dart';
@@ -62,6 +63,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
   Widget build(BuildContext context) {
     final user = ref.watch(currentAuthUserProvider);
     final isLoading = ref.watch(authControllerProvider).isLoading;
+    final isAdmin = ref.watch(isAdminProvider).valueOrNull ?? false;
     final reusableProfile = ref.watch(reusableProfileProvider).asData?.value;
     if (user == null) {
       final guestContent = Center(
@@ -265,6 +267,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       ),
                       onTap: () => context.push('/support'),
                     ),
+                    if (isAdmin) ...[
+                      const Divider(height: 1, indent: 56),
+                      _AccountLinkTile(
+                        key: const Key('account-admin'),
+                        icon: Icons.admin_panel_settings_outlined,
+                        title: tr('Quản trị', 'Admin'),
+                        subtitle: tr(
+                          'Trả lời hỗ trợ, duyệt thanh toán',
+                          'Reply to support, review payments',
+                        ),
+                        onTap: () => context.push('/admin'),
+                      ),
+                    ],
                     const Divider(height: 1, indent: 56),
                     _AccountLinkTile(
                       icon: Icons.password_rounded,

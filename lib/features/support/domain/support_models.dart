@@ -37,6 +37,9 @@ abstract interface class SupportRepository {
   /// The signed-in account's conversation, oldest first, kept live.
   Stream<List<SupportMessage>> watch();
 
+  /// When support last opened this conversation, kept live (null: never).
+  Stream<DateTime?> watchSeenAt();
+
   /// Saves the message for this account and notifies the support inbox.
   Future<void> send(String body);
 }

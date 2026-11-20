@@ -13,6 +13,10 @@ class _FakeSupport implements SupportRepository {
   final _controller = StreamController<List<SupportMessage>>.broadcast();
   final _messages = <SupportMessage>[];
   final sent = <String>[];
+  DateTime? seenAt;
+
+  @override
+  Stream<DateTime?> watchSeenAt() => Stream.value(seenAt);
 
   @override
   Stream<List<SupportMessage>> watch() async* {
@@ -89,5 +93,24 @@ void main() {
     support.reply('Đã kích hoạt cho bạn.');
     await tester.pump();
     expect(find.text('Đã kích hoạt cho bạn.'), findsOneWidget);
+  });
+
+  testWidgets('shows Seen only once support opened the last message', (
+    tester,
+  ) async {
+    final support = _FakeSupport()..seenAt = DateTime.utc(2026, 11, 20, 8, 5);
+    await support.send('Cho mình hỏi');
+    await tester.pumpWidget(_app(support, user: _user));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('support-seen')), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox());
+    final unseen = _FakeSupport()..seenAt = DateTime.utc(2026, 11, 20, 7);
+    await unseen.send('Cho mình hỏi');
+    await tester.pumpWidget(_app(unseen, user: _user));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(const Key('support-seen')), findsNothing);
   });
 }

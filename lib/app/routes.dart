@@ -8,6 +8,7 @@ import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/reset_password_screen.dart';
 import '../features/auth/presentation/auth_redirect.dart';
+import '../features/admin/presentation/admin_screen.dart';
 import '../features/ai_tools/presentation/screens/ai_interview_screen.dart';
 import '../features/ai_tools/presentation/screens/ats_scorer_screen.dart';
 import '../features/ai_tools/presentation/screens/interview_practice_screen.dart';
@@ -59,6 +60,9 @@ const _appRoutes = {
   '/upgrade-pro',
   '/terms',
   '/privacy',
+  '/support',
+  '/job-tracker',
+  '/admin',
 };
 
 /// Application Declarative Routing Configuration
@@ -173,6 +177,11 @@ GoRouter createAppRouter({
       path: '/job-tracker',
       name: 'job-tracker',
       builder: (context, state) => const JobTrackerScreen(),
+    ),
+    GoRoute(
+      path: '/admin',
+      name: 'admin',
+      builder: (context, state) => const AdminScreen(),
     ),
   ],
 );
