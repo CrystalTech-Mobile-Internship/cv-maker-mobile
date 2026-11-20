@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/constants/auth_callback_constants.dart';
@@ -111,7 +110,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/home',
       name: 'home',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         HomeScreen(
@@ -137,7 +136,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/ats-scorer',
       name: 'ats-scorer',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         DesktopToolFrame(route: '/ats-scorer', child: AtsScorerScreen()),
@@ -146,7 +145,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/ai-interview',
       name: 'ai-interview',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         DesktopToolFrame(route: '/ai-interview', child: AiInterviewScreen()),
@@ -163,7 +162,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/interview-practice',
       name: 'interview-practice',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         DesktopToolFrame(
@@ -191,7 +190,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/upgrade-pro',
       name: 'upgrade-pro',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         DesktopToolFrame(route: '/upgrade-pro', child: ProUpgradeScreen()),
@@ -200,7 +199,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/support',
       name: 'support',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         DesktopToolFrame(route: '/support', child: SupportChatScreen()),
@@ -209,7 +208,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/job-tracker',
       name: 'job-tracker',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         DesktopToolFrame(route: '/job-tracker', child: JobTrackerScreen()),
@@ -218,7 +217,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/admin',
       name: 'admin',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         DesktopToolFrame(route: '/admin', child: AdminScreen()),
@@ -227,7 +226,7 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/admin/payments',
       name: 'admin-payments',
-      pageBuilder: (context, state) => _sidebarPage(
+      pageBuilder: (context, state) => sidebarPage(
         context,
         state,
         DesktopToolFrame(
@@ -238,14 +237,3 @@ GoRouter createAppRouter({
     ),
   ],
 );
-
-/// On computers the sidebar stays in place between its pages, so the page
-/// itself switches without an animation and only the content fades in
-/// (see `DesktopShell`). Phones keep the usual page animation.
-Page<void> _sidebarPage(
-  BuildContext context,
-  GoRouterState state,
-  Widget child,
-) => MediaQuery.sizeOf(context).width >= DesktopToolFrame.minWidth
-    ? NoTransitionPage<void>(key: state.pageKey, child: child)
-    : MaterialPage<void>(key: state.pageKey, child: child);
