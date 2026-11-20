@@ -1,5 +1,6 @@
-// OpenRouter client with an ordered model fallback list.
-// The API key is read from the function environment only.
+// AI client with an ordered fallback list across two providers:
+// Google Gemini (if GEMINI_API_KEY is set) first, then OpenRouter.
+// Keys are read from the function environment only.
 
 export type ChatMessage = {
   role: "system" | "user" | "assistant";
@@ -30,6 +31,21 @@ const defaultModels = [
   "nvidia/nemotron-3.5-lightning:free",
 ];
 
+/** Used when GEMINI_API_KEY is set but GEMINI_MODELS is not. */
+const defaultGeminiModels = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-2.0-flash",
+];
+
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const GEMINI_URL =
+  "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+
+/** How long a model that ran out of quota is skipped, when no hint is given. */
+const DEFAULT_COOLDOWN_MS = 60_000;
+const MAX_COOLDOWN_MS = 10 * 60_000;
+
 export class ProviderError extends Error {
   constructor(message: string) {
     super(message);
@@ -37,13 +53,77 @@ export class ProviderError extends Error {
   }
 }
 
-export function configuredModels(env: (name: string) => string | undefined) {
-  const raw = env("OPENROUTER_MODELS") ?? "";
-  const models = raw
+type Route = {
+  provider: "gemini" | "openrouter";
+  url: string;
+  key: string;
+  model: string;
+};
+
+function list(raw: string | undefined) {
+  return (raw ?? "")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+export function configuredModels(env: (name: string) => string | undefined) {
+  const models = list(env("OPENROUTER_MODELS"));
   return models.length ? models : defaultModels;
+}
+
+export function configuredGeminiModels(
+  env: (name: string) => string | undefined,
+) {
+  const models = list(env("GEMINI_MODELS"));
+  return models.length ? models : defaultGeminiModels;
+}
+
+/** Every model to try, Gemini first, skipping providers without a key. */
+export function configuredRoutes(
+  env: (name: string) => string | undefined,
+): Route[] {
+  const routes: Route[] = [];
+  const gemini = env("GEMINI_API_KEY")?.trim();
+  if (gemini) {
+    for (const model of configuredGeminiModels(env)) {
+      routes.push({ provider: "gemini", url: GEMINI_URL, key: gemini, model });
+    }
+  }
+  const openrouter = env("OPENROUTER_API_KEY")?.trim();
+  if (openrouter) {
+    for (const model of configuredModels(env)) {
+      routes.push({
+        provider: "openrouter",
+        url: OPENROUTER_URL,
+        key: openrouter,
+        model,
+      });
+    }
+  }
+  return routes;
+}
+
+function cooldownMs(response: Response) {
+  const seconds = Number(response.headers.get("retry-after"));
+  if (Number.isFinite(seconds) && seconds > 0) {
+    return Math.min(seconds * 1000, MAX_COOLDOWN_MS);
+  }
+  return DEFAULT_COOLDOWN_MS;
+}
+
+function requestBody(route: Route, messages: ChatMessage[], options: CompletionOptions) {
+  return JSON.stringify({
+    model: route.model,
+    messages,
+    temperature: options.temperature,
+    max_tokens: options.maxTokens,
+    // OpenRouter's switch for thinking models; Gemini does not accept it.
+    ...(route.provider === "openrouter"
+      ? { reasoning: { effort: "low", exclude: true } }
+      : {}),
+    ...(options.json ? { response_format: { type: "json_object" } } : {}),
+  });
 }
 
 export function createOpenRouterComplete(
@@ -52,15 +132,25 @@ export function createOpenRouterComplete(
   timeoutMs = 45_000,
   // Total budget across all models, kept below the app's own wait.
   deadlineMs = 110_000,
+  // Models that ran out of quota, skipped until the time stored here.
+  // One map per running function instance.
+  coolingUntil: Map<string, number> = new Map(),
 ): CompleteFn {
   return async (messages, options) => {
-    const apiKey = env("OPENROUTER_API_KEY");
-    if (!apiKey) throw new ProviderError("OPENROUTER_NOT_CONFIGURED");
+    const routes = configuredRoutes(env);
+    if (!routes.length) throw new ProviderError("OPENROUTER_NOT_CONFIGURED");
 
-    const models = configuredModels(env);
+    // Skip models that are resting after a quota error, unless every model
+    // is resting, in which case try them all anyway.
+    const now = Date.now();
+    const ready = routes.filter(
+      (route) => (coolingUntil.get(`${route.provider}:${route.model}`) ?? 0) <= now,
+    );
+    const order = ready.length ? ready : routes;
+
     let lastError = "NO_MODEL";
     const started = Date.now();
-    for (const model of models) {
+    for (const route of order) {
       const remaining = deadlineMs - (Date.now() - started);
       if (remaining < 5_000) {
         lastError = lastError === "NO_MODEL" ? "DEADLINE" : lastError;
@@ -72,30 +162,26 @@ export function createOpenRouterComplete(
         Math.min(options.timeoutMs ?? timeoutMs, remaining),
       );
       try {
-        const response = await fetchImpl(
-          "https://openrouter.ai/api/v1/chat/completions",
-          {
-            method: "POST",
-            signal: controller.signal,
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${apiKey}`,
-              "X-Title": "Smart CV Maker",
-            },
-            body: JSON.stringify({
-              model,
-              messages,
-              temperature: options.temperature,
-              max_tokens: options.maxTokens,
-              reasoning: { effort: "low", exclude: true },
-              ...(options.json
-                ? { response_format: { type: "json_object" } }
-                : {}),
-            }),
+        const response = await fetchImpl(route.url, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${route.key}`,
+            ...(route.provider === "openrouter"
+              ? { "X-Title": "Smart CV Maker" }
+              : {}),
           },
-        );
+          body: requestBody(route, messages, options),
+        });
         if (!response.ok) {
           lastError = `HTTP_${response.status}`;
+          if (response.status === 429) {
+            coolingUntil.set(
+              `${route.provider}:${route.model}`,
+              Date.now() + cooldownMs(response),
+            );
+          }
           await response.body?.cancel();
           continue;
         }
@@ -109,7 +195,8 @@ export function createOpenRouterComplete(
           lastError = "UNPARSEABLE";
           continue;
         }
-        return { text, model };
+        coolingUntil.delete(`${route.provider}:${route.model}`);
+        return { text, model: route.model };
       } catch (error) {
         lastError = error instanceof Error ? error.name : "FETCH_FAILED";
       } finally {
