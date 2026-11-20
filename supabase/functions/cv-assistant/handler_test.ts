@@ -223,6 +223,57 @@ Deno.test("moves to the next model when a reply cannot be used", async () => {
   assertEquals(seen, ["a", "b"]);
 });
 
+Deno.test("tries Gemini models first, then falls back to OpenRouter", async () => {
+  const seen: string[] = [];
+  const fakeFetch = (async (url: string, init: RequestInit) => {
+    const body = JSON.parse(String(init.body));
+    const auth = (init.headers as Record<string, string>).Authorization;
+    seen.push(`${url.includes("googleapis") ? "gemini" : "or"}:${body.model}:${auth}`);
+    if (url.includes("googleapis")) {
+      if (body.reasoning) throw new Error("gemini must not get reasoning");
+      return new Response("quota", { status: 429 });
+    }
+    return new Response(
+      JSON.stringify({ choices: [{ message: { content: "hello" } }] }),
+    );
+  }) as unknown as typeof fetch;
+  const env = (name: string) =>
+    ({
+      GEMINI_API_KEY: "g",
+      GEMINI_MODELS: "g1,g2",
+      OPENROUTER_API_KEY: "k",
+      OPENROUTER_MODELS: "a",
+    } as Record<string, string>)[name];
+  const complete = createOpenRouterComplete(env, fakeFetch);
+  const options = { maxTokens: 10, temperature: 0, json: false };
+
+  const first = await complete([{ role: "user", content: "hi" }], options);
+  assertEquals(first, { text: "hello", model: "a" });
+  assertEquals(seen, ["gemini:g1:Bearer g", "gemini:g2:Bearer g", "or:a:Bearer k"]);
+
+  // Both Gemini models are out of quota, so the next call skips them.
+  seen.length = 0;
+  await complete([{ role: "user", content: "hi" }], options);
+  assertEquals(seen, ["or:a:Bearer k"]);
+});
+
+Deno.test("works with only a Gemini key", async () => {
+  const fakeFetch = (async () =>
+    new Response(
+      JSON.stringify({ choices: [{ message: { content: "ok" } }] }),
+    )) as unknown as typeof fetch;
+  const complete = createOpenRouterComplete(
+    (name) => ({ GEMINI_API_KEY: "g" } as Record<string, string>)[name],
+    fakeFetch,
+  );
+  const result = await complete([{ role: "user", content: "hi" }], {
+    maxTokens: 10,
+    temperature: 0,
+    json: false,
+  });
+  assertEquals(result, { text: "ok", model: "gemini-2.5-flash" });
+});
+
 Deno.test("stops trying models once the time budget is spent", async () => {
   let calls = 0;
   const fakeFetch = (async () => {

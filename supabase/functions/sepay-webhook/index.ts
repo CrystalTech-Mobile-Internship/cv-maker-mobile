@@ -20,43 +20,28 @@ function serviceStore(): PaymentStore {
         content: event.content,
         payload: event.payload,
       });
-      if (!error) return true;
-      if (error.code === "23505") return false;
-      throw new Error(`record: ${error.message}`);
+      // 23505: already recorded by an earlier delivery of the same event.
+      if (error && error.code !== "23505") {
+        throw new Error(`record: ${error.message}`);
+      }
     },
-    async findPending(code) {
-      const { data, error } = await client
-        .from("pro_upgrade_requests")
-        .select("id, amount, plan")
-        .eq("transfer_code", code)
-        .eq("status", "pending")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw new Error(`find: ${error.message}`);
-      if (!data) return null;
-      const { data: price } = await client.rpc("pro_plan_price", {
-        p_plan: data.plan,
-      });
-      return { id: data.id, amount: Number(data.amount ?? price ?? 0) };
-    },
-    async approve(requestId, ref) {
-      const { error } = await client.rpc("approve_pro_request", {
-        p_request_id: requestId,
-        p_note: "SePay",
-      });
-      if (error) throw new Error(`approve: ${error.message}`);
-      await client
-        .from("pro_upgrade_requests")
-        .update({ paid_at: new Date().toISOString(), payment_ref: ref })
-        .eq("id", requestId);
-    },
-    async mark(providerId, status, requestId) {
-      await client
+    async ignore(providerId) {
+      const { error } = await client
         .from("payment_events")
-        .update({ status, request_id: requestId ?? null })
+        .update({ status: "ignored" })
         .eq("provider", "sepay")
-        .eq("provider_id", providerId);
+        .eq("provider_id", providerId)
+        .eq("status", "received");
+      if (error) throw new Error(`ignore: ${error.message}`);
+    },
+    async apply(providerId, code, ref) {
+      const { data, error } = await client.rpc("apply_sepay_payment", {
+        p_provider_id: providerId,
+        p_code: code,
+        p_ref: ref,
+      });
+      if (error) throw new Error(`apply: ${error.message}`);
+      return String(data);
     },
   };
 }

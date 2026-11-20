@@ -10,23 +10,32 @@ function assertEquals(actual: unknown, expected: unknown) {
   if (a !== b) throw new Error(`Expected ${b}, got ${a}`);
 }
 
-function fakeStore(pending: Record<string, { id: string; amount: number }>) {
-  const seen = new Set<string>();
+/** Mimics the database: one row per SePay id, matched at most once. */
+function fakeStore(opts: { failApplyOnce?: boolean } = {}) {
+  const status = new Map<string, string>();
   const log: string[] = [];
+  let failNext = opts.failApplyOnce ?? false;
   const store: PaymentStore = {
     record: (e) => {
-      if (seen.has(e.providerId)) return Promise.resolve(false);
-      seen.add(e.providerId);
-      return Promise.resolve(true);
-    },
-    findPending: (code) => Promise.resolve(pending[code] ?? null),
-    approve: (id) => {
-      log.push(`approve ${id}`);
+      if (!status.has(e.providerId)) status.set(e.providerId, "received");
       return Promise.resolve();
     },
-    mark: (pid, status) => {
-      log.push(`${pid} ${status}`);
+    ignore: (pid) => {
+      if (status.get(pid) === "received") status.set(pid, "ignored");
+      log.push(`${pid} ignored`);
       return Promise.resolve();
+    },
+    apply: (pid, code) => {
+      if (failNext) {
+        failNext = false;
+        return Promise.reject(new Error("permission denied"));
+      }
+      const current = status.get(pid)!;
+      if (current !== "received") return Promise.resolve(current);
+      const next = code ? "matched" : "unmatched";
+      status.set(pid, next);
+      log.push(`${pid} ${next} ${code ?? "-"}`);
+      return Promise.resolve(next);
     },
   };
   return { store, log };
@@ -55,36 +64,45 @@ Deno.test("finds the code even when the bank adds spaces and dashes", () => {
 });
 
 Deno.test("rejects calls without the right key", async () => {
-  const { store } = fakeStore({});
+  const { store } = fakeStore();
   const handler = createSepayHandler({ apiKey: "secret", store: () => store });
   assertEquals((await handler(post(transfer(), "wrong"))).status, 401);
 });
 
-Deno.test("approves a matching transfer once", async () => {
-  const { store, log } = fakeStore({
-    CVPROQ1A2B3C4D: { id: "req-1", amount: 119000 },
-  });
+Deno.test("matches a transfer once even when SePay sends it twice", async () => {
+  const { store, log } = fakeStore();
   const handler = createSepayHandler({ apiKey: "secret", store: () => store });
 
   assertEquals((await handler(post(transfer()))).status, 200);
   assertEquals((await handler(post(transfer()))).status, 200);
-  assertEquals(log, ["approve req-1", "101 matched"]);
+  assertEquals(log, ["101 matched CVPROQ1A2B3C4D"]);
 });
 
-Deno.test("does not approve when the amount is too low", async () => {
-  const { store, log } = fakeStore({
-    CVPROQ1A2B3C4D: { id: "req-1", amount: 119000 },
-  });
+Deno.test("a retry after a failure still activates Pro", async () => {
+  const { store, log } = fakeStore({ failApplyOnce: true });
   const handler = createSepayHandler({ apiKey: "secret", store: () => store });
 
-  await handler(post(transfer({ transferAmount: 49000 })));
-  assertEquals(log, ["101 unmatched"]);
+  let firstStatus = 0;
+  try {
+    firstStatus = (await handler(post(transfer()))).status;
+  } catch (_) {
+    firstStatus = 500; // Deno.serve turns a thrown error into a 500.
+  }
+  assertEquals(firstStatus, 500);
+  assertEquals((await handler(post(transfer()))).status, 200);
+  assertEquals(log, ["101 matched CVPROQ1A2B3C4D"]);
+});
+
+Deno.test("transfers without a code are kept as unmatched", async () => {
+  const { store, log } = fakeStore();
+  const handler = createSepayHandler({ apiKey: "secret", store: () => store });
+
+  await handler(post(transfer({ content: "chuyen tien", id: 7 })));
+  assertEquals(log, ["7 unmatched -"]);
 });
 
 Deno.test("ignores outgoing transfers", async () => {
-  const { store, log } = fakeStore({
-    CVPROQ1A2B3C4D: { id: "req-1", amount: 119000 },
-  });
+  const { store, log } = fakeStore();
   const handler = createSepayHandler({ apiKey: "secret", store: () => store });
 
   await handler(post(transfer({ transferType: "out" })));

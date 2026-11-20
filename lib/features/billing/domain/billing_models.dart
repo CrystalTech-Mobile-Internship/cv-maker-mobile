@@ -14,6 +14,9 @@ enum ProPlan {
   /// Length of the plan in months (30 days each).
   final int months;
 
+  /// Days of Pro this plan adds (matches `pro_plan_days` on the server).
+  int get days => months * 30;
+
   /// Price per month, rounded down to the nearest 100đ.
   int get monthlyAmount => (amount / months / 100).floor() * 100;
 
