@@ -1,25 +1,35 @@
 import '../../../core/i18n/app_language.dart';
 
 enum ProPlan {
-  monthly('monthly', 49000),
-  lifetime('lifetime', 99000);
+  monthly('monthly', 49000, 1),
+  quarterly('quarterly', 119000, 3);
 
-  const ProPlan(this.value, this.amount);
+  const ProPlan(this.value, this.amount, this.months);
 
   final String value;
 
   /// Price in VND; the server checks the paid amount against its own table.
   final int amount;
 
+  /// Length of the plan in months (30 days each).
+  final int months;
+
+  /// Price per month, rounded down to the nearest 100đ.
+  int get monthlyAmount => (amount / months / 100).floor() * 100;
+
+  /// Percent saved compared with paying monthly for the same time.
+  int get savingPercent =>
+      (100 - amount * 100 / (ProPlan.monthly.amount * months)).round();
+
   String get label => switch (this) {
     ProPlan.monthly => tr('1 tháng', '1 month'),
-    ProPlan.lifetime => tr('Trọn đời', 'Lifetime'),
+    ProPlan.quarterly => tr('3 tháng', '3 months'),
   };
 
   String get price => formatVnd(amount);
 
   static ProPlan fromValue(String? value) =>
-      value == 'monthly' ? ProPlan.monthly : ProPlan.lifetime;
+      value == 'quarterly' ? ProPlan.quarterly : ProPlan.monthly;
 }
 
 /// `99000` → `99.000đ`.

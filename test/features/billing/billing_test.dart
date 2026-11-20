@@ -25,6 +25,9 @@ void main() {
     expect(formatVnd(99000), '99.000đ');
     expect(formatVnd(1490000), '1.490.000đ');
     expect(ProPlan.monthly.price, '49.000đ');
+    expect(ProPlan.quarterly.price, '119.000đ');
+    expect(ProPlan.quarterly.monthlyAmount, 39600);
+    expect(ProPlan.fromValue('quarterly'), ProPlan.quarterly);
   });
 
   test('maps request rows', () {
@@ -51,7 +54,7 @@ void main() {
                 isPro: false,
                 latestRequest: ProUpgradeRequest(
                   id: 'r1',
-                  plan: ProPlan.lifetime,
+                  plan: ProPlan.quarterly,
                   transferCode: 'CVPRO-LIFETIME-ABCD1234',
                   status: ProRequestStatus.pending,
                   createdAt: DateTime.utc(2026, 11, 12),

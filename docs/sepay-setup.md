@@ -22,8 +22,8 @@ SePay gọi webhook ──► Edge Function sepay-webhook
 App đang mở màn thanh toán tự thấy Pro (realtime + kiểm tra mỗi 4 giây)
 ```
 
-- **Giá gói** nằm ở hàm SQL `pro_plan_price`: 1 tháng `49.000đ`, trọn đời `99.000đ`. Muốn đổi giá thì sửa hàm này (và `ProPlan` trong `lib/features/billing/domain/billing_models.dart` để màn hình hiện đúng).
-- **Mã thanh toán** có dạng `CVPRO` + `M` (tháng) hoặc `L` (trọn đời) + 8 ký tự, ví dụ `CVPROL1A2B3C4D`. Mỗi tài khoản có mã riêng theo gói.
+- **Giá gói** nằm ở hàm SQL `pro_plan_price`: 1 tháng `49.000đ`, 3 tháng `119.000đ`. Muốn đổi giá thì sửa hàm này (và `ProPlan` trong `lib/features/billing/domain/billing_models.dart` để màn hình hiện đúng).
+- **Mã thanh toán** có dạng `CVPRO` + `M` (1 tháng) hoặc `Q` (3 tháng) + 8 ký tự, ví dụ `CVPROQ1A2B3C4D`. Mỗi tài khoản có mã riêng theo gói.
 - Chuyển **thiếu tiền** hoặc **sai mã** thì giao dịch được lưu với trạng thái `unmatched`, không lên Pro. Bạn xử lý tay (mục 8).
 
 ## 2. Chuẩn bị

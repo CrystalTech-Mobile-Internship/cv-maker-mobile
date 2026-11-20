@@ -26,6 +26,14 @@ alter table public.pro_upgrade_requests
   add constraint pro_upgrade_requests_status
   check (status in ('pending', 'approved', 'rejected', 'expired'));
 
+-- Plans on sale: 1 month and 3 months. 'lifetime' stays valid only for
+-- requests made before this change.
+alter table public.pro_upgrade_requests
+  drop constraint if exists pro_upgrade_requests_plan;
+alter table public.pro_upgrade_requests
+  add constraint pro_upgrade_requests_plan
+  check (plan in ('monthly', 'quarterly', 'lifetime'));
+
 -- Server-side prices in VND; the client never decides the amount.
 create or replace function public.pro_plan_price(p_plan text)
 returns integer
@@ -33,8 +41,70 @@ language sql
 immutable
 set search_path = ''
 as $$
-  select case p_plan when 'monthly' then 49000 when 'lifetime' then 99000 end;
+  select case p_plan
+    when 'monthly' then 49000
+    when 'quarterly' then 119000
+    when 'lifetime' then 99000
+  end;
 $$;
+
+-- Days of Pro each plan adds; null means no end date.
+create or replace function public.pro_plan_days(p_plan text)
+returns integer
+language sql
+immutable
+set search_path = ''
+as $$
+  select case p_plan when 'monthly' then 30 when 'quarterly' then 90 end;
+$$;
+
+-- Approves a pending request and extends Pro from the later of now or the
+-- current end date, so paying early never loses days.
+create or replace function public.approve_pro_request(
+  p_request_id uuid,
+  p_note text default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_request public.pro_upgrade_requests;
+  v_days integer;
+  v_until timestamptz;
+begin
+  select * into v_request from public.pro_upgrade_requests
+  where id = p_request_id and status = 'pending'
+  for update;
+  if not found then
+    raise exception 'pending request not found';
+  end if;
+
+  v_days := public.pro_plan_days(v_request.plan);
+  if v_days is null then
+    v_until := null;
+  else
+    select greatest(coalesce(e.pro_until, now()), now())
+      + make_interval(days => v_days)
+    into v_until
+    from (select 1) one
+    left join public.user_entitlements e on e.user_id = v_request.user_id;
+  end if;
+
+  insert into public.user_entitlements (user_id, plan, pro_until, updated_at)
+  values (v_request.user_id, 'pro', v_until, timezone('utc', now()))
+  on conflict (user_id) do update
+    set plan = 'pro', pro_until = excluded.pro_until, updated_at = excluded.updated_at;
+
+  update public.pro_upgrade_requests
+  set status = 'approved', reviewed_at = timezone('utc', now()), admin_note = p_note
+  where id = p_request_id;
+end;
+$$;
+
+revoke all on function public.approve_pro_request(uuid, text) from public, anon, authenticated;
+grant execute on function public.approve_pro_request(uuid, text) to service_role;
 
 -- Starts (or reuses) the caller's checkout for a plan and returns it.
 -- Any other pending request of the caller expires, so switching plans works.
@@ -52,12 +122,12 @@ begin
   if v_user is null then
     raise exception 'not authenticated' using errcode = '28000';
   end if;
-  if p_plan not in ('monthly', 'lifetime') then
+  if p_plan not in ('monthly', 'quarterly') then
     raise exception 'unknown plan' using errcode = '22023';
   end if;
 
   v_code := 'CVPRO'
-    || case p_plan when 'monthly' then 'M' else 'L' end
+    || case p_plan when 'monthly' then 'M' else 'Q' end
     || upper(substr(replace(v_user::text, '-', ''), 1, 8));
 
   select * into v_row from public.pro_upgrade_requests

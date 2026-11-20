@@ -42,14 +42,14 @@ const post = (body: unknown, key = "secret") =>
 const transfer = (over: Record<string, unknown> = {}) => ({
   id: 101,
   transferType: "in",
-  transferAmount: 99000,
-  content: "NGUYEN VAN A chuyen tien CVPRO L1A2B3C4D FT2611",
+  transferAmount: 119000,
+  content: "NGUYEN VAN A chuyen tien CVPRO Q1A2B3C4D FT2611",
   referenceCode: "FT2611",
   ...over,
 });
 
 Deno.test("finds the code even when the bank adds spaces and dashes", () => {
-  assertEquals(findCheckoutCode("ck cvpro-l1a2b3c4d tks"), "CVPROL1A2B3C4D");
+  assertEquals(findCheckoutCode("ck cvpro-q1a2b3c4d tks"), "CVPROQ1A2B3C4D");
   assertEquals(findCheckoutCode(null, "MBVCB.123.CVPROM0F1E2D3C"), "CVPROM0F1E2D3C");
   assertEquals(findCheckoutCode("no code here"), null);
 });
@@ -62,7 +62,7 @@ Deno.test("rejects calls without the right key", async () => {
 
 Deno.test("approves a matching transfer once", async () => {
   const { store, log } = fakeStore({
-    CVPROL1A2B3C4D: { id: "req-1", amount: 99000 },
+    CVPROQ1A2B3C4D: { id: "req-1", amount: 119000 },
   });
   const handler = createSepayHandler({ apiKey: "secret", store: () => store });
 
@@ -73,7 +73,7 @@ Deno.test("approves a matching transfer once", async () => {
 
 Deno.test("does not approve when the amount is too low", async () => {
   const { store, log } = fakeStore({
-    CVPROL1A2B3C4D: { id: "req-1", amount: 99000 },
+    CVPROQ1A2B3C4D: { id: "req-1", amount: 119000 },
   });
   const handler = createSepayHandler({ apiKey: "secret", store: () => store });
 
@@ -83,7 +83,7 @@ Deno.test("does not approve when the amount is too low", async () => {
 
 Deno.test("ignores outgoing transfers", async () => {
   const { store, log } = fakeStore({
-    CVPROL1A2B3C4D: { id: "req-1", amount: 99000 },
+    CVPROQ1A2B3C4D: { id: "req-1", amount: 119000 },
   });
   const handler = createSepayHandler({ apiKey: "secret", store: () => store });
 

@@ -37,7 +37,8 @@ void main() {
     );
 
     expect(find.text('49.000đ'), findsOneWidget);
-    expect(find.text('99.000đ'), findsOneWidget);
+    expect(find.text('119.000đ'), findsOneWidget);
+    expect(find.text('Tiết kiệm 19%'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('pro-plan-monthly')));
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('pro-start-checkout')));

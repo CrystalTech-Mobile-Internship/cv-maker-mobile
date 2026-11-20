@@ -3,7 +3,7 @@
  *
  * SePay calls this for every transaction on the linked bank account, with
  * `Authorization: Apikey <key>`. Incoming transfers whose note contains a
- * Pro checkout code (e.g. `CVPROL1A2B3C4D`) and whose amount covers the
+ * Pro checkout code (e.g. `CVPROQ1A2B3C4D`) and whose amount covers the
  * price upgrade the account right away.
  */
 
@@ -39,7 +39,7 @@ export type PaymentStore = {
   ): Promise<void>;
 };
 
-const CODE = /CVPRO[ML][0-9A-F]{8}/;
+const CODE = /CVPRO[MQL][0-9A-F]{8}/;
 
 /** Finds a checkout code in a bank note, ignoring spaces and symbols. */
 export function findCheckoutCode(...notes: (string | null | undefined)[]) {

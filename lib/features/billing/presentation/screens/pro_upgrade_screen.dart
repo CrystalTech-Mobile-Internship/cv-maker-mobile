@@ -26,7 +26,7 @@ class ProUpgradeScreen extends ConsumerStatefulWidget {
 }
 
 class _ProUpgradeScreenState extends ConsumerState<ProUpgradeScreen> {
-  ProPlan _plan = ProPlan.lifetime;
+  ProPlan _plan = ProPlan.quarterly;
   ProUpgradeRequest? _checkout;
   bool _starting = false;
   Timer? _poll;
@@ -204,20 +204,24 @@ class _PlanPicker extends StatelessWidget {
       note: tr('Dùng ngắn hạn khi đang tìm việc', 'For a short job search'),
       onTap: () => onSelected(ProPlan.monthly),
     );
-    final lifetime = _PlanCard(
-      key: const ValueKey('pro-plan-lifetime'),
-      plan: ProPlan.lifetime,
-      selected: selected == ProPlan.lifetime,
-      period: tr('một lần', 'one time'),
-      note: tr('Trả một lần, dùng mãi', 'Pay once, keep it'),
-      badge: tr('Tiết kiệm nhất', 'Best value'),
-      onTap: () => onSelected(ProPlan.lifetime),
+    const q = ProPlan.quarterly;
+    final quarterly = _PlanCard(
+      key: const ValueKey('pro-plan-quarterly'),
+      plan: q,
+      selected: selected == q,
+      period: tr('/ 90 ngày', '/ 90 days'),
+      note: tr(
+        'Chỉ ${formatVnd(q.monthlyAmount)} mỗi tháng, đủ cho cả mùa tuyển dụng',
+        'Just ${formatVnd(q.monthlyAmount)} a month, enough for a full job hunt',
+      ),
+      badge: tr('Tiết kiệm ${q.savingPercent}%', 'Save ${q.savingPercent}%'),
+      onTap: () => onSelected(q),
     );
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth < 560) {
           return Column(
-            children: [lifetime, const SizedBox(height: 12), monthly],
+            children: [quarterly, const SizedBox(height: 12), monthly],
           );
         }
         return IntrinsicHeight(
@@ -226,7 +230,7 @@ class _PlanPicker extends StatelessWidget {
             children: [
               Expanded(child: monthly),
               const SizedBox(width: 12),
-              Expanded(child: lifetime),
+              Expanded(child: quarterly),
             ],
           ),
         );
@@ -327,9 +331,13 @@ class _PlanCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    period,
-                    style: const TextStyle(color: AppTheme.mutedText),
+                  Flexible(
+                    child: Text(
+                      period,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: AppTheme.mutedText),
+                    ),
                   ),
                 ],
               ),
