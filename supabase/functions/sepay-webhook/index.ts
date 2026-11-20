@@ -21,7 +21,17 @@ function serviceStore(): PaymentStore {
         payload: event.payload,
       });
       if (!error) return true;
-      if (error.code === "23505") return false;
+      if (error.code === "23505") {
+        const { data } = await client
+          .from("payment_events")
+          .select("status")
+          .eq("provider", "sepay")
+          .eq("provider_id", event.providerId)
+          .maybeSingle();
+        // If previously received but failed before completing, allow retry
+        if (data?.status === "received") return true;
+        return false;
+      }
       throw new Error(`record: ${error.message}`);
     },
     async findPending(code) {

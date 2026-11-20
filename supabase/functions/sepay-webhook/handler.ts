@@ -93,29 +93,37 @@ export function createSepayHandler(deps: {
       return json(400, { success: false });
     }
 
-    const store = deps.store();
-    const providerId = String(payload.id);
-    const amount = Math.round(Number(payload.transferAmount ?? 0));
-    const content = `${payload.content ?? ""}`.slice(0, 500);
+    try {
+      const store = deps.store();
+      const providerId = String(payload.id);
+      const amount = Math.round(Number(payload.transferAmount ?? 0));
+      const content = `${payload.content ?? ""}`.slice(0, 500);
 
-    const isNew = await store.record({ providerId, amount, content, payload });
-    // SePay retries until it gets a success; a repeat is already handled.
-    if (!isNew) return json(200, { success: true });
+      const isNew = await store.record({ providerId, amount, content, payload });
+      // SePay retries until it gets a success; a repeat is already handled.
+      if (!isNew) return json(200, { success: true });
 
-    if (payload.transferType !== "in") {
-      await store.mark(providerId, "ignored");
+      if (payload.transferType !== "in") {
+        await store.mark(providerId, "ignored");
+        return json(200, { success: true });
+      }
+
+      const code = findCheckoutCode(payload.code, payload.content, payload.description);
+      const request = code ? await store.findPending(code) : null;
+      if (!request || amount < request.amount) {
+        await store.mark(providerId, "unmatched", request?.id);
+        return json(200, { success: true });
+      }
+
+      await store.approve(request.id, payload.referenceCode ?? providerId);
+      await store.mark(providerId, "matched", request.id);
       return json(200, { success: true });
+    } catch (err) {
+      console.error("sepay-webhook processing error:", err);
+      return json(500, {
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
-
-    const code = findCheckoutCode(payload.code, payload.content, payload.description);
-    const request = code ? await store.findPending(code) : null;
-    if (!request || amount < request.amount) {
-      await store.mark(providerId, "unmatched", request?.id);
-      return json(200, { success: true });
-    }
-
-    await store.approve(request.id, payload.referenceCode ?? providerId);
-    await store.mark(providerId, "matched", request.id);
-    return json(200, { success: true });
   };
 }
