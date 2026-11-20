@@ -257,6 +257,30 @@ Deno.test("tries Gemini models first, then falls back to OpenRouter", async () =
   assertEquals(seen, ["or:a:Bearer k"]);
 });
 
+Deno.test("skips a retired model on later calls", async () => {
+  const seen: string[] = [];
+  const fakeFetch = (async (_url: string, init: RequestInit) => {
+    const model = JSON.parse(String(init.body)).model as string;
+    seen.push(model);
+    if (model === "old") return new Response("gone", { status: 404 });
+    return new Response(
+      JSON.stringify({ choices: [{ message: { content: "ok" } }] }),
+    );
+  }) as unknown as typeof fetch;
+  const complete = createOpenRouterComplete(
+    (name) =>
+      ({ GEMINI_API_KEY: "g", GEMINI_MODELS: "old,new" } as Record<
+        string,
+        string
+      >)[name],
+    fakeFetch,
+  );
+  const options = { maxTokens: 10, temperature: 0, json: false };
+  await complete([{ role: "user", content: "hi" }], options);
+  await complete([{ role: "user", content: "hi" }], options);
+  assertEquals(seen, ["old", "new", "new"]);
+});
+
 Deno.test("works with only a Gemini key", async () => {
   const fakeFetch = (async () =>
     new Response(
@@ -271,7 +295,7 @@ Deno.test("works with only a Gemini key", async () => {
     temperature: 0,
     json: false,
   });
-  assertEquals(result, { text: "ok", model: "gemini-2.5-flash" });
+  assertEquals(result, { text: "ok", model: "gemini-3.8-flash" });
 });
 
 Deno.test("stops trying models once the time budget is spent", async () => {
