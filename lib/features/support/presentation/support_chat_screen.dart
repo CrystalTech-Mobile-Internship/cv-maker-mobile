@@ -118,6 +118,7 @@ class _ConversationState extends ConsumerState<_Conversation> {
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(supportMessagesProvider);
+    final seenAt = ref.watch(supportSeenAtProvider).valueOrNull;
     return Column(
       children: [
         Expanded(
@@ -134,6 +135,7 @@ class _ConversationState extends ConsumerState<_Conversation> {
               reverse: true,
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               children: [
+                if (_isSeen(items, seenAt)) const _SeenLabel(),
                 for (final message in items.reversed) _Bubble(message),
                 const _Welcome(),
               ],
@@ -189,6 +191,33 @@ class _ConversationState extends ConsumerState<_Conversation> {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// True when the last message is the user's and support has opened the
+/// conversation since it was sent.
+bool _isSeen(List<SupportMessage> items, DateTime? seenAt) {
+  if (items.isEmpty || seenAt == null) return false;
+  final last = items.last;
+  return !last.fromSupport && !seenAt.isBefore(last.createdAt);
+}
+
+class _SeenLabel extends StatelessWidget {
+  const _SeenLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          tr('Đã xem', 'Seen'),
+          key: const Key('support-seen'),
+          style: const TextStyle(fontSize: 11, color: AppTheme.mutedText),
+        ),
+      ),
     );
   }
 }

@@ -180,7 +180,7 @@ from payment_events order by created_at desc limit 20;
 | `ignored` | Tiền ra khỏi tài khoản, bỏ qua. |
 | `received` | Mới nhận, chưa xử lý xong (hiếm, thường do lỗi giữa chừng). |
 
-**Duyệt tay** khi khách chuyển sai nội dung: tìm yêu cầu `pending` của khách rồi chạy
+**Duyệt tay** khi khách chuyển sai nội dung: mở trang **Quản trị → Thanh toán** trong app (xem `docs/admin.md`), tìm yêu cầu "Chờ thanh toán" của khách và bấm **Duyệt**. Hoặc chạy trong SQL Editor:
 
 ```sql
 select approve_pro_request('<id yêu cầu>', 'Duyệt tay: chuyển sai nội dung');

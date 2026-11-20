@@ -28,11 +28,25 @@ class SupabaseSupportRepository implements SupportRepository {
         .from('support_messages')
         .stream(primaryKey: ['id'])
         .eq('user_id', client.auth.currentUser!.id)
-        .order('created_at')
+        .order('created_at', ascending: true)
         .map(
           (rows) => rows
               .map((row) => SupportMessage.fromRow(Map.of(row)))
               .toList(growable: false),
+        );
+  }
+
+  @override
+  Stream<DateTime?> watchSeenAt() {
+    final client = _client;
+    return client
+        .from('support_reads')
+        .stream(primaryKey: ['user_id'])
+        .eq('user_id', client.auth.currentUser!.id)
+        .map(
+          (rows) => rows.isEmpty
+              ? null
+              : DateTime.tryParse('${rows.first['read_at']}')?.toUtc(),
         );
   }
 
@@ -78,6 +92,10 @@ class SupabaseSupportRepository implements SupportRepository {
 
 final supportRepositoryProvider = Provider<SupportRepository>(
   (ref) => SupabaseSupportRepository(),
+);
+
+final supportSeenAtProvider = StreamProvider.autoDispose<DateTime?>(
+  (ref) => ref.watch(supportRepositoryProvider).watchSeenAt(),
 );
 
 final supportMessagesProvider =

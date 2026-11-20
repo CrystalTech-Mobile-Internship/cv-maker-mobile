@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 export '../controllers/cv_list_provider.dart' show cvListStreamProvider;
 
+import '../../../admin/presentation/admin_providers.dart';
 import '../../../../app/theme.dart';
 import '../../../auth/data/guest_session_service.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -635,6 +636,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Widget content,
   ) {
     if (!_isWide(context)) return content;
+    final isAdmin = ref.watch(isAdminProvider).valueOrNull ?? false;
     final page = switch (_selectedIndex) {
       0 => content,
       1 => content,
@@ -703,6 +705,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           label: tr('Hỗ trợ', 'Support'),
           onTap: () => context.push('/support'),
         ),
+        if (isAdmin)
+          DesktopToolLink(
+            key: const Key('tool-admin'),
+            icon: Icons.admin_panel_settings_outlined,
+            label: tr('Quản trị', 'Admin'),
+            onTap: () => context.push('/admin'),
+          ),
       ],
       actions: [
         if (_selectedIndex == 2 && user != null)
