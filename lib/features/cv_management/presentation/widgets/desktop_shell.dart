@@ -139,11 +139,61 @@ class DesktopShell extends StatelessWidget {
                     ],
                   ),
                 ),
-              Expanded(child: child),
+              Expanded(
+                child: _ContentEntrance(
+                  // A new section or tool replays the entrance.
+                  key: ValueKey(
+                    '$selectedIndex/${tools.indexWhere((t) => t.selected)}',
+                  ),
+                  child: child,
+                ),
+              ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Short fade and lift for the content area only; the sidebar stays still.
+class _ContentEntrance extends StatefulWidget {
+  const _ContentEntrance({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<_ContentEntrance> createState() => _ContentEntranceState();
+}
+
+class _ContentEntranceState extends State<_ContentEntrance>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+  )..forward();
+  late final Animation<double> _curve = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _curve,
+      child: SlideTransition(
+        position: Tween(
+          begin: const Offset(0, 0.015),
+          end: Offset.zero,
+        ).animate(_curve),
+        child: widget.child,
+      ),
     );
   }
 }

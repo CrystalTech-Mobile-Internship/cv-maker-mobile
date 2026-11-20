@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/constants/auth_callback_constants.dart';
@@ -110,9 +111,13 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/home',
       name: 'home',
-      builder: (context, state) => HomeScreen(
-        initialTab: int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0,
-        createOnOpen: state.uri.queryParameters['create'] == '1',
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        HomeScreen(
+          initialTab: int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0,
+          createOnOpen: state.uri.queryParameters['create'] == '1',
+        ),
       ),
     ),
     GoRoute(
@@ -132,14 +137,20 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/ats-scorer',
       name: 'ats-scorer',
-      builder: (context, state) =>
-          DesktopToolFrame(route: '/ats-scorer', child: AtsScorerScreen()),
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        DesktopToolFrame(route: '/ats-scorer', child: AtsScorerScreen()),
+      ),
     ),
     GoRoute(
       path: '/ai-interview',
       name: 'ai-interview',
-      builder: (context, state) =>
-          DesktopToolFrame(route: '/ai-interview', child: AiInterviewScreen()),
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        DesktopToolFrame(route: '/ai-interview', child: AiInterviewScreen()),
+      ),
     ),
     GoRoute(
       path: '/community/post',
@@ -152,12 +163,16 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/interview-practice',
       name: 'interview-practice',
-      builder: (context, state) => DesktopToolFrame(
-        route: '/interview-practice',
-        child: InterviewPracticeScreen(
-          args: state.extra is InterviewPracticeArgs
-              ? state.extra as InterviewPracticeArgs
-              : null,
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        DesktopToolFrame(
+          route: '/interview-practice',
+          child: InterviewPracticeScreen(
+            args: state.extra is InterviewPracticeArgs
+                ? state.extra as InterviewPracticeArgs
+                : null,
+          ),
         ),
       ),
     ),
@@ -176,34 +191,61 @@ GoRouter createAppRouter({
     GoRoute(
       path: '/upgrade-pro',
       name: 'upgrade-pro',
-      builder: (context, state) =>
-          DesktopToolFrame(route: '/upgrade-pro', child: ProUpgradeScreen()),
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        DesktopToolFrame(route: '/upgrade-pro', child: ProUpgradeScreen()),
+      ),
     ),
     GoRoute(
       path: '/support',
       name: 'support',
-      builder: (context, state) =>
-          DesktopToolFrame(route: '/support', child: SupportChatScreen()),
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        DesktopToolFrame(route: '/support', child: SupportChatScreen()),
+      ),
     ),
     GoRoute(
       path: '/job-tracker',
       name: 'job-tracker',
-      builder: (context, state) =>
-          DesktopToolFrame(route: '/job-tracker', child: JobTrackerScreen()),
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        DesktopToolFrame(route: '/job-tracker', child: JobTrackerScreen()),
+      ),
     ),
     GoRoute(
       path: '/admin',
       name: 'admin',
-      builder: (context, state) =>
-          DesktopToolFrame(route: '/admin', child: AdminScreen()),
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        DesktopToolFrame(route: '/admin', child: AdminScreen()),
+      ),
     ),
     GoRoute(
       path: '/admin/payments',
       name: 'admin-payments',
-      builder: (context, state) => DesktopToolFrame(
-        route: '/admin/payments',
-        child: AdminScreen(section: AdminSection.payments),
+      pageBuilder: (context, state) => _sidebarPage(
+        context,
+        state,
+        DesktopToolFrame(
+          route: '/admin/payments',
+          child: AdminScreen(section: AdminSection.payments),
+        ),
       ),
     ),
   ],
 );
+
+/// On computers the sidebar stays in place between its pages, so the page
+/// itself switches without an animation and only the content fades in
+/// (see `DesktopShell`). Phones keep the usual page animation.
+Page<void> _sidebarPage(
+  BuildContext context,
+  GoRouterState state,
+  Widget child,
+) => MediaQuery.sizeOf(context).width >= DesktopToolFrame.minWidth
+    ? NoTransitionPage<void>(key: state.pageKey, child: child)
+    : MaterialPage<void>(key: state.pageKey, child: child);
